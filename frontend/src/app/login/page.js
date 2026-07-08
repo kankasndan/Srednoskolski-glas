@@ -2,11 +2,13 @@
 
 export default function LogIn() {
   function handleGoogleLogin() {
-    window.location.href = "http://127.0.0.1:8000/api/auth/google/redirect";
+    window.location.href =
+      process.env.NEXT_PUBLIC_API_URL + "/api/auth/google/redirect"; // process.env.NEXT_PUBLIC_API_URL must be used everywhere
   }
 
   function handleFacebookLogin() {
-    window.location.href = "http://127.0.0.1:8000/api/auth/facebook/redirect";
+    window.location.href =
+      process.env.NEXT_PUBLIC_API_URL + "/api/auth/facebook/redirect";
   }
 
   return (
