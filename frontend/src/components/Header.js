@@ -8,7 +8,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 flex h-32 w-full items-center gap-20 bg-white pt-12 pr-14 pb-6 pl-14">
       <Link href="/feed" className="shrink-0">
         <Image
-          src="/logo.svg"
+          src="/logo-with-text.svg"
           alt="Средношколски глас"
           width={240}
           height={56}
