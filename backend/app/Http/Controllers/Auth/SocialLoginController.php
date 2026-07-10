@@ -4,43 +4,43 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialLoginController extends Controller
 {
+    // 1. Redirect to Google/Facebook
     public function redirect($provider)
     {
-        return Socialite::driver($provider)->redirect();
+        return Socialite::driver($provider)->stateless()->redirect();
     }
 
+    // 2. Handle callback from Google/Facebook
     public function callback($provider)
     {
         try {
-            // Retrieve user data from the provider
-            $socialUser = Socialite::driver($provider)->user();
+            $socialUser = Socialite::driver($provider)->stateless()->user();
             
-            // Register or log in the user
+            // Find existing user or create a new one
             $user = User::updateOrCreate(
-                [
-                    'email' => $socialUser->getEmail(),
-                ],
+                ['email' => $socialUser->getEmail()],
                 [
                     'name' => $socialUser->getName(),
-                    'provider' => $provider,
                     'provider_id' => $socialUser->getId(),
+                    'provider_name' => $provider,
                 ]
             );
 
-            // Authenticate the user into your application
-            Auth::login($user);
+            // Create Sanctum API Token for React
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-            // Redirect to your intended dashboard route
-            return redirect('/dashboard'); 
-            
+            // Redirect browser back to React frontend callback page with the token
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            return redirect()->to("{$frontendUrl}/auth/callback?token={$token}");
+
         } catch (\Exception $e) {
-            dd('failed');
-            return redirect('/login')->withErrors(['error' => 'Authentication failed. Please try again.']);
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            return redirect()->to("{$frontendUrl}/login?error=auth_failed");
         }
     }
 }
