@@ -11,7 +11,7 @@ export default function Header() {
         className="flex h-14 w-60 shrink-0 items-center justify-center overflow-hidden"
       >
         <Image
-          src="/logo.svg"
+          src="/logo-with-text.svg"
           alt="Средношколски глас"
           width={240}
           height={56}
