@@ -11,7 +11,7 @@ export default function AuthCallbackPage() {
 
     if (token) {
       localStorage.setItem("auth_token", token);
-      router.replace("/");
+      router.replace("/feed");
       return;
     }
 
