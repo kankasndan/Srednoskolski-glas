@@ -19,6 +19,7 @@ class SocialLoginController extends Controller
     {
         try {
             $socialUser = Socialite::driver($provider)->stateless()->user();
+            dd("here");
 
             $email = $socialUser->getEmail() ?: sprintf('%s-%s@social.local', $provider, $socialUser->getId());
 
@@ -28,11 +29,13 @@ class SocialLoginController extends Controller
                     'provider_id' => $socialUser->getId(),
                 ],
                 [
-                    'name' => $socialUser->getName(),
+                    'username' => $socialUser->getName(),
                     'email' => $email,
                     'provider' => $provider,
                 ]
             );
+
+            dd($user);
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
