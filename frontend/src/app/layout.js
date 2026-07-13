@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono, Manrope, Oswald } from "next/font/google";
 import "./globals.css";
+import NavigationTracker from "@/components/NavigationTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,10 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${oswald.variable} h-full antialiased text-zinc-600`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <NavigationTracker />
+        {children}
+      </body>
     </html>
   );
 }
