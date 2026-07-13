@@ -5,10 +5,9 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import { faGoogle } from "@fortawesome/free-solid-svg-icons";
 import { faGoogle, faFacebook } from "@fortawesome/free-brands-svg-icons";
+import { API_BASE_URL } from "@/lib/api";
 
 config.autoAddCss = false;
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function LogIn() {
   return (
