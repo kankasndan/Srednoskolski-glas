@@ -5,8 +5,7 @@ export default function SidebarNav() {
     <nav className="flex w-[268px] flex-col gap-2">
       <NavItem label="Почетна" defaultChecked />
       <NavItem label="Најнови дискусии" />
-      <NavItem label="Пребарај дискусии" />
-      <NavItem label="Започни дискусија" variant="plus" />
+      <NavItem label="Истражи" />
     </nav>
   );
 }
