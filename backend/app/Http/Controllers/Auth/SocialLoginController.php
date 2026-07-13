@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialLoginController extends Controller
@@ -20,26 +19,30 @@ class SocialLoginController extends Controller
     {
         try {
             $socialUser = Socialite::driver($provider)->stateless()->user();
-            
-            // Find existing user or create a new one
+
+            $email = $socialUser->getEmail() ?: sprintf('%s-%s@social.local', $provider, $socialUser->getId());
+
             $user = User::updateOrCreate(
-                ['email' => $socialUser->getEmail()],
+                [
+                    'provider' => $provider,
+                    'provider_id' => $socialUser->getId(),
+                ],
                 [
                     'name' => $socialUser->getName(),
-                    'provider_id' => $socialUser->getId(),
-                    'provider_name' => $provider,
+                    'email' => $email,
+                    'provider' => $provider,
                 ]
             );
 
-            // Create Sanctum API Token for React
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            // Redirect browser back to React frontend callback page with the token
-            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            $frontendUrl = rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'));
+
             return redirect()->to("{$frontendUrl}/auth/callback?token={$token}");
 
         } catch (\Exception $e) {
-            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            $frontendUrl = rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'));
+
             return redirect()->to("{$frontendUrl}/login?error=auth_failed");
         }
     }
