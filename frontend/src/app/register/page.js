@@ -3,7 +3,7 @@ import AuthBackButton from "@/components/AuthBackButton";
 import AuthMasthead from "@/components/AuthMasthead";
 import SocialAuthButtons from "@/components/SocialAuthButtons";
 
-export default function LogIn() {
+export default function Register() {
   return (
     <main className="flex min-h-screen w-full bg-white">
       <AuthHero />
@@ -13,10 +13,10 @@ export default function LogIn() {
 
         <div className="mx-auto flex w-full max-w-122 flex-1 flex-col justify-center py-8 2xl:max-w-[560px]">
           <AuthMasthead
-            titleLine="НАЈАВИ СЕ НА"
-            subtitle="Најави се за повторно да се поврзеш со заедницата на средношколци во Македонија."
+            titleLine="РЕГИСТРИРАЈ СЕ НА"
+            subtitle="Приклучи се на заедницата на средношколци во Македонија — споделувај, прашувај, поврзувај се."
           />
-          <SocialAuthButtons successRedirect="/feed" />
+          <SocialAuthButtons successRedirect="/register/onboarding" />
         </div>
       </div>
     </main>

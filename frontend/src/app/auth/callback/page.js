@@ -9,13 +9,25 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get("token");
 
+    const successRedirect =
+      localStorage.getItem("post_login_redirect") || "/register/onboarding";
+    const errorRedirect =
+      localStorage.getItem("post_login_error_redirect") || "/register";
+    localStorage.removeItem("post_login_redirect");
+    localStorage.removeItem("post_login_error_redirect");
+
     if (token) {
       localStorage.setItem("auth_token", token);
-      router.replace("/feed");
+      // Only a completed registration flow (redirect target is onboarding)
+      // earns access to the onboarding step; OnboardingGuard checks this flag.
+      if (successRedirect === "/register/onboarding") {
+        localStorage.setItem("onboarding_pending", "1");
+      }
+      router.replace(successRedirect);
       return;
     }
 
-    router.replace("/login?error=missing_token");
+    router.replace(`${errorRedirect}?error=missing_token`);
   }, [router]);
 
   return (
