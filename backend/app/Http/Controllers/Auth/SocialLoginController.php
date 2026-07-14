@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
+use Log;
 
 class SocialLoginController extends Controller
 {
@@ -19,7 +20,6 @@ class SocialLoginController extends Controller
     {
         try {
             $socialUser = Socialite::driver($provider)->stateless()->user();
-            dd("here");
 
             $email = $socialUser->getEmail() ?: sprintf('%s-%s@social.local', $provider, $socialUser->getId());
 
@@ -34,8 +34,6 @@ class SocialLoginController extends Controller
                     'provider' => $provider,
                 ]
             );
-
-            dd($user);
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
