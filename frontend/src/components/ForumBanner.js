@@ -1,4 +1,5 @@
 import Image from "next/image";
+import StartDiscussionButton from "@/components/StartDiscussionButton";
 
 export default function ForumBanner({ title, description, icon }) {
   return (
@@ -8,9 +9,9 @@ export default function ForumBanner({ title, description, icon }) {
           <Image
             src={icon}
             alt=""
-            width={220}
-            height={220}
-            className="absolute left-1/2 top-1/2 size-[220px] max-w-none -translate-x-1/2 -translate-y-1/2"
+            width={205}
+            height={205}
+            className="absolute left-[calc(50%+4px)] top-1/2 size-[205px] max-w-none -translate-x-1/2 -translate-y-1/2"
             priority
           />
         </span>
@@ -25,15 +26,7 @@ export default function ForumBanner({ title, description, icon }) {
         </div>
       </div>
 
-      <button
-        type="button"
-        className="flex h-12 w-[268px] shrink-0 items-center justify-center gap-3 rounded-2xl bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0]"
-      >
-        <Image src="/plus.svg" alt="" width={24} height={24} className="size-6" />
-        <span className="flex h-[19px] w-[168px] items-center leading-none">
-          Започни нова дискусија
-        </span>
-      </button>
+      <StartDiscussionButton />
     </section>
   );
 }
