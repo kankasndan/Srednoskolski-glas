@@ -1,25 +1,12 @@
 "use client";
 
-import Image from "next/image";
-
 const ROW =
-  "flex h-12 w-[268px] cursor-pointer items-center gap-3 rounded-2xl border border-[#582FF5]/30 px-4 py-2 text-left font-[family-name:var(--font-manrope)] text-[14px] font-medium text-[#595959] transition-colors";
+  "flex h-10 w-[268px] cursor-pointer items-center gap-3 rounded-[10px] border border-[#CCCCCC] px-4 py-2 text-left font-[family-name:var(--font-manrope)] text-[14px] font-medium leading-none text-[#595959] transition-colors";
 
-export default function NavItem({ label, defaultChecked = false, variant = "check" }) {
-  if (variant === "plus") {
-    return (
-      <a href="#" onClick={(e) => e.preventDefault()} className={ROW}>
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#582FF5]">
-          <Image src="/plus.svg" alt="" width={16} height={16} />
-        </span>
-        <span>{label}</span>
-      </a>
-    );
-  }
-
+export default function NavItem({ label, defaultChecked = false }) {
   return (
     <label
-      className={`${ROW} group has-[:checked]:border-transparent has-[:checked]:bg-[#582FF5] has-[:checked]:text-white`}
+      className={`${ROW} group has-[:checked]:border-transparent has-[:checked]:bg-[#582FF5] has-[:checked]:font-bold has-[:checked]:text-white`}
     >
       <input
         type="radio"
@@ -27,11 +14,11 @@ export default function NavItem({ label, defaultChecked = false, variant = "chec
         defaultChecked={defaultChecked}
         className="peer sr-only"
       />
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-[#582FF5]/40 group-has-[:checked]:border-white">
+      <span className="flex size-4 shrink-0 items-center justify-center rounded-[3px] border border-[#000000] group-has-[:checked]:border-white">
         <svg
           className="hidden group-has-[:checked]:block"
-          width="14"
-          height="14"
+          width="12"
+          height="12"
           viewBox="0 0 24 24"
           fill="none"
         >
