@@ -64,7 +64,7 @@ export default function OnboardingForm() {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        router.push("/feed");
+        router.push("/register/onboarding_2");
       }}
       className="mx-auto mt-12 flex w-full max-w-[360px] flex-col gap-3 2xl:max-w-[440px] 2xl:gap-4"
     >
