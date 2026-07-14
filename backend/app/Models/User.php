@@ -11,7 +11,20 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'provider', 'provider_id'])]
+#[Fillable([
+    'name',
+    'email',
+    'password',
+    'provider',
+    'provider_id',
+    'imageUrl',
+    'city',
+    'school',
+    'area',
+    'year',
+    'signed_up',
+    'onboarding_completed_at',
+])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -28,6 +41,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'onboarding_completed_at' => 'datetime',
         ];
     }
 }

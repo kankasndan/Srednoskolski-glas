@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
 import { CITIES } from "@/lib/schools";
 import TextField from "@/components/TextField";
 import SelectField from "@/components/SelectField";
@@ -41,6 +42,8 @@ export default function OnboardingForm() {
   const [area, setArea] = useState("");
   const [year, setYear] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const cityNames = CITIES.map((c) => c.city);
   const schools = CITIES.find((c) => c.city === city)?.schools ?? [];
@@ -50,14 +53,57 @@ export default function OnboardingForm() {
     setSchool(""); // reset school when the city changes
   }
 
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setErrorMessage("");
+
+    const token = localStorage.getItem("auth_token");
+
+    if (!token) {
+      router.replace("/login?error=missing_token");
+      return;
+    }
+
+    const formData = new FormData(e.currentTarget);
+    const payload = {
+      username: String(formData.get("pseudonym") || "").trim(),
+      city,
+      school,
+      area,
+      year,
+    };
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/onboarding`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.message || "Не успеа зачувувањето на onboarding.");
+      }
+
+      localStorage.removeItem("onboarding_pending");
+      router.push("/feed");
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Не успеа зачувувањето на onboarding.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        // Onboarding done — drop the one-time pass so it can't be reopened.
-        localStorage.removeItem("onboarding_pending");
-        router.push("/feed");
-      }}
+      onSubmit={handleSubmit}
       className="mx-auto mt-4 flex w-full max-w-[360px] flex-col gap-3 2xl:max-w-[440px] 2xl:gap-4"
     >
       <TextField
@@ -116,10 +162,18 @@ export default function OnboardingForm() {
       />
 
       <SubmitButton
-        label="Започни"
-        disabled={!agreed}
-        disabledTooltip="Прифати ги условите за да продолжиш"
+        label={isSubmitting ? "Се зачувува..." : "Започни"}
+        disabled={!agreed || isSubmitting}
+        disabledTooltip={
+          !agreed ? "Прифати ги условите за да продолжиш" : undefined
+        }
       />
+
+      {errorMessage && (
+        <p className="text-center font-(family-name:--font-manrope) text-[13px] text-red-600 2xl:text-[15px]">
+          {errorMessage}
+        </p>
+      )}
     </form>
   );
 }
