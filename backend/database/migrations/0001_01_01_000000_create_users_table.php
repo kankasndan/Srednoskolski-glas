@@ -17,12 +17,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
-            $table->string('grade')->nullable();
             $table->string('imageUrl')->nullable();
             $table->string('provider')->nullable();
             $table->string('provider_id')->nullable();
             $table->string('type')->default('user');
-            $table->string('signed_up')->nullable();
+            $table->timestamp('onboarding_completed_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

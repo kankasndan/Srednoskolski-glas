@@ -43,4 +43,9 @@ class User extends Authenticatable
             'onboarding_completed_at' => 'datetime',
         ];
     }
+
+    public function forumUser()
+    {
+        return $this->hasMany(Forum::class);
+    }
 }
