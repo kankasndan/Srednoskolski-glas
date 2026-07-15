@@ -23,6 +23,8 @@ class OnboardingController extends Controller
         'Четврта' => 4,
     ];
 
+    private const SCHOOL_SEPARATOR = '|';
+
     public function store(StoreOnboardingRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -35,7 +37,8 @@ class OnboardingController extends Controller
         $user->save();
 
         if ($validated['is_student']) {
-            $school = $this->resolveSchool($validated['city'], $validated['school']);
+            ['school' => $schoolName, 'city' => $cityName] = $this->parseSchoolSelection($validated['school']);
+            $school = $this->resolveSchool($cityName, $schoolName);
             $vocation = Vocation::query()->where('name', $validated['area'])->first();
 
             if ($vocation === null) {
@@ -68,6 +71,25 @@ class OnboardingController extends Controller
             'message' => 'Onboarding saved',
             'user' => $user->fresh(['studentData.school.city', 'studentData.vocation']),
         ]);
+    }
+
+    /**
+     * Split the combined "school|city" selection value into its parts.
+     *
+     * @return array{school: string, city: string}
+     */
+    private function parseSchoolSelection(string $value): array
+    {
+        $separatorPosition = mb_strrpos($value, self::SCHOOL_SEPARATOR);
+
+        if ($separatorPosition === false) {
+            return ['school' => trim($value), 'city' => ''];
+        }
+
+        return [
+            'school' => trim(mb_substr($value, 0, $separatorPosition)),
+            'city' => trim(mb_substr($value, $separatorPosition + mb_strlen(self::SCHOOL_SEPARATOR))),
+        ];
     }
 
     private function resolveSchool(string $cityName, string $schoolName): School

@@ -44,8 +44,8 @@ class User extends Authenticatable
         return $this->hasMany(Forum::class);
     }
 
-    public function studentData()
+    public function studentData(): HasOne
     {
-        return $this->hasOne(StudentData::class, "student_data");
+        return $this->hasOne(StudentData::class);
     }
 }
