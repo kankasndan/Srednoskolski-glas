@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use App\Models\School;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class City extends Model
 {
-    protected $fillable = ["name"];
+    protected $fillable = ['name'];
 
-    public function school()
+    public function schools(): HasMany
     {
         return $this->hasMany(School::class);
     }

@@ -51,7 +51,7 @@ export default function AuthButtons() {
   }, []);
 
   if (user) {
-    const displayName = user.name || user.username || "Профил";
+    const displayName = user.username || "Профил";
     const avatarUrl = user.imageUrl;
     const fallbackInitial = displayName.charAt(0).toUpperCase() || "U";
 

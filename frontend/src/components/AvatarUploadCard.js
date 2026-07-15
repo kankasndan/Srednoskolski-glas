@@ -4,6 +4,11 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+function finishOnboarding(router) {
+  localStorage.removeItem("onboarding_pending");
+  router.push("/feed");
+}
+
 export default function AvatarUploadCard() {
   const router = useRouter();
   const fileInputRef = useRef(null);
@@ -89,7 +94,7 @@ export default function AvatarUploadCard() {
 
       <button
         type="button"
-        onClick={previewUrl ? () => router.push("/feed") : openFilePicker}
+        onClick={previewUrl ? () => finishOnboarding(router) : openFilePicker}
         className="mx-auto mt-8 h-14 w-[400px] max-w-full rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[15px] font-bold text-white transition-colors hover:bg-[#4B25E0]"
       >
         {previewUrl ? "Продолжи" : "Прикачи фотографија"}
@@ -97,7 +102,7 @@ export default function AvatarUploadCard() {
 
       <button
         type="button"
-        onClick={() => router.push("/feed")}
+        onClick={() => finishOnboarding(router)}
         className="mx-auto mt-6 block text-center font-(family-name:--font-manrope) text-[16px] font-normal leading-none text-[#737373] transition-colors hover:text-[#333333]"
       >
         Можеби подоцна
