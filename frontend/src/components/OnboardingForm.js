@@ -34,20 +34,7 @@ const AREAS = [
 ];
 
 const YEARS = ["Прва", "Втора", "Трета", "Четврта"];
-const SCHOOL_SEPARATOR = " — ";
 const LOCKED_HINT = "Само средношколци можат да го пополнат ова поле.";
-
-function parseSchoolSelection(value) {
-  const idx = value.lastIndexOf(SCHOOL_SEPARATOR);
-  if (idx === -1) {
-    return { school: value.trim(), city: "" };
-  }
-
-  return {
-    school: value.slice(0, idx).trim(),
-    city: value.slice(idx + SCHOOL_SEPARATOR.length).trim(),
-  };
-}
 
 function formatApiError(data) {
   if (data?.errors) {
@@ -95,9 +82,7 @@ export default function OnboardingForm() {
     };
 
     if (!notStudent) {
-      const { school: schoolName, city } = parseSchoolSelection(school);
-      payload.city = city;
-      payload.school = schoolName;
+      payload.school = school;
       payload.area = area;
       payload.year = year;
     }

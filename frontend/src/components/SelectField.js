@@ -45,7 +45,7 @@ export default function SelectField({
                   {schools.map((school) => (
                     <option
                       key={`${city}-${school}`}
-                      value={`${school} — ${city}`}
+                      value={`${school}|${city}`}
                       className="text-[#000000]"
                     >
                       {school}
