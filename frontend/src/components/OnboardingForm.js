@@ -35,76 +35,39 @@ const AREAS = [
 
 const YEARS = ["Прва", "Втора", "Трета", "Четврта"];
 
+const LOCKED_HINT = "Само средношколци можат да го пополнат ова поле.";
+
 export default function OnboardingForm() {
   const router = useRouter();
-  const [city, setCity] = useState("");
   const [school, setSchool] = useState("");
   const [area, setArea] = useState("");
   const [year, setYear] = useState("");
+  const [notStudent, setNotStudent] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
-  const cityNames = CITIES.map((c) => c.city);
-  const schools = CITIES.find((c) => c.city === city)?.schools ?? [];
+  // Cities as group headers, ordered by how many schools each has (most first).
+  const schoolGroups = [...CITIES].sort(
+    (a, b) => b.schools.length - a.schools.length
+  );
 
-  function handleCityChange(e) {
-    setCity(e.target.value);
-    setSchool(""); // reset school when the city changes
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setErrorMessage("");
-
-    const token = localStorage.getItem("auth_token");
-
-    if (!token) {
-      router.replace("/login?error=missing_token");
-      return;
-    }
-
-    const formData = new FormData(e.currentTarget);
-    const payload = {
-      username: String(formData.get("pseudonym") || "").trim(),
-      city,
-      school,
-      area,
-      year,
-    };
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/onboarding`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(body.message || "Не успеа зачувувањето на onboarding.");
-      }
-
-      localStorage.removeItem("onboarding_pending");
-      router.push("/feed");
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "Не успеа зачувувањето на onboarding.",
-      );
-    } finally {
-      setIsSubmitting(false);
+  // "Не сум средношколец" clears and locks the school-only fields.
+  function handleNotStudentChange(e) {
+    const checked = e.target.checked;
+    setNotStudent(checked);
+    if (checked) {
+      setSchool("");
+      setArea("");
+      setYear("");
     }
   }
 
   return (
     <form
-      onSubmit={handleSubmit}
-      className="mx-auto mt-4 flex w-full max-w-[360px] flex-col gap-3 2xl:max-w-[440px] 2xl:gap-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        router.push("/register/onboarding_2");
+      }}
+      className="mx-auto mt-12 flex w-full max-w-[360px] flex-col gap-3 2xl:max-w-[440px] 2xl:gap-4"
     >
       <TextField
         id="pseudonym"
@@ -115,27 +78,29 @@ export default function OnboardingForm() {
         maxLength={20}
       />
 
-      <SelectField
-        id="city"
-        label="Град"
-        required
-        value={city}
-        onChange={handleCityChange}
-        placeholder="Избери град"
-        options={cityNames}
-      />
-
-      {city && (
-        <SelectField
-          id="school"
-          label="Училиште"
-          required
-          value={school}
-          onChange={(e) => setSchool(e.target.value)}
-          placeholder="Избери училиште"
-          options={schools}
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={notStudent}
+          onChange={handleNotStudentChange}
+          className="h-4 w-4 shrink-0 accent-[#582FF5] 2xl:h-5 2xl:w-5"
         />
-      )}
+        <span className="font-(family-name:--font-manrope) text-[12px] font-normal leading-[19.4px] text-[#595959] 2xl:text-[14px]">
+          Не сум средношколец
+        </span>
+      </label>
+
+      <SelectField
+        id="school"
+        label="Училиште"
+        required
+        value={school}
+        onChange={(e) => setSchool(e.target.value)}
+        placeholder="Избери училиште"
+        groups={schoolGroups}
+        disabled={notStudent}
+        tooltip={notStudent ? LOCKED_HINT : undefined}
+      />
 
       <SelectField
         id="area"
@@ -145,15 +110,20 @@ export default function OnboardingForm() {
         onChange={(e) => setArea(e.target.value)}
         placeholder="Избери подрачје"
         options={AREAS}
+        disabled={notStudent}
+        tooltip={notStudent ? LOCKED_HINT : undefined}
       />
 
       <SelectField
         id="year"
-        label="Година (опционално)"
+        label="Година"
+        required
         value={year}
         onChange={(e) => setYear(e.target.value)}
         placeholder="Избери година"
         options={YEARS}
+        disabled={notStudent}
+        tooltip={notStudent ? LOCKED_HINT : undefined}
       />
 
       <TermsCheckbox
@@ -161,19 +131,13 @@ export default function OnboardingForm() {
         onChange={(e) => setAgreed(e.target.checked)}
       />
 
-      <SubmitButton
-        label={isSubmitting ? "Се зачувува..." : "Започни"}
-        disabled={!agreed || isSubmitting}
-        disabledTooltip={
-          !agreed ? "Прифати ги условите за да продолжиш" : undefined
-        }
-      />
-
-      {errorMessage && (
-        <p className="text-center font-(family-name:--font-manrope) text-[13px] text-red-600 2xl:text-[15px]">
-          {errorMessage}
-        </p>
-      )}
+      <div className="mt-4">
+        <SubmitButton
+          label="Продолжи"
+          disabled={!agreed}
+          disabledTooltip="Прифати ги условите за да продолжиш"
+        />
+      </div>
     </form>
   );
 }
