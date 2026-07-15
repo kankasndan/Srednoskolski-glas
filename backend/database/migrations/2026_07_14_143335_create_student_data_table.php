@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('student_data', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("user_id")->constrained()->cascadeOnDelete();
-            $table->foreignId("school_id")->constrained()->cascadeOnDelete();
-            $table->foreignId("vocation_id")->constrained()->cascadeOnDelete();
-            $table->enum("grade", [1,2,3,4]);
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('school_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('vocation_id')->nullable()->constrained()->nullOnDelete();
+            $table->unsignedTinyInteger('grade')->nullable();
             $table->timestamps();
+
+            $table->unique('user_id');
         });
     }
 

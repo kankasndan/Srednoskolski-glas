@@ -3,23 +3,39 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StudentData extends Model
 {
-    protected $fillable = ['user_id', "school_id", "vocation_id", "grade"];
+    protected $fillable = [
+        'user_id',
+        'school_id',
+        'vocation_id',
+        'grade',
+    ];
 
-    public function school()
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
     {
-        return $this->hasMany(School::class);
+        return [
+            'grade' => 'integer',
+        ];
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
-        return $this->hasMany(User::class);
+        return $this->belongsTo(User::class);
     }
 
-    public function vocation()
+    public function school(): BelongsTo
     {
-        return $this->hasMany(Vocation::class);
+        return $this->belongsTo(School::class);
+    }
+
+    public function vocation(): BelongsTo
+    {
+        return $this->belongsTo(Vocation::class);
     }
 }

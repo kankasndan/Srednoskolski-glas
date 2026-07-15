@@ -15,11 +15,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call(OnboardingReferenceSeeder::class);
 
         User::factory()->create([
-            'name' => 'Test User',
+            'username' => 'test_user',
             'email' => 'test@example.com',
+            'onboarding_completed_at' => now(),
         ]);
     }
 }

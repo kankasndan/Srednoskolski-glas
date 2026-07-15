@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('vocations', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
+            $table->string('name')->unique();
             $table->timestamps();
         });
     }
@@ -26,5 +26,3 @@ return new class extends Migration
         Schema::dropIfExists('vocations');
     }
 };
-
-

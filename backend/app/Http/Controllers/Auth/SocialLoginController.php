@@ -22,18 +22,11 @@ class SocialLoginController extends Controller
             $socialUser = Socialite::driver($provider)->stateless()->user();
 
             $email = $socialUser->getEmail() ?: sprintf('%s-%s@social.local', $provider, $socialUser->getId());
-            $displayName = trim((string) ($socialUser->getNickname() ?: $socialUser->getName() ?: $socialUser->getEmail()));
-
-            if ($displayName === '') {
-                $displayName = sprintf('%s_%s', $provider, $socialUser->getId());
-            }
 
             $user = User::firstOrNew(['email' => $email]);
             $user->fill([
-                'name' => $user->exists && filled($user->name) ? $user->name : $displayName,
                 'provider' => $provider,
                 'provider_id' => $socialUser->getId(),
-                'imageUrl' => $socialUser->getAvatar(),
             ]);
             $user->save();
 
