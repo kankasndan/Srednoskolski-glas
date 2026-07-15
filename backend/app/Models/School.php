@@ -13,8 +13,8 @@ class School extends Model
         return $this->belongsTo(City::class);
     }
 
-    public function userSchool()
+    public function studetnData()
     {
-        return $this->hasMany(User::class, "student_data");
+        return $this->hasMany(StudentData::class, "student_data");
     }
 }
