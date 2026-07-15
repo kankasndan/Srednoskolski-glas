@@ -7,7 +7,9 @@ export default function AuthCallbackPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get("token");
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const onboarding = params.get("onboarding");
 
     const successRedirect =
       localStorage.getItem("post_login_redirect") || "/register/onboarding";
@@ -18,12 +20,21 @@ export default function AuthCallbackPage() {
 
     if (token) {
       localStorage.setItem("auth_token", token);
-      // Only a completed registration flow (redirect target is onboarding)
-      // earns access to the onboarding step; OnboardingGuard checks this flag.
-      if (successRedirect === "/register/onboarding") {
+      const onboardingRequired = onboarding === "required";
+
+      if (onboardingRequired) {
         localStorage.setItem("onboarding_pending", "1");
+      } else {
+        localStorage.removeItem("onboarding_pending");
       }
-      router.replace(successRedirect);
+
+      const nextPath = onboardingRequired
+        ? "/register/onboarding"
+        : successRedirect === "/register/onboarding"
+          ? "/feed"
+          : successRedirect;
+
+      router.replace(nextPath);
       return;
     }
 

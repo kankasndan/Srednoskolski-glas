@@ -12,11 +12,15 @@ export default function OnboardingGuard({ children }) {
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem("onboarding_pending")) {
+    const token = localStorage.getItem("auth_token");
+    const pending = localStorage.getItem("onboarding_pending");
+
+    if (token && pending) {
       setAllowed(true);
-    } else {
-      router.replace("/register");
+      return;
     }
+
+    router.replace("/register");
   }, [router]);
 
   if (!allowed) return null; // render nothing until the check passes / redirect fires
