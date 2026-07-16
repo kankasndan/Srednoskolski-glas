@@ -25,7 +25,7 @@ export default function ThematicForums({ selectedKey, onSelect }) {
             <ForumItem
               key={forum.slug}
               forum={forum}
-              selectedKey={selectedKey}
+              active={selectedKey === `forum:${forum.slug}`}
               onSelect={onSelect}
             />
           ))}

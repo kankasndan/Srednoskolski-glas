@@ -81,16 +81,16 @@ export default function AuthButtons() {
   }
 
   return (
-    <div className="ml-auto flex shrink-0 items-center gap-4">
+    <div className="ml-auto flex h-10 w-[300px] shrink-0 items-center gap-3">
       <Link
         href="/login"
-        className="flex h-12 w-36 items-center justify-center gap-4 rounded-2xl border border-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-[#0A0A0A] transition-colors hover:border-[var(--color-secondary-200)] hover:bg-[var(--color-secondary-200)] hover:text-[var(--color-grays-900)]"
+        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[var(--color-secondary-200)] hover:bg-[var(--color-secondary-200)] hover:text-[var(--color-grays-900)]"
       >
         Најави се
       </Link>
       <Link
         href="/register"
-        className="flex h-12 w-36 items-center justify-center gap-4 rounded-2xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:border-[var(--color-secondary-200)] hover:bg-[var(--color-secondary-200)] hover:text-[var(--color-grays-900)]"
+        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:border-[var(--color-secondary-200)] hover:bg-[var(--color-secondary-200)] hover:text-[var(--color-grays-900)]"
       >
         Регистрација
       </Link>

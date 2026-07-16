@@ -28,7 +28,7 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
 
   function handleSelect(key) {
     setNavOverride({
-      key: key.startsWith("nav:") ? key : null,
+      key,
       pathname,
     });
   }

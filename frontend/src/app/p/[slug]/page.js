@@ -2,10 +2,12 @@
 
 import { notFound, useParams } from "next/navigation";
 import AppShell from "@/components/AppShell";
+import ForumBanner from "@/components/ForumBanner";
 import ForumEmptyState from "@/components/ForumEmptyState";
+import ForumFilters from "@/components/ForumFilters";
+import ForumThreadList from "@/components/ForumThreadList";
 import { useForums } from "@/hooks/useForums";
-
-const DRZHAVNA_MATURA_SLUG = "drzhavna_matura";
+import forumPageMock from "../../../../public/forum-page-mock.json";
 
 export default function TopicForumPage() {
   const { slug } = useParams();
@@ -31,15 +33,33 @@ export default function TopicForumPage() {
     );
   }
 
-  const forum = forums.find((item) => item.slug === slug);
+  const mockForum = forumPageMock.forum.slug === slug ? forumPageMock.forum : null;
+  const forum = mockForum ?? forums.find((item) => item.slug === slug);
+  const threads = mockForum ? forumPageMock.threads : [];
 
-  if (!forum || slug === DRZHAVNA_MATURA_SLUG) {
+  if (!forum) {
     notFound();
+  }
+
+  if (threads.length === 0) {
+    return (
+      <AppShell>
+        <ForumEmptyState />
+      </AppShell>
+    );
   }
 
   return (
     <AppShell>
-      <ForumEmptyState />
+      <div className="flex w-[990px] max-w-full flex-col gap-6">
+        <ForumBanner
+          title={forum.name}
+          description={forum.description}
+          icon={forum.imageUrl}
+        />
+        <ForumFilters />
+        <ForumThreadList forumName={forum.name} threads={threads} />
+      </div>
     </AppShell>
   );
 }

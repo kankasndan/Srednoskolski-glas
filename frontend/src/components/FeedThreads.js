@@ -17,9 +17,9 @@ const TIME_FILTER_OPTIONS = [
 const THREADS = [
   {
     tags: [
-      { label: "Државна матура", icon: "/icons/drzavna_matura.svg", iconZoom: true },
+      { label: "Државна матура", icon: "/icons/drzhavna_matura.svg", iconZoom: true },
       { label: "марко_2026", icon: "/Generic avatar.svg" },
-      { label: "Гим. Орце Николов", icon: "/icons/uciliste.svg" },
+      { label: "Гим. Орце Николов", icon: "/icons/uchilishte.svg" },
     ],
     title: "Кои се најдобрите ресурси за подготовка на матура по математика?",
     excerpt: "Здраво на сите. Секој совет е добредојден...",
@@ -32,7 +32,7 @@ const THREADS = [
       { label: "Препорачано", tone: "highlight" },
       { label: "Факултети", icon: "/icons/fakulteti.svg", iconZoom: true },
       { label: "елена.к", icon: "/Generic avatar.svg" },
-      { label: "СУГС Михајло Пупин", icon: "/icons/uciliste.svg" },
+      { label: "СУГС Михајло Пупин", icon: "/icons/uchilishte.svg" },
     ],
     title: "Brainster Next vs ЕТФ - кој е подобар за софтверско инженерство?",
     excerpt: "Размислувам помеѓу овие два факултета и ме интересира мислење на постари ученици...",
@@ -44,7 +44,7 @@ const THREADS = [
     tags: [
       { label: "Ментално здравје", icon: "/icons/mentalno_zdravje.svg", iconZoom: true },
       { label: "анонимен_111", icon: "/Generic avatar.svg" },
-      { label: "Гим. Никола Карев", icon: "/icons/uciliste.svg" },
+      { label: "Гим. Никола Карев", icon: "/icons/uchilishte.svg" },
     ],
     title: "Како се справувате со стрес пред испити?",
     excerpt: "Имам матура за два месеца и не можам да спијам нормално...",
@@ -54,7 +54,7 @@ const THREADS = [
   },
   {
     tags: [
-      { label: "СУГС Михајло Пупин", icon: "/icons/uciliste.svg" },
+      { label: "СУГС Михајло Пупин", icon: "/icons/uchilishte.svg" },
       { label: "стефан_22", icon: "/Generic avatar.svg" },
     ],
     title: "Кога ќе се одржи екскурзијата за матуранти?",

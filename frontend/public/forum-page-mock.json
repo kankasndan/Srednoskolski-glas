@@ -1,0 +1,37 @@
+{
+  "forum": {
+    "id": 2,
+    "name": "Државна матура",
+    "slug": "drzhavna_matura",
+    "type": "general",
+    "description": "Форум за темата „Државна матура“.",
+    "imageUrl": "/icons/drzhavna_matura.svg",
+    "bannerUrl": "https://picsum.photos/seed/drzhavna_matura/1200/300",
+    "threads_count": 1,
+    "members_count": 0,
+    "school": null
+  },
+  "threads": [
+    {
+      "id": 1,
+      "title": "Кога почнуваат пријавите за државна матура?",
+      "description": "Дали некој знае точните датуми за пријавување на државна матура оваа година? Не можам да најдам официјална информација.",
+      "upvotes": 42,
+      "views": 890,
+      "is_anonymous": false,
+      "comments_count": 4,
+      "created_at": "2026-07-16T11:14:09.000000Z",
+      "author": {
+        "id": 3,
+        "username": "ana_k",
+        "imageUrl": null,
+        "school": {
+          "id": 2,
+          "name": "Јане Сандански",
+          "city": "Битола"
+        }
+      },
+      "attachments": []
+    }
+  ]
+}

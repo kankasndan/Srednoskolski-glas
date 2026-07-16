@@ -1,5 +1,5 @@
 // Simple Macedonian Cyrillic -> ASCII slug, matching the naming convention
-// e.g. "Вештачка интелегенција" -> "vestacka_intelegencija"
+// e.g. "Вештачка интелигенција" -> "veshtachka_inteligencija"
 const CYRILLIC_TO_LATIN = {
   а: "a", б: "b", в: "v", г: "g", д: "d", ѓ: "gj", е: "e", ж: "zh", з: "z",
   ѕ: "dz", и: "i", ј: "j", к: "k", л: "l", љ: "lj", м: "m", н: "n", њ: "nj",
@@ -18,7 +18,7 @@ export function slugify(name) {
 export function createSchoolForum(name) {
   return {
     name,
-    icon: "/icons/uciliste.svg",
+    icon: "/icons/uchilishte.svg",
     slug: slugify(name),
   };
 }
