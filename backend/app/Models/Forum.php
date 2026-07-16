@@ -13,8 +13,8 @@ class Forum extends Model
         return $this->hasMany(Thread::class);
     }
 
-    public function forumUser()
+    public function followers()
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class, 'forum_user');
     }
 }

@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('threads', function (Blueprint $table) {
+            $table->softDeletes();
             $table->id();
             $table->string("title");
             $table->text("description");

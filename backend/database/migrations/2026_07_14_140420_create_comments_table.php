@@ -9,6 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('comments', function (Blueprint $table) {
+            $table->softDeletes();
             $table->id();
 
             // Link to the thread
@@ -28,6 +29,7 @@ return new class extends Migration
                   ->cascadeOnDelete();
 
             $table->text('content');
+            $table->unsignedTinyInteger('upvotes');
             $table->timestamps();
         });
     }

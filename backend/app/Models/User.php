@@ -39,13 +39,38 @@ class User extends Authenticatable
         ];
     }
 
-    public function forumUser(): HasMany
+    public function followedForums()
     {
-        return $this->hasMany(Forum::class);
+        return $this->belongsToMany(Forum::class);
     }
 
     public function studentData()
     {
         return $this->belongsTo(StudentData::class, "student_data");
+    }
+
+    public function threads()
+    {
+        return $this->hasMany(Thread::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
+
+    public function sanctions()
+    {
+        return $this->hasMany(Sanction::class);
+    }
+
+    public function appeals()
+    {
+        return $this->hasMany(Appeal::class);
     }
 }

@@ -28,4 +28,14 @@ class Comment extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+        public function mentions()
+    {
+        return $this->morphMany(Mention::class, 'mentionable');
+    }
+
+    public function reports()
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
 }

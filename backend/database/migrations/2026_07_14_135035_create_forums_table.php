@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string("type");
             $table->string("imageUrl");
             $table->string("bannerUrl");
+            $table->foreignId("school_id")->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
