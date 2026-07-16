@@ -21,7 +21,7 @@ class Comment extends Model
 
     public function allReplies(): HasMany
     {
-        return $this->replies()->with('allReplies');
+        return $this->replies()->with(['user.studentData.school.city', 'allReplies']);
     }
 
     public function user()

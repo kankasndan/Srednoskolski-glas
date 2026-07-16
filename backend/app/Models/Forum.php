@@ -9,7 +9,7 @@ class Forum extends Model
 {
     protected $fillable = ['name', 'slug', 'description', 'type', 'school_id', 'imageUrl', 'bannerUrl', 'threads_count', 'members_count'];
 
-    public function thread()
+    public function threads()
     {
         return $this->hasMany(Thread::class);
     }
