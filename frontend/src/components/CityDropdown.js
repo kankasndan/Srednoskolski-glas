@@ -3,12 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { createSchoolForum } from "@/lib/forums";
 
-export default function CityDropdown({ city, schools, selectedKey, onSelect }) {
+export default function CityDropdown({ city, forums, selectedKey, onSelect }) {
   const pathname = usePathname();
-  const schoolForums = schools.map(createSchoolForum);
-  const hasActiveSchool = schoolForums.some(
+  const hasActiveSchool = forums.some(
     (school) =>
       pathname === `/p/${school.slug}` || selectedKey === `forum:${school.slug}`,
   );
@@ -28,7 +26,7 @@ export default function CityDropdown({ city, schools, selectedKey, onSelect }) {
         />
       </summary>
       <ul className="flex flex-col gap-1 py-2 pl-4">
-        {schoolForums.map((school) => {
+        {forums.map((school) => {
           const key = `forum:${school.slug}`;
           const isCurrentPage = pathname === `/p/${school.slug}`;
           const isActive = selectedKey === key;

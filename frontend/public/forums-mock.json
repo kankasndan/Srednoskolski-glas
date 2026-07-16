@@ -1,0 +1,208 @@
+{
+    "general": [
+        {
+            "id": 4,
+            "name": "Вештачка интелегенција",
+            "slug": "veshtachka_intelegencija",
+            "type": "general",
+            "school_id": null,
+            "imageUrl": "/icons/veshtachka_intelegencija.svg",
+            "threads_count": 0,
+            "members_count": 0
+        },
+        {
+            "id": 10,
+            "name": "Воннаставни активности",
+            "slug": "vonnastavni_aktivnosti",
+            "type": "general",
+            "school_id": null,
+            "imageUrl": "/icons/vonnastavni_aktivnosti.svg",
+            "threads_count": 0,
+            "members_count": 0
+        },
+        {
+            "id": 2,
+            "name": "Државна матура",
+            "slug": "drzhavna_matura",
+            "type": "general",
+            "school_id": null,
+            "imageUrl": "/icons/drzhavna_matura.svg",
+            "threads_count": 0,
+            "members_count": 0
+        },
+        {
+            "id": 11,
+            "name": "Технологија и програмирање",
+            "slug": "tehnologija_i_programiranje",
+            "type": "general",
+            "school_id": null,
+            "imageUrl": "/icons/tehnologija_i_programiranje.svg",
+            "threads_count": 0,
+            "members_count": 0
+        },
+        {
+            "id": 5,
+            "name": "Факултети",
+            "slug": "fakulteti",
+            "type": "general",
+            "school_id": null,
+            "imageUrl": "/icons/fakulteti.svg",
+            "threads_count": 0,
+            "members_count": 0
+        }
+    ],
+    "schools_by_city": [
+        {
+            "city": {
+                "id": 1,
+                "name": "Берово"
+            },
+            "forums": [
+                {
+                    "id": 17,
+                    "name": "Ацо Русковски",
+                    "slug": "aco_ruskovski_berovo",
+                    "type": "school",
+                    "school_id": 1,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                }
+            ]
+        },
+        {
+            "city": {
+                "id": 30,
+                "name": "Струмица"
+            },
+            "forums": [
+                {
+                    "id": 78,
+                    "name": "Димитар Влахов",
+                    "slug": "dimitar_vlahov_strumica",
+                    "type": "school",
+                    "school_id": 62,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                },
+                {
+                    "id": 77,
+                    "name": "Јане Сандански",
+                    "slug": "jane_sandanski_strumica",
+                    "type": "school",
+                    "school_id": 61,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                },
+                {
+                    "id": 108,
+                    "name": "Јахја Кемал",
+                    "slug": "jahja_kemal_strumica",
+                    "type": "school",
+                    "school_id": 92,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                },
+                {
+                    "id": 79,
+                    "name": "Никола Карев",
+                    "slug": "nikola_karev_strumica",
+                    "type": "school",
+                    "school_id": 63,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                }
+            ]
+        },
+        {
+            "city": {
+                "id": 31,
+                "name": "Тетово"
+            },
+            "forums": [
+                {
+                    "id": 81,
+                    "name": "8 Септември",
+                    "slug": "8_septemvri_tetovo",
+                    "type": "school",
+                    "school_id": 65,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                },
+                {
+                    "id": 82,
+                    "name": "Гоце Стојчески",
+                    "slug": "goce_stojcheski_tetovo",
+                    "type": "school",
+                    "school_id": 66,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                },
+                {
+                    "id": 83,
+                    "name": "Моша Пијаде",
+                    "slug": "mosha_pijade_tetovo",
+                    "type": "school",
+                    "school_id": 67,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                },
+                {
+                    "id": 80,
+                    "name": "Никола Штејн",
+                    "slug": "nikola_shtejn_tetovo",
+                    "type": "school",
+                    "school_id": 64,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                }
+            ]
+        },
+        {
+            "city": {
+                "id": 32,
+                "name": "Штип"
+            },
+            "forums": [
+                {
+                    "id": 84,
+                    "name": "Димитар Мирасчиев",
+                    "slug": "dimitar_miraschiev_shtip",
+                    "type": "school",
+                    "school_id": 68,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                },
+                {
+                    "id": 85,
+                    "name": "Јане Сандански",
+                    "slug": "jane_sandanski_shtip",
+                    "type": "school",
+                    "school_id": 69,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                },
+                {
+                    "id": 86,
+                    "name": "Коле Нехтенин",
+                    "slug": "kole_nehtenin_shtip",
+                    "type": "school",
+                    "school_id": 70,
+                    "imageUrl": "/icons/uciliste.svg",
+                    "threads_count": 0,
+                    "members_count": 0
+                }
+            ]
+        }
+    ]
+}
