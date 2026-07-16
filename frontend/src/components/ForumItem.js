@@ -25,7 +25,7 @@ export default function ForumItem({ forum, selectedKey, onSelect }) {
       }`}
     >
       <Image
-        src={forum.icon}
+        src={forum.imageUrl}
         alt=""
         width={55}
         height={55}
