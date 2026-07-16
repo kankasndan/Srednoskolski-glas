@@ -10,7 +10,7 @@ export default function DrzhavnaMaturaPage() {
         <ForumBanner
           title="Државна матура"
           description="Сè за државна матура - подготовка, литература, искуства."
-          icon="/icons/drzavna_matura.svg"
+          icon="/icons/drzhavna_matura.svg"
         />
         <ForumFilters />
         <ForumThreadList />

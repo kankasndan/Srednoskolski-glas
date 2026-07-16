@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import SchoolForums from "@/components/SchoolForums";
 import SidebarNav from "@/components/SidebarNav";
 import ThematicForums from "@/components/ThematicForums";
+import { useForums } from "@/hooks/useForums";
 
 function getSelectedKey(pathname) {
   if (pathname === "/feed") return "nav:home";
@@ -18,6 +19,7 @@ function getSelectedKey(pathname) {
 
 export default function AppShell({ children, contentClassName = "pl-8" }) {
   const pathname = usePathname();
+  const { general, schoolsByCity, loading, error } = useForums();
   const [navOverride, setNavOverride] = useState({ key: null, pathname: null });
   const selectedKey =
     navOverride.pathname === pathname && navOverride.key
@@ -38,8 +40,20 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
         <div className="sticky top-40 flex h-[calc(100vh-160px)] shrink-0">
           <aside className="overflow-y-auto overscroll-contain pr-14 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <SidebarNav selectedKey={selectedKey} onSelect={handleSelect} />
-            <ThematicForums selectedKey={selectedKey} onSelect={handleSelect} />
-            <SchoolForums selectedKey={selectedKey} onSelect={handleSelect} />
+            <ThematicForums
+              forums={general}
+              loading={loading}
+              error={error}
+              selectedKey={selectedKey}
+              onSelect={handleSelect}
+            />
+            <SchoolForums
+              schoolsByCity={schoolsByCity}
+              loading={loading}
+              error={error}
+              selectedKey={selectedKey}
+              onSelect={handleSelect}
+            />
           </aside>
           <div className="w-px shrink-0 rounded-2xl bg-[#CCCCCC]" />
         </div>

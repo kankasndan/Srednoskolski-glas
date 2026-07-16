@@ -17,7 +17,7 @@ const TIME_FILTER_OPTIONS = [
 const THREADS = [
   {
     tags: [
-      { label: "Државна матура", icon: "/icons/drzavna_matura.svg", iconZoom: true },
+      { label: "Државна матура", icon: "/icons/drzhavna_matura.svg", iconZoom: true },
       { label: "марко_2026", icon: "/Generic avatar.svg" },
       { label: "Гим. Орце Николов", icon: "/icons/uciliste.svg" },
     ],

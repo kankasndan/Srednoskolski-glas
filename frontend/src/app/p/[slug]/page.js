@@ -9,7 +9,7 @@ const DRZHAVNA_MATURA_SLUG = "drzhavna_matura";
 
 export default function TopicForumPage() {
   const { slug } = useParams();
-  const { forums, loading, error } = useForums();
+  const { general, schoolsByCity, loading, error } = useForums();
 
   if (loading) {
     return (
@@ -31,7 +31,8 @@ export default function TopicForumPage() {
     );
   }
 
-  const forum = forums.find((item) => item.slug === slug);
+  const schoolForums = schoolsByCity.flatMap((entry) => entry.forums);
+  const forum = [...general, ...schoolForums].find((item) => item.slug === slug);
 
   if (!forum || slug === DRZHAVNA_MATURA_SLUG) {
     notFound();

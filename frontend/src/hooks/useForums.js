@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { getForums } from "@/api/forums";
 
-// Loads forums via getForums() and exposes loading/error so callers never
-// assume the data is present on first render.
+// Loads forums via getForums() and exposes the general + school-by-city lists
+// with loading/error so callers never assume the data is present on first render.
 export function useForums() {
-  const [forums, setForums] = useState([]);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -14,8 +14,8 @@ export function useForums() {
     let active = true;
 
     getForums()
-      .then((data) => {
-        if (active) setForums(data);
+      .then((payload) => {
+        if (active) setData(payload);
       })
       .catch((err) => {
         if (active) setError(err);
@@ -29,5 +29,10 @@ export function useForums() {
     };
   }, []);
 
-  return { forums, loading, error };
+  return {
+    general: data?.general ?? [],
+    schoolsByCity: data?.schools_by_city ?? [],
+    loading,
+    error,
+  };
 }

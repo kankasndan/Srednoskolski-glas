@@ -1,11 +1,6 @@
-"use client";
-
 import ForumItem from "@/components/ForumItem";
-import { useForums } from "@/hooks/useForums";
 
-export default function ThematicForums({ selectedKey, onSelect }) {
-  const { forums, loading, error } = useForums();
-
+export default function ThematicForums({ forums, loading, error, selectedKey, onSelect }) {
   return (
     <div className="mt-8 flex w-[268px] flex-col gap-2">
       <h2 className="w-[268px] font-[family-name:var(--font-manrope)] text-[16px] font-bold leading-none text-[#0A0A0A]">
