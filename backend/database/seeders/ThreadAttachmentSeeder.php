@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Thread;
+use App\Models\ThreadAttachment;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ThreadAttachmentSeeder extends Seeder
 {
@@ -23,23 +24,19 @@ class ThreadAttachmentSeeder extends Seeder
 
     public function run(): void
     {
-        $now = now();
-
         foreach (self::ATTACHMENTS as $attachment) {
-            $threadId = DB::table('threads')->where('title', $attachment['thread'])->value('id');
+            $thread = Thread::where('title', $attachment['thread'])->first();
 
-            if ($threadId === null) {
+            if ($thread === null) {
                 continue;
             }
 
-            DB::table('thread_attachments')->updateOrInsert(
-                ['thread_id' => $threadId, 'url' => $attachment['url']],
+            ThreadAttachment::updateOrCreate(
+                ['thread_id' => $thread->id, 'url' => $attachment['url']],
                 [
                     'slug' => $attachment['slug'],
                     'provider' => 'imagekit',
                     'file_id' => $attachment['file_id'],
-                    'updated_at' => $now,
-                    'created_at' => $now,
                 ],
             );
         }

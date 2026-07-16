@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class School extends Model
 {
@@ -18,5 +19,10 @@ class School extends Model
     public function studentData(): HasMany
     {
         return $this->hasMany(StudentData::class);
+    }
+
+    public function forum(): HasOne
+    {
+        return $this->hasOne(Forum::class);
     }
 }

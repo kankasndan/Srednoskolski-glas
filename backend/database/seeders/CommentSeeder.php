@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Comment;
+use App\Models\Thread;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class CommentSeeder extends Seeder
 {
@@ -86,50 +88,32 @@ class CommentSeeder extends Seeder
     public function run(): void
     {
         foreach (self::COMMENTS as $comment) {
-            $threadId = DB::table('threads')->where('title', $comment['thread'])->value('id');
-            $userId = DB::table('users')->where('email', $comment['author'])->value('id');
+            $thread = Thread::where('title', $comment['thread'])->first();
+            $author = User::where('email', $comment['author'])->first();
 
-            if ($threadId === null || $userId === null) {
+            if ($thread === null || $author === null) {
                 continue;
             }
 
-            $parentId = $this->upsertComment($threadId, $userId, null, $comment['content']);
+            $parent = Comment::updateOrCreate([
+                'thread_id' => $thread->id,
+                'user_id' => $author->id,
+                'parent_id' => null,
+                'content' => $comment['content'],
+            ]);
 
             foreach ($comment['replies'] ?? [] as $reply) {
-                $replyUserId = DB::table('users')->where('email', $reply['author'])->value('id');
+                $replyAuthor = User::where('email', $reply['author'])->first();
 
-                if ($replyUserId === null) {
+                if ($replyAuthor === null) {
                     continue;
                 }
 
-                $this->upsertComment($threadId, $replyUserId, $parentId, $reply['content']);
+                $parent->replies()->updateOrCreate(
+                    ['user_id' => $replyAuthor->id, 'content' => $reply['content']],
+                    ['thread_id' => $thread->id],
+                );
             }
         }
-    }
-
-    private function upsertComment(int $threadId, int $userId, ?int $parentId, string $content): int
-    {
-        $now = now();
-
-        DB::table('comments')->updateOrInsert(
-            [
-                'thread_id' => $threadId,
-                'user_id' => $userId,
-                'parent_id' => $parentId,
-                'content' => $content,
-            ],
-            ['updated_at' => $now, 'created_at' => $now],
-        );
-
-        return (int) DB::table('comments')
-            ->where('thread_id', $threadId)
-            ->where('user_id', $userId)
-            ->where('content', $content)
-            ->when(
-                $parentId === null,
-                fn ($query) => $query->whereNull('parent_id'),
-                fn ($query) => $query->where('parent_id', $parentId),
-            )
-            ->value('id');
     }
 }

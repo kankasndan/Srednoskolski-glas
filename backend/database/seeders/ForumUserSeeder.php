@@ -2,51 +2,43 @@
 
 namespace Database\Seeders;
 
+use App\Models\Forum;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ForumUserSeeder extends Seeder
 {
     /**
-     * Forum memberships keyed by user email, listing joined forum slugs.
+     * Forum memberships keyed by user email, listing joined general forum names.
      *
      * @var array<string, list<string>>
      */
     private const MEMBERSHIPS = [
-        'demo@example.com' => ['opsti_diskusii', 'vestacka_intelegencija', 'tehnologija_i_programirane', 'drzavna_matura'],
-        'ana@example.com' => ['drzavna_matura', 'mentalno_zdravje', 'pomos_pri_ucene'],
-        'marko@example.com' => ['pomos_pri_ucene', 'fakulteti', 'sport'],
-        'elena@example.com' => ['stranski_jazici', 'studii_vo_stranstvo', 'opsti_diskusii'],
-        'stefan@example.com' => ['fakulteti', 'tehnologija_i_programirane', 'kariera_i_profesii'],
-        'ivana@example.com' => ['kariera_i_profesii', 'zabava_i_kultura', 'socijalni_prasana'],
-        'nikola@example.com' => ['sport', 'opsti_diskusii'],
-        'profesor@example.com' => ['pretstavi_se', 'slobodni_diskusii', 'opsti_diskusii'],
-        'test@example.com' => ['opsti_diskusii', 'drzavna_matura'],
+        'demo@example.com' => ['Општи дискусии', 'Вештачка интелегенција', 'Технологија и програмирање', 'Државна матура'],
+        'ana@example.com' => ['Државна матура', 'Ментално здравје', 'Помош при учење'],
+        'marko@example.com' => ['Помош при учење', 'Факултети', 'Спорт'],
+        'elena@example.com' => ['Странски јазици', 'Студии во странство', 'Општи дискусии'],
+        'stefan@example.com' => ['Факултети', 'Технологија и програмирање', 'Кариера и професии'],
+        'ivana@example.com' => ['Кариера и професии', 'Забава и култура', 'Социјални прашања'],
+        'nikola@example.com' => ['Спорт', 'Општи дискусии'],
+        'profesor@example.com' => ['Претстави се', 'Слободни дискусии', 'Општи дискусии'],
+        'test@example.com' => ['Општи дискусии', 'Државна матура'],
     ];
 
     public function run(): void
     {
-        $now = now();
+        foreach (self::MEMBERSHIPS as $email => $forumNames) {
+            $user = User::where('email', $email)->first();
 
-        foreach (self::MEMBERSHIPS as $email => $slugs) {
-            $userId = DB::table('users')->where('email', $email)->value('id');
-
-            if ($userId === null) {
+            if ($user === null) {
                 continue;
             }
 
-            foreach ($slugs as $slug) {
-                $forumId = DB::table('forums')->where('slug', $slug)->value('id');
+            $forumIds = Forum::where('type', 'general')
+                ->whereIn('name', $forumNames)
+                ->pluck('id');
 
-                if ($forumId === null) {
-                    continue;
-                }
-
-                DB::table('forum_user')->updateOrInsert(
-                    ['user_id' => $userId, 'forum_id' => $forumId],
-                    ['updated_at' => $now, 'created_at' => $now],
-                );
-            }
+            $user->forums()->syncWithoutDetaching($forumIds);
         }
     }
 }

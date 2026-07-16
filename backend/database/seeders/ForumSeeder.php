@@ -2,52 +2,86 @@
 
 namespace Database\Seeders;
 
+use App\Models\Forum;
+use App\Models\School;
+use App\Support\Slug;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ForumSeeder extends Seeder
 {
     /**
-     * Topic forums. Slugs mirror the frontend `forums.js` list.
+     * General/topic forum names. Slugs are generated to match the frontend.
      *
-     * @var list<array{name: string, slug: string}>
+     * @var list<string>
      */
-    private const FORUMS = [
-        ['name' => 'Општи дискусии', 'slug' => 'opsti_diskusii'],
-        ['name' => 'Државна матура', 'slug' => 'drzavna_matura'],
-        ['name' => 'Помош при учење', 'slug' => 'pomos_pri_ucene'],
-        ['name' => 'Вештачка интелегенција', 'slug' => 'vestacka_intelegencija'],
-        ['name' => 'Факултети', 'slug' => 'fakulteti'],
-        ['name' => 'Странски јазици', 'slug' => 'stranski_jazici'],
-        ['name' => 'Кариера и професии', 'slug' => 'kariera_i_profesii'],
-        ['name' => 'Студии во странство', 'slug' => 'studii_vo_stranstvo'],
-        ['name' => 'Ментално здравје', 'slug' => 'mentalno_zdravje'],
-        ['name' => 'Воннаставни активности', 'slug' => 'vonnastavni_aktivnosti'],
-        ['name' => 'Технологија и програмирање', 'slug' => 'tehnologija_i_programirane'],
-        ['name' => 'Забава и култура', 'slug' => 'zabava_i_kultura'],
-        ['name' => 'Спорт', 'slug' => 'sport'],
-        ['name' => 'Социјални прашања', 'slug' => 'socijalni_prasana'],
-        ['name' => 'Претстави се', 'slug' => 'pretstavi_se'],
-        ['name' => 'Слободни дискусии', 'slug' => 'slobodni_diskusii'],
+    private const GENERAL_FORUMS = [
+        'Општи дискусии',
+        'Државна матура',
+        'Помош при учење',
+        'Вештачка интелегенција',
+        'Факултети',
+        'Странски јазици',
+        'Кариера и професии',
+        'Студии во странство',
+        'Ментално здравје',
+        'Воннаставни активности',
+        'Технологија и програмирање',
+        'Забава и култура',
+        'Спорт',
+        'Социјални прашања',
+        'Претстави се',
+        'Слободни дискусии',
     ];
 
     public function run(): void
     {
-        $now = now();
+        $this->seedGeneralForums();
+        $this->seedSchoolForums();
+    }
 
-        foreach (self::FORUMS as $forum) {
-            DB::table('forums')->updateOrInsert(
-                ['slug' => $forum['slug']],
+    private function seedGeneralForums(): void
+    {
+        foreach (self::GENERAL_FORUMS as $name) {
+            $slug = Slug::make($name);
+
+            Forum::updateOrCreate(
+                ['slug' => $slug],
                 [
-                    'name' => $forum['name'],
-                    'description' => 'Форум за темата „'.$forum['name'].'“.',
+                    'name' => $name,
+                    'description' => 'Форум за темата „'.$name.'“.',
                     'type' => 'general',
-                    'imageUrl' => '/icons/'.$forum['slug'].'.svg',
-                    'bannerUrl' => 'https://picsum.photos/seed/'.$forum['slug'].'/1200/300',
-                    'updated_at' => $now,
-                    'created_at' => $now,
+                    'school_id' => null,
+                    'imageUrl' => '/icons/'.$slug.'.svg',
+                    'bannerUrl' => 'https://picsum.photos/seed/'.$slug.'/1200/300',
+                    'threads_count' => 0,
+                    'members_count' => 0,
                 ],
             );
         }
+    }
+
+    /**
+     * One forum per school, linked via `school_id`. The school (and its city)
+     * remain the single source of truth for the name/location.
+     */
+    private function seedSchoolForums(): void
+    {
+        School::with('city')->each(function (School $school) {
+            $slug = Slug::make($school->name.' '.$school->city->name);
+
+            Forum::updateOrCreate(
+                ['school_id' => $school->id],
+                [
+                    'name' => $school->name,
+                    'slug' => $slug,
+                    'description' => 'Форум на '.$school->name.' ('.$school->city->name.').',
+                    'type' => 'school',
+                    'imageUrl' => '/icons/uciliste.svg',
+                    'bannerUrl' => 'https://picsum.photos/seed/'.$slug.'/1200/300',
+                    'threads_count' => 0,
+                    'members_count' => 0,
+                ],
+            );
+        });
     }
 }

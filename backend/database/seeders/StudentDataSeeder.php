@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\School;
+use App\Models\User;
+use App\Models\Vocation;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class StudentDataSeeder extends Seeder
 {
@@ -24,29 +26,23 @@ class StudentDataSeeder extends Seeder
 
     public function run(): void
     {
-        $now = now();
-
         foreach (self::STUDENTS as $student) {
-            $userId = DB::table('users')->where('email', $student['email'])->value('id');
-            $schoolId = DB::table('schools')
-                ->join('cities', 'schools.city_id', '=', 'cities.id')
-                ->where('schools.name', $student['school'])
-                ->where('cities.name', $student['city'])
-                ->value('schools.id');
-            $vocationId = DB::table('vocations')->where('name', $student['vocation'])->value('id');
+            $user = User::where('email', $student['email'])->first();
+            $school = School::whereHas('city', fn ($query) => $query->where('name', $student['city']))
+                ->where('name', $student['school'])
+                ->first();
+            $vocation = Vocation::where('name', $student['vocation'])->first();
 
-            if ($userId === null || $schoolId === null || $vocationId === null) {
+            if ($user === null || $school === null || $vocation === null) {
                 continue;
             }
 
-            DB::table('student_data')->updateOrInsert(
-                ['user_id' => $userId],
+            $user->studentData()->updateOrCreate(
+                ['user_id' => $user->id],
                 [
-                    'school_id' => $schoolId,
-                    'vocation_id' => $vocationId,
+                    'school_id' => $school->id,
+                    'vocation_id' => $vocation->id,
                     'grade' => $student['grade'],
-                    'updated_at' => $now,
-                    'created_at' => $now,
                 ],
             );
         }
