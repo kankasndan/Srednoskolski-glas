@@ -1,0 +1,108 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Матура",
+      "slug": "matura",
+      "description": "Сè за државната матура — испити, рокови, литература и совети од оние што веќе поминале.",
+      "type": "public",
+      "imageUrl": "/icons/drzavna_matura.svg",
+      "bannerUrl": "/icons/drzavna_matura.svg",
+      "members_count": 1482,
+      "threads_count": 217,
+      "created_at": "2026-01-12T09:14:03.000000Z",
+      "updated_at": "2026-07-02T18:41:27.000000Z"
+    },
+    {
+      "id": 2,
+      "name": "Факултети и уписи",
+      "slug": "fakulteti-i-upisi",
+      "description": "Прашања за уписи, бодови, конкурси и избор на факултет во земјата и странство.",
+      "type": "public",
+      "imageUrl": "/icons/fakulteti.svg",
+      "bannerUrl": "/icons/fakulteti.svg",
+      "members_count": 1136,
+      "threads_count": 164,
+      "created_at": "2026-01-12T09:15:44.000000Z",
+      "updated_at": "2026-07-14T07:22:10.000000Z"
+    },
+    {
+      "id": 3,
+      "name": "Домашни и учење",
+      "slug": "domashni-i-uchenje",
+      "description": "Заглавен со задача? Прашај тука. Математика, физика, хемија, јазици — сè оди.",
+      "type": "public",
+      "imageUrl": "/icons/pomos_pri_ucene.svg",
+      "bannerUrl": "/icons/pomos_pri_ucene.svg",
+      "members_count": 2043,
+      "threads_count": 589,
+      "created_at": "2026-01-12T09:17:02.000000Z",
+      "updated_at": "2026-07-15T20:03:55.000000Z"
+    },
+    {
+      "id": 4,
+      "name": "Натпревари и олимпијади",
+      "slug": "natprevari-i-olimpijadi",
+      "description": "Информации, подготовки и резултати од натпревари, олимпијади и хакатони.",
+      "type": "public",
+      "imageUrl": "/icons/vonnastavni_aktivnosti.svg",
+      "bannerUrl": "/icons/vonnastavni_aktivnosti.svg",
+      "members_count": 412,
+      "threads_count": 73,
+      "created_at": "2026-02-03T11:30:19.000000Z",
+      "updated_at": "2026-06-28T14:12:41.000000Z"
+    },
+    {
+      "id": 5,
+      "name": "Практика и работа",
+      "slug": "praktika-i-rabota",
+      "description": "Пракси, скратено работно време, стипендии и првите чекори во кариерата.",
+      "type": "public",
+      "imageUrl": "/icons/kariera_i_profesii.svg",
+      "bannerUrl": "/icons/kariera_i_profesii.svg",
+      "members_count": 687,
+      "threads_count": 98,
+      "created_at": "2026-02-03T11:31:47.000000Z",
+      "updated_at": "2026-07-09T16:55:02.000000Z"
+    },
+    {
+      "id": 6,
+      "name": "Ученички права",
+      "slug": "uchenichki-prava",
+      "description": "Правила, правилници, ученички заедници и што да правиш кога нешто не е како што треба.",
+      "type": "public",
+      "imageUrl": "/icons/socijalni_prasana.svg",
+      "bannerUrl": "/icons/socijalni_prasana.svg",
+      "members_count": 534,
+      "threads_count": 61,
+      "created_at": "2026-03-21T08:02:33.000000Z",
+      "updated_at": "2026-07-11T12:18:09.000000Z"
+    },
+    {
+      "id": 7,
+      "name": "Ментално здравје",
+      "slug": "mentalno-zdravje",
+      "description": "Простор за притисок, стрес и сè што носи училиштето. Анонимните објави се добредојдени.",
+      "type": "public",
+      "imageUrl": "/icons/mentalno_zdravje.svg",
+      "bannerUrl": "/icons/mentalno_zdravje.svg",
+      "members_count": 921,
+      "threads_count": 143,
+      "created_at": "2026-03-21T08:04:12.000000Z",
+      "updated_at": "2026-07-16T06:47:38.000000Z"
+    },
+    {
+      "id": 8,
+      "name": "Слободно",
+      "slug": "slobodno",
+      "description": "Офтопик — меми, музика, игри, филмови и сè што не се вклопува никаде другаде.",
+      "type": "public",
+      "imageUrl": "/icons/slobodni_diskusii.svg",
+      "bannerUrl": "/icons/slobodni_diskusii.svg",
+      "members_count": 1795,
+      "threads_count": 402,
+      "created_at": "2026-01-12T09:20:55.000000Z",
+      "updated_at": "2026-07-16T09:11:24.000000Z"
+    }
+  ]
+}

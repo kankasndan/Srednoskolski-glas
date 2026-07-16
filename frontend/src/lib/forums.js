@@ -15,32 +15,6 @@ export function slugify(name) {
     .join("");
 }
 
-// Add / edit forum names here. The link (/p/<slug>) is derived automatically
-// from each name, while icon keeps the current public/icons filename.
-const FORUM_DEFINITIONS = [
-  { name: "Општи дискусии", icon: "/icons/opsti_diskusii.svg" },
-  { name: "Државна матура", icon: "/icons/drzavna_matura.svg" },
-  { name: "Помош при учење", icon: "/icons/pomos_pri_ucene.svg" },
-  { name: "Вештачка интелегенција", icon: "/icons/vestacka_intelegencija.svg" },
-  { name: "Факултети", icon: "/icons/fakulteti.svg" },
-  { name: "Странски јазици", icon: "/icons/stranski_jazici.svg" },
-  { name: "Кариера и професии", icon: "/icons/kariera_i_profesii.svg" },
-  { name: "Студии во странство", icon: "/icons/studii_vo_stranstvo.svg" },
-  { name: "Ментално здравје", icon: "/icons/mentalno_zdravje.svg" },
-  { name: "Воннаставни активности", icon: "/icons/vonnastavni_aktivnosti.svg" },
-  { name: "Технологија и програмирање", icon: "/icons/tehnologija_i_programirane.svg" },
-  { name: "Забава и култура", icon: "/icons/zabava_i_kultura.svg" },
-  { name: "Спорт", icon: "/icons/sport.svg" },
-  { name: "Социјални прашања", icon: "/icons/socijalni_prasana.svg" },
-  { name: "Претстави се", icon: "/icons/pretstavi_se.svg" },
-  { name: "Слободни дискусии", icon: "/icons/slobodni_diskusii.svg" },
-];
-
-export const FORUMS = FORUM_DEFINITIONS.map((forum) => ({
-  ...forum,
-  slug: slugify(forum.name),
-}));
-
 export function createSchoolForum(name) {
   return {
     name,
