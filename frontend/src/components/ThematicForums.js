@@ -20,14 +20,16 @@ export default function ThematicForums({ selectedKey, onSelect }) {
           Не успеа вчитувањето на форумите.
         </p>
       ) : (
-        forums.map((forum) => (
-          <ForumItem
-            key={forum.slug}
-            forum={forum}
-            selectedKey={selectedKey}
-            onSelect={onSelect}
-          />
-        ))
+        <div className="flex flex-col gap-2">
+          {forums.map((forum) => (
+            <ForumItem
+              key={forum.slug}
+              forum={forum}
+              selectedKey={selectedKey}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
