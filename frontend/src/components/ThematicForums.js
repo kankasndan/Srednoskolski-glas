@@ -2,8 +2,8 @@ import ForumItem from "@/components/ForumItem";
 
 export default function ThematicForums({ forums, loading, error, selectedKey, onSelect }) {
   return (
-    <div className="mt-8 flex w-[268px] flex-col gap-2">
-      <h2 className="w-[268px] font-[family-name:var(--font-manrope)] text-[16px] font-bold leading-none text-[#0A0A0A]">
+    <div className="mt-8 flex w-[268px] flex-col">
+      <h2 className="mb-3 h-[22px] w-[268px] font-[family-name:var(--font-manrope)] text-[16px] font-bold leading-[22px] text-[#0A0A0A]">
         Тематски форуми
       </h2>
       {loading ? (
@@ -15,14 +15,16 @@ export default function ThematicForums({ forums, loading, error, selectedKey, on
           Не успеа вчитувањето на форумите.
         </p>
       ) : (
-        forums.map((forum) => (
-          <ForumItem
-            key={forum.slug}
-            forum={forum}
-            selectedKey={selectedKey}
-            onSelect={onSelect}
-          />
-        ))
+        <div className="flex flex-col gap-2">
+          {forums.map((forum) => (
+            <ForumItem
+              key={forum.slug}
+              forum={forum}
+              active={selectedKey === `forum:${forum.slug}`}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

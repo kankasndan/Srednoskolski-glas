@@ -3,6 +3,27 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --color-primary-100: #6b47f5;
+  --color-primary-200: #582ff5;
+  --color-primary-300: #3300f5;
+  --color-secondary-100: #dcebed;
+  --color-secondary-200: #cfe9ed;
+  --color-secondary-300: #a6e4ed;
+  --color-accent-100: #f0ed90;
+  --color-accent-200: #f0e92f;
+  --color-accent-300: #f0e700;
+  --color-error: #e54336;
+  --color-warning: #f5b704;
+  --color-success: #34a354;
+  --color-grays-100: #ffffff;
+  --color-grays-200: #e5e5e5;
+  --color-grays-300: #cccccc;
+  --color-grays-400: #b2b2b2;
+  --color-grays-500: #999999;
+  --color-grays-600: #808080;
+  --color-grays-700: #595959;
+  --color-grays-800: #333333;
+  --color-grays-900: #000000;
 }
 
 @theme inline {
