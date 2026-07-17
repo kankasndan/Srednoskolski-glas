@@ -7,11 +7,11 @@
         fill: none;
         stroke: #582ff5;
         stroke-miterlimit: 10;
-        stroke-width: 3px;
+        stroke-width: 16px;
       }
     </style>
   </defs>
-  <polyline class="st0" points="204.92 204.75 163.15 241.55 202.61 280.81"/>
-  <polyline class="st0" points="297.39 207.56 336.85 246.81 295.08 283.61"/>
-  <line class="st0" x1="275.99" y1="171.44" x2="224.04" y2="316.05"/>
+  <polyline class="st0" points="185.41 190.23 125.57 242.95 182.11 299.18"/>
+  <polyline class="st0" points="317.89 194.25 374.43 250.48 314.59 303.2"/>
+  <line class="st0" x1="287.23" y1="142.51" x2="212.8" y2="349.68"/>
 </svg>
