@@ -1,13 +1,8 @@
-"use client";
-
-import { useState } from "react";
 import FieldLabel from "@/components/FieldLabel";
 
 const MAX_LENGTH = 100;
 
-export default function TitleInput() {
-  const [value, setValue] = useState("");
-
+export default function TitleInput({ value, onChange, onBlur, errorMessage }) {
   return (
     <div className="flex flex-col gap-2">
       <FieldLabel htmlFor="title" required>
@@ -21,17 +16,32 @@ export default function TitleInput() {
           required
           maxLength={MAX_LENGTH}
           value={value}
-          onChange={(event) => setValue(event.target.value)}
+          aria-invalid={!!errorMessage}
+          aria-describedby={errorMessage ? "title-error" : undefined}
+          onChange={(event) => onChange(event.target.value)}
+          onBlur={onBlur}
           onInvalid={(event) =>
             event.target.setCustomValidity("Внеси барем 1 карактер.")
           }
           onInput={(event) => event.target.setCustomValidity("")}
           placeholder="Внеси наслов на дискусијата"
-          className="h-10 w-full rounded-xl border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 text-black placeholder:text-[#595959] focus:border-[#582FF5] focus:outline-none"
+          className={`h-10 w-full rounded-xl border px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 text-black placeholder:text-[#595959] focus:outline-none ${
+            errorMessage ? "border-[var(--color-error)]" : "border-[#CCCCCC] focus:border-[#582FF5]"
+          }`}
         />
-        <span className="self-end font-[family-name:var(--font-manrope)] text-[12px] leading-none text-[#595959]">
-          {value.length}/{MAX_LENGTH}
-        </span>
+        <div className="flex min-h-4 items-center justify-between gap-3">
+          <p
+            id="title-error"
+            className={`min-w-0 flex-1 truncate font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[var(--color-error)] ${
+              errorMessage ? "" : "invisible"
+            }`}
+          >
+            {errorMessage || "Нема грешка"}
+          </p>
+          <span className="shrink-0 font-[family-name:var(--font-manrope)] text-[12px] leading-none text-[#595959]">
+            {value.length}/{MAX_LENGTH}
+          </span>
+        </div>
       </div>
     </div>
   );

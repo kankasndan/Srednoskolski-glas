@@ -1,22 +1,26 @@
-import AnonymousToggle from "@/components/AnonymousToggle";
 import BackButton from "@/components/BackButton";
-import ForumSelect from "@/components/ForumSelect";
 import Header from "@/components/Header";
-import PostTypeButtons from "@/components/PostTypeButtons";
-import TitleInput from "@/components/TitleInput";
+import Image from "next/image";
+import NewDiscussionForm from "@/components/NewDiscussionForm";
+import NewPageFooter from "@/components/NewPageFooter";
 
 export default function NewDiscussionPage() {
   return (
-    <div className="min-h-screen w-full bg-white">
+    <div className="relative min-h-screen w-full overflow-x-hidden bg-white">
       <Header />
-      <div className="flex flex-col items-start gap-6 px-14">
+      <Image
+        src="/avatar.svg"
+        alt=""
+        width={395}
+        height={366}
+        aria-hidden="true"
+        className="pointer-events-none absolute left-[840px] top-[280px] hidden h-[366px] w-[395px] select-none xl:block"
+        priority
+      />
+      <div className="relative z-10 flex flex-col items-start gap-6 px-14">
         <BackButton label="Врати се назад" />
-        <div className="flex w-[632px] max-w-full items-end gap-3">
-          <ForumSelect />
-          <AnonymousToggle className="flex-1" />
-        </div>
-        <TitleInput />
-        <PostTypeButtons />
+        <NewDiscussionForm />
+        <NewPageFooter />
       </div>
     </div>
   );

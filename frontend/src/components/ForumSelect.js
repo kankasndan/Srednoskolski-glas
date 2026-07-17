@@ -1,40 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import FieldLabel from "@/components/FieldLabel";
 import ForumIcon from "@/components/ForumIcon";
 import ForumOption from "@/components/ForumOption";
 import { useForums } from "@/hooks/useForums";
 
-export default function ForumSelect() {
+export default function ForumSelect({ selected, onChange, onBlur, errorMessage }) {
   const { general, loading, error } = useForums();
-  const [selected, setSelected] = useState(null);
   const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handlePointerDown(event) {
+      if (!dropdownRef.current?.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [open]);
 
   function handleSelect(forum) {
-    setSelected(forum);
+    onChange(forum);
     setOpen(false);
   }
 
   return (
     <div className="flex w-[310px] max-w-full flex-col gap-2">
       <FieldLabel required>Каде сакаш да започнеш дискусија?</FieldLabel>
+      <input type="hidden" name="forum" value={selected?.slug ?? ""} />
 
       <div
+        ref={dropdownRef}
         className="relative w-full"
         onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            setOpen(false);
+            onBlur?.();
+          }
         }}
       >
         <button
           type="button"
           disabled={loading || !!error}
           aria-expanded={open}
+          aria-describedby={errorMessage ? "forum-error" : undefined}
           onClick={() => setOpen((prev) => !prev)}
-          className={`flex h-10 w-full items-center justify-between gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors ${
+          className={`flex h-10 w-full cursor-pointer items-center justify-between gap-4 rounded-xl border px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors ${
             open || selected ? "bg-[#CFE9ED]" : "bg-white hover:bg-[#DCEBED]"
-          } ${selected ? "text-black" : "text-[#595959]"}`}
+          } ${errorMessage ? "border-[var(--color-error)]" : "border-[#CCCCCC]"} ${
+            selected ? "text-black" : "text-[#595959]"
+          }`}
         >
           <span className="flex min-w-0 items-center gap-3">
             {selected && <ForumIcon src={selected.imageUrl} />}
@@ -46,9 +67,9 @@ export default function ForumSelect() {
           <Image
             src="/chevron-down.svg"
             alt=""
-            width={20}
-            height={20}
-            className={`size-5 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+            width={16}
+            height={16}
+            className={`size-4 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
           />
         </button>
 
@@ -60,6 +81,14 @@ export default function ForumSelect() {
           </div>
         )}
       </div>
+      <p
+        id="forum-error"
+        className={`min-h-4 truncate font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[var(--color-error)] ${
+          errorMessage ? "" : "invisible"
+        }`}
+      >
+        {errorMessage || "Нема грешка"}
+      </p>
     </div>
   );
 }

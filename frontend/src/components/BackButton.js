@@ -34,7 +34,7 @@ export default function BackButton({ href, label }) {
       type="button"
       onClick={handleBack}
       aria-label={label ? undefined : "Назад"}
-      className={`flex h-10 items-center justify-center rounded-full transition-colors ${
+      className={`flex h-10 cursor-pointer items-center justify-center rounded-full transition-colors ${
         label
           ? "gap-2 text-[#582FF5] hover:text-black"
           : "w-10 text-[#0A0A0A] hover:bg-gray-100"
