@@ -16,7 +16,7 @@ export default function CityDropdown({ city, forums, selectedKey, onSelect }) {
       <summary
         className="flex h-10 w-[268px] cursor-pointer list-none items-center justify-between gap-4 rounded-[12px] border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none tracking-normal text-black transition-colors duration-300 ease-out hover:bg-[#CFE9ED] group-open:rounded-b-none group-open:bg-[#CFE9ED] [&::-webkit-details-marker]:hidden"
       >
-        <span className="flex h-[19px] min-w-0 flex-1 items-center truncate">{city}</span>
+        <span className="flex h-[19px] min-w-0 flex-1 items-center truncate">{city.name}</span>
         <Image
           src="/chevron-down.svg"
           alt=""
@@ -26,11 +26,11 @@ export default function CityDropdown({ city, forums, selectedKey, onSelect }) {
         />
       </summary>
       <ul className="flex w-[268px] flex-col overflow-hidden rounded-b-[12px] border-x border-b border-[#CCCCCC] bg-white transition-all duration-300 ease-out">
-        {schoolForums.map((school, index) => {
+        {forums.map((school, index) => {
           const key = `forum:${school.slug}`;
           const isCurrentPage = pathname === `/p/${school.slug}`;
           const isActive = selectedKey === key;
-          const hasDivider = index < schoolForums.length - 1;
+          const hasDivider = index < forums.length - 1;
 
           return (
             <li key={school.slug}>
