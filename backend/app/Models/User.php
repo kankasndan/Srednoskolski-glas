@@ -40,6 +40,21 @@ class User extends Authenticatable
         ];
     }
 
+    protected static function booted(): void
+    {
+        // Give users without a picture one of the default avatars at random, so
+        // every account always has an image to display.
+        static::creating(function (User $user): void {
+            if (empty($user->imageUrl)) {
+                $defaults = config('avatars.defaults', []);
+
+                if (! empty($defaults)) {
+                    $user->imageUrl = $defaults[array_rand($defaults)];
+                }
+            }
+        });
+    }
+
     public function forumUser(): HasMany
     {
         return $this->hasMany(Forum::class);
