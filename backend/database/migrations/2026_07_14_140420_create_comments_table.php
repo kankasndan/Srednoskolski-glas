@@ -13,22 +13,24 @@ return new class extends Migration
 
             // Link to the thread
             $table->foreignId('thread_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
+                ->constrained()
+                ->cascadeOnDelete();
 
             // The self-referencing parent ID (nullable for top-level comments)
             $table->foreignId('parent_id')
-                  ->nullable()
-                  ->constrained('comments') // Explicitly point to this same table
-                  ->cascadeOnDelete();
+                ->nullable()
+                ->constrained('comments') // Explicitly point to this same table
+                ->cascadeOnDelete();
 
             // Link to the user who wrote the comment
             $table->foreignId('user_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
+                ->constrained()
+                ->cascadeOnDelete();
 
             $table->text('content');
+            $table->unsignedTinyInteger('upvotes')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

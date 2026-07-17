@@ -5,10 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Thread extends Model
 {
-    protected $fillable = ["title", "description", "upvotes", "views", "user_id", "forum_id", "is_anonymous"];
+    use SoftDeletes;
+
+    protected $fillable = ['title', 'description', 'upvotes', 'views', 'user_id', 'forum_id', 'is_anonymous'];
 
     /**
      * @return array<string, string>
@@ -38,5 +42,15 @@ class Thread extends Model
     public function forum(): BelongsTo
     {
         return $this->belongsTo(Forum::class);
+    }
+
+    public function mentions(): MorphMany
+    {
+        return $this->morphMany(Mention::class, 'mentionable');
+    }
+
+    public function reports(): MorphMany
+    {
+        return $this->morphMany(Report::class, 'reportable');
     }
 }

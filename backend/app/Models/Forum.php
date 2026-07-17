@@ -21,6 +21,6 @@ class Forum extends Model
 
     public function forumUser()
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class, 'forum_user');
     }
 }

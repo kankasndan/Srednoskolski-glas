@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('type');
             $table->string('imageUrl');
             $table->string('bannerUrl');
-            $table->integer('threads_count');
-            $table->integer('members_count');
+            $table->integer('threads_count')->default(0);
+            $table->integer('members_count')->default(0);
             $table->timestamps();
         });
     }

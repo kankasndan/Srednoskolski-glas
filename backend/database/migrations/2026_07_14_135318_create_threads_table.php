@@ -13,14 +13,15 @@ return new class extends Migration
     {
         Schema::create('threads', function (Blueprint $table) {
             $table->id();
-            $table->string("title");
-            $table->text("description");
-            $table->unsignedInteger("upvotes");
-            $table->unsignedInteger("views");
-            $table->foreignId("user_id")->nullable()->constrained();
-            $table->foreignId("forum_id")->constrained()->cascadeOnDelete();
-            $table->boolean("is_anonymous")->default(0);
+            $table->string('title');
+            $table->text('description');
+            $table->unsignedInteger('upvotes')->default(0);
+            $table->unsignedInteger('views')->default(0);
+            $table->foreignId('user_id')->nullable()->constrained();
+            $table->foreignId('forum_id')->constrained()->cascadeOnDelete();
+            $table->boolean('is_anonymous')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
