@@ -1,0 +1,403 @@
+Issue Type,Epic Name,Epic Link,Summary,Description,Story Points,Assignee Role,Labels,Priority,Task ID,Depends On
+Epic,Foundation,,Foundation,"DB schema completion, API conventions, frontend data layer and shared UI primitives that everything else depends on.",,,foundation,Highest,A,
+Story,,A,A1 votes table + Vote model,"Create polymorphic votes table (votable_type/votable_id) linked to users; migration + Vote model.
+
+Acceptance criteria:
+- votes table with user_id FK and polymorphic votable columns.
+- Unique constraint on (user_id, votable_type, votable_id).
+- Vote model with morphTo relation; User/Thread/Comment relations wired.
+- migrate runs clean.",3,BE1,backend,Highest,A1,
+Story,,A,A2 follows table + Follow model,"Create follows table (user follows a thread) + Follow model.
+
+Acceptance criteria:
+- follows table with user_id and thread_id FKs, unique (user_id, thread_id).
+- Follow model + relations on User and Thread.
+- migrate runs clean.",2,BE1,backend,High,A2,
+Story,,A,A3 edited_at + deleted_by columns,"Add edited_at (nullable timestamp) to threads and comments; add deleted_by FK to support tombstone (deleted by user vs moderator).
+
+Acceptance criteria:
+- Migration adds edited_at to threads and comments.
+- Migration adds nullable deleted_by (FK users) to threads and comments.
+- Soft deletes remain intact; migrate runs clean.",3,BE2,backend,Highest,A3,
+Story,,A,A4 API conventions + base Resources,"Define a single success/error JSON envelope, validation error format, and pagination meta. Create base API Resource classes (ThreadResource, CommentResource, ForumResource, UserResource). Document in backend README.
+
+Acceptance criteria:
+- Documented response shape for success, error, validation error, and paginated lists.
+- Resource classes return the documented shape and are used by existing read endpoints.
+- Short README section the frontend can rely on.",5,BE2,backend,Highest,A4,
+Story,,A,A5 migrate:fresh baseline + seeders,"Run migrate:fresh with all schema fixes; update seeders for new columns/tables incl. sample votes/follows.
+
+Acceptance criteria:
+- migrate:fresh --seed succeeds from clean DB.
+- Seeders populate sample votes and follows.
+- No orphaned FKs; existing seeded data still loads.",2,BE1,backend,Highest,A5,"A1,A2,A3"
+Story,,A,A6 Frontend data layer (kill USE_MOCK),"Remove USE_MOCK, add a data-fetching wrapper over lib/api.js (React Query or fetch hooks), scaffold typed hooks (real useForums).
+
+Acceptance criteria:
+- USE_MOCK removed; forums sidebar fetches from /api/forums.
+- Central hook layer with loading/error handling.
+- CSRF/session cookie flow preserved.",5,FS,frontend;integration,Highest,A6,A4
+Story,,A,A7 Shared UI: Avatar,"Reusable Avatar component using imageUrl with size variants.
+
+Acceptance criteria:
+- Renders user image; size props (sm/md/lg).
+- Graceful handling when image fails to load.
+- Storybook-style usage documented in the component file.",2,FE1,frontend;ui,High,A7,
+Story,,A,A8 Shared UI: DropdownMenu,"Accessible three-dots dropdown menu (keyboard nav, Escape, outside-click close).
+
+Acceptance criteria:
+- Opens/closes on click; closes on outside click and Escape.
+- Keyboard navigable; ARIA roles set.
+- Accepts arbitrary menu items via props.",3,FE2,frontend;ui,High,A8,
+Story,,A,A9 Shared UI: Modal + Toast,"Reusable Modal/Dialog and Toast/notification primitives.
+
+Acceptance criteria:
+- Modal traps focus, closes on Escape/backdrop.
+- Toast supports success/error, auto-dismiss.
+- Both usable from any page via a provider or portal.",3,FE3,frontend;ui,High,A9,
+Story,,A,A10 Shared UI: TimeAgo + UpvoteButton + Badge,"TimeAgo (Macedonian relative time), presentational UpvoteButton (count + active state, no API), Featured Badge.
+
+Acceptance criteria:
+- TimeAgo renders MK relative strings.
+- UpvoteButton shows count + active/inactive, emits onClick prop.
+- Badge renders Featured/label variants.",3,FE4,frontend;ui,High,A10,
+Epic,Forums & Feed,,Forums & Feed,"Wire real read API for the feed, forum pages and sidebar; remove hardcoded/mock data.",,,forums,High,B,
+Story,,B,B1 FeedController@index,"Implement cross-forum feed with sort (Trending/Popular/New/Featured), time window, pagination.
+
+Acceptance criteria:
+- GET /api/feed returns paginated threads per A4.
+- Supports sort and time-range query params.
+- Trending is default; matches spec fields.",5,BE1,backend,High,B1,A4
+Story,,B,B2 Dynamic sidebar forum sorting,"ForumController: sort sidebar forums by activity in last 7 days; school forums grouped by city.
+
+Acceptance criteria:
+- GET /api/forums orders topic forums by recent activity.
+- School forums grouped by city, alphabetical within city.
+- Response follows A4 shape.",3,BE2,backend,High,B2,A4
+Story,,B,B3 Pagination for ForumController@show,"Add pagination to threads in a single forum.
+
+Acceptance criteria:
+- GET /api/p/{slug} returns paginated threads with meta.
+- Respects sort/time filters.",2,BE2,backend,Medium,B3,A4
+Story,,B,B4 Feed thread card component,"Presentational card: forum icon/name, author+avatar, time, title, body preview, comment+upvote counts, Featured tag.
+
+Acceptance criteria:
+- Renders all spec fields from props.
+- Uses Avatar (A7), TimeAgo/Badge (A10).
+- No direct API calls.",3,FE1,frontend;ui,High,B4,"A7,A10"
+Story,,B,B5 Forum page presentational,"ForumBanner + ForumFilters (sort/time dropdowns emit state) + thread list using B4.
+
+Acceptance criteria:
+- Banner shows icon/name/description from props.
+- Filters emit selected sort/time via callbacks.
+- Empty state rendered when no threads.",3,FE2,frontend;ui,High,B5,B4
+Story,,B,B6 Wire sidebar + feed to API,"Connect sidebar (Thematic/School) and /feed to /api/forums and /api/feed; filters drive query params; loading/empty/error states.
+
+Acceptance criteria:
+- Sidebar and feed render live data.
+- Changing filters refetches with correct params.
+- Loading, empty and error states handled.",5,FS,frontend;integration,High,B6,"A6,B1,B2,B4"
+Story,,B,B7 Wire forum page,"Connect /p/[slug] to ForumController@show with pagination + filters.
+
+Acceptance criteria:
+- Forum page renders live threads.
+- Pagination and filters work end-to-end.",3,BE1,frontend;integration,High,B7,"B5,B3"
+Epic,Thread creation,,Thread creation,"Create new discussions: POST /threads, the /new page, rich text editor and attachments.",,,threads,High,C,
+Story,,C,C1 POST /api/threads,"Auth-only thread creation with validation.
+
+Acceptance criteria:
+- forum_id required and must exist; title 3-200 chars; body optional.
+- Returns created thread as A4 resource.
+- Rejects unauthenticated requests (401).",5,BE1,backend,High,C1,"A4,A5"
+Story,,C,C2 Attach media to thread + DOC support,"Link uploaded media to a thread via thread_attachments (image/file/link/video); extend MediaController mimetypes to allow DOC/DOCX.
+
+Acceptance criteria:
+- Thread create accepts attachment references and persists thread_attachments.
+- MediaController accepts DOC/DOCX (size limit per spec 25MB).
+- Attachment type stored (image/file/link/video).",5,BE2,backend,High,C2,C1
+Story,,C,C3 /new page UI,"Forum picker (Topic/School grouped, shows forum description), title field, validation states, submit disabled until valid.
+
+Acceptance criteria:
+- Forum picker lists grouped forums with description preview.
+- Title validation (3-200) shown inline.
+- Submit disabled until form valid.",5,FE3,frontend;ui,High,C3,A6
+Story,,C,C4 Rich text editor (TipTap),"Clean SSR-safe TipTap editor: Bold, Italic, ordered/bullet lists, link, code block, quote; outputs HTML/JSON.
+
+Acceptance criteria:
+- Toolbar with all listed formatting actions.
+- No SSR/hydration errors in Next.js.
+- Emits serializable content via prop.",5,FE4,frontend;ui,High,C4,
+Story,,C,C5 Editor attachments UI,"Image upload, file (PDF/DOC) upload, link insert with preview placeholder, video embed (YouTube/TikTok) by URL.
+
+Acceptance criteria:
+- Users can attach images and files in the editor.
+- Link and video-embed insertion UI present.
+- Emits attachment metadata for submit.",5,FE1,frontend;ui,High,C5,C4
+Story,,C,C6 Wire /new submit,"Connect /new to POST /api/threads + media upload; redirect to created thread.
+
+Acceptance criteria:
+- Submitting creates a thread and attachments via API.
+- On success redirects to the new thread detail page.
+- Validation/errors surfaced to the user.",3,FS,frontend;integration,High,C6,"C1,C2,C3,C4"
+Epic,Thread detail & comments,,Thread detail & comments,"Thread detail page and full comment system (nested replies, sorting).",,,comments,High,D,
+Story,,D,D1 ThreadController@show upgrade,"Increment views; return full post + nested comments; comment sort param (Best/Newest/Oldest).
+
+Acceptance criteria:
+- View count increments on show.
+- Returns nested comment tree per A4.
+- Supports sort=best|newest|oldest.",3,BE1,backend,High,D1,A4
+Story,,D,D2 Comment create,"POST comment (top-level + reply via parent_id) with validation; returns resource.
+
+Acceptance criteria:
+- Auth-only; content required.
+- parent_id optional; validated to belong to same thread.
+- Returns created comment as A4 resource.",5,BE2,backend,High,D2,"A4,A5"
+Story,,D,D3 Thread detail page,"/p/[slug]/[id]: main post (rich content + attachments), author block (avatar, pseudonym + school), meta (time, views, counts).
+
+Acceptance criteria:
+- Renders post content and attachments.
+- Author block shows avatar + pseudonym + school.
+- Meta row shows time, views, comment and upvote counts.",5,FE2,frontend;ui,High,D3,"A7,A10"
+Story,,D,D4 Comment tree component,"Nested replies with indentation + left line, collapse/expand, per-comment action row, Best/Newest/Oldest header.
+
+Acceptance criteria:
+- Renders arbitrarily nested replies with visual indentation.
+- Collapse/expand branches.
+- Sort header emits selected order.",5,FE3,frontend;ui,High,D4,"A7,A8,A10"
+Story,,D,D5 Comment composer + reply box,"Add-a-comment field and per-comment reply box with Comment button.
+
+Acceptance criteria:
+- Top-level comment box present.
+- Reply box toggles under a comment.
+- Emits content + parent_id via callback.",3,FE4,frontend;ui,High,D5,A9
+Story,,D,D6 Wire thread detail + comments,"Connect thread detail + comment/reply posting to API; optimistic insert; comment sort.
+
+Acceptance criteria:
+- Detail page renders live data incl. view increment.
+- Posting comment/reply updates the tree optimistically.
+- Sort control refetches/reorders.",5,FS,frontend;integration,High,D6,"D1,D2,D3,D4,D5"
+Epic,Upvote,,Upvote,"Upvote-only voting with toggle for threads and comments.",,,upvote,Medium,E,
+Story,,E,E1 Vote toggle endpoints,"POST toggle vote for thread and comment; returns new count + has_voted; prevents double vote; auth-only.
+
+Acceptance criteria:
+- Toggling adds/removes a vote (idempotent per user).
+- Returns updated count and has_voted.
+- Unauthenticated returns 401.",5,BE1,backend,Medium,E1,"A1,A5"
+Story,,E,E2 Vote fields in resources,"Include upvotes_count and has_voted in Thread/Comment resources.
+
+Acceptance criteria:
+- Both resources expose upvotes_count.
+- has_voted reflects current user.",2,BE2,backend,Medium,E2,"A4,A1"
+Story,,E,E3 Wire UpvoteButton,"Connect UpvoteButton (thread + comment) with optimistic toggle + auth gate (login prompt).
+
+Acceptance criteria:
+- Clicking toggles vote optimistically, reverts on error.
+- Unauthenticated users are prompted to log in.
+- Count stays in sync with server.",3,BE1,frontend;integration,Medium,E3,"E1,E2,A10,D6,B6"
+Epic,Edit & Delete,,Edit & Delete,"Author edit/delete for threads and comments with policies and tombstones.",,,edit-delete,Medium,F,
+Story,,F,F1 Thread update/delete + policy,"PUT + DELETE with ThreadPolicy (author only); set edited_at; soft delete.
+
+Acceptance criteria:
+- Only author can edit/delete (policy enforced).
+- edited_at set on update.
+- Soft delete leaves comments intact with tombstone flag.",5,BE1,backend,Medium,F1,"A3,C1"
+Story,,F,F2 Comment update/delete + policy,"PUT + DELETE with CommentPolicy; edited_at; soft delete; tombstone (user vs moderator).
+
+Acceptance criteria:
+- Only author can edit/delete own comment.
+- edited_at set on update.
+- Deleted comment shows tombstone; replies remain.",5,BE2,backend,Medium,F2,"A3,D2"
+Story,,F,F3 Three-dots actions UI,"Edit/Delete/Report/Share menu; edit-in-place forms for thread & comment; (уредено) badge; tombstone rendering.
+
+Acceptance criteria:
+- Menu shows contextual actions.
+- Edit-in-place saves via callback.
+- Edited badge and tombstone states render.",5,FE1,frontend;ui,Medium,F3,"A8,D3,D4"
+Story,,F,F4 Wire edit/delete,"Connect edit/delete for thread & comment + policies (hide actions for non-authors).
+
+Acceptance criteria:
+- Edit/delete calls hit API and update UI.
+- Non-authors do not see edit/delete.
+- Errors surfaced via toast.",3,FS,frontend;integration,Medium,F4,"F1,F2,F3,D6"
+Epic,Search,,Search,"Full search across threads and comments with filters and highlighting.",,,search,Medium,G,
+Story,,G,G1 Search endpoint,"Search threads (title/body) + comments; relevance/time filters; pagination; matched snippet/highlight data.
+
+Acceptance criteria:
+- GET /api/search returns paginated results per A4.
+- Supports relevance (Recent/Popular/Featured/New) and time filters.
+- Returns snippet/highlight info.",8,BE2,backend,Medium,G1,A4
+Story,,G,G2 /search page UI,"Search bar with clear, live results, highlighted matches, relevance + time filter dropdowns, result cards.
+
+Acceptance criteria:
+- Live-updating results as user types.
+- Matched keywords highlighted.
+- Both filter dropdowns present with spec defaults.",5,FE2,frontend;ui,Medium,G2,B4
+Story,,G,G3 Wire header + search page,"Connect header search + /search live search (debounced) to API; highlight.
+
+Acceptance criteria:
+- Header search routes to /search.
+- Debounced live queries hit API.
+- Results/highlight render live.",3,FS,frontend;integration,Medium,G3,"G1,G2"
+Epic,Recent comments,,Recent comments,"Platform-wide recent comments page.",,,recent,Low,H,
+Story,,H,H1 Recent comments endpoint,"Latest comments across platform (author, forum, thread, time); pagination.
+
+Acceptance criteria:
+- GET /api/recent returns paginated latest comments.
+- Each item includes author, forum, thread ref, time.",3,BE1,backend,Low,H1,A4
+Story,,H,H2 /recent page UI,"Chronological list; each shows author/forum/thread/text/time/actions.
+
+Acceptance criteria:
+- Renders reverse-chronological list from props.
+- Each row links to its thread.",3,FE3,frontend;ui,Low,H2,"A7,A10"
+Story,,H,H3 Wire /recent + sidebar link,"Connect /recent to API and add sidebar Recent link.
+
+Acceptance criteria:
+- /recent renders live data.
+- Sidebar Recent entry navigates to /recent.",2,BE1,frontend;integration,Low,H3,"H1,H2"
+Epic,Report,,Report,"Report content to moderators.",,,report,Medium,I,
+Story,,I,I1 Report create endpoint,"Use existing reports table; reason enum + other text; polymorphic thread/comment; auth.
+
+Acceptance criteria:
+- POST /api/reports stores report with reason + optional detail.
+- Polymorphic to thread or comment.
+- Auth-only.",3,BE2,backend,Medium,I1,A4
+Story,,I,I2 Report modal UI,"Reason radio (Spam/Insult/Misinfo/Age/Other) + optional detail; success toast.
+
+Acceptance criteria:
+- Modal with reason options + optional text.
+- Validates a reason is chosen.
+- Shows success toast on submit.",3,FE4,frontend;ui,Medium,I2,"A9,F3"
+Story,,I,I3 Wire report modal,"Connect report modal to API from three-dots menu.
+
+Acceptance criteria:
+- Report action opens modal and submits to API.
+- Success/error feedback shown.",2,FS,frontend;integration,Medium,I3,"I1,I2,F4"
+Epic,Follow thread,,Follow thread,"Follow/unfollow a thread (visual in MVP).",,,follow,Low,J,
+Story,,J,J1 Follow endpoints,"Follow/unfollow thread; is_following in thread resource.
+
+Acceptance criteria:
+- POST follow / DELETE unfollow, auth-only.
+- Thread resource exposes is_following for current user.",3,BE1,backend,Low,J1,"A2,A5"
+Story,,J,J2 Follow button UI,"Follow button on thread detail with toggle states.
+
+Acceptance criteria:
+- Shows Follow/Following states.
+- Emits toggle via callback.",2,FE1,frontend;ui,Low,J2,D3
+Story,,J,J3 Wire follow button,"Connect follow button to API.
+
+Acceptance criteria:
+- Toggling calls follow/unfollow endpoint.
+- State reflects server, reverts on error.",1,BE1,frontend;integration,Low,J3,"J1,J2,D6"
+Epic,Mentions,,Mentions,"@ mentions with autocomplete and highlighted rendering.",,,mentions,Low,K,
+Story,,K,K1 User search endpoint,"Endpoint for @autocomplete by username prefix.
+
+Acceptance criteria:
+- GET /api/users/search?q= returns matching usernames + avatars.
+- Limited/paginated result set.",3,BE2,backend,Low,K1,A4
+Story,,K,K2 Parse & store mentions,"Parse mentions on thread/comment save into mentions table; return mention data for rendering.
+
+Acceptance criteria:
+- On save, @username tokens resolved to users and stored.
+- Response includes mention data for frontend rendering.",5,BE1,backend,Low,K2,"C1,D2"
+Story,,K,K3 Mention autocomplete in editor,"@ trigger dropdown in editor + colored mention rendering.
+
+Acceptance criteria:
+- Typing @ shows autocomplete from user search.
+- Selected mention inserted and rendered in a distinct color.",5,FE4,frontend;ui,Low,K3,"C4,K1"
+Story,,K,K4 Wire mentions,"Connect mention autocomplete + persistence.
+
+Acceptance criteria:
+- Autocomplete queries API live.
+- Mentions persist and render on saved content.",2,FS,frontend;integration,Low,K4,"K1,K2,K3"
+Epic,Moderation & Admin,,Moderation & Admin,"Admin panel and manual moderation (reports queue, actions, sanctions, appeals).",,,moderation,Medium,L,
+Story,,L,L1 Roles + admin gate,"users.type (user/moderator/admin); admin gate/middleware; seed an admin user.
+
+Acceptance criteria:
+- Role stored on users and enforced by middleware/gate.
+- Admin routes reject non-admins (403).
+- Seeder creates an admin account.",3,BE1,backend,Medium,L1,A5
+Story,,L,L2 Reports list + detail (admin),"Admin endpoints: reports sorted by time/severity, with content context.
+
+Acceptance criteria:
+- GET reports list paginated, sortable.
+- Detail returns reported content with context.
+- Admin-only.",5,BE1,backend,Medium,L2,"I1,L1"
+Story,,L,L3 Moderation actions,"Ignore report / remove content (mod tombstone) / remove+warn / ban user; write sanctions.
+
+Acceptance criteria:
+- Actions update report status and content state.
+- Removal sets moderator tombstone.
+- Ban/warn writes a sanctions record.",8,BE2,backend,Medium,L3,"L2,F1,F2"
+Story,,L,L4 User history + sanctions/appeals,"User action history + sanctions/appeals endpoints (list sanctions, submit/resolve appeal).
+
+Acceptance criteria:
+- List sanctions per user.
+- Create appeal for a sanction; admin resolve endpoint.
+- History reflects moderation actions.",5,BE2,backend,Medium,L4,L3
+Story,,L,L5 Admin reports queue UI,"Admin panel: reports queue list + filters (admin-gated route).
+
+Acceptance criteria:
+- Lists reports with status/severity/time.
+- Filter controls present.
+- Route visible only to admins.",5,FE2,frontend;ui,Medium,L5,A8
+Story,,L,L6 Admin report detail UI,"Report detail view with content context + action buttons (ignore/remove/warn/ban).
+
+Acceptance criteria:
+- Shows reported content in context.
+- Action buttons for each moderation action.
+- Confirmation for destructive actions.",5,FE3,frontend;ui,Medium,L6,L5
+Story,,L,L7 Admin user history UI,"User history view + sanctions list + appeal review UI.
+
+Acceptance criteria:
+- Shows a user's moderation history and sanctions.
+- Appeal review controls present.",5,FE1,frontend;ui,Medium,L7,L5
+Story,,L,L8 Wire admin panel,"Connect admin panel to endpoints + route guard (admin only).
+
+Acceptance criteria:
+- All admin views render live data.
+- Actions call endpoints and refresh state.
+- Non-admins cannot access /admin.",5,FS,frontend;integration,Medium,L8,"L2,L3,L4,L5,L6,L7"
+Epic,Hardening & polish,,Hardening & polish,"Rate limiting, GDPR delete, responsive shell, i18n, lazy loading and remaining polish.",,,hardening,Low,M,
+Story,,M,M1 Rate limiting,"Throttle register/login, thread create, comment create.
+
+Acceptance criteria:
+- Throttle middleware on auth, thread and comment endpoints.
+- Returns 429 with clear message when exceeded.",3,BE1,backend,Low,M1,"C1,D2"
+Story,,M,M2 Account deletion (GDPR),"Endpoint to delete user + their data; confirm cascade.
+
+Acceptance criteria:
+- Authenticated user can delete account.
+- Related data removed/anonymized per policy.
+- Session invalidated after deletion.",5,BE2,backend,Low,M2,A5
+Story,,M,M3 Virus scan on upload,"Virus scan hook (ClamAV/external) before media is published.
+
+Acceptance criteria:
+- Uploaded files scanned before becoming available.
+- Infected files rejected with error.",5,BE2,backend,Low,M3,C2
+Story,,M,M4 Mobile-responsive app shell,"Hamburger + collapsible sidebar, responsive header.
+
+Acceptance criteria:
+- Sidebar collapses to hamburger on mobile.
+- Header and feed usable at mobile breakpoints.
+- No horizontal overflow.",8,FE1,frontend;ui,Low,M4,B6
+Story,,M,M5 Legal/guidelines pages,"Terms of Service, Privacy Policy, Community Guidelines pages + links from onboarding/footer.
+
+Acceptance criteria:
+- Three pages exist with content.
+- Linked from onboarding and footer.",3,FE2,frontend;ui,Low,M5,
+Story,,M,M6 i18n polish,"html lang=mk, translate remaining EN strings, remove dev stub routes (/, /imeNaRuta).
+
+Acceptance criteria:
+- <html lang=""mk"">.
+- Auth callback and root strings in Macedonian.
+- Stub routes removed or redirected to /feed.",3,FE3,frontend;ui,Low,M6,
+Story,,M,M7 Lazy load + infinite scroll,"Lazy loading images/video + infinite scroll/pagination UI on feed/forum/search.
+
+Acceptance criteria:
+- Images/video lazy-loaded.
+- Feed/forum/search paginate or infinite-scroll.",5,FE4,frontend;ui,Low,M7,B6
+Story,,M,M8 Apple OAuth,"Configure Apple provider + enable button (if Apple developer account available).
+
+Acceptance criteria:
+- Apple login configured in services + Socialite.
+- Apple button enabled and functional end-to-end.",3,FS,frontend;integration,Low,M8,
