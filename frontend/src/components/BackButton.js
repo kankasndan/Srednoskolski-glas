@@ -9,7 +9,7 @@ import { hasNavigatedInApp } from "@/lib/navHistory";
 
 config.autoAddCss = false;
 
-export default function AuthBackButton({ href }) {
+export default function BackButton({ href, label }) {
   const router = useRouter();
 
   function handleBack() {
@@ -33,10 +33,19 @@ export default function AuthBackButton({ href }) {
     <button
       type="button"
       onClick={handleBack}
-      aria-label="Назад"
-      className="flex size-10 items-center justify-center rounded-full text-[#0A0A0A] transition-colors hover:bg-gray-100"
+      aria-label={label ? undefined : "Назад"}
+      className={`flex h-10 cursor-pointer items-center justify-center rounded-full transition-colors ${
+        label
+          ? "gap-2 text-[#582FF5] hover:text-black"
+          : "w-10 text-[#0A0A0A] hover:bg-gray-100"
+      }`}
     >
       <FontAwesomeIcon icon={faChevronLeft} className="h-4" />
+      {label && (
+        <span className="font-[family-name:var(--font-manrope)] text-[14px] font-medium leading-none">
+          {label}
+        </span>
+      )}
     </button>
   );
 }

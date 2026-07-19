@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function CommunityBanner() {
   return (
@@ -23,15 +24,15 @@ export default function CommunityBanner() {
         </div>
       </div>
 
-      <button
-        type="button"
+      <Link
+        href="/new"
         className="flex h-12 w-[268px] shrink-0 items-center justify-center gap-3 rounded-2xl bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0]"
       >
         <Image src="/plus.svg" alt="" width={24} height={24} className="size-6" />
         <span className="flex h-[19px] w-[168px] items-center leading-none">
           Започни нова дискусија
         </span>
-      </button>
+      </Link>
     </section>
   );
 }

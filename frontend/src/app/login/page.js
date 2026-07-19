@@ -1,5 +1,5 @@
 import AuthHero from "@/components/AuthHero";
-import AuthBackButton from "@/components/AuthBackButton";
+import BackButton from "@/components/BackButton";
 import AuthMasthead from "@/components/AuthMasthead";
 import SocialAuthButtons from "@/components/SocialAuthButtons";
 
@@ -9,7 +9,7 @@ export default function LogIn() {
       <AuthHero />
 
       <div className="relative flex w-full flex-col px-6 py-8 lg:w-1/2 lg:px-16">
-        <AuthBackButton />
+        <BackButton />
 
         <div className="mx-auto flex w-full max-w-122 flex-1 flex-col justify-center py-8 2xl:max-w-[560px]">
           <AuthMasthead
