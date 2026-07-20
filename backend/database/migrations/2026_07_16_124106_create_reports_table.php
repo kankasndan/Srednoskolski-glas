@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('other_reason')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->enum('source', ['ai', 'human'])->default('human');
+            $table->decimal('ai_confidence', 5, 2)->nullable();
+            $table->text('ai_reasoning')->nullable();
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
