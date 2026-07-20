@@ -1,52 +1,18 @@
-import Image from "next/image";
+"use client";
 
-const THREADS = [
-  {
-    id: 1,
-    tags: [
-      { label: "марко_2026", icon: "/Generic avatar.svg" },
-      { label: "Гим. Орце Николов", icon: "/icons/uciliste.svg" },
-    ],
-    title: "Кои се најдобрите ресурси за подготовка на матура по математика?",
-    excerpt: "Здраво. Барам совети за најдобри книги, видеа и онлајн материјали...",
-    postedAgo: "пред 2ч.",
-    comments: 42,
-    votes: 87,
-  },
-  {
-    id: 2,
-    tags: [
-      { label: "гоце_2027", icon: "/Generic avatar.svg" },
-      { label: "Гим. Никола Карев", icon: "/icons/uciliste.svg" },
-    ],
-    title: "Дали матура по странски јазик е тешка ако имам B2?",
-    excerpt: "Имам Cambridge B2 сертификат и размислувам да земам англиски на матура...",
-    postedAgo: "пред 3д.",
-    comments: 15,
-    votes: 28,
-    image: "/thread-placeholder.png",
-  },
-  {
-    id: 3,
-    tags: [
-      { label: "Истакнато", tone: "highlight" },
-      { label: "ана_матуранка", icon: "/Generic avatar.svg" },
-      { label: "СУГС Михајло Пупин", icon: "/icons/uciliste.svg" },
-    ],
-    title: "[GUIDE] Како се справив со матурата по македонски - мојот метод",
-    excerpt: "Завршив матура минатата година со 4.95. Сакам да го споделам начинот на кој...",
-    postedAgo: "пред 5д.",
-    comments: 89,
-    votes: 312,
-  },
-];
+import Image from "next/image";
+import Link from "next/link";
+import { FORUM_THREADS } from "@/lib/threads";
 
 function ForumTag({ tag }) {
   return (
     <span
-      className={`flex h-6 shrink-0 items-center gap-1 rounded-md px-2 font-[family-name:var(--font-manrope)] text-[12px] font-bold leading-none text-black ${
-        tag.tone === "highlight" ? "bg-[#F0E92F]" : "bg-[#F5F5F5]"
+      className={`flex h-6 shrink-0 items-center rounded-[6px] px-2 font-[family-name:var(--font-roboto)] text-[12px] font-normal leading-4 text-black ${
+        tag.tone === "highlight"
+          ? "bg-[#F0E92F] border-[0.5px] border-[#CCCCCC]"
+          : "bg-[#E6E6E6] border-[0.5px] border-[#CCCCCC]"
       }`}
+      style={{ gap: tag.icon ? "8px" : undefined }}
     >
       {tag.icon ? (
         <span className="relative size-4 shrink-0 overflow-hidden">
@@ -64,64 +30,89 @@ function ForumTag({ tag }) {
   );
 }
 
-function ForumActionButton({ icon, label, count }) {
+function ForumActionButton({ icon, label, count, noHover = false }) {
   return (
     <button
       type="button"
       aria-label={label}
-      className="flex h-10 w-24 items-center justify-center gap-4 rounded-[10px] border border-[#CCCCCC] px-4 py-2 text-[#582FF5] transition-colors hover:border-[#582FF5] hover:bg-[#F5F2FF]"
+      className={`flex h-10 w-24 items-center justify-center gap-4 rounded-[12px] border border-[#CCCCCC] bg-white px-4 py-2 opacity-80 transition-all ${
+        noHover
+          ? ""
+          : "hover:border-[#582FF5] hover:bg-[#F5F2FF] hover:opacity-100 hover:shadow-sm cursor-pointer"
+      }`}
     >
-      <Image src={icon} alt="" width={24} height={24} className="size-6" />
-      <span className="flex h-[19px] min-w-[17px] items-center justify-center font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none tracking-normal text-[#595959]">
+      <Image src={icon} alt="" width={24} height={24} className="size-6 shrink-0" />
+      <span className="min-w-0 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-[19px] text-black">
         {count}
       </span>
     </button>
   );
 }
 
+
+
 function ForumThread({ thread }) {
-  const articleClassName = thread.image
-    ? "relative flex w-[990px] max-w-full flex-col gap-6 bg-transparent pb-8 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]"
-    : "relative flex w-[990px] max-w-full flex-col gap-6 bg-transparent pt-6 pb-7 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]";
+  const metadataRow = (
+    <div className="flex max-w-full flex-wrap items-center gap-2 overflow-hidden">
+      {thread.tags.map((tag) => (
+        <ForumTag key={`${thread.id}-${tag.label}`} tag={tag} />
+      ))}
+      <span className="shrink-0 font-[family-name:var(--font-roboto)] text-[12px] font-normal leading-4 text-[#595959]">
+        {thread.postedAgo}
+      </span>
+    </div>
+  );
 
-  return (
-    <article className={articleClassName}>
-      {thread.image ? (
-        <Image
-          src={thread.image}
-          alt=""
-          width={990}
-          height={421}
-          className="h-[421px] w-full rounded-t-3xl object-cover"
-          priority
-        />
-      ) : null}
+  const textContent = (
+    <div className="flex flex-col gap-2">
+      <Link
+        href={`/feed/thread/${thread.id}`}
+        className="overflow-hidden text-ellipsis whitespace-nowrap font-[family-name:var(--font-manrope)] text-[20px] font-bold leading-[27px] tracking-normal text-black transition-colors hover:text-[#582FF5]"
+      >
+        {thread.title}
+      </Link>
+      <p className="overflow-hidden text-ellipsis whitespace-nowrap font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
+        {thread.excerpt}
+      </p>
+    </div>
+  );
 
-      <div className="flex w-full items-start justify-between gap-8">
-        <div className="flex h-[97px] w-[681px] max-w-[calc(100%-128px)] shrink-0 flex-col gap-4">
-          <div className="flex h-6 max-w-full items-center gap-2 overflow-hidden">
-            {thread.tags.map((tag) => (
-              <ForumTag key={`${thread.id}-${tag.label}`} tag={tag} />
-            ))}
-            <span className="shrink-0 font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-none tracking-normal text-[#595959]">
-              {thread.postedAgo}
-            </span>
-          </div>
-
-          <div className="flex max-w-full flex-col gap-2">
-            <h3 className="overflow-hidden text-ellipsis whitespace-nowrap font-[family-name:var(--font-manrope)] text-[20px] font-bold leading-none tracking-normal text-black">
-              {thread.title}
-            </h3>
-            <p className="overflow-hidden text-ellipsis whitespace-nowrap font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
-              {thread.excerpt}
-            </p>
-          </div>
+  if (thread.image) {
+    return (
+      <article className="relative flex w-full max-w-full flex-col gap-4 bg-transparent pb-6 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]">
+        <div className="flex flex-col gap-4">
+          {metadataRow}
+          {textContent}
         </div>
-
-        <div className="flex w-24 shrink-0 flex-col gap-2">
+        <Link href={`/feed/thread/${thread.id}`} className="block">
+          <Image
+            src={thread.image}
+            alt=""
+            width={990}
+            height={421}
+            className="h-[421px] w-full rounded-[24px] object-cover transition-opacity hover:opacity-90"
+            priority
+          />
+        </Link>
+        <div className="flex flex-row items-center justify-end gap-2">
+          <ForumActionButton icon="/eye.svg" label="Прегледи" count={thread.views} noHover={true} />
           <ForumActionButton icon="/chat-1-line.svg" label="Коментари" count={thread.comments} />
           <ForumActionButton icon="/Chevrons up.svg" label="Гласај нагоре" count={thread.votes} />
         </div>
+      </article>
+    );
+  }
+
+  return (
+    <article className="relative flex w-full max-w-full items-start justify-between gap-8 bg-transparent py-6 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]">
+      <div className="flex min-w-0 flex-1 flex-col gap-4">
+        {metadataRow}
+        {textContent}
+      </div>
+      <div className="flex shrink-0 flex-col gap-2">
+        <ForumActionButton icon="/eye.svg" label="Прегледи" count={thread.views} noHover={true} />
+        <ForumActionButton icon="/chat-1-line.svg" label="Коментари" count={thread.comments} />
+        <ForumActionButton icon="/Chevrons up.svg" label="Гласај нагоре" count={thread.votes} />
       </div>
     </article>
   );
@@ -130,9 +121,10 @@ function ForumThread({ thread }) {
 export default function ForumThreadList() {
   return (
     <div className="flex w-[990px] max-w-full flex-col gap-6" aria-label="Дискусии за државна матура">
-      {THREADS.map((thread) => (
+      {FORUM_THREADS.map((thread) => (
         <ForumThread key={thread.id} thread={thread} />
       ))}
     </div>
   );
 }
+

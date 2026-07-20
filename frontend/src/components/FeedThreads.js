@@ -1,82 +1,34 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useId, useState } from "react";
+import { FEED_THREAD_LIST } from "@/lib/threads";
 
 const SORT_OPTIONS = [
   { value: "trending", label: "Трендинг" },
+  { value: "popular", label: "Популарно" },
+  { value: "new", label: "Ново" },
+  { value: "featured", label: "Истакнато" },
 ];
 
 const TIME_FILTER_OPTIONS = [
+  { value: "today", label: "Денес" },
   { value: "week", label: "Оваа недела" },
   { value: "month", label: "Овој месец" },
-  { value: "six-months", label: "6 месеци" },
-  { value: "year", label: "1 година" },
+  { value: "year", label: "Оваа година" },
 ];
 
-const THREADS = [
-  {
-    tags: [
-      { label: "Државна матура", icon: "/icons/drzavna_matura.svg", iconZoom: true },
-      { label: "марко_2026", icon: "/Generic avatar.svg" },
-      { label: "Гим. Орце Николов", icon: "/icons/uciliste.svg" },
-    ],
-    title: "Кои се најдобрите ресурси за подготовка на матура по математика?",
-    excerpt: "Здраво на сите. Секој совет е добредојден...",
-    postedAgo: "пред 2ч.",
-    votes: 24,
-    comments: 8,
-  },
-  {
-    tags: [
-      { label: "Препорачано", tone: "highlight" },
-      { label: "Факултети", icon: "/icons/fakulteti.svg", iconZoom: true },
-      { label: "елена.к", icon: "/Generic avatar.svg" },
-      { label: "СУГС Михајло Пупин", icon: "/icons/uciliste.svg" },
-    ],
-    title: "Brainster Next vs ЕТФ - кој е подобар за софтверско инженерство?",
-    excerpt: "Размислувам помеѓу овие два факултета и ме интересира мислење на постари ученици...",
-    postedAgo: "пред 4ч.",
-    votes: 18,
-    comments: 11,
-  },
-  {
-    tags: [
-      { label: "Ментално здравје", icon: "/icons/mentalno_zdravje.svg", iconZoom: true },
-      { label: "анонимен_111", icon: "/Generic avatar.svg" },
-      { label: "Гим. Никола Карев", icon: "/icons/uciliste.svg" },
-    ],
-    title: "Како се справувате со стрес пред испити?",
-    excerpt: "Имам матура за два месеца и не можам да спијам нормално...",
-    postedAgo: "пред 1д.",
-    votes: 31,
-    comments: 14,
-  },
-  {
-    tags: [
-      { label: "СУГС Михајло Пупин", icon: "/icons/uciliste.svg" },
-      { label: "стефан_22", icon: "/Generic avatar.svg" },
-    ],
-    title: "Кога ќе се одржи екскурзијата за матуранти?",
-    excerpt: "Дали некој има информација...",
-    postedAgo: "пред 3д.",
-    votes: 9,
-    comments: 5,
-  },
-];
-
-const THREAD_LIST = Array.from({ length: 16 }, (_, index) => ({
-  ...THREADS[index % THREADS.length],
-  id: index,
-  image: index === 2 || index === 6 ? "/thread-placeholder.png" : null,
-}));
 
 function ThreadTag({ tag }) {
   return (
     <span
-      className={`flex h-6 shrink-0 items-center gap-1 rounded-md px-2 font-[family-name:var(--font-manrope)] text-[12px] font-bold leading-none text-black ${
-        tag.tone === "highlight" ? "bg-[#F0E92F]" : "bg-[#F5F5F5]"
+      className={`flex h-6 shrink-0 items-center rounded-[6px] px-2 font-[family-name:var(--font-roboto)] text-[12px] font-normal leading-4 text-black ${
+        tag.tone === "highlight"
+          ? "bg-[#F0E92F] border-[0.5px] border-[#CCCCCC]"
+          : "bg-[#E6E6E6] border-[0.5px] border-[#CCCCCC]"
       }`}
+      style={{ gap: tag.icon ? "8px" : undefined }}
     >
       {tag.icon ? (
         <span className="relative size-4 shrink-0 overflow-hidden">
@@ -98,81 +50,106 @@ function ThreadTag({ tag }) {
 
 function TimestampTag({ label }) {
   return (
-    <span className="flex h-6 w-[63px] shrink-0 items-center justify-center gap-2 rounded-md px-2 py-1 font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-4 tracking-normal text-[#595959]">
-      <span className="flex h-4 w-[47px] items-center gap-1 overflow-hidden whitespace-nowrap">{label}</span>
+    <span className="shrink-0 font-[family-name:var(--font-roboto)] text-[12px] font-normal leading-4 text-[#595959]">
+      {label}
     </span>
   );
 }
 
-function ActionButton({ icon, label, count }) {
+function ActionButton({ icon, label, count, onClick, noHover = false }) {
   return (
     <button
       type="button"
       aria-label={label}
-      className="flex h-12 w-24 items-center justify-center gap-4 rounded-2xl border border-[#CCCCCC] px-4 py-2 text-black opacity-80"
+      onClick={onClick}
+      className={`flex h-10 w-24 items-center justify-center gap-4 rounded-[12px] border border-[#CCCCCC] bg-white px-4 py-2 opacity-80 transition-all ${
+        noHover
+          ? ""
+          : "hover:border-[#582FF5] hover:bg-[#F5F2FF] hover:opacity-100 hover:shadow-sm cursor-pointer"
+      }`}
     >
-      <Image src={icon} alt="" width={24} height={24} className="size-6" />
-      <span className="flex h-[19px] w-[17px] items-center font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none tracking-normal">
+      <Image src={icon} alt="" width={24} height={24} className="size-6 shrink-0" />
+      <span className="min-w-0 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-[19px] text-black">
         {count}
       </span>
     </button>
   );
 }
 
+
+
 function ThreadItem({ thread }) {
-  const content = (
-    <div className="flex w-full items-start justify-between gap-8 px-0 py-0">
-      <div className="flex min-h-[97px] w-[681px] max-w-[calc(100%-128px)] shrink-0 flex-col gap-4">
-        <div className="flex h-6 max-w-full items-center gap-2 overflow-hidden">
-          {thread.tags.map((tag) => (
-            <ThreadTag key={`${thread.id}-${tag.label}`} tag={tag} />
-          ))}
-          <TimestampTag label={thread.postedAgo} />
-        </div>
-
-        <div className="flex min-h-[57px] w-[681px] max-w-full flex-col gap-2">
-          <h3 className="w-fit max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[family-name:var(--font-manrope)] text-[20px] font-bold leading-[27px] text-black">
-            {thread.title}
-          </h3>
-          <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
-            {thread.excerpt}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex h-[104px] w-24 shrink-0 flex-col gap-2">
-        <ActionButton icon="/Chevrons up.svg" label="Гласај нагоре" count={thread.votes} />
-        <ActionButton icon="/chat-1-line.svg" label="Коментари" count={thread.comments} />
-      </div>
+  const metadataRow = (
+    <div className="flex max-w-full flex-wrap items-center gap-2">
+      {thread.tags.map((tag) => (
+        <ThreadTag key={`${thread.id}-${tag.label}`} tag={tag} />
+      ))}
+      <TimestampTag label={thread.postedAgo} />
     </div>
+  );
+
+  const textContent = (
+    <div className="flex flex-col gap-2">
+      <Link
+        href={`/feed/thread/${thread.id}`}
+        className="overflow-hidden text-ellipsis whitespace-nowrap font-[family-name:var(--font-manrope)] text-[20px] font-bold leading-[27px] text-[#000000] transition-colors hover:text-[#582FF5]"
+      >
+        {thread.title}
+      </Link>
+      <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
+        {thread.excerpt}
+      </p>
+    </div>
+  );
+
+  const actionButtons = (
+    <>
+      <ActionButton icon="/eye.svg" label="Прегледи" count={thread.views} noHover={true} />
+      <ActionButton icon="/chat-1-line.svg" label="Коментари" count={thread.comments} />
+      <ActionButton icon="/Chevrons up.svg" label="Гласај нагоре" count={thread.votes} />
+    </>
   );
 
   if (thread.image) {
     return (
-      <article className="relative flex h-[574px] w-[990px] max-w-full flex-col overflow-hidden rounded-t-3xl bg-transparent after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]">
-        <Image
-          src={thread.image}
-          alt=""
-          width={990}
-          height={421}
-          className="h-[421px] w-full rounded-t-3xl object-cover"
-          priority={thread.id === 2}
-        />
-        <div className="px-0 pt-6 pb-8">{content}</div>
+      <article className="relative flex w-full max-w-full flex-col gap-4 bg-transparent pb-6 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]">
+        <div className="flex flex-col gap-4">
+          {metadataRow}
+          {textContent}
+        </div>
+        <Link href={`/feed/thread/${thread.id}`} className="block">
+          <Image
+            src={thread.image}
+            alt=""
+            width={990}
+            height={421}
+            className="h-[421px] w-full rounded-[24px] object-cover transition-opacity hover:opacity-90"
+            priority={thread.id === 2}
+          />
+        </Link>
+        <div className="flex flex-row items-center justify-end gap-2">
+          {actionButtons}
+        </div>
       </article>
     );
   }
 
   return (
-    <article className="relative flex h-40 w-[990px] max-w-full items-start justify-center rounded-3xl bg-transparent px-0 pt-6 pb-8 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]">
-      {content}
+    <article className="relative flex w-full max-w-full items-start justify-between gap-8 bg-transparent py-5 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]">
+      <div className="flex min-w-0 flex-1 flex-col gap-4">
+        {metadataRow}
+        {textContent}
+      </div>
+      <div className="flex shrink-0 flex-col gap-2">
+        {actionButtons}
+      </div>
     </article>
   );
 }
 
-function FeedSelect({ name, label, options, selected, isOpen, listboxId, textWidthClassName, onToggle, onSelect }) {
+function FeedSelect({ name, label, options, selected, isOpen, listboxId, onToggle, onSelect }) {
   return (
-    <div className="relative h-10 w-36 shrink-0">
+    <div className="relative h-10 w-40 shrink-0">
       <input type="hidden" name={name} value={selected.value} />
 
       <button
@@ -181,9 +158,11 @@ function FeedSelect({ name, label, options, selected, isOpen, listboxId, textWid
         aria-expanded={isOpen}
         aria-controls={listboxId}
         onClick={onToggle}
-        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-white py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black"
+        className={`flex h-10 w-40 cursor-pointer items-center justify-between gap-2 rounded-[12px] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors ${
+          isOpen ? "bg-[#CFE9ED]" : "bg-white border border-[#CCCCCC] hover:bg-[#F5F5F5]"
+        }`}
       >
-        <span className={`flex h-[19px] items-center ${textWidthClassName}`}>{selected.label}</span>
+        <span className="flex h-[19px] items-center overflow-hidden text-ellipsis whitespace-nowrap">{selected.label}</span>
         <Image
           src="/chevron-down.svg"
           alt=""
@@ -198,16 +177,18 @@ function FeedSelect({ name, label, options, selected, isOpen, listboxId, textWid
           id={listboxId}
           role="listbox"
           aria-label={label}
-          className="absolute left-0 top-12 z-20 flex w-36 flex-col overflow-hidden rounded-[12px] bg-white py-2 shadow-[0_12px_24px_rgba(88,47,245,0.14)]"
+          className="absolute left-0 top-12 z-20 flex w-40 flex-col overflow-hidden rounded-[12px] border border-[#CCCCCC] bg-white shadow-[0_12px_24px_rgba(88,47,245,0.14)]"
         >
-          {options.map((option) => (
+          {options.map((option, idx) => (
             <button
               key={option.value}
               type="button"
               role="option"
               aria-selected={selected.value === option.value}
               onClick={() => onSelect(option)}
-              className="flex h-10 w-full items-center px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#F5F5F5]"
+              className={`flex h-10 w-full items-center justify-center px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#CFE9ED]/50 ${
+                idx < options.length - 1 ? "border-b border-[#CCCCCC]/60" : ""
+              } ${selected.value === option.value ? "bg-[#CFE9ED]/30" : ""}`}
             >
               {option.label}
             </button>
@@ -223,7 +204,7 @@ export default function FeedThreads() {
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
   const [selectedSort, setSelectedSort] = useState(SORT_OPTIONS[0]);
-  const [selectedTimeFilter, setSelectedTimeFilter] = useState(TIME_FILTER_OPTIONS[0]);
+  const [selectedTimeFilter, setSelectedTimeFilter] = useState(TIME_FILTER_OPTIONS[1]); // Default to "Оваа недела"
 
   const selectSortOption = (option) => {
     setSelectedSort(option);
@@ -235,9 +216,44 @@ export default function FeedThreads() {
     setOpenSelect(null);
   };
 
+  // Perform dynamic filtering and sorting
+  const filteredAndSortedThreads = FEED_THREAD_LIST.filter((thread) => {
+    const age = thread.ageInDays;
+    if (selectedTimeFilter.value === "today") {
+      return age === 0;
+    }
+    if (selectedTimeFilter.value === "week") {
+      return age <= 7;
+    }
+    if (selectedTimeFilter.value === "month") {
+      return age <= 30;
+    }
+    if (selectedTimeFilter.value === "year") {
+      return age <= 365;
+    }
+    return true;
+  }).sort((a, b) => {
+    if (selectedSort.value === "popular") {
+      return b.votes - a.votes;
+    }
+    if (selectedSort.value === "new") {
+      if (a.ageInDays !== b.ageInDays) {
+        return a.ageInDays - b.ageInDays;
+      }
+      return b.id - a.id;
+    }
+    if (selectedSort.value === "featured") {
+      const aFeatured = a.tags.some((t) => t.tone === "highlight" || t.label === "Препорачано") ? 1 : 0;
+      const bFeatured = b.tags.some((t) => t.tone === "highlight" || t.label === "Препорачано") ? 1 : 0;
+      return bFeatured - aFeatured;
+    }
+    // "trending": combined sorting by score
+    return (b.votes + b.comments) - (a.votes + a.comments);
+  });
+
   return (
     <section className="flex w-[990px] max-w-full flex-col gap-8">
-      <div className="flex h-10 w-[288px] self-end">
+      <div className="flex h-10 gap-2 self-end">
         <FeedSelect
           name="sort"
           label="Сортирај дискусии"
@@ -245,7 +261,6 @@ export default function FeedThreads() {
           selected={selectedSort}
           isOpen={openSelect === "sort"}
           listboxId={sortListboxId}
-          textWidthClassName="w-[67px]"
           onToggle={() => setOpenSelect((current) => (current === "sort" ? null : "sort"))}
           onSelect={selectSortOption}
         />
@@ -256,16 +271,21 @@ export default function FeedThreads() {
           selected={selectedTimeFilter}
           isOpen={openSelect === "time"}
           listboxId={timeListboxId}
-          textWidthClassName="w-[89px]"
           onToggle={() => setOpenSelect((current) => (current === "time" ? null : "time"))}
           onSelect={selectTimeFilterOption}
         />
       </div>
 
       <div className="flex w-[990px] max-w-full flex-col gap-6 bg-transparent" aria-label="Дискусии">
-        {THREAD_LIST.map((thread) => (
-          <ThreadItem key={thread.id} thread={thread} />
-        ))}
+        {filteredAndSortedThreads.length > 0 ? (
+          filteredAndSortedThreads.map((thread) => (
+            <ThreadItem key={thread.id} thread={thread} />
+          ))
+        ) : (
+          <div className="flex h-40 w-full items-center justify-center rounded-[12px] border border-[#CCCCCC]/40 bg-white font-[family-name:var(--font-manrope)] text-[16px] font-medium text-[#595959]">
+            Нема пронајдено дискусии за избраниот период.
+          </div>
+        )}
       </div>
     </section>
   );
