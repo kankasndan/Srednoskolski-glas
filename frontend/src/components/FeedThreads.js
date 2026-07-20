@@ -130,7 +130,7 @@ function ActionButton({ icon, label, count }) {
 
 function ThreadItem({ thread }) {
   const content = (
-    <div className="flex w-full items-start justify-between gap-8 px-0 py-0">
+    <div className="flex w-full items-start justify-between gap-8 cursor-pointer hover:bg-gray-50 p-4 rounded-3xl">
       <div className="flex min-h-[97px] w-[681px] max-w-[calc(100%-128px)] shrink-0 flex-col gap-4">
         <div className="flex h-6 max-w-full items-center gap-2 overflow-hidden">
           {thread.tags.map((tag) => (
@@ -208,7 +208,7 @@ function FeedSelect({
         aria-expanded={isOpen}
         aria-controls={listboxId}
         onClick={onToggle}
-        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-white py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black"
+        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-gray-100 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black"
       >
         <span className={`flex h-[19px] items-center ${textWidthClassName}`}>
           {selected.label}
@@ -268,7 +268,7 @@ export default function FeedThreads() {
 
   return (
     <section className="flex w-[990px] max-w-full flex-col gap-8">
-      <div className="flex h-10 w-[288px] self-end">
+      <div className="flex h-10 w-[288px] self-end gap-2">
         <FeedSelect
           name="sort"
           label="Сортирај дискусии"
