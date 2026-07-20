@@ -47,3 +47,12 @@
     --foreground: #ededed;
   }
 }
+
+.mask-fade-out{
+  mask-image: linear-gradient(
+    to bottom,
+    black,
+    black 90%,
+    transparent
+  );
+}

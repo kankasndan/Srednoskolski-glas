@@ -88,13 +88,13 @@ export default function AuthButtons() {
     const avatarUrl = user.imageUrl;
 
     return (
-      <div ref={menuRef} className="relative ml-auto flex shrink-0 items-center gap-3">
+      <div ref={menuRef} className="relative flex shrink-0 items-center gap-3">
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
-          className="flex items-center gap-3 rounded-full transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] focus-visible:ring-offset-2"
+          className="flex items-center gap-1 rounded-full transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] focus-visible:ring-offset-2 cursor-pointer"
         >
           <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full">
             <img
