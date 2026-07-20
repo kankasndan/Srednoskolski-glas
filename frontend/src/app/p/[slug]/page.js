@@ -58,6 +58,9 @@ export default function TopicForumPage() {
           title={forum.name}
           description={forum.description}
           icon={forum.imageUrl}
+          slug={forum.slug}
+          type={forum.type}
+          membersCount={forum.members_count}
         />
         <ForumFilters />
         <ForumThreadList forumName={forum.name} threads={threads} />
