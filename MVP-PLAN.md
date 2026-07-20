@@ -215,7 +215,7 @@ flowchart TD
 | M8 | Apple OAuth (config + активирај копче) — ако има Apple developer акаунт | FS | 3 | — |
 
 ---
-
+ 
 ## 5. Распределба по личност (баланс на оптоварување)
 
 | Улога | Стории | Вкупно SP |
@@ -248,5 +248,377 @@ flowchart TD
 2. **Apple OAuth (M8)** зависи од Apple developer акаунт — оставено опционално/на крај.
 3. **Virus scan (M3)** е ставен како hardening; ако немаш инфраструктура (ClamAV), може да се одложи по MVP.
 4. **Search (G1)** засега е SQL `LIKE`/full-text во постоечката база; ако одиш на Postgres/Meilisearch, SP расте.
+
+## 8. Детални описи на задачите (по ID)
+
+> За секоја стори: **Што** (што претставува задачата), **Промени** (кои датотеки/делови се менуваат), **Како работи** (тек/логика). Патеки: backend = `backend/`, frontend = `frontend/src/`.
+
+### Epic A — Foundation
+
+**A1 — `votes` табела + `Vote` модел**
+- **Што:** Основа за upvote — табела што памети кој корисник гласал за која дискусија/коментар.
+- **Промени:** Нова миграција `create_votes_table` со `user_id`, полиморфни `votable_type` + `votable_id`, `timestamps`, и **unique(`user_id`,`votable_type`,`votable_id`)`. Нов модел `app/Models/Vote.php` со `morphTo('votable')`. Додај `morphMany(Vote::class,'votable')` во `Thread` и `Comment`, и `hasMany(Vote::class)` во `User`.
+- **Како работи:** Полиморфна релација — истата табела служи и за threads и за comments. Unique индексот спречува двоен глас и е основата за toggle логиката (E1).
+
+**A2 — `follows` табела + `Follow` модел**
+- **Што:** Основа за „следи дискусија".
+- **Промени:** Миграција `create_follows_table` (`user_id`, `thread_id`, `timestamps`, unique(`user_id`,`thread_id`)). Модел `Follow`. `belongsToMany`/`hasMany` релации на `User` и `Thread`.
+- **Како работи:** Секој ред = еден корисник следи една дискусија. Unique спречува дупли записи; toggle-от во J1 брише/креира ред.
+
+**A3 — `edited_at` + `deleted_by` колони**
+- **Што:** Поддршка за ознака „(уредено)" и tombstone „избришано од корисник/модератор".
+- **Промени:** Миграција што додава `edited_at` (nullable timestamp) и `deleted_by` (nullable FK → `users`) на `threads` и `comments`. Soft deletes веќе постои.
+- **Како работи:** При edit се сетира `edited_at`; при delete се памети кој избришал во `deleted_by`, па UI знае дали да прикаже „избришано од корисник" или „од модератор".
+
+**A4 — API конвенции + base Resources**
+- **Што:** Единствен формат на JSON одговори за да frontend-от не се преправа со секој endpoint.
+- **Промени:** Дефинирај success/error envelope + формат за валидациски грешки + pagination meta. Создај `app/Http/Resources/{Thread,Comment,Forum,User}Resource.php`. Приспособи ги постоечките read endpoints да враќаат преку овие Resources. Кратка секција во backend README.
+- **Како работи:** Секој контролер враќа `XxxResource`, што дава конзистентни полиња (id, автор, счетачи, timestamps). Ова е договорот на кој се потпираат сите FE hooks.
+
+**A5 — `migrate:fresh` baseline + seeders**
+- **Што:** Чиста база со сите нови табели/колони и примерни податоци.
+- **Промени:** Изврши `php artisan migrate:fresh --seed`. Ажурирај seeders да полнат примерни `votes`/`follows` и новите колони.
+- **Како работи:** Дава заедничка почетна точка на целиот тим; сите последователни backend задачи стартуваат од оваа шема.
+
+**A6 — Frontend data layer (гаснење на USE_MOCK)**
+- **Што:** Централен слој за повикување на API-то наместо mock.
+- **Промени:** Отстрани `USE_MOCK` од `lib/api/forums.js`; wrapper над `lib/api.js` (React Query или сопствени fetch-hooks); scaffolding hook `useForums` што чита од `/api/forums`.
+- **Како работи:** Компонентите повикуваат hooks (loading/error/data), не raw fetch. Го задржува Sanctum cookie/CSRF текот што веќе постои во `lib/api.js`.
+
+**A7 — Shared UI: `Avatar`**
+- **Што:** Повторно употреблив аватар.
+- **Промени:** `components/ui/Avatar.js` што прима `imageUrl` + `size` (sm/md/lg).
+- **Како работи:** Рендерира кружна слика; при грешка при вчитување прикажува неутрален placeholder. Го користат feed картички, thread detail, коментари.
+
+**A8 — Shared UI: `DropdownMenu` (три точки)**
+- **Што:** Пристапно ⋮ мени за акции.
+- **Промени:** `components/ui/DropdownMenu.js` — отвора/затвора на клик, надвор-клик и Escape; прима ставки преку props.
+- **Како работи:** Основа за three-dots менито (Edit/Delete/Report/Share во F3) и за филтри/админ.
+
+**A9 — Shared UI: `Modal` + `Toast`**
+- **Што:** Модал дијалог и нотификации.
+- **Промени:** `components/ui/Modal.js` (focus trap, Escape, backdrop) и `Toast` (success/error, auto-dismiss) преку provider/portal.
+- **Како работи:** Report modal (I2) и потврди/грешки низ апликацијата ги користат.
+
+**A10 — Shared UI: `TimeAgo` + `UpvoteButton` + `Badge`**
+- **Што:** Три ситни презентациски примитиви.
+- **Промени:** `TimeAgo` (релативно време на МК, пр. „пред 3 часа"), `UpvoteButton` (count + active state, емитува `onClick`, **без** API), `Badge` (Featured/ознаки).
+- **Како работи:** Чисто визуелни; логиката за гласање се врзува подоцна (E3).
+
+### Epic B — Forums & Feed (read)
+
+**B1 — `FeedController@index`**
+- **Што:** Cross-forum feed за `/feed`.
+- **Промени:** Имплементирај го празниот `FeedController`; `GET /api/feed` со sort (Trending/Popular/New/Featured), временски прозорец и pagination; враќа `ThreadResource`.
+- **Како работи:** Query над `threads` со join/сортирање; Trending = комбинација од скорешна активност; paginated одговор според A4.
+
+**B2 — Динамичко сортирање на sidebar форуми**
+- **Што:** Тематските форуми сортирани по активност (7 дена); школски групирани по град.
+- **Промени:** Во `ForumController@index` додај сортирање по број постови/коментари во последните 7 дена.
+- **Како работи:** Најактивните форуми одат на врв на sidebar (спец. барање 5.1).
+
+**B3 — Pagination за `ForumController@show`**
+- **Што:** Страничење на дискусии во еден форум.
+- **Промени:** Замени го листањето со `paginate()`; враќа meta.
+- **Како работи:** Го поддржува infinite scroll/страничење на forum page (B7/M7).
+
+**B4 — Feed thread card (презентациска)**
+- **Што:** Картичка за еден пост во feed.
+- **Промени:** `components/FeedThreadCard.js` што прима props: икона/име форум, автор+`Avatar`, `TimeAgo`, наслов, preview, счетачи, `Badge` Featured.
+- **Како работи:** Само props, без API — ги користи B6 и forum page.
+
+**B5 — Forum page презентациски**
+- **Што:** Визуелен склоп на форум страна.
+- **Промени:** `ForumBanner` (икона/име/опис) + `ForumFilters` (sort/time dropdowns што емитуваат state) + листа од B4 картички; empty state.
+- **Како работи:** Филтрите повикуваат callback; податоците ги внесува B7.
+
+**B6 — Wire sidebar + feed**
+- **Што:** Поврзување на sidebar и `/feed` со вистинскиот API.
+- **Промени:** Замени hardcoded `FeedThreads.js` и mock во `ThematicForums`/`SchoolForums` со hooks од A6 (`/api/forums`, `/api/feed`); филтрите праќаат query params; loading/empty/error.
+- **Како работи:** Промена на филтер → refetch со нови params. Прва вистинска end-to-end страница.
+
+**B7 — Wire forum page**
+- **Што:** Поврзување на `/p/[slug]` со `ForumController@show`.
+- **Промени:** Во `app/p/[slug]/page.js` замени mock со вистински повик; pagination + филтри.
+- **Како работи:** Slug од URL → API → banner + листа дискусии.
+
+### Epic C — Thread creation
+
+**C1 — `POST /api/threads`**
+- **Што:** Endpoint за создавање дискусија.
+- **Промени:** Route + метод во `ThreadController@store` (auth:sanctum); валидација: `forum_id` задолжителен и постоечки, `title` 3–200, `body` опционално; враќа `ThreadResource`.
+- **Како работи:** Автентициран корисник праќа форма → се креира `Thread` врзан со форум и автор.
+
+**C2 — Прикачување медиум на дискусија + DOC**
+- **Што:** Врзување на прикачени фајлови со дискусија.
+- **Промени:** При создавање thread прифати референци од `POST /api/media` и креирај `thread_attachments` (тип: слика/фајл/линк/видео). Прошири `MediaController` mimetypes со DOC/DOCX (лимит 25MB спец.).
+- **Како работи:** Медиумот прво се качува (постоечки `/api/media`), па неговиот id/url се врзува со дискусијата при `store`.
+
+**C3 — `/new` UI**
+- **Што:** Форма за нова дискусија.
+- **Промени:** `app/new/page.js`: forum picker (Topic/School групирано, приказ на опис под селекцијата), `title` поле, валидациски состојби, Submit (disabled додека невалидно).
+- **Како работи:** Листата форуми доаѓа од hook (A6). Клиентска валидација пред испраќање.
+
+**C4 — Rich text editor (TipTap)**
+- **Што:** Чиста, SSR-safe изведба на editor-от.
+- **Промени:** Преработи `components/RichTextEditor.js`: Bold/Italic/ordered+bullet листи/линк/code block/quote; излез HTML/JSON преку prop.
+- **Како работи:** Динамичен import за да нема hydration грешки во Next.js; емитува serializable содржина за `body`.
+
+**C5 — Editor attachments UI**
+- **Што:** Прикачување содржина во editor-от.
+- **Промени:** Upload слика, фајл (PDF/DOC), вметни линк (preview placeholder), видео embed (YouTube/TikTok) по URL.
+- **Како работи:** Емитува метаподатоци за прилозите што C6 ги праќа заедно со дискусијата.
+
+**C6 — Wire `/new` submit**
+- **Што:** Поврзување на формата со backend.
+- **Промени:** Submit → `POST /api/threads` + media upload тек; redirect на новата дискусија.
+- **Како работи:** По успех, корисникот оди на thread detail; грешки се прикажуваат.
+
+### Epic D — Thread detail + comments
+
+**D1 — `ThreadController@show` надградба**
+- **Што:** Читање дискусија + вгнездени коментари + views.
+- **Промени:** Инкрементирај `views`; врати цел пост + дрво коментари; параметар `sort` (best/newest/oldest).
+- **Како работи:** При отворање се зголемува view count; коментарите се враќаат како вгнездена структура.
+
+**D2 — Коментари create**
+- **Што:** Нов `CommentController@store`.
+- **Промени:** `POST` за top-level и reply (преку `parent_id`); валидација дека `parent_id` припаѓа на истата дискусија; враќа `CommentResource`.
+- **Како работи:** `parent_id` = null → top-level; инаку reply под родителот (nested).
+
+**D3 — Thread detail страна**
+- **Што:** UI за една дискусија.
+- **Промени:** `app/p/[slug]/[id]/page.js`: главен пост (rich content + прилози), автор блок (`Avatar` + псевдоним + училиште), мета (`TimeAgo`, views, счетачи).
+- **Како работи:** Рендерира HTML од body; прикажува прилози според тип.
+
+**D4 — Comment tree компонента**
+- **Што:** Приказ на вгнездени коментари.
+- **Промени:** `components/CommentTree.js`: индентација + линија лево, collapse/expand, ред со акции по коментар, header за сортирање (Best/Newest/Oldest).
+- **Како работи:** Рекурзивно рендерирање на replies; header емитува избран редослед.
+
+**D5 — Comment composer + reply box**
+- **Што:** Поле за пишување коментар/одговор.
+- **Промени:** „Add a comment" поле + Comment копче; reply box што се отвора под коментар.
+- **Како работи:** Емитува `content` + опционален `parent_id` преку callback.
+
+**D6 — Wire thread detail + коментари**
+- **Што:** Поврзување на детал + коментирање.
+- **Промени:** Повик до `ThreadController@show` и `CommentController@store`; optimistic insert; менување sort.
+- **Како работи:** Нов коментар веднаш се појавува во дрвото, се потврдува со сервер.
+
+### Epic E — Upvote
+
+**E1 — Vote toggle endpoints**
+- **Што:** Гласање со повлекување.
+- **Промени:** `POST` toggle за thread и comment; враќа нов count + `has_voted`; auth-only; користи unique од A1.
+- **Како работи:** Ако веќе гласал → брише глас; инаку креира. Идемпотентно по корисник.
+
+**E2 — Vote полиња во Resources**
+- **Што:** Изложи счетач и статус.
+- **Промени:** Додај `upvotes_count` + `has_voted` во `ThreadResource`/`CommentResource`.
+- **Како работи:** `has_voted` се пресметува за тековниот корисник за да UI знае дали копчето е активно.
+
+**E3 — Wire `UpvoteButton`**
+- **Што:** Поврзување на копчето.
+- **Промени:** Optimistic toggle на thread + comment; auth gate (prompt за најава ако е гостин).
+- **Како работи:** Клик веднаш го менува бројот, се враќа при грешка; неавтентицираните добиваат покана за најава.
+
+### Epic F — Edit / Delete
+
+**F1 — Thread update/delete + policy**
+- **Што:** Уреди/избриши сопствена дискусија.
+- **Промени:** `PUT` + `DELETE`; `ThreadPolicy` (само автор); сетирај `edited_at`; soft delete.
+- **Како работи:** Policy спречува туѓо уредување; delete е мек, коментарите остануваат (tombstone).
+
+**F2 — Comment update/delete + policy**
+- **Што:** Уреди/избриши сопствен коментар.
+- **Промени:** `PUT` + `DELETE`; `CommentPolicy`; `edited_at`; soft delete + tombstone (корисник vs модератор преку `deleted_by`).
+- **Како работи:** Избришан коментар прикажува tombstone, но replies остануваат видливи.
+
+**F3 — Three-dots акции UI**
+- **Што:** Мени Edit/Delete/Report/Share.
+- **Промени:** Користи `DropdownMenu` (A8); edit-in-place форми за thread/comment; „(уредено)" badge; приказ на tombstone.
+- **Како работи:** Ставки се условни (автор гледа Edit/Delete; други гледаат Report). Логика на F4.
+
+**F4 — Wire edit/delete**
+- **Што:** Поврзување на уреди/избриши.
+- **Промени:** Повици до F1/F2; сокриј акции за не-автори според policy.
+- **Како работи:** По успех UI се ажурира; грешки преку Toast.
+
+### Epic G — Search
+
+**G1 — Search endpoint**
+- **Што:** Пребарување дискусии и коментари.
+- **Промени:** `GET /api/search` — наслов/тело + коментари; relevance (Recent/Popular/Featured/New) и time филтри; pagination; snippet/highlight податоци.
+- **Како работи:** SQL `LIKE`/full-text во постоечката база (ако се оди на Postgres/Meilisearch, обемот расте).
+
+**G2 — `/search` UI**
+- **Што:** Страна за пребарување.
+- **Промени:** Search bar со clear, live резултати, highlight, relevance + time dropdowns, result cards (B4-стил).
+- **Како работи:** Пишувањето (debounced) праќа query; клучните зборови означени.
+
+**G3 — Wire header + search**
+- **Што:** Поврзување на header search и `/search`.
+- **Промени:** Header search рутира кон `/search`; live (debounced) повици; highlight.
+- **Како работи:** `SearchBar` станува функционален (сега е само визуелен).
+
+### Epic H — Recent comments
+
+**H1 — Recent comments endpoint**
+- **Што:** Најнови коментари низ платформата.
+- **Промени:** `GET /api/recent` — автор, форум, thread ref, време; pagination.
+- **Како работи:** Обратно-хронолошки список.
+
+**H2 — `/recent` UI**
+- **Што:** Страна со најнови коментари.
+- **Промени:** `app/recent/page.js` — секој ред: автор/форум/дискусија/текст/време/акции.
+- **Како работи:** Секој ред води до својата дискусија.
+
+**H3 — Wire `/recent` + sidebar линк**
+- **Што:** Поврзување + навигација.
+- **Промени:** Врзи со H1; активирај го sidebar копчето „Најнови" (сега без `href`).
+- **Како работи:** Sidebar ставката води на `/recent`.
+
+### Epic I — Report
+
+**I1 — Report create endpoint**
+- **Што:** Пријава на содржина.
+- **Промени:** `POST /api/reports` користејќи ја постоечката `reports` табела; `reason` enum + `other` текст; полиморфно thread/comment; auth.
+- **Како работи:** Се снима пријава со причина; оди во админ редот (L2).
+
+**I2 — Report modal UI**
+- **Што:** Модал за пријава.
+- **Промени:** Користи `Modal` (A9); radio причини (Spam/Навреда/Дезинформации/Возраст/Друго) + опционален детал; success Toast.
+- **Како работи:** Валидира дека е избрана причина пред испраќање.
+
+**I3 — Wire report modal**
+- **Што:** Поврзување од ⋮ менито.
+- **Промени:** Report акција → отвора modal → `POST /api/reports`.
+- **Како работи:** Feedback за успех/грешка.
+
+### Epic J — Follow thread
+
+**J1 — Follow endpoints**
+- **Што:** Следи/отследи дискусија.
+- **Промени:** `POST` follow / `DELETE` unfollow (auth); `is_following` во `ThreadResource`.
+- **Како работи:** Toggle врз `follows` табелата (A2).
+
+**J2 — Follow копче UI**
+- **Што:** Копче на thread detail.
+- **Промени:** Состојби Follow/Following; емитува toggle.
+- **Како работи:** Визуелно; логиката е во J3.
+
+**J3 — Wire follow копче**
+- **Што:** Поврзување.
+- **Промени:** Toggle → follow/unfollow endpoint; состојба од сервер, враќање при грешка.
+- **Како работи:** Во MVP само визуелно следење (без нотификации, спец. 6.6).
+
+### Epic K — Mentions (@)
+
+**K1 — User search endpoint**
+- **Што:** Autocomplete извор за @.
+- **Промени:** `GET /api/users/search?q=` по username prefix; ограничен/paginated резултат (username + аватар).
+- **Како работи:** Го напојува dropdown-от во editor-от.
+
+**K2 — Parse & store mentions**
+- **Што:** Зачувување на споменувања.
+- **Промени:** При зачувување thread/comment парсирај `@username` → мапирај во корисници → сними во `mentions`; врати податоци за приказ.
+- **Како работи:** Токените се резолвираат и се памети врската за подоцнежно рендерирање.
+
+**K3 — Mention autocomplete во editor**
+- **Што:** @ dropdown + обоено рендерирање.
+- **Промени:** TipTap mention екстензија со `@` trigger; избраниот mention се вметнува и се рендерира со посебна боја.
+- **Како работи:** Живо пребарување преку K1 додека се пишува.
+
+**K4 — Wire mentions**
+- **Што:** Поврзување + перзистенција.
+- **Промени:** Autocomplete кон API; mentions се снимаат и се рендерираат на зачуваната содржина.
+- **Како работи:** Во MVP mention не праќа нотификација (спец. 6.2).
+
+### Epic L — Moderation / Admin
+
+**L1 — Роли + admin gate**
+- **Што:** Улоги и заштита на админ рути.
+- **Промени:** Користи `users.type` (user/moderator/admin); middleware/gate; seed админ.
+- **Како работи:** Не-админ добива 403 на админ endpoints.
+
+**L2 — Reports листа + детали (admin)**
+- **Што:** Админ преглед на пријави.
+- **Промени:** Endpoints за листа (сортирана по време/сериозност) и детал со контекст на содржината; admin-only.
+- **Како работи:** Го напојува админ редот (queue).
+
+**L3 — Модераторски акции**
+- **Што:** Дејствија врз пријавена содржина.
+- **Промени:** Игнорирај / отстрани (mod tombstone „од модератор") / отстрани+предупреди / бан; запис во `sanctions`.
+- **Како работи:** Ажурира статус на пријавата и состојба на содржината; бан/предупреда пишува санкција.
+
+**L4 — Историја + sanctions/appeals**
+- **Што:** Историја по корисник и жалби.
+- **Промени:** Листа санкции по корисник; создај appeal; admin resolve.
+- **Како работи:** Ги користи постоечките `sanctions`/`appeals` табели.
+
+**L5 — Admin reports queue UI**
+- **Што:** Листа пријави.
+- **Промени:** `app/admin/...` — листа со статус/сериозност/време + филтри; видлива само за админ.
+- **Како работи:** Route-guarded (L8).
+
+**L6 — Admin report detail UI**
+- **Што:** Детален приказ + акции.
+- **Промени:** Приказ на пријавена содржина во контекст + копчиња (игнорирај/отстрани/предупреди/бан) со потврда за деструктивни.
+- **Како работи:** Ги повикува L3 акциите.
+
+**L7 — Admin user history UI**
+- **Што:** Историја + санкции + жалби.
+- **Промени:** Приказ на модерациска историја и санкции по корисник; преглед на жалби.
+- **Како работи:** Чита од L4.
+
+**L8 — Wire admin панел**
+- **Што:** Поврзување + guard.
+- **Промени:** Сите админ прикази на endpoints; route guard (само admin).
+- **Како работи:** Акциите повикуваат endpoints и освежуваат состојба; не-админ нема пристап.
+
+### Epic M — Hardening & polish
+
+**M1 — Rate limiting**
+- **Што:** Заштита од spam.
+- **Промени:** Throttle на register/login, создавање дискусија, коментар.
+- **Како работи:** Враќа 429 со порака при пречекорување.
+
+**M2 — Бришење акаунт (GDPR)**
+- **Што:** Право на бришење.
+- **Промени:** Endpoint за бришење корисник + податоци; потврди cascade; инвалидирај сесија.
+- **Како работи:** Автентициран корисник го брише својот акаунт; податоците се бришат/анонимизираат.
+
+**M3 — Virus scan при upload**
+- **Што:** Скенирање пред објавување.
+- **Промени:** Hook (ClamAV/екстерно) на media upload.
+- **Како работи:** Заразени фајлови се одбиваат; ако нема инфраструктура, може да се одложи.
+
+**M4 — Mobile-responsive app shell**
+- **Што:** Мобилен layout (спец. mobile-first).
+- **Промени:** Hamburger + collapsible sidebar во `AppShell`; responsive header.
+- **Како работи:** Sidebar се собира на мобилен; без хоризонтален overflow.
+
+**M5 — Legal/guidelines страни**
+- **Што:** Правни страни.
+- **Промени:** Terms of Service, Privacy Policy, Community Guidelines + линкови (onboarding/footer).
+- **Како работи:** Реални страни наместо стилизиран текст.
+
+**M6 — i18n полирање**
+- **Што:** Целосен македонски + чистење.
+- **Промени:** `<html lang="mk">`; преведи преостанати EN стрингови (auth callback, root); отстрани/redirect dev stub routes (`/`, `/imeNaRuta`).
+- **Како работи:** `/` да води на `/feed`.
+
+**M7 — Lazy load + infinite scroll**
+- **Што:** Перформанси.
+- **Промени:** Lazy loading слики/видео; infinite scroll/pagination UI на feed/forum/search.
+- **Како работи:** Се потпира на pagination од B1/B3.
+
+**M8 — Apple OAuth**
+- **Што:** Трет provider.
+- **Промени:** Конфигурирај Apple во `config/services.php` + Socialite; активирај го disabled копчето.
+- **Како работи:** Зависи од Apple developer акаунт; опционално/на крај.
+
+---
 
 *Генерирано од `MVP-STATUS.md` + анализа на кодот. Придружна датотека: `jira-import.csv`.*
