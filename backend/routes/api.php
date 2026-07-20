@@ -28,8 +28,9 @@ Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
 Route::middleware('auth:sanctum')->get('/me', MeController::class)->name('me.show');
 Route::middleware('auth:sanctum')->post('/logout', LogoutController::class)->name('auth.logout');
 
-//Forum page routes
+// Forum page + paginated threads (infinite scroll). Feed/FYP is a separate endpoint later.
 Route::get('/p/{forum:slug}', [ForumController::class, 'show'])->name('forums.show');
+Route::get('/p/{forum:slug}/threads', [ThreadController::class, 'index'])->name('forums.threads.index');
 Route::get('/p/{forum:slug}/comments/{thread:id}', [ThreadController::class, 'show'])->name('forums.threads.show');
 
 //Storage routes

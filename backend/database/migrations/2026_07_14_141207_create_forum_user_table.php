@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignId("user_id")->constrained()->cascadeOnDelete();
             $table->foreignId("forum_id")->constrained()->cascadeOnDelete();
             $table->timestamps();
+
+            // A user can only be a member of a forum once.
+            $table->unique(['user_id', 'forum_id']);
         });
     }
 

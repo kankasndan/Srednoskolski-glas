@@ -86,7 +86,7 @@ flowchart TD
 | ID | Задача | Улога | SP | Depends On |
 |----|--------|-------|----|------------|
 | A1 | `votes` табела + `Vote` модел (полиморфно votable: thread/comment; unique user+votable) | BE1 | 3 | — |
-| A2 | `follows` табела + `Follow` модел (user ↔ thread; unique) | BE1 | 2 | — |
+| A2 | Преименувај `forum_user` → полиморфна `follows` табела (`followable`: forum/thread) + `Follow` модел; мигрирај постоечко членство; освежи `User`/`Forum`/`Thread` релации и seeders | BE1 | 3 | — |
 | A3 | Додади `edited_at` (nullable) на `threads` и `comments`; `deleted_by` FK (за tombstone „од корисник/модератор") | BE2 | 3 | — |
 | A4 | API конвенции: единствен success/error JSON envelope, формат за валидациски грешки, pagination meta; base API Resources (Thread/Comment/Forum/User) + кратка README | BE2 | 5 | — |
 | A5 | `migrate:fresh` baseline + ажурирање на seeders за новите колони/табели (примерни votes/follows) | BE1 | 2 | A1, A2, A3 |
@@ -260,10 +260,16 @@ flowchart TD
 - **Промени:** Нова миграција `create_votes_table` со `user_id`, полиморфни `votable_type` + `votable_id`, `timestamps`, и **unique(`user_id`,`votable_type`,`votable_id`)`. Нов модел `app/Models/Vote.php` со `morphTo('votable')`. Додај `morphMany(Vote::class,'votable')` во `Thread` и `Comment`, и `hasMany(Vote::class)` во `User`.
 - **Како работи:** Полиморфна релација — истата табела служи и за threads и за comments. Unique индексот спречува двоен глас и е основата за toggle логиката (E1).
 
-**A2 — `follows` табела + `Follow` модел**
-- **Што:** Основа за „следи дискусија".
-- **Промени:** Миграција `create_follows_table` (`user_id`, `thread_id`, `timestamps`, unique(`user_id`,`thread_id`)). Модел `Follow`. `belongsToMany`/`hasMany` релации на `User` и `Thread`.
-- **Како работи:** Секој ред = еден корисник следи една дискусија. Unique спречува дупли записи; toggle-от во J1 брише/креира ред.
+**A2 — Преименувај `forum_user` → полиморфна `follows` табела + `Follow` модел**
+- **Што:** Една генеричка табела за „следење" што ги покрива **и членството во форум** (спец. 5 — `members_count`) **и следењето дискусија** (спец. 6.6 — Follow thread). Наместо две табели, постоечката `forum_user` се претвора во полиморфна `follows`.
+- **Промени:**
+  - **Миграција (restructure):** преименувај `forum_user` → `follows`; замени `forum_id` со полиморфни `followable_type` + `followable_id`; задржи `user_id`, `timestamps`; додади **unique(`user_id`,`followable_type`,`followable_id`)**.
+  - **Data-migration:** секој постоечки ред од `forum_user` се пренесува како `follow` со `followable_type = App\Models\Forum` и `followable_id = стариот forum_id` (за да не се изгуби членството).
+  - **Модел:** нов `app/Models/Follow.php` со `belongsTo(User::class)` + `morphTo('followable')`.
+  - **Релации:** во `User` замени го постоечкиот `forums(): BelongsToMany` (кој користеше `forum_user`) со `morphedByMany(Forum::class,'followable','follows')` (следени форуми) и додади `followedThreads()` = `morphedByMany(Thread::class,'followable','follows')`. Во `Forum` и `Thread` додади `followers()` = `morphMany(Follow::class,'followable')`.
+  - **Seeders + counts:** ажурирај ги seeders што полнеле `forum_user`; `members_count` на форум = број follows каде `followable` е тој форум.
+- **Како работи:** Еден ред = еден корисник следи еден објект (форум **или** дискусија). Unique спречува дупли. Follow на **форум** = членство (го крева `members_count`); follow на **thread** = spec 6.6. Во J epic, `is_following` за дискусија проверува дали постои `follow` ред за тековниот корисник + таа дискусија; toggle-от (J1/J3) брише/креира ред.
+- **⚠️ Влијание:** ова допира постоечки код што ја користи `forum_user` пивот-табелата (`User::forums()`, било кој controller/seeder за членство). Тие мора да се ажурираат во истата стори за да не пукне. Бидејќи ги менува `User`/`Forum` моделите, координирај со секој што работи паралелно на тие фајлови.
 
 **A3 — `edited_at` + `deleted_by` колони**
 - **Што:** Поддршка за ознака „(уредено)" и tombstone „избришано од корисник/модератор".
