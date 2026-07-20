@@ -51,7 +51,17 @@ export default function TopicForumPage() {
   if (threads.length === 0) {
     return (
       <AppShell>
-        <ForumEmptyState />
+        <div className="flex w-[990px] max-w-full flex-col gap-6">
+          <ForumBanner
+            title={forum.name}
+            description={forum.description}
+            icon={forum.imageUrl}
+            slug={forum.slug}
+            type={forum.type}
+            membersCount={forum.members_count}
+          />
+          <ForumEmptyState />
+        </div>
       </AppShell>
     );
   }
