@@ -1,18 +1,30 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 const ROW =
-  "flex h-10 w-[268px] cursor-pointer items-center gap-3 rounded-[10px] border border-[#CCCCCC] px-4 py-2 text-left font-[family-name:var(--font-manrope)] text-[14px] font-medium leading-none text-[#595959] transition-colors hover:bg-[#CFE9ED]";
+  "flex h-10 cursor-pointer items-center overflow-hidden whitespace-nowrap rounded-[12px] border border-[#CCCCCC] text-left font-[family-name:var(--font-manrope)] text-[14px] font-medium leading-none text-[#595959] transition-all duration-300 ease-in-out hover:bg-[var(--color-grays-300)]";
 
-export default function NavItem({ label, href, active = false, onSelect }) {
-  const className = `${ROW} ${
-    active ? "bg-[#CFE9ED] font-bold text-black" : ""
+export default function NavItem({ label, href, icon, active = false, onSelect, collapsed }) {
+  const layout = collapsed
+    ? "w-10 justify-center"
+    : "w-[268px] gap-3 px-4 py-2";
+  const className = `${ROW} ${layout} ${
+    active ? "!bg-[var(--color-primary-200)] font-bold text-white" : ""
   }`;
   const checkClassName = `flex size-4 shrink-0 items-center justify-center rounded-[3px] border ${
-    active ? "border-[#582FF5] bg-[#582FF5]" : "border-[#000000]"
+    active ? "border-white bg-white" : "border-[#000000]"
   }`;
-  const content = (
+  const content = collapsed ? (
+    <Image
+      src={icon}
+      alt=""
+      width={24}
+      height={24}
+      className={`max-h-6 max-w-8 object-contain ${active ? "brightness-0 invert" : ""}`}
+    />
+  ) : (
     <>
       <span className={checkClassName}>
         <svg
@@ -24,7 +36,7 @@ export default function NavItem({ label, href, active = false, onSelect }) {
         >
           <path
             d="M20 6 9 17l-5-5"
-            stroke="white"
+            stroke="var(--color-primary-200)"
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"

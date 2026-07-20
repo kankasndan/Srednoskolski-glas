@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export default function ForumIcon({ src }) {
+export default function ForumIcon({ src, active = false }) {
   return (
     <span className="relative size-4 shrink-0">
       <Image
@@ -8,7 +8,9 @@ export default function ForumIcon({ src }) {
         alt=""
         width={36}
         height={36}
-        className="absolute left-1/2 top-1/2 size-9 max-w-none -translate-x-1/2 -translate-y-1/2"
+        className={`absolute left-1/2 top-1/2 size-9 max-w-none -translate-x-1/2 -translate-y-1/2 ${
+          active ? "brightness-0 invert" : ""
+        }`}
       />
     </span>
   );
