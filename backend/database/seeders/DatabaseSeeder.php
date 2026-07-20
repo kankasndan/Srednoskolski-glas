@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(OnboardingReferenceSeeder::class);
+        $this->call([RoleSeeder::class,]);
 
         User::factory()->create([
             'username' => 'test_user',
