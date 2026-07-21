@@ -38,8 +38,8 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
   return (
     <div className="min-h-screen w-full bg-white">
       <Header />
-      <div className="flex px-14 pt-8">
-        <div className="sticky top-40 flex h-[calc(100vh-160px)] shrink-0">
+      <div className="flex px-6">
+        <div className="box-border min-h-full shrink-0 pt-10 border-r border-gray-200">
           <aside
             ref={(node) => {
               if (node) node.scrollTop = sidebarScrollTop;
@@ -47,7 +47,7 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
             onScroll={(event) => {
               sidebarScrollTop = event.currentTarget.scrollTop;
             }}
-            className="overflow-y-auto overscroll-contain pr-14 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="sticky max-h-[70vh] top-26 pr-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overflow-y-scroll overscroll-contain mask-fade-out pb-20"
           >
             <SidebarNav selectedKey={selectedKey} onSelect={handleSelect} />
             <ThematicForums
@@ -65,9 +65,10 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
               onSelect={handleSelect}
             />
           </aside>
-          <div className="w-px shrink-0 rounded-2xl bg-[#CCCCCC]" />
         </div>
-        <main className={`flex flex-1 justify-center ${contentClassName}`}>{children}</main>
+        <main className={`pt-8 flex flex-1 justify-center ${contentClassName}`}>
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { CITIES } from "@/lib/schools";
@@ -56,7 +56,7 @@ export default function OnboardingForm() {
   const [error, setError] = useState("");
 
   const schoolGroups = [...CITIES].sort(
-    (a, b) => b.schools.length - a.schools.length
+    (a, b) => b.schools.length - a.schools.length,
   );
 
   function handleNotStudentChange(e) {
@@ -109,6 +109,10 @@ export default function OnboardingForm() {
       setSubmitting(false);
     }
   }
+
+  useEffect(() => {
+    console.log(schoolGroups);
+  }, []);
 
   return (
     <form

@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+
+        
         $this->call([
             OnboardingReferenceSeeder::class,
             ForumSeeder::class,
@@ -23,6 +25,7 @@ class DatabaseSeeder extends Seeder
             ThreadSeeder::class,
             ThreadAttachmentSeeder::class,
             CommentSeeder::class,
+            RoleSeeder::class,
         ]);
     }
 }

@@ -21,7 +21,13 @@ class Thread extends Model
     {
         return [
             'is_anonymous' => 'boolean',
+            'edited_at' => 'datetime',
         ];
+    }
+
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
     }
 
     public function threadAttachment(): HasMany
