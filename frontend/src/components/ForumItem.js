@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import ForumIcon from "@/components/ForumIcon";
 
 const BASE_CLASS =
-  "group flex h-10 items-center overflow-hidden whitespace-nowrap rounded-xl border border-[var(--color-grays-300)] bg-white font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[var(--color-grays-900)] transition-all duration-300 ease-in-out hover:bg-[var(--color-grays-300)]";
+  "group flex h-10 items-center overflow-hidden whitespace-nowrap rounded-xl border border-[var(--color-grays-300)] bg-white font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[var(--color-grays-900)] transition-all duration-300 ease-in-out hover:bg-[#E5E5E5]";
 
 export default function ForumItem({ forum, active = false, onSelect, collapsed }) {
   const pathname = usePathname();

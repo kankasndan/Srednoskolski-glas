@@ -78,7 +78,7 @@ export default function TopicForumPage() {
           membersCount={forum.members_count}
         />
         <ForumFilters />
-        <ForumThreadList forumName={forum.name} threads={threads} />
+        <ForumThreadList forumName={forum.name} forumSlug={forum.slug} threads={threads} />
       </div>
     </AppShell>
   );

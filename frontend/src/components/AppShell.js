@@ -53,7 +53,7 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
     <div className="flex h-screen flex-col overflow-hidden bg-white">
       <Header />
       <div className="flex min-h-0 flex-1 px-6">
-        <aside className="box-border flex shrink-0 flex-col border-r border-gray-200 pr-6 pt-1">
+        <aside className="box-border flex shrink-0 flex-col border-r border-[#CCCCCC] pr-6 pt-1">
           <button
             type="button"
             onClick={toggleCollapsed}
@@ -101,7 +101,7 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
             )}
           </div>
         </aside>
-        <main className={`flex flex-1 items-start justify-center overflow-y-auto pb-12 pt-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${contentClassName}`}>
+        <main className={`flex flex-1 items-start justify-center overflow-y-auto pb-12 pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${contentClassName}`}>
           {children}
         </main>
       </div>

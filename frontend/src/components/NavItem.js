@@ -4,7 +4,7 @@ import Link from "next/link";
 import ForumIcon from "@/components/ForumIcon";
 
 const ROW =
-  "flex h-10 cursor-pointer items-center overflow-hidden whitespace-nowrap rounded-[12px] border border-[#CCCCCC] text-left font-[family-name:var(--font-manrope)] text-[14px] font-medium leading-none text-[#595959] transition-all duration-300 ease-in-out hover:bg-[var(--color-grays-300)]";
+  "flex h-10 cursor-pointer items-center overflow-hidden whitespace-nowrap rounded-[12px] border border-[#CCCCCC] text-left font-[family-name:var(--font-manrope)] text-[14px] font-medium leading-none text-[#595959] transition-all duration-300 ease-in-out hover:bg-[#E5E5E5]";
 
 export default function NavItem({ label, href, icon, active = false, onSelect, collapsed }) {
   const layout = collapsed
