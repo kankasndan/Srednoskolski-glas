@@ -6,6 +6,7 @@ import { apiFetch } from "@/lib/api";
 import { CITIES } from "@/lib/schools";
 import TextField from "@/components/TextField";
 import SelectField from "@/components/SelectField";
+import SchoolSelect from "@/components/SchoolSelect";
 import TermsCheckbox from "@/components/TermsCheckbox";
 import SubmitButton from "@/components/SubmitButton";
 
@@ -59,8 +60,7 @@ export default function OnboardingForm() {
     (a, b) => b.schools.length - a.schools.length,
   );
 
-  function handleNotStudentChange(e) {
-    const checked = e.target.checked;
+  function handleNotStudentChange(checked) {
     setNotStudent(checked);
     if (checked) {
       setSchool("");
@@ -117,7 +117,7 @@ export default function OnboardingForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mx-auto mt-12 flex w-full max-w-[360px] flex-col gap-3 2xl:max-w-[440px] 2xl:gap-4"
+      className="mx-auto mt-12 flex w-full max-w-100 flex-col gap-3"
     >
       <TextField
         id="pseudonym"
@@ -132,7 +132,7 @@ export default function OnboardingForm() {
         <input
           type="checkbox"
           checked={notStudent}
-          onChange={handleNotStudentChange}
+          onChange={(e) => handleNotStudentChange(e.target.checked)}
           className="h-4 w-4 shrink-0 accent-[#582FF5] 2xl:h-5 2xl:w-5"
         />
         <span className="font-(family-name:--font-manrope) text-[12px] font-normal leading-[19.4px] text-[#595959] 2xl:text-[14px]">
@@ -140,14 +140,16 @@ export default function OnboardingForm() {
         </span>
       </label>
 
-      <SelectField
+      <SchoolSelect
         id="school"
         label="Училиште"
         required={!notStudent}
         value={school}
-        onChange={(e) => setSchool(e.target.value)}
+        onChange={setSchool}
         placeholder="Избери училиште"
         groups={schoolGroups}
+        notStudent={notStudent}
+        onNotStudentChange={handleNotStudentChange}
         disabled={notStudent}
         tooltip={notStudent ? LOCKED_HINT : undefined}
       />
