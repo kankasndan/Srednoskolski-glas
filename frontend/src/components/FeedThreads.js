@@ -130,7 +130,7 @@ function ActionButton({ icon, label, count }) {
 
 function ThreadItem({ thread }) {
   const content = (
-    <div className="flex w-full items-start justify-between gap-8 cursor-pointer hover:bg-gray-50 p-4 rounded-3xl">
+    <div className="flex w-full items-start justify-between gap-8 cursor-pointer">
       <div className="flex min-h-[97px] w-[681px] max-w-[calc(100%-128px)] shrink-0 flex-col gap-4">
         <div className="flex h-6 max-w-full items-center gap-2 overflow-hidden">
           {thread.tags.map((tag) => (
@@ -166,26 +166,28 @@ function ThreadItem({ thread }) {
 
   if (thread.image) {
     return (
-      <article className="relative flex h-[574px] w-[990px] max-w-full flex-col overflow-hidden rounded-t-3xl bg-transparent after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]">
+      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
+        <div className="w-full">{content}</div>
         <Image
           src={thread.image}
           alt=""
           width={990}
           height={421}
-          className="h-[421px] w-full rounded-t-3xl object-cover"
+          className="h-[421px] w-full rounded-t-3xl rounded-b-2xl object-cover"
           priority={thread.id === 2}
         />
-        <div className="px-0 pt-6 pb-8">{content}</div>
       </article>
     );
   }
 
   return (
-    <article className="relative flex h-40 w-[990px] max-w-full items-start justify-center rounded-3xl bg-transparent px-0 pt-6 pb-8 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]">
+    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
       {content}
     </article>
   );
 }
+
+// after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]
 
 function FeedSelect({
   name,
