@@ -2,19 +2,42 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Concerns\PresentsAuthor;
-use App\Models\Comment;
+use App\Http\Controllers\Concerns\FiltersThreads;
+use App\Http\Resources\CommentResource;
+use App\Http\Resources\ThreadResource;
 use App\Models\Forum;
 use App\Models\Thread;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ThreadController extends Controller
 {
-    use PresentsAuthor;
+    use FiltersThreads;
 
     /**
-     * Show a single thread (scoped to its forum) with its fully nested comment tree.
+     * Paginated threads for a single forum (infinite scroll).
+     *
+     * Route: GET /api/p/{forum}/threads
+     * Query: page, sort (trending|top|newest|discussed), time (day|week|month|six-months|year|all)
+     *
+     * Returns 5 threads per page. Feed/FYP ranking is a separate endpoint later.
+     */
+    public function index(Forum $forum, Request $request): JsonResponse
+    {
+        $query = $forum->threads()
+            ->with(['user.studentData.school.city', 'threadAttachment', 'forum'])
+            ->withCount('comments');
+
+        $this->applyThreadFilters($query, $request);
+
+        $threads = $query->paginate($this->threadsPerPage())->withQueryString();
+
+        return ThreadResource::collection($threads)->response();
+    }
+
+    /**
+     * Show a single thread (scoped to its forum) with its nested comment tree.
      */
     public function show(Forum $forum, Thread $thread): JsonResponse
     {
@@ -32,50 +55,10 @@ class ThreadController extends Controller
             ->get();
 
         return response()->json([
-            'thread' => [
-                'id' => $thread->id,
-                'title' => $thread->title,
-                'description' => $thread->description,
-                'upvotes' => $thread->upvotes,
-                'views' => $thread->views,
-                'is_anonymous' => $thread->is_anonymous,
-                'comments_count' => $thread->comments_count,
-                'created_at' => $thread->created_at,
-                'forum' => $thread->forum === null ? null : [
-                    'id' => $thread->forum->id,
-                    'name' => $thread->forum->name,
-                    'slug' => $thread->forum->slug,
-                ],
-                'author' => $thread->is_anonymous ? null : $this->presentAuthor($thread->user),
-                'attachments' => $thread->threadAttachment
-                    ->map(fn ($attachment) => [
-                        'url' => $attachment->url,
-                        'type' => $attachment->slug,
-                    ])
-                    ->values(),
+            'data' => [
+                'thread' => new ThreadResource($thread),
+                'comments' => CommentResource::collection($comments),
             ],
-            'comments' => $comments
-                ->map(fn (Comment $comment) => $this->presentComment($comment))
-                ->values(),
         ]);
-    }
-
-    /**
-     * Recursively shape a comment and its replies.
-     *
-     * @return array<string, mixed>
-     */
-    private function presentComment(Comment $comment): array
-    {
-        return [
-            'id' => $comment->id,
-            'content' => $comment->content,
-            'parent_id' => $comment->parent_id,
-            'created_at' => $comment->created_at,
-            'author' => $this->presentAuthor($comment->user),
-            'replies' => $comment->allReplies
-                ->map(fn (Comment $reply) => $this->presentComment($reply))
-                ->values(),
-        ];
     }
 }

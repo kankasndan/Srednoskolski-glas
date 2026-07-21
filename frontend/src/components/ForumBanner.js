@@ -13,15 +13,15 @@ export default function ForumBanner({ title, description, icon, slug, type, memb
         style={{ backgroundImage: `url("${bannerUrl}")` }}
       />
 
-      <div className="flex h-[137px] items-center justify-between gap-[121px] border-t border-[#CFE9ED] bg-white py-6 pl-6 pr-[25px]">
+      <div className="flex min-h-[137px] items-center justify-between gap-6 border-t border-[#CFE9ED] bg-white p-6">
         <div className="flex min-w-0 items-center gap-6">
           <span className="relative size-20 shrink-0 overflow-hidden">
             <Image
               src={icon}
               alt=""
-              width={205}
-              height={205}
-              className="absolute left-[calc(50%+4px)] top-1/2 size-[205px] max-w-none -translate-x-1/2 -translate-y-1/2"
+              width={150}
+              height={150}
+              className="absolute left-1/2 top-1/2 size-[150px] max-w-none -translate-x-1/2 -translate-y-1/2"
               priority
             />
           </span>
@@ -42,7 +42,7 @@ export default function ForumBanner({ title, description, icon, slug, type, memb
               {membersCount} членови
             </p>
 
-            <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
+            <p className="min-h-[22px] font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
               {description}
             </p>
           </div>

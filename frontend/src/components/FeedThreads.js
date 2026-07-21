@@ -3,9 +3,7 @@
 import Image from "next/image";
 import { useId, useState } from "react";
 
-const SORT_OPTIONS = [
-  { value: "trending", label: "Трендинг" },
-];
+const SORT_OPTIONS = [{ value: "trending", label: "Трендинг" }];
 
 const TIME_FILTER_OPTIONS = [
   { value: "week", label: "Оваа недела" },
@@ -17,7 +15,11 @@ const TIME_FILTER_OPTIONS = [
 const THREADS = [
   {
     tags: [
-      { label: "Државна матура", icon: "/icons/drzhavna_matura.svg", iconZoom: true },
+      {
+        label: "Државна матура",
+        icon: "/icons/drzhavna_matura.svg",
+        iconZoom: true,
+      },
       { label: "марко_2026", icon: "/Generic avatar.svg" },
       { label: "Гим. Орце Николов", icon: "/icons/uchilishte.svg" },
     ],
@@ -35,14 +37,19 @@ const THREADS = [
       { label: "СУГС Михајло Пупин", icon: "/icons/uchilishte.svg" },
     ],
     title: "Brainster Next vs ЕТФ - кој е подобар за софтверско инженерство?",
-    excerpt: "Размислувам помеѓу овие два факултета и ме интересира мислење на постари ученици...",
+    excerpt:
+      "Размислувам помеѓу овие два факултета и ме интересира мислење на постари ученици...",
     postedAgo: "пред 4ч.",
     votes: 18,
     comments: 11,
   },
   {
     tags: [
-      { label: "Ментално здравје", icon: "/icons/mentalno_zdravje.svg", iconZoom: true },
+      {
+        label: "Ментално здравје",
+        icon: "/icons/mentalno_zdravje.svg",
+        iconZoom: true,
+      },
       { label: "анонимен_111", icon: "/Generic avatar.svg" },
       { label: "Гим. Никола Карев", icon: "/icons/uchilishte.svg" },
     ],
@@ -99,7 +106,9 @@ function ThreadTag({ tag }) {
 function TimestampTag({ label }) {
   return (
     <span className="flex h-6 w-[63px] shrink-0 items-center justify-center gap-2 rounded-md px-2 py-1 font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-4 tracking-normal text-[#595959]">
-      <span className="flex h-4 w-[47px] items-center gap-1 overflow-hidden whitespace-nowrap">{label}</span>
+      <span className="flex h-4 w-[47px] items-center gap-1 overflow-hidden whitespace-nowrap">
+        {label}
+      </span>
     </span>
   );
 }
@@ -121,7 +130,7 @@ function ActionButton({ icon, label, count }) {
 
 function ThreadItem({ thread }) {
   const content = (
-    <div className="flex w-full items-start justify-between gap-8 px-0 py-0">
+    <div className="flex w-full items-start justify-between gap-8 cursor-pointer">
       <div className="flex min-h-[97px] w-[681px] max-w-[calc(100%-128px)] shrink-0 flex-col gap-4">
         <div className="flex h-6 max-w-full items-center gap-2 overflow-hidden">
           {thread.tags.map((tag) => (
@@ -141,36 +150,56 @@ function ThreadItem({ thread }) {
       </div>
 
       <div className="flex h-[104px] w-24 shrink-0 flex-col gap-2">
-        <ActionButton icon="/Chevrons up.svg" label="Гласај нагоре" count={thread.votes} />
-        <ActionButton icon="/chat-1-line.svg" label="Коментари" count={thread.comments} />
+        <ActionButton
+          icon="/Chevrons up.svg"
+          label="Гласај нагоре"
+          count={thread.votes}
+        />
+        <ActionButton
+          icon="/chat-1-line.svg"
+          label="Коментари"
+          count={thread.comments}
+        />
       </div>
     </div>
   );
 
   if (thread.image) {
     return (
-      <article className="relative flex h-[574px] w-[990px] max-w-full flex-col overflow-hidden rounded-t-3xl bg-transparent after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]">
+      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
+        <div className="w-full">{content}</div>
         <Image
           src={thread.image}
           alt=""
           width={990}
           height={421}
-          className="h-[421px] w-full rounded-t-3xl object-cover"
+          className="h-[421px] w-full rounded-t-3xl rounded-b-2xl object-cover"
           priority={thread.id === 2}
         />
-        <div className="px-0 pt-6 pb-8">{content}</div>
       </article>
     );
   }
 
   return (
-    <article className="relative flex h-40 w-[990px] max-w-full items-start justify-center rounded-3xl bg-transparent px-0 pt-6 pb-8 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]">
+    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
       {content}
     </article>
   );
 }
 
-function FeedSelect({ name, label, options, selected, isOpen, listboxId, textWidthClassName, onToggle, onSelect }) {
+// after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]
+
+function FeedSelect({
+  name,
+  label,
+  options,
+  selected,
+  isOpen,
+  listboxId,
+  textWidthClassName,
+  onToggle,
+  onSelect,
+}) {
   return (
     <div className="relative h-10 w-36 shrink-0">
       <input type="hidden" name={name} value={selected.value} />
@@ -181,9 +210,11 @@ function FeedSelect({ name, label, options, selected, isOpen, listboxId, textWid
         aria-expanded={isOpen}
         aria-controls={listboxId}
         onClick={onToggle}
-        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-white py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black"
+        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-gray-100 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black"
       >
-        <span className={`flex h-[19px] items-center ${textWidthClassName}`}>{selected.label}</span>
+        <span className={`flex h-[19px] items-center ${textWidthClassName}`}>
+          {selected.label}
+        </span>
         <Image
           src="/chevron-down.svg"
           alt=""
@@ -223,7 +254,9 @@ export default function FeedThreads() {
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
   const [selectedSort, setSelectedSort] = useState(SORT_OPTIONS[0]);
-  const [selectedTimeFilter, setSelectedTimeFilter] = useState(TIME_FILTER_OPTIONS[0]);
+  const [selectedTimeFilter, setSelectedTimeFilter] = useState(
+    TIME_FILTER_OPTIONS[0],
+  );
 
   const selectSortOption = (option) => {
     setSelectedSort(option);
@@ -237,7 +270,7 @@ export default function FeedThreads() {
 
   return (
     <section className="flex w-[990px] max-w-full flex-col gap-8">
-      <div className="flex h-10 w-[288px] self-end">
+      <div className="flex h-10 w-[288px] self-end gap-2">
         <FeedSelect
           name="sort"
           label="Сортирај дискусии"
@@ -246,7 +279,9 @@ export default function FeedThreads() {
           isOpen={openSelect === "sort"}
           listboxId={sortListboxId}
           textWidthClassName="w-[67px]"
-          onToggle={() => setOpenSelect((current) => (current === "sort" ? null : "sort"))}
+          onToggle={() =>
+            setOpenSelect((current) => (current === "sort" ? null : "sort"))
+          }
           onSelect={selectSortOption}
         />
         <FeedSelect
@@ -257,12 +292,17 @@ export default function FeedThreads() {
           isOpen={openSelect === "time"}
           listboxId={timeListboxId}
           textWidthClassName="w-[89px]"
-          onToggle={() => setOpenSelect((current) => (current === "time" ? null : "time"))}
+          onToggle={() =>
+            setOpenSelect((current) => (current === "time" ? null : "time"))
+          }
           onSelect={selectTimeFilterOption}
         />
       </div>
 
-      <div className="flex w-[990px] max-w-full flex-col gap-6 bg-transparent" aria-label="Дискусии">
+      <div
+        className="flex w-[990px] max-w-full flex-col gap-6 bg-transparent"
+        aria-label="Дискусии"
+      >
         {THREAD_LIST.map((thread) => (
           <ThreadItem key={thread.id} thread={thread} />
         ))}

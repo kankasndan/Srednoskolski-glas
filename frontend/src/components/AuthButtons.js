@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
@@ -88,13 +89,13 @@ export default function AuthButtons() {
     const avatarUrl = user.imageUrl;
 
     return (
-      <div ref={menuRef} className="relative ml-auto flex shrink-0 items-center gap-3">
+      <div ref={menuRef} className="relative flex shrink-0 items-center gap-3">
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
-          className="flex items-center gap-3 rounded-full transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] focus-visible:ring-offset-2"
+          className="flex items-center gap-1 rounded-full transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] focus-visible:ring-offset-2 cursor-pointer group"
         >
           <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full">
             <img
@@ -104,9 +105,17 @@ export default function AuthButtons() {
             />
           </div>
 
-          <span className="font-[family-name:var(--font-manrope)] text-[18px] font-medium leading-none text-[#0A0A0A]">
+          <span className="font-[family-name:var(--font-manrope)] text-[18px] font-medium leading-none text-[#0A0A0A] group-hover:text-[#582FF5] transition">
             {displayName}
           </span>
+
+          <Image
+            src="/chevron-down.svg"
+            alt=""
+            width={16}
+            height={16}
+            className={`size-4`}
+          />
         </button>
 
         {menuOpen && (

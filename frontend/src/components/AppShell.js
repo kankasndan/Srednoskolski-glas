@@ -50,15 +50,15 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
   }
 
   return (
-    <div className="min-h-screen w-full bg-white">
+    <div className="flex h-screen flex-col overflow-hidden bg-white">
       <Header />
-      <div className="flex px-14 pt-8">
-        <div className="sticky top-40 flex h-[calc(100vh-160px)] shrink-0">
+      <div className="flex min-h-0 flex-1 px-6">
+        <aside className="box-border flex shrink-0 flex-col border-r border-gray-200 pr-6 pt-1">
           <button
             type="button"
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Прошири мени" : "Собери мени"}
-            className="absolute -top-10 left-0 z-10 flex size-10 items-center justify-center"
+            className="mb-1 flex size-10 shrink-0 items-center justify-center"
           >
             <Image
               src="/collapsed icons/menu-collapse.png"
@@ -68,14 +68,14 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
               className={`size-6 ${collapsed ? "rotate-180" : ""}`}
             />
           </button>
-          <aside
+          <div
             ref={(node) => {
               if (node) node.scrollTop = sidebarScrollTop;
             }}
             onScroll={(event) => {
               sidebarScrollTop = event.currentTarget.scrollTop;
             }}
-            className="overflow-y-auto overscroll-contain pr-14 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mask-fade-out pb-4"
           >
             <SidebarNav
               selectedKey={selectedKey}
@@ -99,10 +99,11 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
                 onSelect={handleSelect}
               />
             )}
-          </aside>
-          <div className="w-px shrink-0 rounded-2xl bg-[#CCCCCC]" />
-        </div>
-        <main className={`flex flex-1 justify-center ${contentClassName}`}>{children}</main>
+          </div>
+        </aside>
+        <main className={`flex flex-1 items-start justify-center overflow-y-auto pb-12 pt-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${contentClassName}`}>
+          {children}
+        </main>
       </div>
     </div>
   );
