@@ -1,30 +1,9 @@
 import Image from "next/image";
+import Link from "next/link";
+import { formatPostedAgo } from "@/lib/time";
 
 const SCHOOL_ICON = "/icons/uchilishte.svg";
 const DEFAULT_AVATAR = "/Generic avatar.svg";
-
-function formatPostedAgo(value) {
-  const createdAt = new Date(value);
-
-  if (Number.isNaN(createdAt.getTime())) {
-    return "";
-  }
-
-  const diffMs = Date.now() - createdAt.getTime();
-  const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
-
-  if (diffMinutes < 60) {
-    return `пред ${Math.max(1, diffMinutes)}м.`;
-  }
-
-  const diffHours = Math.floor(diffMinutes / 60);
-
-  if (diffHours < 24) {
-    return `пред ${diffHours}ч.`;
-  }
-
-  return `пред ${Math.floor(diffHours / 24)}д.`;
-}
 
 function getAttachmentImage(attachments = []) {
   const imageAttachment = attachments.find((attachment) => {
@@ -118,9 +97,17 @@ function ForumActionButton({ icon, label, count }) {
   );
 }
 
-function ForumThread({ thread, priority }) {
+function ForumThread({ thread, forumSlug, priority }) {
+  const openThreadLink = (
+    <Link
+      href={`/p/${forumSlug}/${thread.id}`}
+      aria-label={thread.title}
+      className="absolute inset-0 rounded-3xl"
+    />
+  );
+
   const content = (
-    <div className="flex w-full items-start justify-between gap-8 cursor-pointer">
+    <div className="flex w-full items-start justify-between gap-8">
       <div className="flex min-h-[97px] w-[681px] max-w-[calc(100%-128px)] shrink-0 flex-col gap-4">
         <div className="flex h-6 max-w-full items-center gap-2 overflow-hidden">
           {thread.tags.map((tag) => (
@@ -139,7 +126,7 @@ function ForumThread({ thread, priority }) {
         </div>
       </div>
 
-      <div className="flex h-[104px] w-24 shrink-0 flex-col gap-2">
+      <div className="relative z-10 flex h-[104px] w-24 shrink-0 flex-col gap-2">
         <ForumActionButton
           icon="/Chevrons up.svg"
           label="Гласај нагоре"
@@ -157,6 +144,7 @@ function ForumThread({ thread, priority }) {
   if (thread.image) {
     return (
       <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
+        {openThreadLink}
         <div className="w-full">{content}</div>
         <Image
           src={thread.image}
@@ -172,12 +160,13 @@ function ForumThread({ thread, priority }) {
 
   return (
     <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
+      {openThreadLink}
       {content}
     </article>
   );
 }
 
-export default function ForumThreadList({ forumName, threads }) {
+export default function ForumThreadList({ forumName, forumSlug, threads }) {
   const normalizedThreads = threads.map(normalizeThread);
   const firstImageId = normalizedThreads.find((thread) => thread.image)?.id;
 
@@ -187,6 +176,7 @@ export default function ForumThreadList({ forumName, threads }) {
         <ForumThread
           key={thread.id}
           thread={thread}
+          forumSlug={forumSlug}
           priority={thread.id === firstImageId}
         />
       ))}
