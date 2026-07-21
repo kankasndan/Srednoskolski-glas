@@ -7,7 +7,12 @@ import ForumEmptyState from "@/components/ForumEmptyState";
 import ForumFilters from "@/components/ForumFilters";
 import ForumThreadList from "@/components/ForumThreadList";
 import { useForums } from "@/hooks/useForums";
-import forumPageMock from "../../../../public/forum-page-mock.json";
+import drzhavnaMaturaPageMock from "../../../../public/forum-page-mock.json";
+import opshtiDiskusiiPageMock from "../../../../public/forum-page-opshti-diskusii-mock.json";
+
+// Static page mocks keyed by their forum slug. Add a mock here to give a forum
+// its own banner + threads until the real forum page endpoint is wired up.
+const FORUM_PAGE_MOCKS = [drzhavnaMaturaPageMock, opshtiDiskusiiPageMock];
 
 export default function TopicForumPage() {
   const { slug } = useParams();
@@ -33,11 +38,11 @@ export default function TopicForumPage() {
     );
   }
 
-  const mockForum = forumPageMock.forum.slug === slug ? forumPageMock.forum : null;
+  const mockPage = FORUM_PAGE_MOCKS.find((entry) => entry.forum.slug === slug) ?? null;
   const schoolForums = schoolsByCity.flatMap((entry) => entry.forums);
   const forum =
-    mockForum ?? [...general, ...schoolForums].find((item) => item.slug === slug);
-  const threads = mockForum ? forumPageMock.threads : [];
+    mockPage?.forum ?? [...general, ...schoolForums].find((item) => item.slug === slug);
+  const threads = mockPage ? mockPage.threads : [];
 
   if (!forum) {
     notFound();
@@ -46,7 +51,17 @@ export default function TopicForumPage() {
   if (threads.length === 0) {
     return (
       <AppShell>
-        <ForumEmptyState />
+        <div className="flex w-[990px] max-w-full flex-col gap-6">
+          <ForumBanner
+            title={forum.name}
+            description={forum.description}
+            icon={forum.imageUrl}
+            slug={forum.slug}
+            type={forum.type}
+            membersCount={forum.members_count}
+          />
+          <ForumEmptyState />
+        </div>
       </AppShell>
     );
   }
@@ -58,6 +73,9 @@ export default function TopicForumPage() {
           title={forum.name}
           description={forum.description}
           icon={forum.imageUrl}
+          slug={forum.slug}
+          type={forum.type}
+          membersCount={forum.members_count}
         />
         <ForumFilters />
         <ForumThreadList forumName={forum.name} threads={threads} />

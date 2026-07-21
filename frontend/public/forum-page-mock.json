@@ -4,11 +4,11 @@
     "name": "Државна матура",
     "slug": "drzhavna_matura",
     "type": "general",
-    "description": "Форум за темата „Државна матура“.",
+    "description": "Сè за државна матура - подготовка, литература, искуства.",
     "imageUrl": "/icons/drzhavna_matura.svg",
     "bannerUrl": "https://picsum.photos/seed/drzhavna_matura/1200/300",
     "threads_count": 1,
-    "members_count": 0,
+    "members_count": 259,
     "school": null
   },
   "threads": [
