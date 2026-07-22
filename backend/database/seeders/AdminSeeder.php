@@ -27,6 +27,7 @@ class AdminSeeder extends Seeder
                 'username' => 'moderator_1',
                 'password' => Hash::make('password'),
                 'role' => 'moderator',
+                'forum_id'
                 'email_verified_at' => now(),
                 'onboarding_completed_at' => now(),
             ]

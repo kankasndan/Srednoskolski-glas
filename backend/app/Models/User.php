@@ -76,4 +76,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Appeal::class);
     }
+
+    public function forum()
+    {
+        return $this->hasOne(Forum::class);
+    }
 }
