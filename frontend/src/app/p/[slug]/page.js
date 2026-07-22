@@ -7,8 +7,8 @@ import ForumEmptyState from "@/components/ForumEmptyState";
 import ForumFilters from "@/components/ForumFilters";
 import ForumThreadList from "@/components/ForumThreadList";
 import { useForums } from "@/hooks/useForums";
-import drzhavnaMaturaPageMock from "../../../../public/forum-page-mock.json";
-import opshtiDiskusiiPageMock from "../../../../public/forum-page-opshti-diskusii-mock.json";
+import drzhavnaMaturaPageMock from "../../../../public/MOCK_JSON/forum-page-mock.json";
+import opshtiDiskusiiPageMock from "../../../../public/MOCK_JSON/forum-page-opshti-diskusii-mock.json";
 
 // Static page mocks keyed by their forum slug. Add a mock here to give a forum
 // its own banner + threads until the real forum page endpoint is wired up.

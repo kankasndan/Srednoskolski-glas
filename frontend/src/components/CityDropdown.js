@@ -14,7 +14,7 @@ export default function CityDropdown({ city, forums, selectedKey, onSelect }) {
   return (
     <details name="school-city" className="group w-[268px]">
       <summary
-        className={`flex h-10 w-[268px] cursor-pointer list-none items-center justify-between gap-4 rounded-[12px] border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none tracking-normal text-black transition-colors duration-300 ease-out hover:bg-[#E5E5E5] group-open:rounded-b-none group-open:bg-[var(--color-primary-200)] group-open:text-white [&::-webkit-details-marker]:hidden ${
+        className={`flex h-10 w-[268px] cursor-pointer list-none items-center justify-between gap-4 rounded-[12px] border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none tracking-normal text-black transition-colors duration-300 ease-out hover:bg-[#CFE9ED] group-open:rounded-b-none group-open:bg-[#CFE9ED] [&::-webkit-details-marker]:hidden ${
           activeSchool ? "!bg-[var(--color-primary-200)] !text-white" : ""
         }`}
       >

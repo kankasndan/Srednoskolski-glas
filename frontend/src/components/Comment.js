@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
+import Avatar from "@/components/Avatar";
 import CommentActions from "@/components/CommentActions";
 import CommentAuthor from "@/components/CommentAuthor";
 import CommentBody from "@/components/CommentBody";
@@ -18,13 +18,7 @@ export default function Comment({ comment, depth = 0 }) {
   return (
     <div className="flex gap-2">
       <div className="flex shrink-0 flex-col items-center">
-        <Image
-          src={comment.author.imageUrl}
-          alt=""
-          width={32}
-          height={32}
-          className="size-8 rounded-full object-cover"
-        />
+        <Avatar src={comment.author.imageUrl} size="md" />
         {showLine ? (
           <div className="mt-1 w-0.5 flex-1 rounded-xs bg-[#CFE9ED]" />
         ) : null}

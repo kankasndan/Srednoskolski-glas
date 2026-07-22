@@ -1,0 +1,74 @@
+{
+  "data": {
+    "thread": {
+      "id": 102,
+      "title": "Совети за организирање на времето меѓу училиште и хоби?",
+      "description": "Тешко ми е да балансирам меѓу учење, тренинзи и слободно време. Како вие го организирате денот?\n\nЧесто останувам без време за одмор, па сакам да чујам како другите се справуваат. Дали користите некаков распоред или апликација?",
+      "upvotes": 34,
+      "views": 41,
+      "is_anonymous": false,
+      "comments_count": 2,
+      "created_at": "2026-07-19T16:45:00.000000Z",
+      "edited_at": null,
+      "forum": {
+        "id": 1,
+        "name": "Општи дискусии",
+        "slug": "opshti_diskusii",
+        "imageUrl": "/icons/opshti_diskusii.svg"
+      },
+      "author": {
+        "id": 12,
+        "username": "ana_2027",
+        "imageUrl": "/avatars/default-2.svg",
+        "school": {
+          "id": 22,
+          "name": "СУГС Михајло Пупин",
+          "city": "Скопје"
+        }
+      },
+      "attachments": []
+    },
+    "comments": [
+      {
+        "id": 1,
+        "content": "Јас си правам распоред во недела и се трудам да оставам барем еден слободен ден. Помага многу.",
+        "parent_id": null,
+        "upvotes": 9,
+        "created_at": "2026-07-19T17:30:00.000000Z",
+        "edited_at": null,
+        "deleted_by": null,
+        "author": {
+          "id": 11,
+          "username": "marko_2026",
+          "imageUrl": "/avatars/default-1.svg",
+          "school": {
+            "id": 21,
+            "name": "Гимназија Орце Николов",
+            "city": "Скопје"
+          }
+        },
+        "replies": []
+      },
+      {
+        "id": 2,
+        "content": "Пробај да ги групираш сличните задачи заедно, ми олесни кога почнав така да работам.",
+        "parent_id": null,
+        "upvotes": 6,
+        "created_at": "2026-07-19T18:10:00.000000Z",
+        "edited_at": null,
+        "deleted_by": null,
+        "author": {
+          "id": 13,
+          "username": "toni_maturant",
+          "imageUrl": "/avatars/default-3.svg",
+          "school": {
+            "id": 23,
+            "name": "СУГС Јосип Броз - Тито",
+            "city": "Скопје"
+          }
+        },
+        "replies": []
+      }
+    ]
+  }
+}
