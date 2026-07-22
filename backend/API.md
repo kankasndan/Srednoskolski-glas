@@ -213,9 +213,8 @@ Top-level comments have `parent_id: null`. Replies nest under `replies`.
 
 ## Thread list filters
 
-Used by:
+Used only by:
 
-- `GET /api/p/{slug}`
 - `GET /api/p/{slug}/threads`
 
 | Query | Values | Default | Meaning |
@@ -494,19 +493,17 @@ GET /api/forums
 
 ---
 
-### Forum page (forum + first page of threads)
+### Forum detail (banner / metadata only)
 
 ```
 GET /api/p/{slug}
 ```
 
-**Public.**
+**Public.** No query params. Does **not** return threads — use `/threads` for the list.
 
 | Path | Example |
 |------|---------|
 | `{slug}` | `drzhavna_matura` |
-
-Query: `page`, `sort`, `time` (see [Thread list filters](#thread-list-filters)).
 
 ```json
 {
@@ -523,57 +520,22 @@ Query: `page`, `sort`, `time` (see [Thread list filters](#thread-list-filters)).
       "description": "Дискусии за државна матура…",
       "bannerUrl": "https://…/banner.png",
       "school": null
-    },
-    "threads": [
-      {
-        "id": 15,
-        "title": "Како да се подготвам за матура?",
-        "description": "…",
-        "upvotes": 8,
-        "views": 120,
-        "is_anonymous": false,
-        "comments_count": 4,
-        "created_at": "2026-07-18T10:22:00.000000Z",
-        "edited_at": null,
-        "forum": {
-          "id": 3,
-          "name": "Државна матура",
-          "slug": "drzhavna_matura",
-          "imageUrl": "https://…/forum.png"
-        },
-        "author": { "id": 1, "username": "ana_mk", "imageUrl": "…", "school": null },
-        "attachments": []
-      }
-    ]
-  },
-  "meta": {
-    "current_page": 1,
-    "last_page": 3,
-    "per_page": 5,
-    "total": 12
-  },
-  "links": {
-    "first": "…",
-    "last": "…",
-    "prev": null,
-    "next": "…"
+    }
   }
 }
 ```
-
-Use this for the initial forum page load (banner + first 5 threads).
 
 ---
 
 ## Threads
 
-### Paginated threads for a forum (infinite scroll)
+### Paginated threads for a forum
 
 ```
 GET /api/p/{slug}/threads
 ```
 
-**Public.** Same filters as forum show. Prefer this for loading page 2+ while scrolling.
+**Public.** **Only** source of the forum thread list (page 1, filters, infinite scroll).
 
 ```json
 {
@@ -615,9 +577,12 @@ GET /api/p/{slug}/threads
 
 **Frontend pattern**
 
-1. Load forum: `GET /api/p/{slug}` → render banner + `data.threads`
-2. On scroll: `GET /api/p/{slug}/threads?page=2&sort=…&time=…` → append `data`
-3. Stop when `meta.current_page >= meta.last_page` (or `links.next` is `null`)
+1. Initial page (parallel):
+   - `GET /api/p/{slug}` → banner / forum meta
+   - `GET /api/p/{slug}/threads` → page 1 of threads (default or URL filters)
+2. Filter change (`sort` / `time`): `GET /api/p/{slug}/threads?sort=…&time=…&page=1` → **replace** thread list
+3. Scroll: `GET /api/p/{slug}/threads?page=2&sort=…&time=…` → **append** `data`
+4. Stop when `meta.current_page >= meta.last_page` (or `links.next` is `null`)
 
 ---
 
@@ -749,8 +714,8 @@ DELETE /api/media
 | `PUT` | `/api/onboarding` | yes | Save profile |
 | `GET` | `/api/cities` | — | Cities + schools |
 | `GET` | `/api/forums` | — | Sidebar forums |
-| `GET` | `/api/p/{slug}` | — | Forum + threads page 1 |
-| `GET` | `/api/p/{slug}/threads` | — | Paginated threads (scroll) |
+| `GET` | `/api/p/{slug}` | — | Forum metadata only |
+| `GET` | `/api/p/{slug}/threads` | — | Paginated threads (page 1, filters, scroll) |
 | `GET` | `/api/p/{slug}/comments/{id}` | — | Thread + comment tree |
 | `POST` | `/api/media` | yes | Upload |
 | `DELETE` | `/api/media` | yes | Delete upload |
