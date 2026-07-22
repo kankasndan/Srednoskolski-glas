@@ -12,10 +12,12 @@ export default function OnboardingGuard({ children }) {
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("auth_token");
+    // The "onboarding_pending" flag is set by the OAuth callback right after a
+    // successful login. Real authorization is still enforced server-side by the
+    // auth:sanctum guard on the /onboarding endpoint; this is only a UX gate.
     const pending = localStorage.getItem("onboarding_pending");
 
-    if (token && pending) {
+    if (pending) {
       setAllowed(true);
       return;
     }

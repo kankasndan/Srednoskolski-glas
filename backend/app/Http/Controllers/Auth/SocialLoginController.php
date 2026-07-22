@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -30,12 +31,17 @@ class SocialLoginController extends Controller
             ]);
             $user->save();
 
-            $token = $user->createToken('auth_token')->plainTextToken;
+            // Log the user into the session so Sanctum's SPA (cookie) auth takes
+            // over. No token is exposed to the frontend; the browser holds an
+            // httpOnly session cookie that JavaScript cannot read.
+            Auth::login($user, remember: true);
+            request()->session()->regenerate();
+
             $onboardingStatus = $user->onboarding_completed_at ? 'complete' : 'required';
 
             $frontendUrl = rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'));
 
-            return redirect()->to("{$frontendUrl}/auth/callback?token={$token}&onboarding={$onboardingStatus}");
+            return redirect()->to("{$frontendUrl}/auth/callback?onboarding={$onboardingStatus}");
 
         } catch (\Exception $e) {
             Log::error('Social login failed', [

@@ -5,18 +5,18 @@ import AuthButtons from "@/components/AuthButtons";
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 flex h-32 w-full items-center gap-20 bg-white pt-12 pr-14 pb-6 pl-14">
+    <header className="sticky top-0 z-50 flex w-full items-center justify-between gap-6 bg-white shadow-sm px-14 py-4">
       <Link
         href="/feed"
-        className="flex h-14 w-60 shrink-0 items-center justify-center overflow-hidden"
+        className="flex h-14 w-60 shrink-0 items-center justify-center gap-3 overflow-hidden"
       >
         <Image
-          src="/logo-with-text.svg"
+          src="/logo-with-text.svg?v=large-header"
           alt="Средношколски глас"
           width={240}
           height={56}
           priority
-          className="h-14 w-60 object-cover"
+          className="block h-14 w-60"
         />
       </Link>
       <SearchBar />

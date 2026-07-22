@@ -6,7 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -42,14 +42,29 @@ class User extends Authenticatable
         ];
     }
 
-    public function followedForums()
+    protected static function booted(): void
     {
-        return $this->belongsToMany(Forum::class);
+        // Give users without a picture one of the default avatars at random, so
+        // every account always has an image to display.
+        static::creating(function (User $user): void {
+            if (empty($user->imageUrl)) {
+                $defaults = config('avatars.defaults', []);
+
+                if (! empty($defaults)) {
+                    $user->imageUrl = $defaults[array_rand($defaults)];
+                }
+            }
+        });
     }
 
-    public function studentData()
+    public function studentData(): HasOne
     {
-        return $this->belongsTo(StudentData::class, "student_data");
+        return $this->hasOne(StudentData::class);
+    }
+
+    public function forums(): BelongsToMany
+    {
+        return $this->belongsToMany(Forum::class)->withTimestamps();
     }
 
     public function threads()

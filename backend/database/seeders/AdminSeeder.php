@@ -4,33 +4,34 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        User::updateOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@srednoskolskiglas.mk'],
             [
                 'username' => 'super_admin',
-                'password' => Hash::make('password'),
+                'password' => 'password',
                 'role' => 'super_admin',
                 'email_verified_at' => now(),
                 'onboarding_completed_at' => now(),
-            ]
+            ],
         );
+        $admin->syncRoles(['super_admin']);
 
-        User::updateOrCreate(
+        $moderator = User::updateOrCreate(
             ['email' => 'moderator@srednoskolskiglas.mk'],
             [
                 'username' => 'moderator_1',
-                'password' => Hash::make('password'),
+                'password' => 'password',
                 'role' => 'moderator',
                 'forum_id'
                 'email_verified_at' => now(),
                 'onboarding_completed_at' => now(),
-            ]
+            ],
         );
+        $moderator->syncRoles(['moderator']);
     }
 }

@@ -8,7 +8,7 @@ class Report extends Model
 {
     protected $fillable = [
         'reporter_id', 'reportable_id', 'reportable_type', 'reason', 'other_reason',
-        'status', 'source', 'ai_confidence', 'ai_reasoning', 'reviewed_by',
+        'status', 'source', 'reviewed_by',
     ];
 
     public function reporter()

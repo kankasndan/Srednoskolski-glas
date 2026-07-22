@@ -1,45 +1,72 @@
 import Image from "next/image";
 
-const THREADS = [
-  {
-    id: 1,
-    tags: [
-      { label: "марко_2026", icon: "/Generic avatar.svg" },
-      { label: "Гим. Орце Николов", icon: "/icons/uciliste.svg" },
-    ],
-    title: "Кои се најдобрите ресурси за подготовка на матура по математика?",
-    excerpt: "Здраво. Барам совети за најдобри книги, видеа и онлајн материјали...",
-    postedAgo: "пред 2ч.",
-    comments: 42,
-    votes: 87,
-  },
-  {
-    id: 2,
-    tags: [
-      { label: "гоце_2027", icon: "/Generic avatar.svg" },
-      { label: "Гим. Никола Карев", icon: "/icons/uciliste.svg" },
-    ],
-    title: "Дали матура по странски јазик е тешка ако имам B2?",
-    excerpt: "Имам Cambridge B2 сертификат и размислувам да земам англиски на матура...",
-    postedAgo: "пред 3д.",
-    comments: 15,
-    votes: 28,
-    image: "/thread-placeholder.png",
-  },
-  {
-    id: 3,
-    tags: [
-      { label: "Истакнато", tone: "highlight" },
-      { label: "ана_матуранка", icon: "/Generic avatar.svg" },
-      { label: "СУГС Михајло Пупин", icon: "/icons/uciliste.svg" },
-    ],
-    title: "[GUIDE] Како се справив со матурата по македонски - мојот метод",
-    excerpt: "Завршив матура минатата година со 4.95. Сакам да го споделам начинот на кој...",
-    postedAgo: "пред 5д.",
-    comments: 89,
-    votes: 312,
-  },
-];
+const SCHOOL_ICON = "/icons/uchilishte.svg";
+const DEFAULT_AVATAR = "/Generic avatar.svg";
+
+function formatPostedAgo(value) {
+  const createdAt = new Date(value);
+
+  if (Number.isNaN(createdAt.getTime())) {
+    return "";
+  }
+
+  const diffMs = Date.now() - createdAt.getTime();
+  const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
+
+  if (diffMinutes < 60) {
+    return `пред ${Math.max(1, diffMinutes)}м.`;
+  }
+
+  const diffHours = Math.floor(diffMinutes / 60);
+
+  if (diffHours < 24) {
+    return `пред ${diffHours}ч.`;
+  }
+
+  return `пред ${Math.floor(diffHours / 24)}д.`;
+}
+
+function getAttachmentImage(attachments = []) {
+  const imageAttachment = attachments.find((attachment) => {
+    const type = attachment.type ?? attachment.mime_type ?? attachment.mimeType ?? "";
+    const url = attachment.imageUrl ?? attachment.url ?? attachment.path ?? "";
+
+    return type.startsWith("image/") || /\.(avif|gif|jpe?g|png|webp|svg)$/i.test(url);
+  });
+
+  return imageAttachment?.imageUrl ?? imageAttachment?.url ?? imageAttachment?.path ?? null;
+}
+
+function normalizeThread(thread) {
+  const authorLabel = thread.is_anonymous
+    ? "Анонимен"
+    : thread.author?.username ?? "Корисник";
+  const school = thread.author?.school;
+  const tags = [
+    {
+      label: authorLabel,
+      icon: thread.is_anonymous ? DEFAULT_AVATAR : thread.author?.imageUrl ?? DEFAULT_AVATAR,
+    },
+  ];
+
+  if (school?.name) {
+    tags.push({
+      label: school.city ? `${school.name}` : school.name,
+      icon: SCHOOL_ICON,
+    });
+  }
+
+  return {
+    id: thread.id,
+    tags,
+    title: thread.title,
+    excerpt: thread.description,
+    postedAgo: formatPostedAgo(thread.created_at),
+    comments: thread.comments_count,
+    votes: thread.upvotes,
+    image: getAttachmentImage(thread.attachments),
+  };
+}
 
 function ForumTag({ tag }) {
   return (
@@ -127,10 +154,12 @@ function ForumThread({ thread }) {
   );
 }
 
-export default function ForumThreadList() {
+export default function ForumThreadList({ forumName, threads }) {
+  const normalizedThreads = threads.map(normalizeThread);
+
   return (
-    <div className="flex w-[990px] max-w-full flex-col gap-6" aria-label="Дискусии за државна матура">
-      {THREADS.map((thread) => (
+    <div className="flex w-[990px] max-w-full flex-col gap-6" aria-label={`Дискусии за ${forumName}`}>
+      {normalizedThreads.map((thread) => (
         <ForumThread key={thread.id} thread={thread} />
       ))}
     </div>

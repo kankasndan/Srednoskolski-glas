@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
+  <!-- Generator: Adobe Illustrator 30.0.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 123)  -->
+  <defs>
+    <style>
+      .st0 {
+        stroke-width: 7px;
+      }
+
+      .st0, .st1, .st2 {
+        fill: #582ff5;
+      }
+
+      .st0, .st2 {
+        stroke: #fff;
+        stroke-miterlimit: 10;
+      }
+    </style>
+  </defs>
+  <g>
+    <g>
+      <circle class="st1" cx="211.12" cy="145.25" r="30.85"/>
+      <circle class="st1" cx="168.82" cy="184.53" r="30.85"/>
+      <circle class="st1" cx="147.67" cy="240.8" r="30.85"/>
+      <circle class="st1" cx="168.82" cy="295.19" r="30.85"/>
+      <circle class="st1" cx="211.12" cy="331.45" r="30.85"/>
+      <polygon class="st1" points="241.97 145.25 241.97 195.74 241.97 331.45 166.14 302.62 152.17 233.13 171.43 184.53 211.12 145.25 241.97 145.25"/>
+    </g>
+    <path class="st2" d="M189.56,215.38"/>
+    <path class="st0" d="M241.97,188.56h-53.17s-15.28-28.33,10.87-26.44c0,0,13.31,10.57,13.5,24.17"/>
+    <path class="st0" d="M241.97,239.55l-73.15-1.2s5.25-18.06-18.17-21.08"/>
+    <path class="st0" d="M168.82,238.35s-3.36,13.66-21.15,12.53"/>
+    <path class="st0" d="M241.97,280.34l-35.42,1.89s-32.18-4.02-28.03,11.33,39.36,8.93,47.67-2.52"/>
+  </g>
+  <g>
+    <g>
+      <circle class="st1" cx="288.88" cy="146.45" r="30.85"/>
+      <circle class="st1" cx="331.18" cy="185.73" r="30.85"/>
+      <circle class="st1" cx="352.33" cy="242" r="30.85"/>
+      <circle class="st1" cx="331.18" cy="296.39" r="30.85"/>
+      <circle class="st1" cx="288.88" cy="332.64" r="30.85"/>
+      <polygon class="st1" points="258.03 146.45 258.03 196.93 258.03 332.64 333.86 303.82 347.83 234.32 328.57 185.73 288.88 146.45 258.03 146.45"/>
+    </g>
+    <path class="st2" d="M310.44,216.57"/>
+    <path class="st0" d="M258.03,189.76h53.17s15.28-28.33-10.87-26.44c0,0-13.31,10.57-13.5,24.17"/>
+    <path class="st0" d="M258.03,240.75l73.15-1.2s-5.25-18.06,18.17-21.08"/>
+    <path class="st0" d="M331.18,239.55s3.36,13.66,21.15,12.53"/>
+    <path class="st0" d="M258.03,281.53l35.42,1.89s32.18-4.02,28.03,11.33c-4.15,15.35-39.36,8.93-47.67-2.52"/>
+  </g>
+</svg>

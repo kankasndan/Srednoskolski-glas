@@ -1,27 +1,67 @@
-import { notFound } from "next/navigation";
+"use client";
+
+import { notFound, useParams } from "next/navigation";
 import AppShell from "@/components/AppShell";
+import ForumBanner from "@/components/ForumBanner";
 import ForumEmptyState from "@/components/ForumEmptyState";
-import { FORUMS } from "@/lib/forums";
+import ForumFilters from "@/components/ForumFilters";
+import ForumThreadList from "@/components/ForumThreadList";
+import { useForums } from "@/hooks/useForums";
+import forumPageMock from "../../../../public/forum-page-mock.json";
 
-const DRZHAVNA_MATURA_SLUG = "drzhavna_matura";
+export default function TopicForumPage() {
+  const { slug } = useParams();
+  const { general, schoolsByCity, loading, error } = useForums();
 
-export function generateStaticParams() {
-  return FORUMS.filter((forum) => forum.slug !== DRZHAVNA_MATURA_SLUG).map((forum) => ({
-    slug: forum.slug,
-  }));
-}
+  if (loading) {
+    return (
+      <AppShell>
+        <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal text-[#595959]">
+          Се вчитува…
+        </p>
+      </AppShell>
+    );
+  }
 
-export default async function TopicForumPage({ params }) {
-  const { slug } = await params;
-  const forum = FORUMS.find((item) => item.slug === slug);
+  if (error) {
+    return (
+      <AppShell>
+        <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal text-[#595959]">
+          Не успеа вчитувањето на форумот.
+        </p>
+      </AppShell>
+    );
+  }
 
-  if (!forum || slug === DRZHAVNA_MATURA_SLUG) {
+  const mockForum = forumPageMock.forum.slug === slug ? forumPageMock.forum : null;
+  const schoolForums = schoolsByCity.flatMap((entry) => entry.forums);
+  const forum =
+    mockForum ?? [...general, ...schoolForums].find((item) => item.slug === slug);
+  const threads = mockForum ? forumPageMock.threads : [];
+
+  if (!forum) {
     notFound();
+  }
+
+  if (threads.length === 0) {
+    return (
+      <AppShell>
+        <ForumEmptyState />
+      </AppShell>
+    );
   }
 
   return (
     <AppShell>
-      <ForumEmptyState />
+      <div className="flex w-[990px] max-w-full flex-col gap-6">
+        <ForumBanner
+          title={forum.name}
+          description={forum.description}
+          icon={forum.imageUrl}
+        />
+        <ForumFilters />
+        <ForumThreadList forumName={forum.name} threads={threads} />
+      </div>
     </AppShell>
   );
 }

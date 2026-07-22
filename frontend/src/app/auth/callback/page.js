@@ -8,37 +8,30 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
     const onboarding = params.get("onboarding");
 
     const successRedirect =
       localStorage.getItem("post_login_redirect") || "/register/onboarding";
-    const errorRedirect =
-      localStorage.getItem("post_login_error_redirect") || "/register";
     localStorage.removeItem("post_login_redirect");
     localStorage.removeItem("post_login_error_redirect");
 
-    if (token) {
-      localStorage.setItem("auth_token", token);
-      const onboardingRequired = onboarding === "required";
+    // Auth now lives in an httpOnly session cookie set by the backend; the only
+    // thing the callback carries is whether onboarding still needs to happen.
+    const onboardingRequired = onboarding === "required";
 
-      if (onboardingRequired) {
-        localStorage.setItem("onboarding_pending", "1");
-      } else {
-        localStorage.removeItem("onboarding_pending");
-      }
-
-      const nextPath = onboardingRequired
-        ? "/register/onboarding"
-        : successRedirect === "/register/onboarding"
-          ? "/feed"
-          : successRedirect;
-
-      router.replace(nextPath);
-      return;
+    if (onboardingRequired) {
+      localStorage.setItem("onboarding_pending", "1");
+    } else {
+      localStorage.removeItem("onboarding_pending");
     }
 
-    router.replace(`${errorRedirect}?error=missing_token`);
+    const nextPath = onboardingRequired
+      ? "/register/onboarding"
+      : successRedirect === "/register/onboarding"
+        ? "/feed"
+        : successRedirect;
+
+    router.replace(nextPath);
   }, [router]);
 
   return (

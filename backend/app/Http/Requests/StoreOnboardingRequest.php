@@ -28,7 +28,6 @@ class StoreOnboardingRequest extends FormRequest
                 Rule::unique('users', 'username')->ignore($this->user()?->id),
             ],
             'is_student' => ['required', 'boolean'],
-            'city' => [$isStudent ? 'required' : 'nullable', 'string', 'max:255'],
             'school' => [$isStudent ? 'required' : 'nullable', 'string', 'max:255'],
             'area' => [$isStudent ? 'required' : 'nullable', 'string', 'max:255'],
             'year' => [$isStudent ? 'required' : 'nullable', 'string', 'max:255'],

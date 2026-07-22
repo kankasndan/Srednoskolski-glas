@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('forums', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
-            $table->text("description");
-            $table->string("type");
-            $table->string("imageUrl");
-            $table->string("bannerUrl");
-            $table->foreignId("school_id")->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignId("user_id")->nullable()->constrained()->cascadeOnDelete();
+            $table->string('name');
+            $table->string('slug');
+            $table->text('description');
+            $table->string('type');
+            $table->string('imageUrl');
+            $table->string('bannerUrl');
+            $table->integer('threads_count')->default(0);
+            $table->integer('members_count')->default(0);
             $table->timestamps();
         });
     }

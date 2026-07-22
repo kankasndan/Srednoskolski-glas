@@ -3,25 +3,48 @@
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export function getAuthToken() {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("auth_token");
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+
+function readCookie(name) {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${name}=([^;]*)`),
+  );
+  return match ? decodeURIComponent(match[1]) : null;
 }
 
+// Ask Laravel to set the XSRF-TOKEN cookie. Sanctum then validates it against
+// the X-XSRF-TOKEN header we send on every state-changing request.
+export async function ensureCsrfCookie() {
+  if (readCookie("XSRF-TOKEN")) return;
+  await fetch(`${API_BASE_URL}/sanctum/csrf-cookie`, {
+    credentials: "include",
+  });
+}
+
+// Authenticated requests rely on the httpOnly session cookie set by the
+// backend during login, so we always send credentials. There is no token in
+// JavaScript to read or attach.
 export async function apiFetch(path, options = {}) {
-  const token = getAuthToken();
+  const method = (options.method || "GET").toUpperCase();
   const headers = {
     Accept: "application/json",
     ...(options.body ? { "Content-Type": "application/json" } : {}),
     ...(options.headers || {}),
   };
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  if (!SAFE_METHODS.has(method)) {
+    await ensureCsrfCookie();
+    const csrfToken = readCookie("XSRF-TOKEN");
+    if (csrfToken) {
+      headers["X-XSRF-TOKEN"] = csrfToken;
+    }
   }
 
   return fetch(`${API_BASE_URL}${path}`, {
     ...options,
+    method,
+    credentials: "include",
     headers,
   });
 }

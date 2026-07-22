@@ -1,38 +1,27 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ForumIcon from "@/components/ForumIcon";
 
 const BASE_CLASS =
-  "group flex h-12 w-[268px] items-center gap-3 rounded-2xl border border-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-medium transition-colors";
+  "group flex h-10 w-[268px] items-center gap-3 rounded-xl border border-[var(--color-grays-300)] bg-white px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[var(--color-grays-900)] transition-colors hover:bg-[var(--color-secondary-200)]";
 
-export default function ForumItem({ forum, selectedKey, onSelect }) {
+export default function ForumItem({ forum, active = false, onSelect }) {
   const pathname = usePathname();
   const key = `forum:${forum.slug}`;
   const isCurrentPage = pathname === `/p/${forum.slug}`;
-  const isActive = selectedKey === key;
+  const className = `${BASE_CLASS} ${active ? "!bg-[var(--color-secondary-200)]" : ""}`;
 
   return (
     <Link
       href={`/p/${forum.slug}`}
+      scroll={false}
       aria-current={isCurrentPage ? "page" : undefined}
       onClick={() => onSelect(key)}
-      className={`${BASE_CLASS} ${
-        isActive
-          ? "bg-[#582FF5] font-bold text-white"
-          : "text-[#595959] hover:bg-[#582FF5] hover:text-white"
-      }`}
+      className={className}
     >
-      <Image
-        src={forum.icon}
-        alt=""
-        width={55}
-        height={55}
-        className={`h-[55px] w-[55px] shrink-0 transition group-hover:brightness-0 group-hover:invert ${
-          isActive ? "brightness-0 invert" : ""
-        }`}
-      />
+      <ForumIcon src={forum.imageUrl} />
       <span>{forum.name}</span>
     </Link>
   );

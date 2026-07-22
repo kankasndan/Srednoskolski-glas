@@ -13,9 +13,7 @@ export default function OnboardingMasthead() {
           className="h-[89px] w-[132px] shrink-0 object-contain"
         />
         <h1 className="font-(family-name:--font-oswald) text-left text-[30px] font-normal leading-[34px] tracking-[0%] text-[#000000]">
-          ДОЗВОЛИ НИ ДА ТЕ
-          <br />
-          ЗАПОЗНАЕМЕ
+          ДОЗВОЛИ НИ ДА ТЕ ЗАПОЗНАЕМЕ
         </h1>
       </div>
 
