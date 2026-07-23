@@ -45,6 +45,12 @@ class StudentDataSeeder extends Seeder
                     'grade' => $student['grade'],
                 ],
             );
+
+            $forum = $school->forum;
+
+            if ($forum !== null) {
+                $user->forums()->syncWithoutDetaching([$forum->id]);
+            }
         }
     }
 }

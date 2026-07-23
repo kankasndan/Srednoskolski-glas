@@ -7,6 +7,7 @@ use App\Http\Requests\StoreOnboardingRequest;
 use App\Models\City;
 use App\Models\School;
 use App\Models\StudentData;
+use App\Models\User;
 use App\Models\Vocation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -63,6 +64,8 @@ class OnboardingController extends Controller
                     'grade' => $grade,
                 ],
             );
+
+            $this->followSchoolForum($user, $school);
         } else {
             $user->studentData()?->delete();
         }
@@ -114,5 +117,23 @@ class OnboardingController extends Controller
         }
 
         return $school;
+    }
+
+    /**
+     * Automatically follow the school's forum when the student picks that school.
+     */
+    private function followSchoolForum(User $user, School $school): void
+    {
+        $forum = $school->forum;
+
+        if ($forum === null) {
+            return;
+        }
+
+        $sync = $user->forums()->syncWithoutDetaching([$forum->id]);
+
+        if ($sync['attached'] !== []) {
+            $forum->increment('members_count');
+        }
     }
 }
