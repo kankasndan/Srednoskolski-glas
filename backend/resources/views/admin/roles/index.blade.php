@@ -15,7 +15,7 @@
 
     {{-- Search bar --}}
     <div class="flex items-center gap-3 mb-6 relative">
-        <input type="text" id="staff-search" placeholder="Search staff by email..."
+        <input type="text" id="staff-search" placeholder="Search staff by username..."
             class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
 
         <div id="search-results"
@@ -29,7 +29,7 @@
 
     <section class="mb-8 space-y-6">
         @foreach ($roles as $role)
-            @if ($role != 'user')
+            @if ($role->role != 'user')
                 <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{{ $role->role }}s</h2>
                 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm ">
                     <table class="w-full text-sm">
@@ -115,8 +115,8 @@
                 @csrf
 
                 <div class="mb-4 relative">
-                    <label class="text-sm font-medium text-gray-700">Search user by email</label>
-                    <input type="text" id="grant-search" autocomplete="off" placeholder="Type an email..."
+                    <label class="text-sm font-medium text-gray-700">Search user by username</label>
+                    <input type="text" id="grant-search" autocomplete="off" placeholder="Type an username..."
                         class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
 
                     <input type="hidden" name="user_id" id="grant-selected-user-id">
@@ -238,7 +238,7 @@
             `;
 
                     row.addEventListener('click', () => {
-                        grantSearchInput.value = user.email;
+                        grantSearchInput.value = user.username;
                         grantSelectedUserId.value = user.id;
                         grantResultsBox.classList.add('hidden');
                     });

@@ -13,7 +13,7 @@ class RoleController extends Controller
     {
         $users = User::orderBy("role")->with("forum")->get();
 
-        $roles = User::get("role");
+        $roles = User::distinct()->get("role");
 
         $forums = Forum::get();
 
@@ -46,7 +46,7 @@ class RoleController extends Controller
     {
         $query = $request->get('q', '');
 
-        $users = User::where('email', 'like', "%{$query}%")
+        $users = User::where('username', 'like', "%{$query}%")
             ->whereIn('role', ['moderator', 'admin', 'super_admin'])
             ->limit(10)
             ->get(['id', 'username', 'email', 'role']);
@@ -65,7 +65,7 @@ class RoleController extends Controller
     {
         $query = $request->get('q', '');
 
-        $users = User::where('email', 'like', "%{$query}%")
+        $users = User::where('username', 'like', "%{$query}%")
             ->where('role', 'user')
             ->limit(10)
             ->get(['id', 'username', 'email', 'role']);

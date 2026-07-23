@@ -27,7 +27,6 @@ class AdminSeeder extends Seeder
                 'username' => 'moderator_1',
                 'password' => 'password',
                 'role' => 'moderator',
-                'forum_id'
                 'email_verified_at' => now(),
                 'onboarding_completed_at' => now(),
             ],

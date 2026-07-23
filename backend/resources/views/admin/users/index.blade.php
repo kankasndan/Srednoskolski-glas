@@ -19,10 +19,17 @@
     @endif
 
     {{-- Search + Filters --}}
-    <form action="{{ route('users.index') }}" method="GET" class="flex flex-wrap items-center gap-3 mb-6">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by username or email..."
-            class="flex-1 min-w-[220px] border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
+    <form action="{{ route('user.index') }}" method="GET" class="flex flex-wrap items-center gap-3 mb-6">
 
+        <div class="flex items-center gap-3 relative">
+            <input type="text" id="user-search" name="search" value="{{ request('search') }}"
+                placeholder="Search by username or email..."
+                class="flex-1 min-w-[220px] border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
+
+            <div id="search-results"
+                class="absolute left-0 top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg hidden z-50">
+            </div>
+        </div>
         <select name="school" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
             <option value="">All schools</option>
             @foreach ($schools as $school)
@@ -32,7 +39,7 @@
             @endforeach
         </select>
 
-        <select name="sign_in_method" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <select name="provider" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
             <option value="">All sign-in methods</option>
             <option value="google" {{ request('sign_in_method') == 'google' ? 'selected' : '' }}>Google</option>
             <option value="facebook" {{ request('sign_in_method') == 'facebook' ? 'selected' : '' }}>Facebook</option>
@@ -44,12 +51,13 @@
             <option value="banned" {{ request('status') == 'banned' ? 'selected' : '' }}>Banned</option>
         </select>
 
-        <button type="submit" class="bg-my-purple text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-my-purple/90">
+        <button type="submit"
+            class="bg-my-purple text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-my-purple/90">
             Filter
         </button>
 
         @if (request()->anyFilled(['search', 'school', 'sign_in_method', 'status']))
-            <a href="{{ route('users.index') }}" class="text-sm text-gray-500 hover:underline">Clear filters</a>
+            <a href="{{ route('user.index') }}" class="text-sm text-gray-500 hover:underline">Clear filters</a>
         @endif
     </form>
 
@@ -70,26 +78,33 @@
             </thead>
             <tbody class="divide-y divide-gray-100">
                 @forelse ($users as $user)
-                    <tr class="cursor-pointer hover:bg-gray-50"
-                        onclick="window.location='{{ route('users.show', $user->id) }}'">
+                    <tr class="cursor-pointer hover:bg-gray-50" onclick="window.location='{{ route('user.show', $user->id) }}'">
                         <td class="px-4 py-3 flex items-center gap-3">
-                            <img src="{{ $user->imageUrl ?? 'https://via.placeholder.com/32' }}" class="w-8 h-8 rounded-full object-cover">
+                            <img src="{{ $user->imageUrl ?? 'https://via.placeholder.com/32' }}"
+                                class="w-8 h-8 rounded-full object-cover">
                             <span class="font-medium text-gray-800">{{ $user->username }}</span>
                         </td>
                         <td class="px-4 py-3 text-gray-500">{{ $user->email }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $user->school->name ?? '—' }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $user->school->city ?? '—' }}</td>
-                        <td class="px-4 py-3 text-gray-500 capitalize">{{ $user->sign_in_method ?? '—' }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $user->studentData->school->name ?? '—' }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $user->studentData->school->city->name ?? '—' }}</td>
+                        <td class="px-4 py-3 text-gray-500 capitalize">{{ $user->provider ?? '—' }}</td>
                         <td class="px-4 py-3 text-gray-800 font-medium">{{ $user->karma ?? 0 }}</td>
                         <td class="px-4 py-3">
-                            @if ($user->banned_until && $user->banned_until->isFuture())
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Banned</span>
+                            @if ($user->sanctions()->exists())
+                                @foreach ($user->sanctions as $sanction)
+                                    @if ($sanction->type != 'warning' && ($sanction->expires_at === null || $sanction->expires_at->isFuture()))
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Banned</span>
+                                    @endif
+                                @endforeach
                             @else
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
                             @endif
                         </td>
                         <td class="px-4 py-3 text-right" onclick="event.stopPropagation()">
-                            <a href="{{ route('users.show', $user->id) }}" class="text-my-purple text-xs font-medium hover:underline">
+                            <a href="{{ route('user.show', $user->id) }}"
+                                class="text-my-purple text-xs font-medium hover:underline">
                                 View Profile
                             </a>
                         </td>
@@ -109,4 +124,52 @@
     <div class="mt-6">
         {{ $users->withQueryString()->links() }}
     </div>
+
+    @push('scripts')
+        <script>
+            const roleShowTemplate = "{{ route('user.show', ['user' => '__ID__']) }}";
+            const liveSearchUrl = "{{ route('user.liveSearch') }}";
+
+            const searchInput = document.getElementById('user-search');
+            const resultsBox = document.getElementById('search-results');
+
+            searchInput.addEventListener('input', function() {
+                const query = this.value.trim();
+
+                if (query.length < 2) {
+                    resultsBox.classList.add('hidden');
+                    return;
+                }
+
+                fetch(`${liveSearchUrl}?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(users => renderResults(users))
+                    .catch(err => console.error(err));
+            });
+
+            function renderResults(users) {
+                resultsBox.innerHTML = '';
+
+                if (users.length === 0) {
+                    resultsBox.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">No matching users</div>`;
+                    resultsBox.classList.remove('hidden');
+                    return;
+                }
+
+                users.forEach(user => {
+                    const row = document.createElement('a');
+                    row.href = roleShowTemplate.replace('__ID__', user.id);
+                    row.className =
+                        'block px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center text-sm border-b border-gray-100 last:border-0 no-underline text-inherit';
+                    row.innerHTML = `
+                <span class="font-medium text-gray-800">${user.username ?? 'No username'}</span>
+                <span class="text-gray-400 text-xs">${user.email}</span>
+            `;
+                    resultsBox.appendChild(row);
+                });
+
+                resultsBox.classList.remove('hidden');
+            }
+        </script>
+    @endpush
 @endsection

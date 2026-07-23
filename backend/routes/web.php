@@ -21,8 +21,14 @@ Route::prefix("admin")->middleware("auth")->group(function () {
     // COMUNITY
 
         // USERS
+            Route::get("users", [UserController::class, "index"])->name("user.index");
 
-        Route::get("users", [UserController::class, "index"])->name("user.index");
+            // SEARCH USERS
+            Route::get("users/liveSearch", [UserController::class, "liveSearch"])->name("user.liveSearch");
+            Route::get("users/{user}/show", [UserController::class, "show"])->name("user.show");
+
+            // EXPORT USER AS PDF
+            Route::get('/admin/users/{user}/export', [UserController::class, 'export'])->name('user.export');
    
    
     // ROLES AND PERMISSION

@@ -2,15 +2,17 @@
 
 @section('content')
     {{-- Page header --}}
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col items-start justify-between mb-6">
+        <div class="mb-6">
+            <a href="{{ route('role.index') }}" class="text-sm text-gray-500 hover:text-my-purple flex items-center gap-1">
+                &larr; Back to users
+            </a>
+        </div>
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Staff Profile</h1>
             <p class="text-sm text-gray-500">View and manage this staff member's role and permissions</p>
         </div>
-        <a href="{{ route('role.index') }}"
-            class="bg-my-purple text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-my-purple/90">
-            Go back to all users
-        </a>
+        
     </div>
 
     @if (session('success'))
