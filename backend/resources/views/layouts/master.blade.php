@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Panel</title>
+    <script src="https://kit.fontawesome.com/75475ebc14.js" crossorigin="anonymous"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -55,9 +56,7 @@
                   @if($currentAdmin->imageUrl)
                     <img src="{{ $currentAdmin->imageUrl }} " alt="">
                   @else
-                    <div
-                    class="flex h-9 w-9 items-center justify-center rounded-full bg-my-purple text-[13px] font-bold text-white">
-                        А</div>
+                    <img src="https://via.placeholder.com/32" class="w-8 h-8 rounded-full">
                   @endif
                     <div class="hidden text-left sm:block">
                         <div class="whitespace-nowrap text-[13px] font-bold text-[#1F2333]">{{ $currentAdmin->username }}</div>
@@ -71,12 +70,10 @@
 
                 <div id="userMenu"
                     class="absolute right-0 top-[52px] hidden w-[200px] rounded-[10px] border border-[#E6E8F0] bg-white p-2 shadow-lg z-50">
-                    <a href="#"
+                    <a href="{{ route("admin.profile", ["user" => $currentAdmin->id]) }}"
                         class="block rounded-[8px] px-3 py-2 text-[14px] text-[#595959] hover:bg-[#F4F2FF]">Мој
                         профил</a>
-                    <a href="#"
-                        class="block rounded-[8px] px-3 py-2 text-[14px] text-[#595959] hover:bg-[#F4F2FF]">Поставки</a>
-                    <a href="#"
+                    <a href="{{ route("admin.logout") }}"
                         class="block rounded-[8px] px-3 py-2 text-[14px] font-semibold text-[#DC2626] hover:bg-[#FEE2E2]">Одјави
                         се</a>
                 </div>
@@ -99,6 +96,7 @@
 
     @stack("scripts")
     @stack("scripts1")
+    @stack("scripts-profile")
 
 </body>
 
