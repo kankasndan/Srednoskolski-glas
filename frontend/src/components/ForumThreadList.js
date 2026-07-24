@@ -1,20 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import ThreadActionButton from "@/components/ThreadActionButton";
+import { getAttachmentImage } from "@/lib/attachments";
 import { formatPostedAgo } from "@/lib/time";
 
 const SCHOOL_ICON = "/icons/uchilishte.svg";
 const DEFAULT_AVATAR = "/Generic avatar.svg";
-
-function getAttachmentImage(attachments = []) {
-  const imageAttachment = attachments.find((attachment) => {
-    const type = attachment.type ?? attachment.mime_type ?? attachment.mimeType ?? "";
-    const url = attachment.imageUrl ?? attachment.url ?? attachment.path ?? "";
-
-    return type.startsWith("image/") || /\.(avif|gif|jpe?g|png|webp|svg)$/i.test(url);
-  });
-
-  return imageAttachment?.imageUrl ?? imageAttachment?.url ?? imageAttachment?.path ?? null;
-}
 
 function normalizeThread(thread) {
   const authorLabel = thread.is_anonymous
@@ -82,21 +73,6 @@ function TimestampTag({ label }) {
   );
 }
 
-function ForumActionButton({ icon, label, count }) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      className="flex h-12 w-24 items-center justify-center gap-4 rounded-2xl border border-[#CCCCCC] px-4 py-2 text-black opacity-80"
-    >
-      <Image src={icon} alt="" width={24} height={24} className="size-6" />
-      <span className="flex h-[19px] w-[17px] items-center font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none tracking-normal">
-        {count}
-      </span>
-    </button>
-  );
-}
-
 function ForumThread({ thread, forumSlug, priority }) {
   const openThreadLink = (
     <Link
@@ -127,15 +103,17 @@ function ForumThread({ thread, forumSlug, priority }) {
       </div>
 
       <div className="relative z-10 flex h-[104px] w-24 shrink-0 flex-col gap-2">
-        <ForumActionButton
+        {/* TODO glasanje koga kje ima endpoint */}
+        <ThreadActionButton
           icon="/Chevrons up.svg"
           label="Гласај нагоре"
           count={thread.votes}
         />
-        <ForumActionButton
+        <ThreadActionButton
           icon="/chat-1-line.svg"
           label="Коментари"
           count={thread.comments}
+          href={`/p/${forumSlug}/${thread.id}`}
         />
       </div>
     </div>
