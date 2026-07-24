@@ -54,4 +54,18 @@ trait FiltersThreads
     {
         return 5;
     }
+
+    /**
+     * Eager-load whether the current user has upvoted each thread/comment row.
+     */
+    protected function applyHasVoted(Builder $query, mixed $user): void
+    {
+        if ($user === null) {
+            return;
+        }
+
+        $query->withExists([
+            'votes as has_voted' => fn ($votes) => $votes->where('user_id', $user->id),
+        ]);
+    }
 }

@@ -28,7 +28,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     /**
      * @return array<string, string>
@@ -67,6 +67,18 @@ class User extends Authenticatable
         return $this->belongsToMany(Forum::class)->withTimestamps();
     }
 
+    public function threadViews()
+    {
+        return $this->hasMany(ThreadView::class);
+    }
+
+    public function viewedThreads(): BelongsToMany
+    {
+        return $this->belongsToMany(Thread::class, 'thread_views')
+            ->withPivot('last_viewed_at')
+            ->withTimestamps();
+    }
+
     public function threads()
     {
         return $this->hasMany(Thread::class);
@@ -75,6 +87,11 @@ class User extends Authenticatable
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function votes()
+    {
+        return $this->hasMany(Vote::class);
     }
 
     public function reports()
