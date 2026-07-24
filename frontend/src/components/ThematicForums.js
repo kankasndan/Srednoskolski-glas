@@ -1,9 +1,13 @@
 import ForumItem from "@/components/ForumItem";
 
-export default function ThematicForums({ forums, loading, error, selectedKey, onSelect }) {
+export default function ThematicForums({ forums, loading, error, selectedKey, onSelect, collapsed }) {
   return (
-    <div className="mt-8 flex w-[268px] flex-col">
-      <h2 className="mb-3 h-[22px] w-[268px] font-[family-name:var(--font-manrope)] text-[16px] font-bold leading-[22px] text-[#0A0A0A]">
+    <div className={`mt-8 flex flex-col transition-[width] duration-300 ease-in-out ${collapsed ? "w-10" : "w-[268px]"}`}>
+      <h2
+        className={`mb-3 h-[22px] font-[family-name:var(--font-manrope)] text-[16px] font-bold leading-[22px] text-[#0A0A0A] ${
+          collapsed ? "invisible w-10" : "w-[268px]"
+        }`}
+      >
         Тематски форуми
       </h2>
       {loading ? (
@@ -22,6 +26,7 @@ export default function ThematicForums({ forums, loading, error, selectedKey, on
               forum={forum}
               active={selectedKey === `forum:${forum.slug}`}
               onSelect={onSelect}
+              collapsed={collapsed}
             />
           ))}
         </div>

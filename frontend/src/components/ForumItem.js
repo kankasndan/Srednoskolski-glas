@@ -5,13 +5,16 @@ import { usePathname } from "next/navigation";
 import ForumIcon from "@/components/ForumIcon";
 
 const BASE_CLASS =
-  "group flex h-10 w-[268px] items-center gap-3 rounded-xl border border-[var(--color-grays-300)] bg-white px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[var(--color-grays-900)] transition-colors hover:bg-[var(--color-secondary-200)]";
+  "group flex h-10 items-center overflow-hidden whitespace-nowrap rounded-xl border border-[var(--color-grays-300)] bg-white font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[var(--color-grays-900)] transition-all duration-300 ease-in-out hover:bg-[#E5E5E5]";
 
-export default function ForumItem({ forum, active = false, onSelect }) {
+export default function ForumItem({ forum, active = false, onSelect, collapsed }) {
   const pathname = usePathname();
   const key = `forum:${forum.slug}`;
   const isCurrentPage = pathname === `/p/${forum.slug}`;
-  const className = `${BASE_CLASS} ${active ? "!bg-[var(--color-secondary-200)]" : ""}`;
+  const layout = collapsed ? "w-10 justify-center" : "w-[268px] gap-3 px-4 py-2";
+  const className = `${BASE_CLASS} ${layout} ${
+    active ? "!bg-[var(--color-primary-200)] !text-white" : ""
+  }`;
 
   return (
     <Link
@@ -21,8 +24,8 @@ export default function ForumItem({ forum, active = false, onSelect }) {
       onClick={() => onSelect(key)}
       className={className}
     >
-      <ForumIcon src={forum.imageUrl} />
-      <span>{forum.name}</span>
+      <ForumIcon src={forum.imageUrl} active={active} />
+      {!collapsed && <span>{forum.name}</span>}
     </Link>
   );
 }

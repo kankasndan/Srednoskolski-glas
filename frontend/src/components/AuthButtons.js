@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Avatar from "@/components/Avatar";
 import { apiFetch } from "@/lib/api";
 
 export default function AuthButtons() {
@@ -97,13 +98,7 @@ export default function AuthButtons() {
           aria-expanded={menuOpen}
           className="flex items-center gap-1 rounded-full transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] focus-visible:ring-offset-2 cursor-pointer group"
         >
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full">
-            <img
-              src={avatarUrl}
-              alt={displayName}
-              className="h-full w-full object-cover"
-            />
-          </div>
+          <Avatar src={avatarUrl} size="xl" alt={displayName} />
 
           <span className="font-[family-name:var(--font-manrope)] text-[18px] font-medium leading-none text-[#0A0A0A] group-hover:text-[#582FF5] transition">
             {displayName}
@@ -142,13 +137,13 @@ export default function AuthButtons() {
     <div className="ml-auto flex h-10 w-[300px] shrink-0 items-center gap-3">
       <Link
         href="/login"
-        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[var(--color-secondary-200)] hover:bg-[var(--color-secondary-200)] hover:text-[var(--color-grays-900)]"
+        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-[var(--color-grays-900)]"
       >
         Најави се
       </Link>
       <Link
         href="/register"
-        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:border-[var(--color-secondary-200)] hover:bg-[var(--color-secondary-200)] hover:text-[var(--color-grays-900)]"
+        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-[var(--color-grays-900)]"
       >
         Регистрација
       </Link>
