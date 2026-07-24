@@ -3,6 +3,9 @@ import FieldLabel from "@/components/FieldLabel";
 const MAX_LENGTH = 100;
 
 export default function TitleInput({ value, onChange, onBlur, errorMessage }) {
+  const counterTextColor =
+    value.length >= MAX_LENGTH ? "text-[var(--color-error)]" : "text-[#595959]";
+
   return (
     <div className="flex flex-col gap-2">
       <FieldLabel htmlFor="title" required>
@@ -38,7 +41,9 @@ export default function TitleInput({ value, onChange, onBlur, errorMessage }) {
           >
             {errorMessage || "Нема грешка"}
           </p>
-          <span className="shrink-0 font-[family-name:var(--font-manrope)] text-[12px] leading-none text-[#595959]">
+          <span
+            className={`shrink-0 font-[family-name:var(--font-manrope)] text-[12px] leading-none ${counterTextColor}`}
+          >
             {value.length}/{MAX_LENGTH}
           </span>
         </div>

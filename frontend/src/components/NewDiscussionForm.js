@@ -41,17 +41,14 @@ export default function NewDiscussionForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col items-start gap-6">
-      <div className="flex w-[632px] max-w-full items-start gap-3">
-        <ForumSelect
-          selected={selectedForum}
-          onChange={(forum) => {
-            setSelectedForum(forum);
-            setErrors((current) => ({ ...current, forum: undefined }));
-          }}
-          errorMessage={errors.forum}
-        />
-        <AnonymousToggle className="mt-[22px] flex-1" />
-      </div>
+      <ForumSelect
+        selected={selectedForum}
+        onChange={(forum) => {
+          setSelectedForum(forum);
+          setErrors((current) => ({ ...current, forum: undefined }));
+        }}
+        errorMessage={errors.forum}
+      />
       <TitleInput
         value={title}
         onChange={(nextTitle) => {
@@ -68,14 +65,17 @@ export default function NewDiscussionForm() {
         }}
       />
       <PostTypeButtons />
-      <div className="flex w-[632px] max-w-full justify-end">
-        <button
-          type="submit"
-          className="h-10 w-36 cursor-pointer rounded-xl bg-[#582FF5] font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5]"
-        >
-          Објави
-        </button>
-      </div>
+      <AnonymousToggle
+        className="w-[632px] max-w-full"
+        action={
+          <button
+            type="submit"
+            className="h-10 w-36 cursor-pointer rounded-xl bg-[#582FF5] font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5]"
+          >
+            Објави
+          </button>
+        }
+      />
     </form>
   );
 }
