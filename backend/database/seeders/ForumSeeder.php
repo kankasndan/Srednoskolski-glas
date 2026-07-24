@@ -85,3 +85,4 @@ class ForumSeeder extends Seeder
         });
     }
 }
+

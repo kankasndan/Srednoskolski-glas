@@ -15,7 +15,7 @@
 
     {{-- Search bar --}}
     <div class="flex items-center gap-3 mb-6 relative">
-        <input type="text" id="staff-search" placeholder="Search staff by email..."
+        <input type="text" id="staff-search" placeholder="Search staff by username..."
             class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
 
         <div id="search-results"
@@ -27,74 +27,75 @@
         <span class="text-green-400 text-sm">{{ session('success') }}</span>
     @endif
 
-    @foreach ($users as $user)
-        @if ($user->role != 'user')
-            <section class="mb-8">
-                <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{{ $user->role }}s</h2>
-                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-
-
-
+    <section class="mb-8 space-y-6">
+        @foreach ($roles as $role)
+            @if ($role->role != 'user')
+                <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{{ $role->role }}s</h2>
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm ">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 text-gray-500 text-left">
                             <tr>
                                 <th class="px-4 py-3">User</th>
                                 <th class="px-4 py-3">Email</th>
                                 <th class="px-4 py-3">Role</th>
-                                <th class="px-4 py-3 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-
-                            <tr>
-                                <td class="px-4 py-3 flex items-center gap-3">
-                                    <img src="https://via.placeholder.com/32" class="w-8 h-8 rounded-full">
-                                    <span class="font-medium text-gray-800">{{ $user->username }}</span>
-                                </td>
-                                <td class="px-4 py-3 text-gray-500">{{ $user->email }}</td>
-                                <td class="px-4 py-3">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{{ $user->role }}</span>
-                                </td>
-                                @if ($user->role == 'admin' || $user->role == 'moderator')
-                                    <td class="px-4 py-3 text-right">
-                                        <div class="inline-flex gap-2">
-                                            <div class="flex justify-between items-center gap-5">
-                                                <form action="{{ route('role.update', ['user' => $user->id]) }}"
-                                                    method="POST">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <select class="border border-gray-300 rounded-lg text-xs px-2 py-1"
-                                                        name="role">
-                                                        <option value="super_admin">Super admin</option>
-                                                        <option value="admin">Admin</option>
-                                                        <option value="moderator">Moderator</option>
-                                                    </select>
-                                                    <button
-                                                        class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium bg-green-100 text-black">Update</button>
-                                                </form>
-                                                <form action="{{ route('role.destroy', ['user' => $user->id]) }}"
-                                                    method="post">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button
-                                                        class="text-red-600 text-xs font-medium hover:underline">Revoke</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </td>
-                                @else
-                                    <td class="px-4 py-3 text-right">
-                                        <span class="text-xs text-gray-400 italic">Protected</span>
-                                    </td>
+                                @if ($role->role == 'moderator')
+                                    <th class="px-4 py-3">Forum</th>
                                 @endif
                             </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-left">
+                            @foreach ($users as $user)
+                                @if ($user->role == $role->role)                                
+                                    <tr class="cursor-pointer"  onclick="window.location='{{ route('role.show', ['user' => $user->id]) }}'">
+                                            <td class="px-4 py-3 flex items-center gap-3">
+                                                <img src="https://via.placeholder.com/32" class="w-8 h-8 rounded-full">
+                                                <span class="font-medium text-gray-800">{{ $user->username }}</span>
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-500">{{ $user->email }}</td>
+                                            <td class="px-4 py-3">
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{{ $user->role }}</span>
+                                            </td>
+                                            @if ($user->role == 'moderator')
+                                                <td class="px-4 py-3 text-left">
+                                                    <div class="inline-flex gap-2">
+                                                        <div class="flex justify-between items-center gap-5">
+                                                            @if ($user->forum)
+                                                                <span
+                                                                    class="py-3 text-gray-800">{{ $user->forum->name }}</span>
+                                                            @else
+                                                                <form action="{{ route('role.update.forum') }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    @method('PATCH')
+                                                                    <input type="hidden" name="user_id"
+                                                                        value="{{ $user->id }}">
+                                                                    <select
+                                                                        class="border border-gray-300 rounded-lg text-xs px-2 py-1"
+                                                                        name="forum">
+                                                                        <option>Select forum</option>
+                                                                        @foreach ($forums as $forum)
+                                                                            <option value="{{ $forum->id }}">
+                                                                                {{ $forum->name }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                    <button
+                                                                        class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium bg-green-100 text-black">Update</button>
+                                                                </form>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            @endif
+                                        </tr>
+                                @endif
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
-            </section>
-        @endif
-    @endforeach
+            @endif
+        @endforeach
+    </section>
 
 
 
@@ -114,8 +115,8 @@
                 @csrf
 
                 <div class="mb-4 relative">
-                    <label class="text-sm font-medium text-gray-700">Search user by email</label>
-                    <input type="text" id="grant-search" autocomplete="off" placeholder="Type an email..."
+                    <label class="text-sm font-medium text-gray-700">Search user by username</label>
+                    <input type="text" id="grant-search" autocomplete="off" placeholder="Type an username..."
                         class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
 
                     <input type="hidden" name="user_id" id="grant-selected-user-id">
@@ -237,7 +238,7 @@
             `;
 
                     row.addEventListener('click', () => {
-                        grantSearchInput.value = user.email;
+                        grantSearchInput.value = user.username;
                         grantSelectedUserId.value = user.id;
                         grantResultsBox.classList.add('hidden');
                     });

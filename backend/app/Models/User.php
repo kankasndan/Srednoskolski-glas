@@ -101,11 +101,21 @@ class User extends Authenticatable
 
     public function sanctions()
     {
-        return $this->hasMany(Sanction::class);
+        return $this->hasMany(Sanction::class, "user_id");
     }
 
     public function appeals()
     {
         return $this->hasMany(Appeal::class);
+    }
+
+    public function forum()
+    {
+        return $this->hasOne(Forum::class);
+    }
+
+    public function topics()
+    {
+        return $this->belongsToMany(Topic::class, "feed_topics");
     }
 }
