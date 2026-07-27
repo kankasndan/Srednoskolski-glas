@@ -31,4 +31,14 @@ class AuthContoller extends Controller
 
         return back()->withErrors(["credentials" => "Invalid credentials!"]);
     }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return view("admin.auth.index");
+    }  
 }

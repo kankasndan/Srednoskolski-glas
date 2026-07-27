@@ -102,7 +102,7 @@ function ForumThread({ thread, forumSlug, priority }) {
         </div>
       </div>
 
-      <div className="relative z-10 flex h-[104px] w-24 shrink-0 flex-col gap-2">
+      <div className="relative z-10 flex shrink-0 flex-col gap-2">
         {/* TODO glasanje koga kje ima endpoint */}
         <ThreadActionButton
           icon="/Chevrons up.svg"
@@ -121,7 +121,7 @@ function ForumThread({ thread, forumSlug, priority }) {
 
   if (thread.image) {
     return (
-      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
+      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-[#DCEBED] p-4 rounded-3xl">
         {openThreadLink}
         <div className="w-full">{content}</div>
         <Image
@@ -137,7 +137,7 @@ function ForumThread({ thread, forumSlug, priority }) {
   }
 
   return (
-    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
+    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-[#DCEBED] p-4 rounded-3xl">
       {openThreadLink}
       {content}
     </article>

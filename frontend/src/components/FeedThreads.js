@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useId, useState } from "react";
+import ThreadActionButton from "@/components/ThreadActionButton";
 
 const SORT_OPTIONS = [{ value: "trending", label: "Трендинг" }];
 
@@ -113,21 +114,6 @@ function TimestampTag({ label }) {
   );
 }
 
-function ActionButton({ icon, label, count }) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      className="flex h-12 w-24 items-center justify-center gap-4 rounded-2xl border border-[#CCCCCC] px-4 py-2 text-black opacity-80"
-    >
-      <Image src={icon} alt="" width={24} height={24} className="size-6" />
-      <span className="flex h-[19px] w-[17px] items-center font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none tracking-normal">
-        {count}
-      </span>
-    </button>
-  );
-}
-
 function ThreadItem({ thread }) {
   const content = (
     <div className="flex w-full items-start justify-between gap-8 cursor-pointer">
@@ -149,13 +135,13 @@ function ThreadItem({ thread }) {
         </div>
       </div>
 
-      <div className="flex h-[104px] w-24 shrink-0 flex-col gap-2">
-        <ActionButton
+      <div className="flex shrink-0 flex-col gap-2">
+        <ThreadActionButton
           icon="/Chevrons up.svg"
           label="Гласај нагоре"
           count={thread.votes}
         />
-        <ActionButton
+        <ThreadActionButton
           icon="/chat-1-line.svg"
           label="Коментари"
           count={thread.comments}
@@ -166,7 +152,7 @@ function ThreadItem({ thread }) {
 
   if (thread.image) {
     return (
-      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
+      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-[#DCEBED] p-4 rounded-3xl">
         <div className="w-full">{content}</div>
         <Image
           src={thread.image}
@@ -181,7 +167,7 @@ function ThreadItem({ thread }) {
   }
 
   return (
-    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
+    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-[#DCEBED] p-4 rounded-3xl">
       {content}
     </article>
   );

@@ -5,10 +5,18 @@ import Link from "next/link";
 // diskusijata), inaku e obichno kopche.
 export default function ThreadActionButton({ icon, label, count, href, onClick }) {
   const className =
-    "flex h-12 w-24 cursor-pointer items-center justify-center gap-4 rounded-2xl border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-black opacity-80 transition-colors hover:bg-[#E5E5E5]";
+    "group flex cursor-pointer items-center justify-center gap-4 rounded-2xl border border-[#CCCCCC] px-4 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-black opacity-80 transition-colors hover:border-[var(--color-primary-100)] hover:bg-[var(--color-primary-100)] hover:text-white hover:opacity-100";
   const inner = (
     <>
-      <Image src={icon} alt="" width={24} height={24} className="size-6" />
+      {/* Ikonite se ednobojni purpurni SVG-a, pa na purpurna podloga se gubat.
+          brightness-0 gi pravi crni, invert potoa beli. */}
+      <Image
+        src={icon}
+        alt=""
+        width={24}
+        height={24}
+        className="size-6 transition group-hover:brightness-0 group-hover:invert"
+      />
       {count}
     </>
   );

@@ -59,4 +59,14 @@ class Thread extends Model
     {
         return $this->morphMany(Report::class, 'reportable');
     }
+
+    public function viewsByUsers(): HasMany
+    {
+        return $this->hasMany(ThreadView::class);
+    }
+
+    public function votes(): MorphMany
+    {
+        return $this->morphMany(Vote::class, 'votable');
+    }
 }

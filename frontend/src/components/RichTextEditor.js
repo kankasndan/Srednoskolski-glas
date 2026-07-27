@@ -243,9 +243,14 @@ export default function RichTextEditor({
   errorMessage,
   onContentChange,
   onBlur,
+  // Postoechka sodrzhina (pri ureduvanje na diskusija).
+  initialContent = "",
+  widthClassName = "w-[632px]",
+  // Kopche vo lentata so alatki (na primer "Објави" vo pop-upot za ureduvanje).
+  action,
 }) {
-  const [html, setHtml] = useState("");
-  const [isEmpty, setIsEmpty] = useState(true);
+  const [html, setHtml] = useState(initialContent);
+  const [isEmpty, setIsEmpty] = useState(!initialContent);
   const [characterCount, setCharacterCount] = useState(0);
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
   const [mentionPopoverOpen, setMentionPopoverOpen] = useState(false);
@@ -277,7 +282,7 @@ export default function RichTextEditor({
         },
       }),
     ],
-    content: "",
+    content: initialContent,
     editorProps: {
       attributes: {
         "aria-label": "Содржина на дискусијата",
@@ -345,7 +350,10 @@ export default function RichTextEditor({
     characterCount >= MAX_DESCRIPTION_LENGTH ? "text-[var(--color-error)]" : "text-[#595959]";
 
   return (
-    <section className="relative flex w-[632px] max-w-full flex-col" aria-label="Уредник за содржина">
+    <section
+      className={`relative flex max-w-full flex-col ${widthClassName}`}
+      aria-label="Уредник за содржина"
+    >
       <input type="hidden" name={name} value={html} />
       <div
         className={`overflow-hidden rounded-[13px] border bg-white ${
@@ -424,11 +432,14 @@ export default function RichTextEditor({
                 );
               })}
           </div>
-          <span
-            className={`shrink-0 font-[family-name:var(--font-manrope)] text-[12px] leading-none ${counterTextColor}`}
-          >
-            {characterCount}/{MAX_DESCRIPTION_LENGTH}
-          </span>
+          <div className="flex shrink-0 items-center gap-4">
+            <span
+              className={`font-[family-name:var(--font-manrope)] text-[12px] leading-none ${counterTextColor}`}
+            >
+              {characterCount}/{MAX_DESCRIPTION_LENGTH}
+            </span>
+            {action}
+          </div>
         </div>
       </div>
       <p

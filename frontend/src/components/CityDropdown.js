@@ -1,8 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
+
+// Inline so the stroke follows the summary's text colour: black normally, white
+// once a school is selected and the row turns purple.
+function ChevronDownIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+      className="size-4 shrink-0 transition-transform duration-300 ease-out group-open:rotate-180"
+    >
+      <path
+        d="M4 6L8 10L12 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function CityDropdown({ city, forums, selectedKey, onSelect }) {
   const pathname = usePathname();
@@ -18,16 +40,15 @@ export default function CityDropdown({ city, forums, selectedKey, onSelect }) {
           activeSchool ? "!bg-[var(--color-primary-200)] !text-white" : ""
         }`}
       >
-        <span className="flex h-[19px] min-w-0 flex-1 items-center truncate">
+        {/* Closed: the selected school (or the city when nothing is selected).
+            Open: always the city, so the list below reads as its schools. */}
+        <span className="flex h-[19px] min-w-0 flex-1 items-center truncate group-open:hidden">
           {activeSchool ? activeSchool.name : city.name}
         </span>
-        <Image
-          src="/chevron-down.svg"
-          alt=""
-          width={16}
-          height={16}
-          className="size-4 shrink-0 transition-transform duration-300 ease-out group-open:rotate-180"
-        />
+        <span className="hidden h-[19px] min-w-0 flex-1 items-center truncate group-open:flex">
+          {city.name}
+        </span>
+        <ChevronDownIcon />
       </summary>
       <ul className="flex w-[268px] flex-col overflow-hidden rounded-b-[12px] border-x border-b border-[#CCCCCC] bg-white transition-all duration-300 ease-out">
         {forums.map((school, index) => {

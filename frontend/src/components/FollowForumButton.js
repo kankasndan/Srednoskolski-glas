@@ -8,7 +8,7 @@ export default function FollowForumButton({ className = "" }) {
   const toggleFollow = () => setFollowing((current) => !current);
 
   const stateClasses = following
-    ? "bg-[#A6E4ED] text-[#0A0A0A]"
+    ? "bg-[var(--color-primary-300)] text-white"
     : "bg-[#582FF5] text-white hover:bg-[#DCEBED] hover:text-[#0A0A0A]";
 
   return (

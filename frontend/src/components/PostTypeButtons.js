@@ -48,7 +48,7 @@ function clearFiles(list, setList) {
   setList([]);
 }
 
-export default function PostTypeButtons() {
+export default function PostTypeButtons({ widthClassName = "w-[632px]" }) {
   const [selected, setSelected] = useState(null);
   const [photos, setPhotos] = useState([]);
   const [videos, setVideos] = useState([]);
@@ -131,7 +131,7 @@ export default function PostTypeButtons() {
   ];
 
   return (
-    <div className="flex w-[632px] max-w-full flex-col gap-3">
+    <div className={`flex max-w-full flex-col gap-3 ${widthClassName}`}>
       {photoMode && (
         <MediaAttachments
           kind="image"
