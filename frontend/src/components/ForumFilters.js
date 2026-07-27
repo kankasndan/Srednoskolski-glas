@@ -61,7 +61,7 @@ function ForumSelect({
               role="option"
               aria-selected={selected.value === option.value}
               onClick={() => onSelect(option)}
-              className="flex h-10 w-full items-center px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#F5F5F5]"
+              className="flex h-10 w-full items-center px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#E5E5E5]"
             >
               {option.label}
             </button>

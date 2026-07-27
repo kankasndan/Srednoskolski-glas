@@ -22,7 +22,6 @@ export default function ForumEmptyState() {
           </p>
         </div>
       </div>
-      <StartDiscussionButton />
     </section>
   );
 }

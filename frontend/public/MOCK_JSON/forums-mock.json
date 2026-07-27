@@ -27,7 +27,7 @@
             "type": "general",
             "school_id": null,
             "imageUrl": "/icons/drzhavna_matura.svg",
-            "threads_count": 0,
+            "threads_count": 1,
             "members_count": 0
         },
         {
@@ -48,6 +48,16 @@
             "school_id": null,
             "imageUrl": "/icons/fakulteti.svg",
             "threads_count": 0,
+            "members_count": 0
+        },
+        {
+            "id": 6,
+            "name": "Општи дискусии",
+            "slug": "opshti_diskusii",
+            "type": "general",
+            "school_id": null,
+            "imageUrl": "/icons/opshti_diskusii.svg",
+            "threads_count": 2,
             "members_count": 0
         }
     ],

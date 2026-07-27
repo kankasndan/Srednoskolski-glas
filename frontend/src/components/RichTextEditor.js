@@ -202,7 +202,7 @@ export default function RichTextEditor({
     characterCount >= MAX_DESCRIPTION_LENGTH ? "text-[var(--color-error)]" : "text-[#595959]";
 
   return (
-    <section className="flex w-[632px] max-w-full flex-col" aria-label="Уредник за содржина">
+    <section className="relative flex w-[632px] max-w-full flex-col" aria-label="Уредник за содржина">
       <input type="hidden" name={name} value={html} />
       <div
         className={`overflow-hidden rounded-[13px] border bg-white ${
@@ -243,7 +243,7 @@ export default function RichTextEditor({
       </div>
       <p
         id={`${name}-error`}
-        className={`mt-1 min-h-4 truncate font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[var(--color-error)] ${
+        className={`absolute left-0 top-full mt-1 w-full truncate font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[var(--color-error)] ${
           errorMessage ? "" : "invisible"
         }`}
       >

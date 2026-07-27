@@ -9,7 +9,12 @@ import { hasNavigatedInApp } from "@/lib/navHistory";
 
 config.autoAddCss = false;
 
-export default function BackButton({ href, label }) {
+const LABEL_TONES = {
+  primary: "text-[14px] font-medium text-[#582FF5]",
+  muted: "text-[16px] text-[#595959]",
+};
+
+export default function BackButton({ href, label, tone = "primary" }) {
   const router = useRouter();
 
   function handleBack() {
@@ -36,16 +41,12 @@ export default function BackButton({ href, label }) {
       aria-label={label ? undefined : "Назад"}
       className={`flex h-10 cursor-pointer items-center justify-center rounded-full transition-colors ${
         label
-          ? "gap-2 text-[#582FF5] hover:text-black"
+          ? `gap-2 font-[family-name:var(--font-manrope)] leading-none hover:text-black ${LABEL_TONES[tone]}`
           : "w-10 text-[#0A0A0A] hover:bg-gray-100"
       }`}
     >
       <FontAwesomeIcon icon={faChevronLeft} className="h-4" />
-      {label && (
-        <span className="font-[family-name:var(--font-manrope)] text-[14px] font-medium leading-none">
-          {label}
-        </span>
-      )}
+      {label}
     </button>
   );
 }
