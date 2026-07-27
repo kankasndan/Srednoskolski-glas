@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Comment
+ * @mixin Comment
  */
 class CommentResource extends JsonResource
 {
@@ -20,6 +21,7 @@ class CommentResource extends JsonResource
             'content' => $this->content,
             'parent_id' => $this->parent_id,
             'upvotes' => $this->upvotes,
+            'has_voted' => (bool) ($this->has_voted ?? false),
             'created_at' => $this->created_at,
             'edited_at' => $this->edited_at,
             'deleted_by' => $this->deleted_by,
