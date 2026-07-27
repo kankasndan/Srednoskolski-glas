@@ -6,10 +6,14 @@ import CommentActions from "@/components/CommentActions";
 import CommentAuthor from "@/components/CommentAuthor";
 import CommentBody from "@/components/CommentBody";
 import CommentComposer from "@/components/CommentComposer";
+import InfoDialog from "@/components/InfoDialog";
+import ReportDialog from "@/components/ReportDialog";
 
 export default function Comment({ comment, depth = 0 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [replying, setReplying] = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const [reported, setReported] = useState(false);
   const replies = comment.replies ?? [];
   const hasReplies = replies.length > 0;
   const showThread = !collapsed && hasReplies;
@@ -33,6 +37,25 @@ export default function Comment({ comment, depth = 0 }) {
           collapsed={collapsed}
           onToggle={() => setCollapsed(!collapsed)}
           onReply={() => setReplying(!replying)}
+          onReport={() => setReporting(true)}
+        />
+
+        {/* Se renderira samo dodeka e otvoren, za da se resetira formata. */}
+        {reporting && (
+          <ReportDialog
+            open
+            onClose={() => setReporting(false)}
+            onSubmit={() => {
+              setReporting(false);
+              setReported(true);
+            }}
+          />
+        )}
+
+        <InfoDialog
+          open={reported}
+          title="Пријавата беше успешно поднесена и испратена до админот."
+          onClose={() => setReported(false)}
         />
 
         {replying ? (

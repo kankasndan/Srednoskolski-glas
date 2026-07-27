@@ -6,7 +6,7 @@ export default function FollowThreadButton() {
   const [following, setFollowing] = useState(false);
 
   const stateClasses = following
-    ? "bg-[#A6E4ED] text-[#0A0A0A]"
+    ? "bg-[var(--color-primary-300)] text-white"
     : "bg-[#582FF5] text-white hover:bg-[#4B25E0]";
 
   return (

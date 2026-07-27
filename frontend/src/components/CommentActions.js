@@ -19,7 +19,14 @@ function ActionButton({ icon, iconClassName = "", label, onClick }) {
   );
 }
 
-export default function CommentActions({ votes, hasReplies, collapsed, onToggle, onReply }) {
+export default function CommentActions({
+  votes,
+  hasReplies,
+  collapsed,
+  onToggle,
+  onReply,
+  onReport,
+}) {
   return (
     <div className="flex items-center gap-4">
       {/* TODO glasanje koga kje ima endpoint */}
@@ -37,13 +44,17 @@ export default function CommentActions({ votes, hasReplies, collapsed, onToggle,
         {votes}
       </button>
 
-      {/* TODO prijavi i spodeli koga kje ima endpoint */}
       <ActionButton
         icon="/comments icon/comment.svg"
         label="Одговори"
         onClick={onReply}
       />
-      <ActionButton icon="/comments icon/report.svg" label="Пријави" />
+      <ActionButton
+        icon="/comments icon/report.svg"
+        label="Пријави"
+        onClick={onReport}
+      />
+      {/* TODO spodeli koga kje ima endpoint */}
       <ActionButton icon="/comments icon/share.svg" label="Сподели" />
 
       {hasReplies ? (
