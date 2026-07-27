@@ -118,7 +118,7 @@ function ActionButton({ icon, label, count }) {
     <button
       type="button"
       aria-label={label}
-      className="flex h-12 w-24 items-center justify-center gap-4 rounded-2xl border border-[#CCCCCC] px-4 py-2 text-black opacity-80"
+      className="flex h-12 w-24 items-center justify-center gap-4 rounded-2xl border border-[#CCCCCC] px-4 py-2 text-black opacity-80 cursor-pointer"
     >
       <Image src={icon} alt="" width={24} height={24} className="size-6" />
       <span className="flex h-[19px] w-[17px] items-center font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none tracking-normal">
@@ -148,20 +148,22 @@ function ThreadItem({ thread }) {
           </p>
         </div>
       </div>
-
-      <div className="flex h-[104px] w-24 shrink-0 flex-col gap-2">
-        <ActionButton
-          icon="/Chevrons up.svg"
-          label="Гласај нагоре"
-          count={thread.votes}
-        />
-        <ActionButton
-          icon="/chat-1-line.svg"
-          label="Коментари"
-          count={thread.comments}
-        />
-      </div>
     </div>
+  );
+
+  const actions = (
+    <>
+      <ActionButton
+        icon="/Chevrons up.svg"
+        label="Гласај нагоре"
+        count={thread.votes}
+      />
+      <ActionButton
+        icon="/chat-1-line.svg"
+        label="Коментари"
+        count={thread.comments}
+      />
+    </>
   );
 
   if (thread.image) {
@@ -176,6 +178,7 @@ function ThreadItem({ thread }) {
           className="h-[421px] w-full rounded-t-3xl rounded-b-2xl object-cover"
           priority={thread.id === 2}
         />
+        <div className="flex gap-2">{actions}</div>
       </article>
     );
   }
@@ -183,6 +186,7 @@ function ThreadItem({ thread }) {
   return (
     <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
       {content}
+      <div className="flex flex-col gap-2">{actions}</div>
     </article>
   );
 }
