@@ -99,6 +99,9 @@
     @stack("scripts1")
     @stack("scripts-profile")
     @stack("scripts/dashboard")
+    @stack("scripts-forums")
+    @stack("scripts-forum-show")
+
 
 </body>
 

@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('slug');
             $table->text('description');
             $table->string('type');
-            $table->string('imageUrl');
-            $table->string('bannerUrl');
+            $table->string('imageUrl')->nullable();
+            $table->string('bannerUrl')->nullable();
             $table->integer('threads_count')->default(0);
             $table->integer('members_count')->default(0);
             $table->foreignId('user_id')->nullable()->constrained();
