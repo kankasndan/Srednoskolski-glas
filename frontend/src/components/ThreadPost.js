@@ -1,5 +1,6 @@
 import Image from "next/image";
 import FollowThreadButton from "@/components/FollowThreadButton";
+import ThreadActionsMenu from "@/components/ThreadActionsMenu";
 import ThreadMetaTags from "@/components/ThreadMetaTags";
 import ThreadStats from "@/components/ThreadStats";
 import { formatPostedAgo } from "@/lib/time";
@@ -46,7 +47,7 @@ export default function ThreadPost({ forum, thread }) {
 
         <div className="flex shrink-0 items-center gap-1">
           <IconButton icon="/share-line.svg" label="Сподели ја дискусијата" />
-          <IconButton icon="/more-2-fill.svg" label="Повеќе опции" />
+          <ThreadActionsMenu thread={thread} />
         </div>
       </div>
 

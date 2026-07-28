@@ -1,4 +1,5 @@
-const USE_MOCK = true;
+import { API_BASE_URL } from "@/lib/api";
+const USE_MOCK = false;
 
 const MOCK_THREADS = {
   "drzhavna_matura/1": "/MOCK_JSON/thread-drzhavna-matura-mock.json",
@@ -9,7 +10,7 @@ const MOCK_THREADS = {
 export async function getThread(forumSlug, threadId) {
   const url = USE_MOCK
     ? MOCK_THREADS[`${forumSlug}/${threadId}`]
-    : `/api/forums/${forumSlug}/threads/${threadId}`; // CHECK da li e ovaa tocnata ruta
+    : API_BASE_URL + `/api/p/${forumSlug}/comments/${threadId}`; // CHECK da li e ovaa tocnata ruta
 
   if (!url) return null;
 
