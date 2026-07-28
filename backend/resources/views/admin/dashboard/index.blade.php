@@ -44,8 +44,7 @@
             <ul class="divide-y divide-gray-100">
                 @foreach ($topForums as $forum)
                     <li class="flex justify-between items-center py-2">
-                        {{-- {{ route('admin.forums.show', $forum->slug) }} --}}
-                        <a href=""
+                        <a href="{{ route('forum.show', ["forum" => $forum->id]) }}"
                            class="text-sm text-gray-700 hover:text-indigo-600">
                             {{ $forum->name }}
                         </a>
