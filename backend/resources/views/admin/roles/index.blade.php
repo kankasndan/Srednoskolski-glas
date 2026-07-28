@@ -64,24 +64,8 @@
                                                                 <span
                                                                     class="py-3 text-gray-800">{{ $user->forum->name }}</span>
                                                             @else
-                                                                <form action="{{ route('role.update.forum') }}"
-                                                                    method="POST">
-                                                                    @csrf
-                                                                    @method('PATCH')
-                                                                    <input type="hidden" name="user_id"
-                                                                        value="{{ $user->id }}">
-                                                                    <select
-                                                                        class="border border-gray-300 rounded-lg text-xs px-2 py-1"
-                                                                        name="forum">
-                                                                        <option>Select forum</option>
-                                                                        @foreach ($forums as $forum)
-                                                                            <option value="{{ $forum->id }}">
-                                                                                {{ $forum->name }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                    <button
-                                                                        class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium bg-green-100 text-black">Update</button>
-                                                                </form>
+                                                                <span
+                                                                    class="py-3 text-gray-400">No forum selected</span>
                                                             @endif
                                                         </div>
                                                     </div>
