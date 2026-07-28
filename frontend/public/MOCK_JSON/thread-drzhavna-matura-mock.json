@@ -1,0 +1,111 @@
+{
+  "data": {
+    "thread": {
+      "id": 1,
+      "title": "Кога почнуваат пријавите за државна матура?",
+      "description": "Дали некој знае точните датуми за пријавување на државна матура оваа година? Не можам да најдам официјална информација.",
+      "upvotes": 42,
+      "views": 890,
+      "is_anonymous": false,
+      "comments_count": 4,
+      "created_at": "2026-07-21T09:42:43.000000Z",
+      "edited_at": null,
+      "forum": {
+        "id": 2,
+        "name": "Државна матура",
+        "slug": "drzhavna_matura",
+        "imageUrl": "/icons/drzhavna_matura.svg"
+      },
+      "author": {
+        "id": 3,
+        "username": "ana_k",
+        "imageUrl": "/avatars/default-2.svg",
+        "school": {
+          "id": 2,
+          "name": "Јане Сандански",
+          "city": "Битола"
+        }
+      },
+      "attachments": []
+    },
+    "comments": [
+      {
+        "id": 1,
+        "content": "Обично пријавите се отвораат кон крајот на март. Провери на страницата на матурската комисија.",
+        "parent_id": null,
+        "upvotes": 0,
+        "created_at": "2026-07-21T09:42:43.000000Z",
+        "edited_at": null,
+        "deleted_by": null,
+        "author": {
+          "id": 2,
+          "username": "demo_student",
+          "imageUrl": "/avatars/default-4.svg",
+          "school": {
+            "id": 43,
+            "name": "Георги Димитров",
+            "city": "Скопје"
+          }
+        },
+        "replies": [
+          {
+            "id": 2,
+            "content": "Благодарам! Ќе проверам таму.",
+            "parent_id": 1,
+            "upvotes": 0,
+            "created_at": "2026-07-21T09:42:43.000000Z",
+            "edited_at": null,
+            "deleted_by": null,
+            "author": {
+              "id": 3,
+              "username": "ana_k",
+              "imageUrl": "/avatars/default-2.svg",
+              "school": {
+                "id": 2,
+                "name": "Јане Сандански",
+                "city": "Битола"
+              }
+            },
+            "replies": []
+          },
+          {
+            "id": 3,
+            "content": "Мене професорката ми кажа дека е во април оваа година.",
+            "parent_id": 1,
+            "upvotes": 0,
+            "created_at": "2026-07-21T09:42:43.000000Z",
+            "edited_at": null,
+            "deleted_by": null,
+            "author": {
+              "id": 4,
+              "username": "marko_p",
+              "imageUrl": "/avatars/default-1.svg",
+              "school": {
+                "id": 63,
+                "name": "Никола Карев",
+                "city": "Струмица"
+              }
+            },
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "content": "Датумите официјално се објавуваат преку училиштата, следете ги известувањата.",
+        "parent_id": null,
+        "upvotes": 0,
+        "created_at": "2026-07-21T09:42:43.000000Z",
+        "edited_at": null,
+        "deleted_by": null,
+        "author": {
+          "id": 9,
+          "username": "profesor_x",
+          "imageUrl": "/avatars/default-3.svg",
+          "school": null
+        },
+        "replies": []
+      }
+    ]
+  }
+}

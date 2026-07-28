@@ -66,11 +66,6 @@ const btn = document.getElementById("userMenuBtn");
                         label: "Улоги и пермисии",
                         route: "roles"
                     },
-                    {
-                        key: "nav:settings",
-                        label: "Поставки",
-                        route: "settings"
-                    },
                 ],
             },
         ];

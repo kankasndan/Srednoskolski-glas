@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('bannerUrl');
             $table->integer('threads_count')->default(0);
             $table->integer('members_count')->default(0);
+            $table->foreignId('user_id')->nullable()->constrained();
             $table->timestamps();
         });
     }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Comment extends Model
@@ -40,7 +41,17 @@ class Comment extends Model
 
     public function allReplies(): HasMany
     {
-        return $this->replies()->with(['user.studentData.school.city', 'allReplies']);
+        $relation = $this->replies()->with(['user.studentData.school.city', 'allReplies']);
+
+        $userId = auth('web')->id() ?? auth()->id();
+
+        if ($userId !== null) {
+            $relation->withExists([
+                'votes as has_voted' => fn ($query) => $query->where('user_id', $userId),
+            ]);
+        }
+
+        return $relation;
     }
 
     public function user()
@@ -56,5 +67,10 @@ class Comment extends Model
     public function reports()
     {
         return $this->morphMany(Report::class, 'reportable');
+    }
+
+    public function votes(): MorphMany
+    {
+        return $this->morphMany(Vote::class, 'votable');
     }
 }

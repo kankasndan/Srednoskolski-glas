@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Header from "@/components/Header";
 import SchoolForums from "@/components/SchoolForums";
@@ -9,6 +10,7 @@ import ThematicForums from "@/components/ThematicForums";
 import { useForums } from "@/hooks/useForums";
 
 let sidebarScrollTop = 0;
+let sidebarCollapsed = false;
 
 function getSelectedKey(pathname) {
   if (pathname === "/feed") return "nav:home";
@@ -22,7 +24,19 @@ function getSelectedKey(pathname) {
 export default function AppShell({ children, contentClassName = "pl-8" }) {
   const pathname = usePathname();
   const { general, schoolsByCity, loading, error } = useForums();
+  const [collapsed, setCollapsed] = useState(sidebarCollapsed);
   const [navOverride, setNavOverride] = useState({ key: null, pathname: null });
+
+  useEffect(() => {
+    sidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+    setCollapsed(sidebarCollapsed);
+  }, []);
+
+  function toggleCollapsed() {
+    sidebarCollapsed = !collapsed;
+    setCollapsed(sidebarCollapsed);
+    localStorage.setItem("sidebarCollapsed", String(sidebarCollapsed));
+  }
   const selectedKey =
     navOverride.pathname === pathname && navOverride.key
       ? navOverride.key
@@ -36,37 +50,58 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
   }
 
   return (
-    <div className="min-h-screen w-full bg-white">
+    <div className="flex h-screen flex-col overflow-hidden bg-white">
       <Header />
-      <div className="flex px-6">
-        <div className="box-border min-h-full shrink-0 pt-10 border-r border-gray-200">
-          <aside
+      <div className="flex min-h-0 flex-1 px-6">
+        <aside className="box-border flex shrink-0 flex-col border-r border-[#CCCCCC] pr-6 pt-1">
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? "Прошири мени" : "Собери мени"}
+            className="mb-1 flex size-10 shrink-0 items-center justify-center"
+          >
+            <Image
+              src="/collapsed icons/menu-collapse.png"
+              alt=""
+              width={24}
+              height={24}
+              className={`size-6 ${collapsed ? "rotate-180" : ""}`}
+            />
+          </button>
+          <div
             ref={(node) => {
               if (node) node.scrollTop = sidebarScrollTop;
             }}
             onScroll={(event) => {
               sidebarScrollTop = event.currentTarget.scrollTop;
             }}
-            className="sticky max-h-[70vh] top-26 pr-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overflow-y-scroll overscroll-contain mask-fade-out pb-20"
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mask-fade-out pb-4"
           >
-            <SidebarNav selectedKey={selectedKey} onSelect={handleSelect} />
+            <SidebarNav
+              selectedKey={selectedKey}
+              onSelect={handleSelect}
+              collapsed={collapsed}
+            />
             <ThematicForums
               forums={general}
               loading={loading}
               error={error}
               selectedKey={selectedKey}
               onSelect={handleSelect}
+              collapsed={collapsed}
             />
-            <SchoolForums
-              schoolsByCity={schoolsByCity}
-              loading={loading}
-              error={error}
-              selectedKey={selectedKey}
-              onSelect={handleSelect}
-            />
-          </aside>
-        </div>
-        <main className={`pt-8 flex flex-1 justify-center ${contentClassName}`}>
+            {!collapsed && (
+              <SchoolForums
+                schoolsByCity={schoolsByCity}
+                loading={loading}
+                error={error}
+                selectedKey={selectedKey}
+                onSelect={handleSelect}
+              />
+            )}
+          </div>
+        </aside>
+        <main className={`flex flex-1 items-start justify-center overflow-y-auto pb-12 pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${contentClassName}`}>
           {children}
         </main>
       </div>

@@ -28,8 +28,9 @@ export function useThread(forumSlug, threadId) {
   }, [forumSlug, threadId]);
 
   return {
-    forum: data?.forum ?? null,
+    forum: data?.thread?.forum ?? null,
     thread: data?.thread ?? null,
+    comments: data?.comments ?? [],
     loading,
     error,
     missing: !loading && !error && data === null,

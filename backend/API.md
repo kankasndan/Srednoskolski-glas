@@ -138,6 +138,7 @@ For school forums, `type` is `"school"` and `school` looks like:
   "title": "Како да се подготвам за матура?",
   "description": "<p>Текст на постот…</p>",
   "upvotes": 8,
+  "has_voted": false,
   "views": 120,
   "is_anonymous": false,
   "comments_count": 4,
@@ -173,6 +174,7 @@ Notes:
 - If `is_anonymous` is `true`, `author` is `null`.
 - `edited_at` is set when the post was edited; otherwise `null`.
 - `attachments[].type` comes from the attachment slug (e.g. image/file/link/video).
+- `has_voted` is `true` when the current authenticated user has upvoted this item; guests always get `false`.
 
 ### Comment (nested tree)
 
@@ -182,6 +184,7 @@ Notes:
   "content": "Се согласувам.",
   "parent_id": null,
   "upvotes": 2,
+  "has_voted": false,
   "created_at": "2026-07-18T11:00:00.000000Z",
   "edited_at": null,
   "deleted_by": null,
@@ -215,7 +218,7 @@ Top-level comments have `parent_id: null`. Replies nest under `replies`.
 
 Used by:
 
-- `GET /api/p/{slug}`
+- `GET /api/feed`
 - `GET /api/p/{slug}/threads`
 
 | Query | Values | Default | Meaning |
@@ -238,12 +241,65 @@ Used by:
 Examples:
 
 ```
+GET /api/feed?sort=trending&time=week
 GET /api/p/drzhavna_matura/threads?sort=top&time=month
 GET /api/p/drzhavna_matura/threads?sort=newest&page=2
-GET /api/p/drzhavna_matura?sort=discussed&time=week
 ```
 
-> Cross-forum feed / FYP (`/api/feed`) is **not** implemented yet. Do not use forum thread lists as a personalized feed.
+---
+
+## Feed
+
+### Personalized / trending feed
+
+```
+GET /api/feed
+```
+
+**Public** (works for guests). If the SPA sends the session cookie, the feed personalizes for that user.
+
+**Behavior**
+
+| Who | What you get |
+|-----|----------------|
+| Guest | Site-wide threads (same sort/time filters as forum lists) |
+| Logged in, **no** followed forums | Same as guest — site-wide trending |
+| Logged in, **≥1** followed forums | Still the **full site-wide** pool (so 1–2 follows don’t hide everything else). Threads from followed forums get a soft boost (+30), and threads the user previously opened get a smaller boost (+15), then normal sort metrics apply |
+
+Opening a thread via `GET /api/p/{slug}/comments/{id}` while logged in records a row in `thread_views` (and increments the public `views` counter).
+
+```json
+{
+  "data": [
+    {
+      "id": 15,
+      "title": "Како да се подготвам за матура?",
+      "description": "…",
+      "upvotes": 8,
+      "views": 120,
+      "is_anonymous": false,
+      "comments_count": 4,
+      "created_at": "2026-07-18T10:22:00.000000Z",
+      "edited_at": null,
+      "forum": {
+        "id": 3,
+        "name": "Државна матура",
+        "slug": "drzhavna_matura",
+        "imageUrl": "https://…/forum.png"
+      },
+      "author": { "id": 1, "username": "ana_mk", "imageUrl": "…", "school": null },
+      "attachments": []
+    }
+  ],
+  "links": { "first": "…", "last": "…", "prev": null, "next": "…" },
+  "meta": {
+    "current_page": 1,
+    "last_page": 3,
+    "per_page": 5,
+    "total": 12
+  }
+}
+```
 
 ---
 
@@ -494,19 +550,17 @@ GET /api/forums
 
 ---
 
-### Forum page (forum + first page of threads)
+### Forum detail (banner / metadata only)
 
 ```
 GET /api/p/{slug}
 ```
 
-**Public.**
+**Public.** No query params. Does **not** return threads — use `/threads` for the list.
 
 | Path | Example |
 |------|---------|
 | `{slug}` | `drzhavna_matura` |
-
-Query: `page`, `sort`, `time` (see [Thread list filters](#thread-list-filters)).
 
 ```json
 {
@@ -523,57 +577,22 @@ Query: `page`, `sort`, `time` (see [Thread list filters](#thread-list-filters)).
       "description": "Дискусии за државна матура…",
       "bannerUrl": "https://…/banner.png",
       "school": null
-    },
-    "threads": [
-      {
-        "id": 15,
-        "title": "Како да се подготвам за матура?",
-        "description": "…",
-        "upvotes": 8,
-        "views": 120,
-        "is_anonymous": false,
-        "comments_count": 4,
-        "created_at": "2026-07-18T10:22:00.000000Z",
-        "edited_at": null,
-        "forum": {
-          "id": 3,
-          "name": "Државна матура",
-          "slug": "drzhavna_matura",
-          "imageUrl": "https://…/forum.png"
-        },
-        "author": { "id": 1, "username": "ana_mk", "imageUrl": "…", "school": null },
-        "attachments": []
-      }
-    ]
-  },
-  "meta": {
-    "current_page": 1,
-    "last_page": 3,
-    "per_page": 5,
-    "total": 12
-  },
-  "links": {
-    "first": "…",
-    "last": "…",
-    "prev": null,
-    "next": "…"
+    }
   }
 }
 ```
-
-Use this for the initial forum page load (banner + first 5 threads).
 
 ---
 
 ## Threads
 
-### Paginated threads for a forum (infinite scroll)
+### Paginated threads for a forum
 
 ```
 GET /api/p/{slug}/threads
 ```
 
-**Public.** Same filters as forum show. Prefer this for loading page 2+ while scrolling.
+**Public.** **Only** source of the forum thread list (page 1, filters, infinite scroll).
 
 ```json
 {
@@ -615,9 +634,12 @@ GET /api/p/{slug}/threads
 
 **Frontend pattern**
 
-1. Load forum: `GET /api/p/{slug}` → render banner + `data.threads`
-2. On scroll: `GET /api/p/{slug}/threads?page=2&sort=…&time=…` → append `data`
-3. Stop when `meta.current_page >= meta.last_page` (or `links.next` is `null`)
+1. Initial page (parallel):
+   - `GET /api/p/{slug}` → banner / forum meta
+   - `GET /api/p/{slug}/threads` → page 1 of threads (default or URL filters)
+2. Filter change (`sort` / `time`): `GET /api/p/{slug}/threads?sort=…&time=…&page=1` → **replace** thread list
+3. Scroll: `GET /api/p/{slug}/threads?page=2&sort=…&time=…` → **append** `data`
+4. Stop when `meta.current_page >= meta.last_page` (or `links.next` is `null`)
 
 ---
 
@@ -676,6 +698,44 @@ If the thread does not belong to that forum → `404`.
 ```
 
 `comments` is only top-level comments; replies are nested in each comment’s `replies` array. Currently ordered newest first. Comment sort params (`best` / `newest` / `oldest`) are not implemented yet.
+
+---
+
+## Votes (upvote toggle)
+
+Upvote only (no downvote). Second call from the same user removes the vote.
+
+**Auth required.** Call `GET /sanctum/csrf-cookie` first, then send `X-XSRF-TOKEN`.
+
+### Toggle thread upvote
+
+```
+POST /api/threads/{id}/upvote
+```
+
+### Toggle comment upvote
+
+```
+POST /api/comments/{id}/upvote
+```
+
+**Success (`200`)**
+
+```json
+{
+  "data": {
+    "upvotes": 43,
+    "has_voted": true
+  }
+}
+```
+
+| Field | Meaning |
+|-------|---------|
+| `upvotes` | New public counter on the thread/comment |
+| `has_voted` | `true` if this request left a vote; `false` if it removed one |
+
+Unique constraint: one vote per user per thread/comment. Feed/forum/thread responses also include `has_voted` when the session user is known.
 
 ---
 
@@ -749,9 +809,12 @@ DELETE /api/media
 | `PUT` | `/api/onboarding` | yes | Save profile |
 | `GET` | `/api/cities` | — | Cities + schools |
 | `GET` | `/api/forums` | — | Sidebar forums |
-| `GET` | `/api/p/{slug}` | — | Forum + threads page 1 |
-| `GET` | `/api/p/{slug}/threads` | — | Paginated threads (scroll) |
-| `GET` | `/api/p/{slug}/comments/{id}` | — | Thread + comment tree |
+| `GET` | `/api/feed` | optional | Personalized / site-wide feed |
+| `GET` | `/api/p/{slug}` | — | Forum metadata only |
+| `GET` | `/api/p/{slug}/threads` | — | Paginated threads (page 1, filters, scroll) |
+| `GET` | `/api/p/{slug}/comments/{id}` | — | Thread + comment tree (records view if logged in) |
+| `POST` | `/api/threads/{id}/upvote` | yes | Toggle thread upvote |
+| `POST` | `/api/comments/{id}/upvote` | yes | Toggle comment upvote |
 | `POST` | `/api/media` | yes | Upload |
 | `DELETE` | `/api/media` | yes | Delete upload |
 
@@ -761,9 +824,8 @@ DELETE /api/media
 
 These are planned but **not** in routes today — do not call them:
 
-- `GET /api/feed` (cross-forum FYP)
 - `POST /api/threads` (create discussion)
 - Comment create / edit / delete
-- Votes, reports, search, follow, admin
+- Reports, search, follow, admin
 
 When they ship, this file should be updated.

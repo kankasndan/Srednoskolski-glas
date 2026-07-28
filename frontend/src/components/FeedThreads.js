@@ -1,7 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useState } from "react";
+import { useId, useState, useEffect } from "react";
+
+import { formatDistanceToNow } from "date-fns";
+import { mk } from "date-fns/locale";
+
+import { API_BASE_URL } from "@/lib/api";
 
 const SORT_OPTIONS = [{ value: "trending", label: "Трендинг" }];
 
@@ -78,65 +83,68 @@ const THREAD_LIST = Array.from({ length: 16 }, (_, index) => ({
   image: index === 2 || index === 6 ? "/thread-placeholder.png" : null,
 }));
 
-function ThreadTag({ tag }) {
-  return (
-    <span
-      className={`flex h-6 shrink-0 items-center gap-1 rounded-md px-2 font-[family-name:var(--font-manrope)] text-[12px] font-bold leading-none text-black ${
-        tag.tone === "highlight" ? "bg-[#F0E92F]" : "bg-[#F5F5F5]"
-      }`}
-    >
-      {tag.icon ? (
-        <span className="relative size-4 shrink-0 overflow-hidden">
-          <Image
-            src={tag.icon}
-            alt=""
-            width={tag.iconZoom ? 40 : 16}
-            height={tag.iconZoom ? 40 : 16}
-            className={`absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2 ${
-              tag.iconZoom ? "size-10" : "size-4"
-            }`}
-          />
-        </span>
-      ) : null}
-      {tag.label}
-    </span>
-  );
-}
-
-function TimestampTag({ label }) {
-  return (
-    <span className="flex h-6 w-[63px] shrink-0 items-center justify-center gap-2 rounded-md px-2 py-1 font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-4 tracking-normal text-[#595959]">
-      <span className="flex h-4 w-[47px] items-center gap-1 overflow-hidden whitespace-nowrap">
-        {label}
-      </span>
-    </span>
-  );
-}
-
 function ActionButton({ icon, label, count }) {
   return (
     <button
       type="button"
       aria-label={label}
-      className="flex h-12 w-24 items-center justify-center gap-4 rounded-2xl border border-[#CCCCCC] px-4 py-2 text-black opacity-80"
+      className="flex items-center justify-center gap-1 rounded-2xl border border-[#CCCCCC] hover:bg-gray-200 transition px-4 py-2 cursor-pointer"
     >
       <Image src={icon} alt="" width={24} height={24} className="size-6" />
-      <span className="flex h-[19px] w-[17px] items-center font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none tracking-normal">
-        {count}
-      </span>
+      <span>{count ?? 0}</span>
     </button>
   );
 }
 
 function ThreadItem({ thread }) {
+  console.log(thread.forum);
   const content = (
-    <div className="flex w-full items-start justify-between gap-8 cursor-pointer">
-      <div className="flex min-h-[97px] w-[681px] max-w-[calc(100%-128px)] shrink-0 flex-col gap-4">
-        <div className="flex h-6 max-w-full items-center gap-2 overflow-hidden">
-          {thread.tags.map((tag) => (
-            <ThreadTag key={`${thread.id}-${tag.label}`} tag={tag} />
-          ))}
-          <TimestampTag label={thread.postedAgo} />
+    <div className="flex w-full items-start justify-between gap-8">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <div className="bg-gray-100 rounded-xl py-1 px-2 flex gap-2 items-center">
+            {thread.forum.imageUrl ? (
+              <img
+                src={thread.forum.imageUrl}
+                className="w-5 h-5 rounded-full object-cover"
+              />
+            ) : (
+              <img
+                src="/avatars/default-1.svg"
+                className="w-5 h-5 rounded-full object-cover"
+              />
+            )}
+            {thread.forum.name}
+          </div>
+
+          {thread.author ? (
+            <>
+              <div className="bg-gray-100 rounded-xl py-1 px-2 flex gap-1 items-center">
+                {thread.author.imageUrl ? (
+                  <img
+                    src={thread.author.imageUrl}
+                    className="w-5 h-5 rounded-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src="/avatars/default-1.svg"
+                    className="w-5 h-5 rounded-full object-cover"
+                  />
+                )}
+                {thread.author.username}
+              </div>
+              <div className="bg-gray-100 rounded-xl py-1 px-2 flex gap-2 items-center">
+                {thread.author.school.name}
+              </div>
+            </>
+          ) : null}
+
+          <span className="text-sm">
+            {formatDistanceToNow(new Date(thread.created_at), {
+              addSuffix: true,
+              locale: mk,
+            })}
+          </span>
         </div>
 
         <div className="flex min-h-[57px] w-[681px] max-w-full flex-col gap-2">
@@ -144,29 +152,38 @@ function ThreadItem({ thread }) {
             {thread.title}
           </h3>
           <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
-            {thread.excerpt}
+            {thread.description}
           </p>
         </div>
-      </div>
 
-      <div className="flex h-[104px] w-24 shrink-0 flex-col gap-2">
-        <ActionButton
-          icon="/Chevrons up.svg"
-          label="Гласај нагоре"
-          count={thread.votes}
-        />
-        <ActionButton
-          icon="/chat-1-line.svg"
-          label="Коментари"
-          count={thread.comments}
-        />
+        <div className="text-xs flex items-center gap-0.5">
+          <img src="/eye-line.svg" />
+          <span className="text-primary-300 font-bold">
+            {thread.views ?? 0}
+          </span>
+        </div>
       </div>
     </div>
   );
 
+  const actions = (
+    <>
+      <ActionButton
+        icon="/Chevrons up.svg"
+        label="Гласај нагоре"
+        count={thread.upvotes}
+      />
+      <ActionButton
+        icon="/chat-1-line.svg"
+        label="Коментари"
+        count={thread.comments_count}
+      />
+    </>
+  );
+
   if (thread.image) {
     return (
-      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
+      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl cursor-pointer">
         <div className="w-full">{content}</div>
         <Image
           src={thread.image}
@@ -176,13 +193,15 @@ function ThreadItem({ thread }) {
           className="h-[421px] w-full rounded-t-3xl rounded-b-2xl object-cover"
           priority={thread.id === 2}
         />
+        <div className="flex gap-2">{actions}</div>
       </article>
     );
   }
 
   return (
-    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl">
+    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl cursor-pointer">
       {content}
+      <div className="flex flex-col gap-2">{actions}</div>
     </article>
   );
 }
@@ -196,12 +215,11 @@ function FeedSelect({
   selected,
   isOpen,
   listboxId,
-  textWidthClassName,
   onToggle,
   onSelect,
 }) {
   return (
-    <div className="relative h-10 w-36 shrink-0">
+    <div className="relative">
       <input type="hidden" name={name} value={selected.value} />
 
       <button
@@ -210,11 +228,9 @@ function FeedSelect({
         aria-expanded={isOpen}
         aria-controls={listboxId}
         onClick={onToggle}
-        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-gray-100 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black"
+        className="w-36 flex py-2 px-3 rounded-xl cursor-pointer items-center justify-center gap-1 bg-gray-100 font-bold hover:bg-gray-200 tranistion"
       >
-        <span className={`flex h-[19px] items-center ${textWidthClassName}`}>
-          {selected.label}
-        </span>
+        <span className={`text-nowrap`}>{selected.label}</span>
         <Image
           src="/chevron-down.svg"
           alt=""
@@ -229,7 +245,7 @@ function FeedSelect({
           id={listboxId}
           role="listbox"
           aria-label={label}
-          className="absolute left-0 top-12 z-20 flex w-36 flex-col overflow-hidden rounded-[12px] bg-white py-2 shadow-[0_12px_24px_rgba(88,47,245,0.14)]"
+          className="box-border absolute left-0 top-12 z-20 flex w-full flex-col overflow-hidden rounded-xl bg-white py-2 shadow-xl"
         >
           {options.map((option) => (
             <button
@@ -238,7 +254,7 @@ function FeedSelect({
               role="option"
               aria-selected={selected.value === option.value}
               onClick={() => onSelect(option)}
-              className="flex h-10 w-full items-center px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#F5F5F5]"
+              className="flex w-full p-2 items-center px-4 leading-none transition-colors hover:bg-gray-100 cursor-pointer"
             >
               {option.label}
             </button>
@@ -257,6 +273,34 @@ export default function FeedThreads() {
   const [selectedTimeFilter, setSelectedTimeFilter] = useState(
     TIME_FILTER_OPTIONS[0],
   );
+  const [paginationPage, setPaginationPage] = useState(1);
+
+  const [threads, setThreads] = useState([]);
+  const [moreThreadsLoading, setMoreThreadsLoading] = useState(false);
+
+  async function fetchThreads() {
+    setMoreThreadsLoading(true);
+    // const response = await fetch(
+    //   API_BASE_URL + "/api/p/drzhavna_matura/threads?page=" + paginationPage,
+    //   {
+    //     method: "POST",
+    //     body: {
+    //       selectedSort,
+    //       selectedTimeFilter,
+    //     },
+    //   },
+    // );
+    // const response = await fetch(
+    //   API_BASE_URL + "/api/p/drzhavna_matura/threads?page=" + paginationPage,
+    // );
+    const response = await fetch(API_BASE_URL + "/api/feed");
+
+    const threads = await response.json();
+    console.log(threads);
+
+    setThreads((prev) => [...prev, ...threads.data]);
+    setMoreThreadsLoading(false);
+  }
 
   const selectSortOption = (option) => {
     setSelectedSort(option);
@@ -268,9 +312,13 @@ export default function FeedThreads() {
     setOpenSelect(null);
   };
 
+  useEffect(() => {
+    fetchThreads();
+  }, [paginationPage]);
+
   return (
-    <section className="flex w-[990px] max-w-full flex-col gap-8">
-      <div className="flex h-10 w-[288px] self-end gap-2">
+    <section className="flex w-full max-w-[990px] flex-col items-center gap-8">
+      <div className="flex self-end gap-2">
         <FeedSelect
           name="sort"
           label="Сортирај дискусии"
@@ -278,7 +326,6 @@ export default function FeedThreads() {
           selected={selectedSort}
           isOpen={openSelect === "sort"}
           listboxId={sortListboxId}
-          textWidthClassName="w-[67px]"
           onToggle={() =>
             setOpenSelect((current) => (current === "sort" ? null : "sort"))
           }
@@ -291,7 +338,6 @@ export default function FeedThreads() {
           selected={selectedTimeFilter}
           isOpen={openSelect === "time"}
           listboxId={timeListboxId}
-          textWidthClassName="w-[89px]"
           onToggle={() =>
             setOpenSelect((current) => (current === "time" ? null : "time"))
           }
@@ -299,14 +345,32 @@ export default function FeedThreads() {
         />
       </div>
 
-      <div
-        className="flex w-[990px] max-w-full flex-col gap-6 bg-transparent"
-        aria-label="Дискусии"
-      >
-        {THREAD_LIST.map((thread) => (
+      <div className="flex w-full flex-col gap-6" aria-label="Дискусии">
+        {threads.map((thread) => (
           <ThreadItem key={thread.id} thread={thread} />
         ))}
+        {/* {THREAD_LIST.map((thread) => (
+          <ThreadItem key={thread.id} thread={thread} />
+        ))} */}
       </div>
+
+      <button
+        onClick={() => setPaginationPage((prev) => prev + 1)}
+        className="flex gap-2 items-center cursor-pointer group"
+      >
+        <span className="font-bold text-primary-300 text-xl group-hover:opacity-80 transition">
+          Load more
+        </span>
+        {moreThreadsLoading ? (
+          <div className="bg-primary-300 rounded-full w-6 h-6 text-white font-bold flex items-center justify-center group-hover:opacity-80 transition animate-spin">
+            <img src="/plus.svg" className="size-5" />
+          </div>
+        ) : (
+          <div className="bg-primary-300 rounded-full w-6 h-6 text-white font-bold flex items-center justify-center group-hover:opacity-80 transition">
+            <img src="/plus.svg" className="size-5" />
+          </div>
+        )}
+      </button>
     </section>
   );
 }

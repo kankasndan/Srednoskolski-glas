@@ -1,37 +1,26 @@
 "use client";
 
 import Link from "next/link";
+import ForumIcon from "@/components/ForumIcon";
 
 const ROW =
-  "flex h-10 w-[268px] cursor-pointer items-center gap-3 rounded-[10px] border border-[#CCCCCC] px-4 py-2 text-left font-[family-name:var(--font-manrope)] text-[14px] font-medium leading-none text-[#595959] transition-colors hover:bg-[#CFE9ED]";
+  "flex h-10 cursor-pointer items-center overflow-hidden whitespace-nowrap rounded-[12px] border border-[#CCCCCC] text-left font-[family-name:var(--font-manrope)] text-[14px] font-medium leading-none text-[#595959] transition-all duration-300 ease-in-out hover:bg-[#E5E5E5]";
 
-export default function NavItem({ label, href, active = false, onSelect }) {
-  const className = `${ROW} ${
-    active ? "bg-[#CFE9ED] font-bold text-black" : ""
-  }`;
-  const checkClassName = `flex size-4 shrink-0 items-center justify-center rounded-[3px] border ${
-    active ? "border-[#582FF5] bg-[#582FF5]" : "border-[#000000]"
+export default function NavItem({ label, href, icon, active = false, onSelect, collapsed }) {
+  const layout = collapsed
+    ? "w-10 justify-center"
+    : "w-[268px] gap-3 px-4 py-2";
+  const className = `${ROW} ${layout} ${
+    active ? "!bg-[var(--color-primary-200)] font-bold text-white" : ""
   }`;
   const content = (
     <>
-      <span className={checkClassName}>
-        <svg
-          className={active ? "block" : "hidden"}
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-        >
-          <path
-            d="M20 6 9 17l-5-5"
-            stroke="white"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
-      <span>{label}</span>
+      <ForumIcon
+        src={icon}
+        active={active}
+        imageClassName="max-h-5 max-w-5 object-contain"
+      />
+      {!collapsed && <span>{label}</span>}
     </>
   );
 

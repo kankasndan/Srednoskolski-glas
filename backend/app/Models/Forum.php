@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Forum extends Model
 {
-    protected $fillable = ['name', 'slug', 'description', 'type', 'school_id', 'imageUrl', 'bannerUrl', 'threads_count', 'members_count'];
+    protected $fillable = ['name', 'user_id', 'slug', 'description', 'type', 'school_id', 'imageUrl', 'bannerUrl', 'threads_count', 'members_count'];
 
     public function threads()
     {
@@ -22,5 +22,10 @@ class Forum extends Model
     public function forumUser()
     {
         return $this->belongsToMany(User::class, 'forum_user');
+    }
+
+    public function moderator()
+    {
+        return $this->belongsTo(User::class);
     }
 }

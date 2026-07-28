@@ -1,5 +1,6 @@
 import Image from "next/image";
 import FollowThreadButton from "@/components/FollowThreadButton";
+import ThreadActionsMenu from "@/components/ThreadActionsMenu";
 import ThreadMetaTags from "@/components/ThreadMetaTags";
 import ThreadStats from "@/components/ThreadStats";
 import { formatPostedAgo } from "@/lib/time";
@@ -28,7 +29,7 @@ function IconButton({ icon, label }) {
     <button
       type="button"
       aria-label={label}
-      className="grid size-9 cursor-pointer place-items-center rounded-lg transition-colors hover:bg-[#F5F5F5]"
+      className="grid size-9 cursor-pointer place-items-center rounded-lg transition-colors hover:bg-[#E5E5E5]"
     >
       <Image src={icon} alt="" width={20} height={20} className="size-5" />
     </button>
@@ -37,7 +38,7 @@ function IconButton({ icon, label }) {
 
 export default function ThreadPost({ forum, thread }) {
   return (
-    <article className="flex flex-col gap-6 rounded-3xl border border-[#CFE9ED] bg-white p-6">
+    <article className="flex flex-col gap-6 rounded-3xl border border-[#CCCCCC] bg-white p-6">
       <div className="flex items-start justify-between gap-4">
         <ThreadMetaTags
           tags={buildTags(forum, thread)}
@@ -46,7 +47,7 @@ export default function ThreadPost({ forum, thread }) {
 
         <div className="flex shrink-0 items-center gap-1">
           <IconButton icon="/share-line.svg" label="Сподели ја дискусијата" />
-          <IconButton icon="/more-2-fill.svg" label="Повеќе опции" />
+          <ThreadActionsMenu thread={thread} />
         </div>
       </div>
 
@@ -54,13 +55,12 @@ export default function ThreadPost({ forum, thread }) {
         <h1 className="text-[20px] font-bold leading-[27px] text-black">
           {thread.title}
         </h1>
-        {/* CHECK treba da se proveri kako kje se pusta thread body od backend */}
         <p className="whitespace-pre-line text-[16px] leading-[22px] text-[#595959]">
-          {thread.body}
+          {thread.description}
         </p>
       </div>
 
-      <hr className="border-[#CFE9ED]" />
+      <hr className="border-[#CCCCCC]" />
 
       <div className="flex items-center justify-between gap-4">
         <ThreadStats

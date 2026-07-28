@@ -6,7 +6,7 @@ import { apiFetch } from "@/lib/api";
 import { CITIES } from "@/lib/schools";
 import TextField from "@/components/TextField";
 import SelectField from "@/components/SelectField";
-import SchoolSelect from "@/components/SchoolSelect";
+import Checkbox from "@/components/Checkbox";
 import TermsCheckbox from "@/components/TermsCheckbox";
 import SubmitButton from "@/components/SubmitButton";
 
@@ -128,17 +128,11 @@ export default function OnboardingForm() {
         maxLength={20}
       />
 
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={notStudent}
-          onChange={(e) => handleNotStudentChange(e.target.checked)}
-          className="h-4 w-4 shrink-0 accent-[#582FF5] 2xl:h-5 2xl:w-5"
-        />
+      <Checkbox checked={notStudent} onChange={handleNotStudentChange}>
         <span className="font-(family-name:--font-manrope) text-[12px] font-normal leading-[19.4px] text-[#595959] 2xl:text-[14px]">
           Не сум средношколец
         </span>
-      </label>
+      </Checkbox>
 
       <SchoolSelect
         id="school"

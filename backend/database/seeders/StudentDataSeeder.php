@@ -22,6 +22,8 @@ class StudentDataSeeder extends Seeder
         ['email' => 'stefan@example.com', 'school' => 'Гоце Стојчески', 'city' => 'Тетово', 'vocation' => 'Сообраќајна струка', 'grade' => 3],
         ['email' => 'ivana@example.com', 'school' => 'Кочо Рацин', 'city' => 'Велес', 'vocation' => 'Хемиско-технолошка струка', 'grade' => 2],
         ['email' => 'test@example.com', 'school' => 'Раде Јовчевски-Корчагин', 'city' => 'Скопје', 'vocation' => 'ПМА', 'grade' => 4],
+        ['email' => 'nikola@example.com', 'school' => 'Раде Јовчевски-Корчагин', 'city' => 'Скопје', 'vocation' => 'ПМА', 'grade' => 4],
+        ['email' => 'profesor@example.com', 'school' => 'Раде Јовчевски-Корчагин', 'city' => 'Скопје', 'vocation' => 'ПМА', 'grade' => 4],
     ];
 
     public function run(): void
@@ -45,6 +47,12 @@ class StudentDataSeeder extends Seeder
                     'grade' => $student['grade'],
                 ],
             );
+
+            $forum = $school->forum;
+
+            if ($forum !== null) {
+                $user->forums()->syncWithoutDetaching([$forum->id]);
+            }
         }
     }
 }

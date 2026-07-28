@@ -80,15 +80,15 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
             ))}
           </div>
         )}
+        <p
+          id="forum-error"
+          className={`absolute left-0 top-full mt-1 w-full truncate font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[var(--color-error)] ${
+            errorMessage ? "" : "invisible"
+          }`}
+        >
+          {errorMessage || "Нема грешка"}
+        </p>
       </div>
-      <p
-        id="forum-error"
-        className={`min-h-4 truncate font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[var(--color-error)] ${
-          errorMessage ? "" : "invisible"
-        }`}
-      >
-        {errorMessage || "Нема грешка"}
-      </p>
     </div>
   );
 }

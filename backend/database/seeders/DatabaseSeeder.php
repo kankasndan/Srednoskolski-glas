@@ -14,18 +14,31 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-
-        
         $this->call([
+            // Reference data
             OnboardingReferenceSeeder::class,
             ForumSeeder::class,
+            RoleSeeder::class,
+
+            // Users (regular + admin/moderator with Spatie roles)
             UserSeeder::class,
+            AdminSeeder::class,
             StudentDataSeeder::class,
             ForumUserSeeder::class,
+
+            // Content
             ThreadSeeder::class,
             ThreadAttachmentSeeder::class,
             CommentSeeder::class,
-            RoleSeeder::class,
+            MentionSeeder::class,
+
+            // Moderation
+            ReportSeeder::class,
+            SanctionSeeder::class,
+            AppealSeeder::class,
+
+            // Denormalized counters last
+            ForumCountSeeder::class,
         ]);
     }
 }

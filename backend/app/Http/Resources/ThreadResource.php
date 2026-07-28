@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Thread;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Thread
+ * @mixin Thread
  */
 class ThreadResource extends JsonResource
 {
@@ -20,6 +21,7 @@ class ThreadResource extends JsonResource
             'title' => $this->title,
             'description' => $this->description,
             'upvotes' => $this->upvotes,
+            'has_voted' => (bool) ($this->has_voted ?? false),
             'views' => $this->views,
             'is_anonymous' => $this->is_anonymous,
             'comments_count' => $this->whenCounted('comments'),

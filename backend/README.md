@@ -62,13 +62,13 @@ Validation failures (`422`) additionally include field errors:
 | Method | Path | Notes |
 |--------|------|-------|
 | `GET` | `/api/forums` | **All** forums (sidebar). No pagination. `{ data: { general, schools_by_city } }` |
-| `GET` | `/api/p/{slug}` | Forum detail + **paginated** threads (5/page). Query: `page`, `sort`, `time` |
-| `GET` | `/api/p/{slug}/threads` | Paginated threads for that forum (infinite scroll, 5/page). Query: `page`, `sort`, `time` |
+| `GET` | `/api/p/{slug}` | Forum metadata only (banner/description). No threads. |
+| `GET` | `/api/p/{slug}/threads` | Paginated threads for that forum (5/page). Query: `page`, `sort`, `time` |
 | `GET` | `/api/p/{slug}/comments/{id}` | Single thread + nested comments |
 
 ### Thread list filters
 
-Shared by `/api/p/{slug}` and `/api/p/{slug}/threads`:
+On `/api/p/{slug}/threads` only:
 
 | Param | Values | Default |
 |-------|--------|---------|
