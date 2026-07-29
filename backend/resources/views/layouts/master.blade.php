@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Admin Panel</title>
+    <title>@yield("title")</title>
     <script src="https://kit.fontawesome.com/75475ebc14.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/svg" href="{{ asset('images/logo.svg') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -97,6 +98,7 @@
     @stack("scripts")
     @stack("scripts1")
     @stack("scripts-profile")
+    @stack("scripts/dashboard")
 
 </body>
 

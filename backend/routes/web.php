@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuthContoller;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -10,7 +11,11 @@ Route::get("admin/login", [AuthContoller::class, "index"])->name("login");
 Route::post("admin/login/login", [AuthContoller::class, "login"])->name("admin.login");
 
 Route::prefix("admin")->middleware("auth")->group(function () {
-    Route::get("dashboard", [AdminController::class, "index"])->name("admin.dashboard");
+
+    // DAHSBOARD
+        Route::get("dashboard", [DashboardController::class, "index"])->name("admin.dashboard");
+        Route::get("dashboard/export", [DashboardController::class, "exportPdf"])->name("admin.dashboard.export");
+        
     
     // UPDATE PROFILE
         Route::get('profile/{user}', [AdminController::class, 'profile'])->name('admin.profile');
