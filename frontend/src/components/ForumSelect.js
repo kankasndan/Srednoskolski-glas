@@ -31,7 +31,7 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
   }
 
   return (
-    <div className="flex w-[310px] max-w-full flex-col gap-2">
+    <div className="mb-12 flex w-[268px] max-w-full flex-col gap-2">
       <FieldLabel required>Каде сакаш да започнеш дискусија?</FieldLabel>
       <input type="hidden" name="forum" value={selected?.slug ?? ""} />
 

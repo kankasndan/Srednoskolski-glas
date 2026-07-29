@@ -14,7 +14,7 @@ export default function NewPageFooter() {
           Правила
         </a>
       </nav>
-      <p className="mt-4 leading-5 text-[#582FF5]">
+      <p className="mt-4 leading-4 text-[#582FF5] mb-8">
         &copy; {new Date().getFullYear()} Средношколски Глас.
         <br />
         Сите права задржани.

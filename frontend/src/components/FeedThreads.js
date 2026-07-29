@@ -206,8 +206,6 @@ function ThreadItem({ thread }) {
   );
 }
 
-// after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:rounded-full after:bg-[#CFE9ED]
-
 function FeedSelect({
   name,
   label,
@@ -215,11 +213,12 @@ function FeedSelect({
   selected,
   isOpen,
   listboxId,
+  textWidthClassName,
   onToggle,
   onSelect,
 }) {
   return (
-    <div className="relative">
+    <div className="relative h-10 w-36 shrink-0">
       <input type="hidden" name={name} value={selected.value} />
 
       <button
@@ -228,9 +227,11 @@ function FeedSelect({
         aria-expanded={isOpen}
         aria-controls={listboxId}
         onClick={onToggle}
-        className="w-36 flex py-2 px-3 rounded-xl cursor-pointer items-center justify-center gap-1 bg-gray-100 font-bold hover:bg-gray-200 tranistion"
+        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-white py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black"
       >
-        <span className={`text-nowrap`}>{selected.label}</span>
+        <span className={`flex h-[19px] items-center ${textWidthClassName}`}>
+          {selected.label}
+        </span>
         <Image
           src="/chevron-down.svg"
           alt=""
@@ -245,7 +246,7 @@ function FeedSelect({
           id={listboxId}
           role="listbox"
           aria-label={label}
-          className="box-border absolute left-0 top-12 z-20 flex w-full flex-col overflow-hidden rounded-xl bg-white py-2 shadow-xl"
+          className="absolute left-0 top-12 z-20 flex w-36 flex-col overflow-hidden rounded-[12px] bg-white py-2 shadow-[0_12px_24px_rgba(88,47,245,0.14)]"
         >
           {options.map((option) => (
             <button
@@ -254,7 +255,7 @@ function FeedSelect({
               role="option"
               aria-selected={selected.value === option.value}
               onClick={() => onSelect(option)}
-              className="flex w-full p-2 items-center px-4 leading-none transition-colors hover:bg-gray-100 cursor-pointer"
+              className="flex h-10 w-full items-center px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#E5E5E5]"
             >
               {option.label}
             </button>
@@ -318,7 +319,7 @@ export default function FeedThreads() {
 
   return (
     <section className="flex w-full max-w-[990px] flex-col items-center gap-8">
-      <div className="flex self-end gap-2">
+      <div className="flex h-10 w-[288px] self-end gap-2">
         <FeedSelect
           name="sort"
           label="Сортирај дискусии"
@@ -326,6 +327,7 @@ export default function FeedThreads() {
           selected={selectedSort}
           isOpen={openSelect === "sort"}
           listboxId={sortListboxId}
+          textWidthClassName="w-[67px]"
           onToggle={() =>
             setOpenSelect((current) => (current === "sort" ? null : "sort"))
           }
@@ -338,6 +340,7 @@ export default function FeedThreads() {
           selected={selectedTimeFilter}
           isOpen={openSelect === "time"}
           listboxId={timeListboxId}
+          textWidthClassName="w-[89px]"
           onToggle={() =>
             setOpenSelect((current) => (current === "time" ? null : "time"))
           }

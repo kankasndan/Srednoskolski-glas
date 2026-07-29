@@ -14,7 +14,7 @@ export default function NewDiscussionPage() {
         width={395}
         height={366}
         aria-hidden="true"
-        className="pointer-events-none fixed left-[840px] top-[280px] hidden h-[366px] w-[395px] select-none xl:block"
+        className="pointer-events-none fixed left-[936px] top-[329px] hidden h-[366px] w-[395px] select-none xl:block"
         priority
       />
       <div className="relative z-10 flex flex-col items-start gap-6 px-14">

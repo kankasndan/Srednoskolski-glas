@@ -40,7 +40,7 @@ export default function NewDiscussionForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col items-start gap-6">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col items-start gap-4">
       <ForumSelect
         selected={selectedForum}
         onChange={(forum) => {
@@ -66,11 +66,11 @@ export default function NewDiscussionForm() {
       />
       <PostTypeButtons />
       <AnonymousToggle
-        className="w-[632px] max-w-full"
+        className="w-[779px] max-w-full"
         action={
           <button
             type="submit"
-            className="h-10 w-36 cursor-pointer rounded-xl bg-[#582FF5] font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5]"
+            className="ml-auto h-10 w-36 cursor-pointer rounded-xl bg-[#582FF5] font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5]"
           >
             Објави
           </button>

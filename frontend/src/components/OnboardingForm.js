@@ -6,7 +6,6 @@ import { apiFetch } from "@/lib/api";
 import { CITIES } from "@/lib/schools";
 import TextField from "@/components/TextField";
 import SelectField from "@/components/SelectField";
-import Checkbox from "@/components/Checkbox";
 import TermsCheckbox from "@/components/TermsCheckbox";
 import SubmitButton from "@/components/SubmitButton";
 
@@ -35,7 +34,7 @@ const AREAS = [
 ];
 
 const YEARS = ["Прва", "Втора", "Трета", "Четврта"];
-const LOCKED_HINT = "Само средношколци можат да го пополнат ова поле.";
+const NOT_STUDENT = "Не сум средношколец";
 
 function formatApiError(data) {
   if (data?.errors) {
@@ -51,20 +50,19 @@ export default function OnboardingForm() {
   const [school, setSchool] = useState("");
   const [area, setArea] = useState("");
   const [year, setYear] = useState("");
-  const [notStudent, setNotStudent] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const notStudent = school === NOT_STUDENT;
 
   const schoolGroups = [...CITIES].sort(
     (a, b) => b.schools.length - a.schools.length,
   );
 
-  function handleNotStudentChange(e) {
-    const checked = e.target.checked;
-    setNotStudent(checked);
-    if (checked) {
-      setSchool("");
+  function handleSchoolChange(e) {
+    setSchool(e.target.value);
+    if (e.target.value === NOT_STUDENT) {
       setArea("");
       setYear("");
     }
@@ -118,7 +116,7 @@ export default function OnboardingForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mx-auto mt-12 flex w-full max-w-[360px] flex-col gap-3 2xl:max-w-[440px] 2xl:gap-4"
+      className="mx-auto mt-12 flex w-full max-w-[400px] flex-col gap-3 2xl:max-w-[440px] 2xl:gap-4"
     >
       <TextField
         id="pseudonym"
@@ -129,46 +127,42 @@ export default function OnboardingForm() {
         maxLength={20}
       />
 
-      <Checkbox checked={notStudent} onChange={handleNotStudentChange}>
-        <span className="font-(family-name:--font-manrope) text-[12px] font-normal leading-[19.4px] text-[#595959] 2xl:text-[14px]">
-          Не сум средношколец
-        </span>
-      </Checkbox>
-
-      <SelectField
-        id="school"
-        label="Училиште"
-        required={!notStudent}
-        value={school}
-        onChange={(e) => setSchool(e.target.value)}
-        placeholder="Избери училиште"
-        groups={schoolGroups}
-        disabled={notStudent}
-        tooltip={notStudent ? LOCKED_HINT : undefined}
-      />
+      <div className="flex flex-col gap-0">
+        <SelectField
+          id="school"
+          label="Училиште"
+          required
+          value={school}
+          onChange={handleSchoolChange}
+          placeholder="Избери училиште"
+          standaloneOption={{ value: NOT_STUDENT, label: NOT_STUDENT }}
+          groups={schoolGroups}
+        />
+        <p className="-mt-1 mb-3 font-(family-name:--font-manrope) text-[12px] text-[#595959] 2xl:text-[14px]">
+          Доколку не си средношколец, можеш да ја користиш платформата само за
+          читање и коментирање на дискусии.
+        </p>
+      </div>
 
       <SelectField
         id="area"
-        label="Подрачје"
-        required={!notStudent}
+        label="Подрачје на образование"
+        required
         value={area}
         onChange={(e) => setArea(e.target.value)}
-        placeholder="Избери подрачје"
+        placeholder="Избери струка"
         options={AREAS}
         disabled={notStudent}
-        tooltip={notStudent ? LOCKED_HINT : undefined}
       />
 
       <SelectField
         id="year"
-        label="Година"
-        required={!notStudent}
+        label="Година (опционално)"
         value={year}
         onChange={(e) => setYear(e.target.value)}
         placeholder="Избери година"
         options={YEARS}
         disabled={notStudent}
-        tooltip={notStudent ? LOCKED_HINT : undefined}
       />
 
       <TermsCheckbox
@@ -185,7 +179,7 @@ export default function OnboardingForm() {
       <div className="mt-4">
         <SubmitButton
           label={submitting ? "Зачувување..." : "Продолжи"}
-          disabled={!agreed || submitting}
+          disabled={!agreed || submitting || (!notStudent && (!school || !area))}
           disabledTooltip="Прифати ги условите за да продолжиш"
         />
       </div>

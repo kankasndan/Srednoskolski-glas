@@ -48,7 +48,7 @@ function clearFiles(list, setList) {
   setList([]);
 }
 
-export default function PostTypeButtons({ widthClassName = "w-[632px]" }) {
+export default function PostTypeButtons({ widthClassName = "w-[779px]" }) {
   const [selected, setSelected] = useState(null);
   const [photos, setPhotos] = useState([]);
   const [videos, setVideos] = useState([]);

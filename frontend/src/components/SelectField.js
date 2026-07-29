@@ -9,6 +9,7 @@ export default function SelectField({
   placeholder,
   options,
   groups,
+  standaloneOption,
   disabled = false,
   tooltip,
 }) {
@@ -28,17 +29,28 @@ export default function SelectField({
         <select
           id={id}
           name={id}
-          required={required}
+          required={required && !disabled}
           disabled={disabled}
           value={value}
           onChange={onChange}
-          className={`${fieldClass} appearance-none pr-11 disabled:cursor-not-allowed disabled:bg-[#F5F5F5] disabled:text-[#B3B3B3] ${
+          className={`${fieldClass} appearance-none pr-11 disabled:cursor-not-allowed disabled:bg-[#CCCCCC] disabled:text-[#FFFFFF] ${
             value ? "text-[#000000]" : "text-[#595959]"
           }`}
         >
-          <option value="" disabled>
-            {placeholder}
-          </option>
+          /* Default unselected placeholder */
+          {placeholder && (
+            <option value="" disabled hidden>
+              {placeholder}
+            </option>
+          )}
+
+          {standaloneOption && (
+            <option value={standaloneOption.value} className="text-[#000000]">
+              {standaloneOption.label}
+            </option>
+          )}
+
+          /* Grouped Options */
           {groups
             ? groups.map(({ city, schools }) => (
                 <optgroup key={city} label={city.toUpperCase()}>
@@ -53,7 +65,7 @@ export default function SelectField({
                   ))}
                 </optgroup>
               ))
-            : options.map((name) => (
+            : options?.map((name) => (
                 <option key={name} value={name} className="text-[#000000]">
                   {name}
                 </option>
@@ -63,7 +75,9 @@ export default function SelectField({
           src="/chevron-down.svg"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 2xl:h-6 2xl:w-6"
+          className={`pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 2xl:h-6 2xl:w-6 ${
+            disabled ? "brightness-0 invert" : ""
+          }`}
         />
       </div>
     </div>

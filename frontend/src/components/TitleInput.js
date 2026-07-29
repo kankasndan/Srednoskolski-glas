@@ -7,7 +7,7 @@ export default function TitleInput({
   onChange,
   onBlur,
   errorMessage,
-  widthClassName = "w-[632px]",
+  widthClassName = "w-[779px]",
 }) {
   const counterTextColor =
     value.length >= MAX_LENGTH ? "text-[var(--color-error)]" : "text-[#595959]";

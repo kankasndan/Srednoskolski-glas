@@ -11,7 +11,7 @@ import { useThread } from "@/hooks/useThread";
 
 function StatusMessage({ children }) {
   return (
-    <p className="font-(family-name:--font-manrope) text-[16px] text-[#595959]">
+    <p className="font-(family-name:--font-manrope) text-[16px] text-[#999999]">
       {children}
     </p>
   );
