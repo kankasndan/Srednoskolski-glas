@@ -101,6 +101,7 @@
     @stack("scripts/dashboard")
     @stack("scripts-forums")
     @stack("scripts-forum-show")
+    @stack("scripts-reports")
 
 
 </body>
