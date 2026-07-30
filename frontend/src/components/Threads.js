@@ -231,6 +231,7 @@ export default function Threads({ forum = null }) {
       );
 
       const threads = await response.json();
+      console.log(threads);
       setThreads((prev) => [...prev, ...threads.data]);
       if (threads.data.length === 0) {
         setNoMoreThreads(true);
