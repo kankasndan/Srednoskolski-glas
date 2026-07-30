@@ -5,6 +5,8 @@ import { useId, useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { mk } from "date-fns/locale";
 import { API_BASE_URL } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 const SORT_OPTIONS = [{ value: "trending", label: "Трендинг" }];
 
@@ -15,20 +17,49 @@ const TIME_FILTER_OPTIONS = [
   { value: "year", label: "1 година" },
 ];
 
-function ActionButton({ icon, label, count }) {
+function ActionButton({ icon, label, count, onclick, upvoteToggle }) {
   return (
     <button
+      onClick={onclick}
       type="button"
       aria-label={label}
-      className="flex items-center justify-center gap-1 rounded-2xl border border-[#CCCCCC] hover:bg-gray-200 transition px-4 py-2 cursor-pointer"
+      className={
+        !upvoteToggle
+          ? "flex items-center justify-center gap-1 rounded-2xl border border-[#CCCCCC] hover:bg-gray-200 transition px-4 py-2 cursor-pointer"
+          : "bg-primary-300 text-white flex items-center justify-center gap-1 rounded-2xl border border-primary-300 hover:bg-primary-100 transition px-4 py-2 cursor-pointer"
+      }
     >
-      <Image src={icon} alt="" width={24} height={24} className="size-6" />
-      <span>{count ?? 0}</span>
+      {!upvoteToggle ? (
+        <Image src={icon} alt="" width={24} height={24} className="size-6" />
+      ) : (
+        <Image
+          src={icon}
+          alt=""
+          width={24}
+          height={24}
+          className="size-6 -scale-y-100 white-icon"
+        />
+      )}
+      <span>{!upvoteToggle ? (count ?? 0) : (count + 1 ?? 0)}</span>
     </button>
   );
 }
 
 function ThreadItem({ thread }) {
+  const [upvoteToggle, setUpvoteToggle] = useState(false);
+  async function upvote() {
+    const path = API_BASE_URL + "/api/threads/" + thread.id + "/upvote";
+    setUpvoteToggle((prev) => !prev);
+    await fetch(path, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "X-XSRF-TOKEN": Cookies.get("XSRF-TOKEN"),
+      },
+    });
+  }
+
+  const router = useRouter();
   const content = (
     <div className="flex w-full items-start justify-between gap-8">
       <div className="flex flex-col gap-4">
@@ -103,6 +134,8 @@ function ThreadItem({ thread }) {
         icon="/Chevrons up.svg"
         label="Гласај нагоре"
         count={thread.upvotes}
+        onclick={upvote}
+        upvoteToggle={upvoteToggle}
       />
       <ActionButton
         icon="/chat-1-line.svg"
@@ -115,8 +148,14 @@ function ThreadItem({ thread }) {
   if (thread.image) {
     return (
       <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 pt-6 rounded-3xl cursor-pointer">
-        <div className="w-full">{content}</div>
+        <div
+          onClick={() => router.push(`/p/${thread.forum.slug}/${thread.id}`)}
+          className="w-full"
+        >
+          {content}
+        </div>
         <Image
+          onClick={() => router.push(`/p/${thread.forum.slug}/${thread.id}`)}
           src={thread.image}
           alt=""
           width={990}
@@ -131,7 +170,12 @@ function ThreadItem({ thread }) {
 
   return (
     <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 pt-6 rounded-3xl cursor-pointer">
-      {content}
+      <div
+        className="w-full"
+        onClick={() => router.push(`/p/${thread.forum.slug}/${thread.id}`)}
+      >
+        {content}
+      </div>
       <div className="flex flex-col gap-2">{actions}</div>
     </article>
   );
@@ -231,7 +275,6 @@ export default function Threads({ forum = null }) {
       );
 
       const threads = await response.json();
-      console.log(threads);
       setThreads((prev) => [...prev, ...threads.data]);
       if (threads.data.length === 0) {
         setNoMoreThreads(true);
