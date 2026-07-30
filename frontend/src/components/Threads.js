@@ -114,7 +114,7 @@ function ThreadItem({ thread }) {
 
   if (thread.image) {
     return (
-      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl cursor-pointer">
+      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 pt-6 rounded-3xl cursor-pointer">
         <div className="w-full">{content}</div>
         <Image
           src={thread.image}
@@ -130,7 +130,7 @@ function ThreadItem({ thread }) {
   }
 
   return (
-    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl cursor-pointer">
+    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 pt-6 rounded-3xl cursor-pointer">
       {content}
       <div className="flex flex-col gap-2">{actions}</div>
     </article>
@@ -194,7 +194,7 @@ function FeedSelect({
   );
 }
 
-export default function FeedThreads() {
+export default function Threads({ forum = null }) {
   const sortListboxId = useId();
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
@@ -208,6 +208,9 @@ export default function FeedThreads() {
   const [threads, setThreads] = useState([]);
   const [moreThreadsLoading, setMoreThreadsLoading] = useState(false);
   const [noMoreThreads, setNoMoreThreads] = useState(false);
+  const BASE_URL =
+    API_BASE_URL +
+    (forum === null ? "/api/feed" : "/api/p/" + forum + "/threads");
 
   async function fetchThreads({
     byPagination = false,
@@ -218,8 +221,8 @@ export default function FeedThreads() {
       setMoreThreadsLoading(true);
 
       const response = await fetch(
-        API_BASE_URL +
-          "/api/feed?page=" +
+        BASE_URL +
+          "?page=" +
           paginationPage +
           "&time=" +
           time.value +
@@ -237,12 +240,7 @@ export default function FeedThreads() {
       setNoMoreThreads(false);
       setPaginationPage(1);
       const response = await fetch(
-        API_BASE_URL +
-          "/api/feed?page=1" +
-          "&time=" +
-          time.value +
-          "&sort=" +
-          sort.value,
+        BASE_URL + "?page=1" + "&time=" + time.value + "&sort=" + sort.value,
       );
 
       const threads = await response.json();
@@ -296,7 +294,7 @@ export default function FeedThreads() {
         />
       </div>
 
-      <div className="flex w-full flex-col gap-6" aria-label="Дискусии">
+      <div className="flex w-full flex-col" aria-label="Дискусии">
         {threads.map((thread) => (
           <ThreadItem key={thread.id} thread={thread} />
         ))}

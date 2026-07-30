@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import SchoolForums from "@/components/SchoolForums";
 import SidebarNav from "@/components/SidebarNav";
@@ -22,6 +22,7 @@ function getSelectedKey(pathname) {
 }
 
 export default function AppShell({ children, contentClassName = "pl-8" }) {
+  const router = useRouter();
   const pathname = usePathname();
   const { general, schoolsByCity, loading, error } = useForums();
   const [collapsed, setCollapsed] = useState(sidebarCollapsed);
@@ -101,7 +102,9 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
             )}
           </div>
         </aside>
-        <main className={`flex flex-1 items-start justify-center overflow-y-auto pb-12 pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${contentClassName}`}>
+        <main
+          className={`flex flex-1 items-start justify-center overflow-y-auto pb-12 pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${contentClassName}`}
+        >
           {children}
         </main>
       </div>
