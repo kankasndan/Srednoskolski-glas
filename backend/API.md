@@ -242,6 +242,7 @@ Examples:
 
 ```
 GET /api/feed?sort=trending&time=week
+GET /api/feed?page=2&sort=newest
 GET /api/p/drzhavna_matura/threads?sort=top&time=month
 GET /api/p/drzhavna_matura/threads?sort=newest&page=2
 ```
@@ -257,6 +258,31 @@ GET /api/feed
 ```
 
 **Public** (works for guests). If the SPA sends the session cookie, the feed personalizes for that user.
+
+**Paginated** — same contract as `GET /api/p/{slug}/threads`:
+
+| Query | Values | Default | Meaning |
+|-------|--------|---------|---------|
+| `page` | integer ≥ 1 | `1` | Page number |
+| `sort` | `trending`, `top`, `newest`, `discussed` | `trending` | Order |
+| `time` | `day`, `week`, `month`, `six-months`, `year`, `all` | `all` | Only threads created in this window |
+
+**Page size:** always **5** threads per page. Response includes `data`, `links`, and `meta` (`current_page`, `last_page`, `per_page`, `total`).
+
+Examples:
+
+```
+GET /api/feed
+GET /api/feed?page=2
+GET /api/feed?sort=trending&time=week&page=1
+```
+
+**Frontend usage (infinite scroll)**
+
+1. Initial: `GET /api/feed` → page 1  
+2. Filter change (`sort` / `time`): `GET /api/feed?sort=…&time=…&page=1` → **replace** list  
+3. Scroll: `GET /api/feed?page=2&sort=…&time=…` → **append** `data`  
+4. Stop when `meta.current_page >= meta.last_page` (or `links.next` is `null`)
 
 **Behavior**
 
@@ -276,6 +302,7 @@ Opening a thread via `GET /api/p/{slug}/comments/{id}` while logged in records a
       "title": "Како да се подготвам за матура?",
       "description": "…",
       "upvotes": 8,
+      "has_voted": false,
       "views": 120,
       "is_anonymous": false,
       "comments_count": 4,
@@ -291,7 +318,12 @@ Opening a thread via `GET /api/p/{slug}/comments/{id}` while logged in records a
       "attachments": []
     }
   ],
-  "links": { "first": "…", "last": "…", "prev": null, "next": "…" },
+  "links": {
+    "first": "http://localhost:8000/api/feed?page=1",
+    "last": "http://localhost:8000/api/feed?page=3",
+    "prev": null,
+    "next": "http://localhost:8000/api/feed?page=2"
+  },
   "meta": {
     "current_page": 1,
     "last_page": 3,
@@ -634,12 +666,12 @@ GET /api/p/{slug}/threads
 
 **Frontend pattern**
 
-1. Initial page (parallel):
-   - `GET /api/p/{slug}` → banner / forum meta
-   - `GET /api/p/{slug}/threads` → page 1 of threads (default or URL filters)
-2. Filter change (`sort` / `time`): `GET /api/p/{slug}/threads?sort=…&time=…&page=1` → **replace** thread list
-3. Scroll: `GET /api/p/{slug}/threads?page=2&sort=…&time=…` → **append** `data`
-4. Stop when `meta.current_page >= meta.last_page` (or `links.next` is `null`)
+  1. Initial page (parallel):
+    - `GET /api/p/{slug}` → banner / forum meta
+    - `GET /api/p/{slug}/threads` → page 1 of threads (default or URL filters)
+  2. Filter change (`sort` / `time`): `GET /api/p/{slug}/threads?sort=…&time=…&page=1` → **replace** thread list
+  3. Scroll: `GET /api/p/{slug}/threads?page=2&sort=…&time=…` → **append** `data`
+  4. Stop when `meta.current_page >= meta.last_page` (or `links.next` is `null`)
 
 ---
 
@@ -809,7 +841,7 @@ DELETE /api/media
 | `PUT` | `/api/onboarding` | yes | Save profile |
 | `GET` | `/api/cities` | — | Cities + schools |
 | `GET` | `/api/forums` | — | Sidebar forums |
-| `GET` | `/api/feed` | optional | Personalized / site-wide feed |
+| `GET` | `/api/feed` | optional | Paginated personalized / site-wide feed (5/page) |
 | `GET` | `/api/p/{slug}` | — | Forum metadata only |
 | `GET` | `/api/p/{slug}/threads` | — | Paginated threads (page 1, filters, scroll) |
 | `GET` | `/api/p/{slug}/comments/{id}` | — | Thread + comment tree (records view if logged in) |
