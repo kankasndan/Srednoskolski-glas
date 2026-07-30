@@ -31,7 +31,7 @@ export default function ForumBanner({ title, description, icon, slug, type, memb
               {title}
             </h1>
 
-            <p className="flex items-center gap-2 font-[family-name:var(--font-oswald)] text-[14px] font-bold leading-none text-black">
+            <p className="flex items-center gap-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black">
               <Image
                 src="/user-heart-line.svg"
                 alt=""
