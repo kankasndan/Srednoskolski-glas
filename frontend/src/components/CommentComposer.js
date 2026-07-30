@@ -65,7 +65,7 @@ export default function CommentComposer({ forumSlug, compact = false, onClose })
         ) : (
           <Link
             href={`/p/${forumSlug}`}
-            className="text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px]"
+            className="cursor-pointer text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px]"
           >
             Внимавај на правилата на заедницата.
           </Link>

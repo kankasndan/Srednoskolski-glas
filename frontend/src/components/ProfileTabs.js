@@ -13,7 +13,7 @@ function TabLink({ href, label, count, active }) {
   return (
     <Link
       href={href}
-      className={`relative flex items-center gap-2 pb-3 font-(family-name:--font-manrope) text-[16px] font-bold leading-none transition-colors ${
+      className={`relative flex cursor-pointer items-center gap-2 pb-3 font-(family-name:--font-manrope) text-[16px] font-bold leading-none transition-colors ${
         active ? "text-(--color-primary-200)" : "text-(--color-grays-800) hover:text-black"
       }`}
     >

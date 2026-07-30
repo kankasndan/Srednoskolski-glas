@@ -62,7 +62,7 @@ export default function AvatarUploadCard() {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`flex w-full flex-1 flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed px-6 py-10 transition-colors ${
+        className={`flex w-full flex-1 cursor-pointer flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed px-6 py-10 transition-colors ${
           isDragging ? "border-[#582FF5] bg-[#582FF5]/5" : "border-[#B5B5B5]"
         }`}
       >
@@ -95,7 +95,7 @@ export default function AvatarUploadCard() {
       <button
         type="button"
         onClick={previewUrl ? () => finishOnboarding(router) : openFilePicker}
-        className="mx-auto mt-8 h-14 w-[400px] max-w-full rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[15px] font-bold text-white transition-colors hover:bg-[#4B25E0]"
+        className="mx-auto mt-8 h-14 w-[400px] max-w-full cursor-pointer rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[15px] font-bold text-white transition-colors hover:bg-[#4B25E0]"
       >
         {previewUrl ? "Продолжи" : "Прикачи фотографија"}
       </button>
@@ -103,7 +103,7 @@ export default function AvatarUploadCard() {
       <button
         type="button"
         onClick={() => finishOnboarding(router)}
-        className="mx-auto mt-6 block text-center font-(family-name:--font-manrope) text-[16px] font-normal leading-none text-[#737373] transition-colors hover:text-[#333333]"
+        className="mx-auto mt-6 block cursor-pointer text-center font-(family-name:--font-manrope) text-[16px] font-normal leading-none text-[#737373] transition-colors hover:text-[#333333]"
       >
         Можеби подоцна
       </button>

@@ -44,7 +44,7 @@ function CityGroup({ city, schools, value, onSelect }) {
             <button
               type="button"
               onClick={() => onSelect(school, city)}
-              className={`${rowClass} text-black ${
+              className={`${rowClass} cursor-pointer text-black ${
                 value === `${school}|${city}` ? "bg-[#E5E5E5]" : ""
               }`}
             >
@@ -148,7 +148,7 @@ export default function SchoolSelect({
             <button
               type="button"
               onClick={toggleNotStudent}
-              className={`${rowClass} shrink-0 text-[#595959] ${
+              className={`${rowClass} cursor-pointer shrink-0 text-[#595959] ${
                 notStudent ? "bg-[#E5E5E5]" : ""
               }`}
             >

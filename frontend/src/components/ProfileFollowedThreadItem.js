@@ -31,7 +31,7 @@ export default function ProfileFollowedThreadItem({ thread }) {
       <Link
         href={href}
         aria-label={thread.title}
-        className="absolute inset-0 rounded-3xl"
+        className="absolute inset-0 cursor-pointer rounded-2xl"
       />
 
       <div className="flex min-w-0 flex-col gap-4">

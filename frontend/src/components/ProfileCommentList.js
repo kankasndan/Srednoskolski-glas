@@ -22,7 +22,7 @@ function ProfileCommentItem({ comment }) {
       <Link
         href={threadHref}
         aria-label={thread.title}
-        className="absolute inset-0 rounded-3xl"
+        className="absolute inset-0 cursor-pointer rounded-3xl"
       />
 
       <div className="flex min-w-0 flex-col gap-4">

@@ -13,7 +13,7 @@ function FollowCard({ forum }) {
       <Link
         href={`/p/${forum.slug}`}
         aria-label={forum.name}
-        className="absolute inset-0 rounded-2xl"
+        className="absolute inset-0 cursor-pointer rounded-2xl"
       />
 
       <div className="flex min-w-0 items-center gap-5">
