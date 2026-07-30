@@ -100,7 +100,7 @@ export default function AuthButtons() {
         >
           <Avatar src={avatarUrl} size="xl" alt={displayName} />
 
-          <span className="font-[family-name:var(--font-manrope)] text-[18px] font-medium leading-none text-[#0A0A0A] group-hover:text-[#582FF5] transition">
+          <span className="font-(family-name:--font-manrope) text-[18px] font-medium leading-none text-[#0A0A0A] group-hover:text-[#582FF5] transition">
             {displayName}
           </span>
 
@@ -118,12 +118,21 @@ export default function AuthButtons() {
             role="menu"
             className="absolute top-full right-0 z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-[#E5E5E5] bg-white py-2 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
           >
+            <Link
+              href="/profile"
+              role="menuitem"
+              onClick={() => setMenuOpen(false)}
+              className="flex w-full items-center gap-3 px-5 py-3 text-left font-(family-name:--font-manrope) text-[15px] font-medium leading-none text-[#0A0A0A] transition-colors hover:bg-[#F5F5F5]"
+            >
+              Профил
+            </Link>
+
             <button
               type="button"
               role="menuitem"
               onClick={handleLogout}
               disabled={loggingOut}
-              className="flex w-full items-center gap-3 px-5 py-3 text-left font-[family-name:var(--font-manrope)] text-[15px] font-medium leading-none text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center gap-3 px-5 py-3 text-left font-(family-name:--font-manrope) text-[15px] font-medium leading-none text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loggingOut ? "Се одјавува…" : "Одјави се"}
             </button>
@@ -134,16 +143,16 @@ export default function AuthButtons() {
   }
 
   return (
-    <div className="ml-auto flex h-10 w-[300px] shrink-0 items-center gap-3">
+    <div className="ml-auto flex h-10 w-75 shrink-0 items-center gap-3">
       <Link
         href="/login"
-        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-[var(--color-grays-900)]"
+        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900)"
       >
         Најави се
       </Link>
       <Link
         href="/register"
-        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-[var(--color-grays-900)]"
+        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-white transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900)"
       >
         Регистрација
       </Link>
