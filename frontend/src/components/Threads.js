@@ -2,10 +2,8 @@
 
 import Image from "next/image";
 import { useId, useState, useEffect } from "react";
-
 import { formatDistanceToNow } from "date-fns";
 import { mk } from "date-fns/locale";
-
 import { API_BASE_URL } from "@/lib/api";
 
 const SORT_OPTIONS = [{ value: "trending", label: "Трендинг" }];
@@ -16,72 +14,6 @@ const TIME_FILTER_OPTIONS = [
   { value: "six-months", label: "6 месеци" },
   { value: "year", label: "1 година" },
 ];
-
-const THREADS = [
-  {
-    tags: [
-      {
-        label: "Државна матура",
-        icon: "/icons/drzhavna_matura.svg",
-        iconZoom: true,
-      },
-      { label: "марко_2026", icon: "/Generic avatar.svg" },
-      { label: "Гим. Орце Николов", icon: "/icons/uchilishte.svg" },
-    ],
-    title: "Кои се најдобрите ресурси за подготовка на матура по математика?",
-    excerpt: "Здраво на сите. Секој совет е добредојден...",
-    postedAgo: "пред 2ч.",
-    votes: 24,
-    comments: 8,
-  },
-  {
-    tags: [
-      { label: "Препорачано", tone: "highlight" },
-      { label: "Факултети", icon: "/icons/fakulteti.svg", iconZoom: true },
-      { label: "елена.к", icon: "/Generic avatar.svg" },
-      { label: "СУГС Михајло Пупин", icon: "/icons/uchilishte.svg" },
-    ],
-    title: "Brainster Next vs ЕТФ - кој е подобар за софтверско инженерство?",
-    excerpt:
-      "Размислувам помеѓу овие два факултета и ме интересира мислење на постари ученици...",
-    postedAgo: "пред 4ч.",
-    votes: 18,
-    comments: 11,
-  },
-  {
-    tags: [
-      {
-        label: "Ментално здравје",
-        icon: "/icons/mentalno_zdravje.svg",
-        iconZoom: true,
-      },
-      { label: "анонимен_111", icon: "/Generic avatar.svg" },
-      { label: "Гим. Никола Карев", icon: "/icons/uchilishte.svg" },
-    ],
-    title: "Како се справувате со стрес пред испити?",
-    excerpt: "Имам матура за два месеца и не можам да спијам нормално...",
-    postedAgo: "пред 1д.",
-    votes: 31,
-    comments: 14,
-  },
-  {
-    tags: [
-      { label: "СУГС Михајло Пупин", icon: "/icons/uchilishte.svg" },
-      { label: "стефан_22", icon: "/Generic avatar.svg" },
-    ],
-    title: "Кога ќе се одржи екскурзијата за матуранти?",
-    excerpt: "Дали некој има информација...",
-    postedAgo: "пред 3д.",
-    votes: 9,
-    comments: 5,
-  },
-];
-
-const THREAD_LIST = Array.from({ length: 16 }, (_, index) => ({
-  ...THREADS[index % THREADS.length],
-  id: index,
-  image: index === 2 || index === 6 ? "/thread-placeholder.png" : null,
-}));
 
 function ActionButton({ icon, label, count }) {
   return (
@@ -97,7 +29,6 @@ function ActionButton({ icon, label, count }) {
 }
 
 function ThreadItem({ thread }) {
-  console.log(thread.forum);
   const content = (
     <div className="flex w-full items-start justify-between gap-8">
       <div className="flex flex-col gap-4">
@@ -134,7 +65,7 @@ function ThreadItem({ thread }) {
                 {thread.author.username}
               </div>
               <div className="bg-gray-100 rounded-xl py-1 px-2 flex gap-2 items-center">
-                {thread.author.school.name}
+                {thread.author.school ? thread.author.school.name : null}
               </div>
             </>
           ) : null}
@@ -183,7 +114,7 @@ function ThreadItem({ thread }) {
 
   if (thread.image) {
     return (
-      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl cursor-pointer">
+      <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 pt-6 rounded-3xl cursor-pointer">
         <div className="w-full">{content}</div>
         <Image
           src={thread.image}
@@ -199,7 +130,7 @@ function ThreadItem({ thread }) {
   }
 
   return (
-    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 rounded-3xl cursor-pointer">
+    <article className="relative flex items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 pt-6 rounded-3xl cursor-pointer">
       {content}
       <div className="flex flex-col gap-2">{actions}</div>
     </article>
@@ -266,7 +197,7 @@ function FeedSelect({
   );
 }
 
-export default function FeedThreads() {
+export default function Threads({ forum = null }) {
   const sortListboxId = useId();
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
@@ -275,47 +206,68 @@ export default function FeedThreads() {
     TIME_FILTER_OPTIONS[0],
   );
   const [paginationPage, setPaginationPage] = useState(1);
+  const [paginating, setPaginating] = useState(true);
 
   const [threads, setThreads] = useState([]);
   const [moreThreadsLoading, setMoreThreadsLoading] = useState(false);
+  const [noMoreThreads, setNoMoreThreads] = useState(false);
+  const BASE_URL =
+    API_BASE_URL +
+    (forum === null ? "/api/feed" : "/api/p/" + forum + "/threads");
 
-  async function fetchThreads() {
-    setMoreThreadsLoading(true);
-    // const response = await fetch(
-    //   API_BASE_URL + "/api/p/drzhavna_matura/threads?page=" + paginationPage,
-    //   {
-    //     method: "POST",
-    //     body: {
-    //       selectedSort,
-    //       selectedTimeFilter,
-    //     },
-    //   },
-    // );
-    // const response = await fetch(
-    //   API_BASE_URL + "/api/p/drzhavna_matura/threads?page=" + paginationPage,
-    // );
-    const response = await fetch(API_BASE_URL + "/api/feed");
+  async function fetchThreads({
+    byPagination = false,
+    sort = selectedSort,
+    time = selectedTimeFilter,
+  }) {
+    if (byPagination) {
+      setMoreThreadsLoading(true);
 
-    const threads = await response.json();
-    console.log(threads);
+      const response = await fetch(
+        BASE_URL +
+          "?page=" +
+          paginationPage +
+          "&time=" +
+          time.value +
+          "&sort=" +
+          sort.value,
+      );
 
-    setThreads((prev) => [...prev, ...threads.data]);
-    setMoreThreadsLoading(false);
+      const threads = await response.json();
+      console.log(threads);
+      setThreads((prev) => [...prev, ...threads.data]);
+      if (threads.data.length === 0) {
+        setNoMoreThreads(true);
+      }
+      setMoreThreadsLoading(false);
+    } else {
+      setNoMoreThreads(false);
+      setPaginationPage(1);
+      const response = await fetch(
+        BASE_URL + "?page=1" + "&time=" + time.value + "&sort=" + sort.value,
+      );
+
+      const threads = await response.json();
+
+      setThreads(threads.data);
+    }
   }
 
   const selectSortOption = (option) => {
     setSelectedSort(option);
     setOpenSelect(null);
+    fetchThreads({ byPagination: false, sort: option });
   };
 
   const selectTimeFilterOption = (option) => {
     setSelectedTimeFilter(option);
     setOpenSelect(null);
+    fetchThreads({ byPagination: false, time: option });
   };
 
   useEffect(() => {
-    fetchThreads();
-  }, [paginationPage]);
+    fetchThreads({ byPagination: true });
+  }, [paginating]);
 
   return (
     <section className="flex w-full max-w-[990px] flex-col items-center gap-8">
@@ -348,7 +300,7 @@ export default function FeedThreads() {
         />
       </div>
 
-      <div className="flex w-full flex-col gap-6" aria-label="Дискусии">
+      <div className="flex w-full flex-col" aria-label="Дискусии">
         {threads.map((thread) => (
           <ThreadItem key={thread.id} thread={thread} />
         ))}
@@ -357,23 +309,32 @@ export default function FeedThreads() {
         ))} */}
       </div>
 
-      <button
-        onClick={() => setPaginationPage((prev) => prev + 1)}
-        className="flex gap-2 items-center cursor-pointer group"
-      >
+      {noMoreThreads ? (
         <span className="font-bold text-primary-300 text-xl group-hover:opacity-80 transition">
-          Load more
+          Нема веќе :/
         </span>
-        {moreThreadsLoading ? (
-          <div className="bg-primary-300 rounded-full w-6 h-6 text-white font-bold flex items-center justify-center group-hover:opacity-80 transition animate-spin">
-            <img src="/plus.svg" className="size-5" />
-          </div>
-        ) : (
-          <div className="bg-primary-300 rounded-full w-6 h-6 text-white font-bold flex items-center justify-center group-hover:opacity-80 transition">
-            <img src="/plus.svg" className="size-5" />
-          </div>
-        )}
-      </button>
+      ) : (
+        <button
+          onClick={() => {
+            setPaginationPage((prev) => prev + 1);
+            setPaginating((prev) => !prev);
+          }}
+          className="flex gap-2 items-center cursor-pointer group"
+        >
+          <span className="font-bold text-primary-300 text-xl group-hover:opacity-80 transition">
+            Прочитај повеќе
+          </span>
+          {moreThreadsLoading ? (
+            <div className="bg-primary-300 rounded-full w-6 h-6 text-white font-bold flex items-center justify-center group-hover:opacity-80 transition animate-spin">
+              <img src="/plus.svg" className="size-5" />
+            </div>
+          ) : (
+            <div className="bg-primary-300 rounded-full w-6 h-6 text-white font-bold flex items-center justify-center group-hover:opacity-80 transition">
+              <img src="/plus.svg" className="size-5" />
+            </div>
+          )}
+        </button>
+      )}
     </section>
   );
 }

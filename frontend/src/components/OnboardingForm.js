@@ -8,6 +8,7 @@ import TextField from "@/components/TextField";
 import SelectField from "@/components/SelectField";
 import TermsCheckbox from "@/components/TermsCheckbox";
 import SubmitButton from "@/components/SubmitButton";
+import SchoolSelect from "@/components/SchoolSelect";
 
 const AREAS = [
   "Геолошко-рударска и металуршка струка",
@@ -34,7 +35,6 @@ const AREAS = [
 ];
 
 const YEARS = ["Прва", "Втора", "Трета", "Четврта"];
-const NOT_STUDENT = "Не сум средношколец";
 
 function formatApiError(data) {
   if (data?.errors) {
@@ -54,17 +54,21 @@ export default function OnboardingForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const notStudent = school === NOT_STUDENT;
+  const [notStudent, setNotStudent] = useState(false);
 
   const schoolGroups = [...CITIES].sort(
     (a, b) => b.schools.length - a.schools.length,
   );
 
-  function handleSchoolChange(e) {
-    setSchool(e.target.value);
-    if (e.target.value === NOT_STUDENT) {
+  function handleNotStudentChange(checked) {
+    setNotStudent(checked);
+    if (checked) {
+      setSchool("");
       setArea("");
       setYear("");
+    }
+    else {
+      setSchool("");
     }
   }
 
@@ -128,21 +132,24 @@ export default function OnboardingForm() {
       />
 
       <div className="flex flex-col gap-0">
-        <SelectField
-          id="school"
-          label="Училиште"
-          required
-          value={school}
-          onChange={handleSchoolChange}
-          placeholder="Избери училиште"
-          standaloneOption={{ value: NOT_STUDENT, label: NOT_STUDENT }}
-          groups={schoolGroups}
-        />
         <p className="-mt-1 mb-3 font-(family-name:--font-manrope) text-[12px] text-[#595959] 2xl:text-[14px]">
           Доколку не си средношколец, можеш да ја користиш платформата само за
           читање и коментирање на дискусии.
         </p>
       </div>
+
+      <SchoolSelect
+        id="school"
+        label="Училиште"
+        required={!notStudent}
+        value={school}
+        onChange={setSchool}
+        placeholder="Избери училиште"
+        groups={schoolGroups}
+        notStudent={notStudent}
+        onNotStudentChange={handleNotStudentChange}
+        disabled={notStudent}
+      />
 
       <SelectField
         id="area"

@@ -1,0 +1,37 @@
+{
+  "data": [
+    {
+      "id": 6,
+      "name": "Вештачка интелигенција",
+      "slug": "veshtachka_intelegencija",
+      "type": "general",
+      "school_id": null,
+      "imageUrl": "/icons/veshtachka_intelegencija.svg",
+      "description": "AI алатки, новости, идеи и дискусии за иднината.",
+      "threads_count": 26,
+      "members_count": 422
+    },
+    {
+      "id": 8,
+      "name": "Студии во странство",
+      "slug": "studii_vo_stranstvo",
+      "type": "general",
+      "school_id": null,
+      "imageUrl": "/icons/studii_vo_stranstvo.svg",
+      "description": "Апликации, стипендии и искуства од студирање надвор.",
+      "threads_count": 14,
+      "members_count": 189
+    },
+    {
+      "id": 11,
+      "name": "Воннаставни активности",
+      "slug": "vonnastavni_aktivnosti",
+      "type": "general",
+      "school_id": null,
+      "imageUrl": "/icons/vonnastavni_aktivnosti.svg",
+      "description": "Спорт, музика, дебата, волонтирање и нови искуства.",
+      "threads_count": 33,
+      "members_count": 500
+    }
+  ]
+}
