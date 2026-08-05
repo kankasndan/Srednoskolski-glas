@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('soft deletes appeals and hides them from the default query', function () {
+it('deletes appeals permanently', function () {
     $user = User::factory()->create();
     $admin = User::factory()->create();
 
@@ -28,6 +28,5 @@ it('soft deletes appeals and hides them from the default query', function () {
     $appeal->delete();
 
     expect(Appeal::query()->count())->toBe(0)
-        ->and(Appeal::onlyTrashed()->count())->toBe(1)
-        ->and(Appeal::onlyTrashed()->first()?->id)->toBe($appeal->id);
+        ->and(Appeal::whereKey($appeal->id)->exists())->toBeFalse();
 });

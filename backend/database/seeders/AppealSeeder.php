@@ -54,7 +54,7 @@ class AppealSeeder extends Seeder
                 $adminId = User::where('email', $row['admin'])->value('id');
             }
 
-            $appeal = Appeal::withTrashed()->updateOrCreate(
+            Appeal::updateOrCreate(
                 [
                     'sanction_id' => $sanction->id,
                     'user_id' => $user->id,
@@ -67,10 +67,6 @@ class AppealSeeder extends Seeder
                     'resolved_at' => in_array($row['status'], ['accepted', 'rejected'], true) ? now()->subHours(5) : null,
                 ],
             );
-
-            if (in_array($row['status'], ['accepted', 'rejected'], true)) {
-                $appeal->delete();
-            }
         }
     }
 }
