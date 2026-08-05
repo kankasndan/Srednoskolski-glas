@@ -16,12 +16,12 @@
                 <div>
                     <span id="active-appeals-total"
                         class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium">
-                        Total appeals: {{ $activeAppealsTotal }}
+                        Total appeals: {{ $appeals->total() }}
                     </span>
 
                     <span id="resolved-appeals-total" style="display: none;"
                         class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium">
-                        Total resolved appeals: {{ $resolvedAppealsTotal }}
+                        Total resolved appeals: {{ $resolvedAppeals->total() }}
                     </span>
                 </div>
             </div>
@@ -30,7 +30,7 @@
             <div class="flex gap-1 border-b border-gray-200 mb-6">
                 <button type="button" data-tab="queue"
                     class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600">
-                    Appeal Queue
+                    Appeal 
                 </button>
                 <button type="button" data-tab="history"
                     class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">
@@ -41,40 +41,6 @@
             <!-- ===================== QUEUE TAB ===================== -->
             <div id="tab-queue" class="tab-panel">
 
-                <!-- Filter Form (server-side) -->
-                <form action="{{ route('appeal.index') }}" method="GET" id="filter-form"
-                    class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6 flex flex-wrap items-center gap-3">
-
-                    <input type="hidden" name="status" id="status-input" value="{{ request('status', 'all') }}">
-
-                    <button type="submit" data-filter="all"
-                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium {{ request('status', 'all') === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                        All
-                    </button>
-                    <button type="submit" data-filter="pending"
-                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium {{ request('status') === 'pending' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                        Pending
-                    </button>
-                    <button type="submit" data-filter="accepted"
-                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium {{ request('status') === 'accepted' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                        Accepted
-                    </button>
-                    <button type="submit" data-filter="rejected"
-                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium {{ request('status') === 'rejected' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                        Rejected
-                    </button>
-
-                    @if ((request('status') || request('search')) && request('status') != 'all')
-                        <a href="{{ route('appeal.index') }}"
-                            class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            Clear filters
-                        </a>
-                    @endif
-                </form>
 
                 @if (session('success'))
                     <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">

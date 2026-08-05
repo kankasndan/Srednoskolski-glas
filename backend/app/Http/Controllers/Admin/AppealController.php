@@ -10,37 +10,19 @@ class AppealController extends Controller
 {
     public function index(Request $request)
     {
-        $activeAppealsQuery = Appeal::query()
+        $appeals = Appeal::query()
             ->with('sanction', 'user')
-            ->when($request->filled('status') && $request->status !== 'all', function ($query) use ($request) {
-                $query->where('status', $request->status);
-            })
+            ->where('status', 'pending')
             ->latest()
-            ;
-
-        $activeAppealsTotal = (clone $activeAppealsQuery)->count();
-        $appeals = $activeAppealsQuery->paginate(10)->withQueryString();
-
-        $resolvedAppealsQuery = Appeal::query()
-            ->onlyTrashed()
-            ->with('sanction', 'user')
-            ;
-
-        if ($request->filled('history_status') && $request->history_status !== 'all') {
-            $resolvedAppealsQuery->where('status', $request->history_status);
-        }
-
-        if ($request->filled('range') && $request->range !== 'all') {
-            $resolvedAppealsQuery->where('deleted_at', '>=', now()->subDays((int) $request->range));
-        }
-
-        $resolvedAppealsTotal = (clone $resolvedAppealsQuery)->count();
-        $resolvedAppeals = $resolvedAppealsQuery
-            ->latest('deleted_at')
-            ->paginate(10, ['*'], 'history_page')
+            ->paginate(10)
             ->withQueryString();
 
-        return view('admin.appeals.index', compact('appeals', 'resolvedAppeals', 'activeAppealsTotal', 'resolvedAppealsTotal'));
+        $resolvedAppeals = Appeal::whereIn('status', ['accepted', 'rejected'])
+            ->with('sanction', 'user')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.appeals.index', compact('appeals', 'resolvedAppeals'));
     }
 
     public function show(Appeal $appeal)
@@ -57,19 +39,25 @@ class AppealController extends Controller
 
     public function accept(Appeal $appeal)
     {
-        $appeal->with("sanction.report");
+        $appeal->with('sanction.report');
 
         $appeal->sanction->report->delete();
-        
+
         $appeal->sanction->delete();
 
-        $appeal->delete();
+        $appeal->update([
+            'status' => 'accepted',
+        ]);
 
-        return redirect()->route("appeal.index")->with(['success' => "Successfully appeal accepted"]);
+        return redirect()->route('appeal.index')->with(['success' => 'Successfully appeal accepted']);
     }
 
     public function reject(Appeal $appeal)
     {
-        
+        $appeal->update([
+            'status' => 'rejected',
+        ]);
+
+        return redirect()->route('appeal.index')->with(['success' => 'Successfully appeal rejected.']);
     }
 }

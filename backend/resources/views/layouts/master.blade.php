@@ -21,19 +21,6 @@
             <span class="whitespace-nowrap text-[16px] font-bold tracking-wide text-[#1F2333]">Админ Панел</span>
         </div>
 
-        <!-- Search (col 2, always takes remaining space) -->
-        <div class="flex justify-center">
-            <div
-                class="flex w-full max-w-[420px] items-center gap-2 rounded-[10px] border border-[#D8DAE5] bg-[#F7F8FC] px-4 py-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="shrink-0 text-[#9598A6]">
-                    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
-                    <path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                </svg>
-                <input type="text" placeholder="Пребарај корисници, пријави, дискусии..."
-                    class="w-full bg-transparent text-[14px] text-[#3A3D4D] outline-none placeholder:text-[#9598A6]" />
-            </div>
-        </div>
-
         <!-- Right side (col 3) -->
         <div class="flex items-center gap-4 justify-self-end">
 

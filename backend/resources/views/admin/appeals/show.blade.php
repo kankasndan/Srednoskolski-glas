@@ -127,14 +127,8 @@
             </div>
 
             <!-- Decision Actions -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex justify-between items-center bg-white rounded-xl shadow-sm border border-gray-200 p-5">
                 <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Resolve Appeal</h2>
-
-                <div class="mb-4">
-                    <label class="text-xs font-medium text-gray-500 uppercase mb-1 block">Moderator Note (optional)</label>
-                    <textarea rows="3" placeholder="Add an internal note about your decision..."
-                        class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-                </div>
 
                 <div class="flex justify-end gap-3">
                     <form action="{{ route('appeal.reject', ['appeal' => $appeal->id]) }}" method="POST">
