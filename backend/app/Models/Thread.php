@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -32,7 +33,7 @@ class Thread extends Model
 
     public function threadAttachment(): HasMany
     {
-        return $this->hasMany(ThreadAttachment::class);
+        return $this->hasMany(ThreadAttachment::class)->orderBy('id');
     }
 
     public function comments(): HasMany
@@ -68,5 +69,10 @@ class Thread extends Model
     public function votes(): MorphMany
     {
         return $this->morphMany(Vote::class, 'votable');
+    }
+
+    public function poll(): HasOne
+    {
+        return $this->hasOne(Poll::class);
     }
 }

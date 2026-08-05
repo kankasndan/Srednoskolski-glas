@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\UpdateLastActive;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -19,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
 
+        $middleware->api(append: [
+            UpdateLastActive::class,
+        ]);
+
         // SPA/API has no named "login" route. Unauthenticated /api/* must return 401 JSON
         // instead of redirecting (Postman often omits Accept: application/json).
         $middleware->redirectGuestsTo(function (Request $request) {
@@ -35,7 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         // Uniform JSON error envelope for all /api/* responses.
-        $exceptions->render(function (\Throwable $e, Request $request) {
+        $exceptions->render(function (Throwable $e, Request $request) {
             if (! $request->is('api/*')) {
                 return null;
             }

@@ -116,9 +116,12 @@ Same as card, plus:
 {
   "description": "Дискусии за државна матура…",
   "bannerUrl": "https://…/banner.png",
-  "school": null
+  "school": null,
+  "is_following": false
 }
 ```
+
+`is_following` is included only for authenticated requests. School forums never expose a follow control in the UI — membership is set at onboarding.
 
 For school forums, `type` is `"school"` and `school` looks like:
 
@@ -606,6 +609,7 @@ GET /api/p/{slug}
       "imageUrl": "https://…/forum.png",
       "threads_count": 42,
       "members_count": 120,
+      "is_following": false,
       "description": "Дискусии за државна матура…",
       "bannerUrl": "https://…/banner.png",
       "school": null
@@ -613,6 +617,40 @@ GET /api/p/{slug}
   }
 }
 ```
+
+`is_following` is only present when the request is authenticated.
+
+---
+
+### Follow / unfollow a general forum
+
+```
+POST   /api/p/{slug}/follow
+DELETE /api/p/{slug}/follow
+```
+
+**Auth required.** Only `type: "general"` forums can be followed or unfollowed.
+
+School forums (`type: "school"`) are attached automatically when a student completes onboarding and **cannot** be followed or unfollowed via this API (422). Users can only belong to their own school forum that way.
+
+| Path | Example |
+|------|---------|
+| `{slug}` | `drzhavna_matura` |
+
+```json
+{
+  "data": {
+    "is_following": true,
+    "members_count": 121
+  }
+}
+```
+
+| Status | When |
+|--------|------|
+| `401` | Guest |
+| `422` | School forum (follow or unfollow) |
+| `200` | Success (idempotent — following twice stays at one membership) |
 
 ---
 
@@ -733,6 +771,49 @@ If the thread does not belong to that forum → `404`.
 
 ---
 
+## Create thread
+
+```
+POST /api/threads
+```
+
+**Auth required.** `multipart/form-data` (not JSON). Call `GET /sanctum/csrf-cookie` first, then send `X-XSRF-TOKEN`.
+
+| Field | Type | Rules |
+|-------|------|--------|
+| `forum_id` | int | required, exists |
+| `title` | string | required, 3–200 |
+| `description` | string | optional (HTML/text) |
+| `is_anonymous` | bool | optional, default false |
+| `files[]` | file | optional; image/video/pdf/doc/docx; max 10 images, 1 video, 1 doc. **Order is preserved** in the thread gallery (e.g. video then images, or images then video). |
+| `link` | url | optional; stored as attachment `type: link` |
+| `poll[question]` | string | optional |
+| `poll[options][]` | string[] | required with poll; 2–4 options |
+
+**Exclusivity (same as UI):** link cannot combine with image/video; images + one video are allowed together; document / poll cannot combine.
+
+Files are uploaded with `Media::upload($file, "threads/{id}")` → ImageKit, then saved on `thread_attachments`.
+
+Polls expire **3 days** after creation (`ends_at`). One poll per thread.
+
+**Success (`201`)** — `ThreadResource` (includes `attachments` + `poll` when present).
+
+---
+
+## Poll vote
+
+```
+POST /api/polls/{id}/vote
+```
+
+**Auth required.** Body JSON: `{ "poll_option_id": 1 }`
+
+- One vote per user per poll
+- Results always returned (`votes_count`, `percentage`, `total_votes`, `user_voted_option_id`)
+- Rejected after `ends_at` (`422`) or if already voted (`409`)
+
+---
+
 ## Votes (upvote toggle)
 
 Upvote only (no downvote). Second call from the same user removes the vote.
@@ -768,6 +849,51 @@ POST /api/comments/{id}/upvote
 | `has_voted` | `true` if this request left a vote; `false` if it removed one |
 
 Unique constraint: one vote per user per thread/comment. Feed/forum/thread responses also include `has_voted` when the session user is known.
+
+---
+
+## Comments
+
+### Create comment (or reply)
+
+```
+POST /api/threads/{thread}/comments
+```
+
+**Auth required.** Call `GET /sanctum/csrf-cookie` first, then send `X-XSRF-TOKEN`. JSON body:
+
+| Field | Type | Rules |
+|-------|------|--------|
+| `content` | string | required; 1–1000 characters |
+| `parent_id` | integer \| null | optional; must be an existing comment on **this same thread** |
+
+Omit `parent_id` (or send `null`) for a top-level comment. Pass a comment id to nest a reply under it (any depth).
+
+**Success (`201`)** — single `Comment` resource (same shape as in the thread tree; `replies` is `[]` for a freshly created node):
+
+```json
+{
+  "data": {
+    "id": 42,
+    "content": "Се согласувам.",
+    "parent_id": null,
+    "upvotes": 0,
+    "has_voted": false,
+    "created_at": "2026-08-05T12:00:00.000000Z",
+    "edited_at": null,
+    "deleted_by": null,
+    "author": {
+      "id": 1,
+      "username": "ana_mk",
+      "imageUrl": "…",
+      "school": null
+    },
+    "replies": []
+  }
+}
+```
+
+For a reply, `parent_id` is the parent comment’s id. Reload the thread via `GET /api/p/{slug}/comments/{id}` to get the full nested tree.
 
 ---
 
@@ -842,9 +968,14 @@ DELETE /api/media
 | `GET` | `/api/cities` | — | Cities + schools |
 | `GET` | `/api/forums` | — | Sidebar forums |
 | `GET` | `/api/feed` | optional | Paginated personalized / site-wide feed (5/page) |
-| `GET` | `/api/p/{slug}` | — | Forum metadata only |
+| `GET` | `/api/p/{slug}` | optional | Forum metadata only (`is_following` when auth) |
 | `GET` | `/api/p/{slug}/threads` | — | Paginated threads (page 1, filters, scroll) |
 | `GET` | `/api/p/{slug}/comments/{id}` | — | Thread + comment tree (records view if logged in) |
+| `POST` | `/api/p/{slug}/follow` | yes | Follow general forum |
+| `DELETE` | `/api/p/{slug}/follow` | yes | Unfollow general forum |
+| `POST` | `/api/threads` | yes | Create thread (+ files / link / poll) |
+| `POST` | `/api/threads/{id}/comments` | yes | Create comment or nested reply |
+| `POST` | `/api/polls/{id}/vote` | yes | Vote on poll option |
 | `POST` | `/api/threads/{id}/upvote` | yes | Toggle thread upvote |
 | `POST` | `/api/comments/{id}/upvote` | yes | Toggle comment upvote |
 | `POST` | `/api/media` | yes | Upload |
@@ -856,8 +987,7 @@ DELETE /api/media
 
 These are planned but **not** in routes today — do not call them:
 
-- `POST /api/threads` (create discussion)
-- Comment create / edit / delete
-- Reports, search, follow, admin
+- Comment edit / delete
+- Reports, search, admin JSON APIs
 
 When they ship, this file should be updated.

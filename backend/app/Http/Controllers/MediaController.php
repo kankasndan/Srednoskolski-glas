@@ -17,7 +17,7 @@ class MediaController extends Controller
                 'required',
                 'file',
                 'max:102400',
-                'mimetypes:image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,application/pdf',
+                'mimetypes:image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             ],
             'directory' => ['nullable', 'string', 'max:255'],
         ]);

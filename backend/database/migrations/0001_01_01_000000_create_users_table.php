@@ -20,8 +20,9 @@ return new class extends Migration
             $table->string('imageUrl')->nullable();
             $table->string('provider')->nullable();
             $table->string('provider_id')->nullable();
-            $table->enum("role", ["user", "moderator", "admin", "super_admin"])->default('user');
+            $table->enum('role', ['user', 'moderator', 'admin', 'super_admin'])->default('user');
             $table->timestamp('onboarding_completed_at')->nullable();
+            $table->timestamp('last_active_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

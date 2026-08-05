@@ -1,0 +1,94 @@
+{
+  "data": [
+    {
+      "id": 51,
+      "title": "Кој предмет ви е најинтересен оваа година?",
+      "description": "Кај мене дефинитивно е психологија, ама ме интересира што најмногу ви се допаѓа вам...",
+      "upvotes": 87,
+      "views": 56,
+      "is_anonymous": false,
+      "is_featured": false,
+      "comments_count": 42,
+      "created_at": "2026-07-28T08:00:00.000000Z",
+      "edited_at": null,
+      "forum": {
+        "id": 3,
+        "name": "Општи дискусии",
+        "slug": "opshti_diskusii",
+        "type": "general",
+        "imageUrl": "/icons/opshti_diskusii.svg"
+      },
+      "author": {
+        "id": 1,
+        "username": "марко_2026",
+        "imageUrl": null,
+        "school": {
+          "id": 1,
+          "name": "Гим. Орце Николов",
+          "city": "Скопје"
+        }
+      },
+      "attachments": []
+    },
+    {
+      "id": 52,
+      "title": "Колку часа дневно поминувате на учење?",
+      "description": "Се обидувам да направам подобар распоред, па ме интересира колку време учите во просек...",
+      "upvotes": 312,
+      "views": 56,
+      "is_anonymous": false,
+      "is_featured": true,
+      "comments_count": 89,
+      "created_at": "2026-07-23T10:00:00.000000Z",
+      "edited_at": null,
+      "forum": {
+        "id": 4,
+        "name": "Помош при учење",
+        "slug": "pomosh_pri_uchenje",
+        "type": "general",
+        "imageUrl": "/icons/pomosh_pri_uchenje.svg"
+      },
+      "author": {
+        "id": 5,
+        "username": "ана_матуранка",
+        "imageUrl": null,
+        "school": {
+          "id": 3,
+          "name": "СУГС Михајло Пупин",
+          "city": "Скопје"
+        }
+      },
+      "attachments": []
+    },
+    {
+      "id": 53,
+      "title": "Кои AI алатки најмногу ви помагаат при учење?",
+      "description": "Освен ChatGPT, дали користите некои други алатки за истражување, белешки или презентации?",
+      "upvotes": 87,
+      "views": 56,
+      "is_anonymous": false,
+      "is_featured": false,
+      "comments_count": 42,
+      "created_at": "2026-07-28T08:00:00.000000Z",
+      "edited_at": null,
+      "forum": {
+        "id": 6,
+        "name": "Вештачка интелигенција",
+        "slug": "veshtachka_intelegencija",
+        "type": "general",
+        "imageUrl": "/icons/veshtachka_intelegencija.svg"
+      },
+      "author": {
+        "id": 1,
+        "username": "марко_2026",
+        "imageUrl": null,
+        "school": {
+          "id": 1,
+          "name": "Гим. Орце Николов",
+          "city": "Скопје"
+        }
+      },
+      "attachments": []
+    }
+  ]
+}

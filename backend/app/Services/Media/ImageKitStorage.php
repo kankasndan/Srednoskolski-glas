@@ -51,8 +51,12 @@ class ImageKitStorage implements MediaStorage
             $payload['tags'] = is_array($options['tags']) ? implode(',', $options['tags']) : $options['tags'];
         }
 
+        if (! $file->isValid()) {
+            throw new RuntimeException($file->getErrorMessage());
+        }
+
         $response = Http::withBasicAuth($this->config['private_key'], '')
-            ->attach('file', (string) file_get_contents($file->getRealPath()), $fileName)
+            ->attach('file', $file->getContent(), $fileName)
             ->post($this->config['upload_endpoint'], $payload);
 
         if ($response->failed()) {

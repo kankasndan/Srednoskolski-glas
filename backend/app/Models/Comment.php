@@ -29,6 +29,11 @@ class Comment extends Model
         return $this->belongsTo(Thread::class);
     }
 
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
+    }
+
     public function deletedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');

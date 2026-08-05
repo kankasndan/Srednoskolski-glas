@@ -1,12 +1,12 @@
 "use client";
 
 import { notFound, useParams } from "next/navigation";
-import AppShell from "@/components/AppShell";
-import BackButton from "@/components/BackButton";
-import CommentComposer from "@/components/CommentComposer";
-import CommentList from "@/components/CommentList";
-import CommentsHeader from "@/components/CommentsHeader";
-import ThreadPost from "@/components/ThreadPost";
+import AppShell from "@/components/shell/AppShell";
+import BackButton from "@/components/shell/BackButton";
+import CommentComposer from "@/components/thread/CommentComposer";
+import CommentList from "@/components/thread/CommentList";
+import CommentsHeader from "@/components/thread/CommentsHeader";
+import ThreadPost from "@/components/thread/ThreadPost";
 import { useThread } from "@/hooks/useThread";
 
 function StatusMessage({ children }) {

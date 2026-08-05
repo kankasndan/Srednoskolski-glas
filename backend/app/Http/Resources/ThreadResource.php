@@ -39,6 +39,10 @@ class ThreadResource extends JsonResource
             'attachments' => ThreadAttachmentResource::collection(
                 $this->whenLoaded('threadAttachment'),
             ),
+            'poll' => $this->when(
+                $this->relationLoaded('poll'),
+                fn () => $this->poll === null ? null : new PollResource($this->poll),
+            ),
         ];
     }
 }

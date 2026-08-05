@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Forum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Forum
+ * @mixin Forum
  */
 class ForumResource extends JsonResource
 {
@@ -27,6 +28,8 @@ class ForumResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $user = $request->user();
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -36,6 +39,10 @@ class ForumResource extends JsonResource
             'imageUrl' => $this->imageUrl,
             'threads_count' => $this->threads_count,
             'members_count' => $this->members_count,
+            'is_following' => $this->when(
+                $this->withDetails && $user !== null,
+                fn () => $user->forums()->where('forums.id', $this->id)->exists(),
+            ),
             'description' => $this->when($this->withDetails, $this->description),
             'bannerUrl' => $this->when($this->withDetails, $this->bannerUrl),
             'school' => $this->when(

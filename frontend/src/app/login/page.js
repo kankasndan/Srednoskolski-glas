@@ -1,7 +1,7 @@
-import AuthHero from "@/components/AuthHero";
-import BackButton from "@/components/BackButton";
-import AuthMasthead from "@/components/AuthMasthead";
-import SocialAuthButtons from "@/components/SocialAuthButtons";
+import AuthHero from "@/components/auth/AuthHero";
+import BackButton from "@/components/shell/BackButton";
+import AuthMasthead from "@/components/auth/AuthMasthead";
+import SocialAuthButtons from "@/components/auth/SocialAuthButtons";
 
 export default function LogIn() {
   return (

@@ -23,6 +23,7 @@ use Spatie\Permission\Traits\HasRoles;
     'provider_id',
     'role',
     'onboarding_completed_at',
+    'last_active_at',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -39,6 +40,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'onboarding_completed_at' => 'datetime',
+            'last_active_at' => 'datetime',
         ];
     }
 
@@ -101,7 +103,7 @@ class User extends Authenticatable
 
     public function sanctions()
     {
-        return $this->hasMany(Sanction::class, "user_id");
+        return $this->hasMany(Sanction::class, 'user_id');
     }
 
     public function appeals()
@@ -116,6 +118,6 @@ class User extends Authenticatable
 
     public function topics()
     {
-        return $this->belongsToMany(Topic::class, "feed_topics");
+        return $this->belongsToMany(Topic::class, 'feed_topics');
     }
 }

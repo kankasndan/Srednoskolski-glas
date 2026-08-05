@@ -14,7 +14,16 @@ const btn = document.getElementById("userMenuBtn");
         const ROW_BASE =
             "flex h-10 w-[240px] cursor-pointer items-center gap-3 rounded-[10px] border border-[#CCCCCC] px-4 py-2 text-left font-medium leading-none text-[14px] text-[#595959] transition-colors no-underline";
 
-        const NAV_SECTIONS = [{
+        const NAV_SECTIONS = [
+            {
+                title: "Почетна табла",
+                items: [{
+                        key: "nav:dashboard",
+                        label: "Контролна табла",
+                        route: "dashboard"
+                    },]
+            },
+            {
                 title: "Модерација",
                 items: [{
                         key: "nav:reports",

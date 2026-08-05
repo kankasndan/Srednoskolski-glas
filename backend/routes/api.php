@@ -5,9 +5,12 @@ use App\Http\Controllers\Auth\MeController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CityController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FeedController;
+use App\Http\Controllers\FollowForumController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\PollController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\VoteController;
 use Illuminate\Support\Facades\Route;
@@ -37,11 +40,19 @@ Route::get('/p/{forum:slug}', [ForumController::class, 'show'])->name('forums.sh
 Route::get('/p/{forum:slug}/threads', [ThreadController::class, 'index'])->name('forums.threads.index');
 Route::get('/p/{forum:slug}/comments/{thread:id}', [ThreadController::class, 'show'])->name('forums.threads.show');
 
-// Storage routes
+// Storage + write actions
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/threads', [ThreadController::class, 'store'])->name('threads.store');
+    Route::post('/threads/{thread}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->name('polls.vote');
+
+    Route::post('/p/{forum:slug}/follow', [FollowForumController::class, 'store'])->name('forums.follow');
+    Route::delete('/p/{forum:slug}/follow', [FollowForumController::class, 'destroy'])->name('forums.unfollow');
+
     Route::post('/media', [MediaController::class, 'store'])->name('media.store');
     Route::delete('/media', [MediaController::class, 'destroy'])->name('media.destroy');
 
+    // Upvote system routes
     Route::post('/threads/{thread}/upvote', [VoteController::class, 'toggleThread'])->name('threads.upvote');
     Route::post('/comments/{comment}/upvote', [VoteController::class, 'toggleComment'])->name('comments.upvote');
 });
