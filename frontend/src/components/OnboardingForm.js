@@ -60,8 +60,7 @@ export default function OnboardingForm() {
     (a, b) => b.schools.length - a.schools.length,
   );
 
-  function handleNotStudentChange(e) {
-    const checked = e.target.checked;
+  function handleNotStudentChange(checked) {
     setNotStudent(checked);
     if (checked) {
       setSchool("");
@@ -118,7 +117,7 @@ export default function OnboardingForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mx-auto mt-12 flex w-full max-w-[360px] flex-col gap-3 2xl:max-w-[440px] 2xl:gap-4"
+      className="mx-auto mt-12 flex w-full max-w-100 flex-col gap-3"
     >
       <TextField
         id="pseudonym"
@@ -135,14 +134,16 @@ export default function OnboardingForm() {
         </span>
       </Checkbox>
 
-      <SelectField
+      <SchoolSelect
         id="school"
         label="Училиште"
         required={!notStudent}
         value={school}
-        onChange={(e) => setSchool(e.target.value)}
+        onChange={setSchool}
         placeholder="Избери училиште"
         groups={schoolGroups}
+        notStudent={notStudent}
+        onNotStudentChange={handleNotStudentChange}
         disabled={notStudent}
         tooltip={notStudent ? LOCKED_HINT : undefined}
       />
