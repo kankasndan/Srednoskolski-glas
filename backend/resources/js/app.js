@@ -57,14 +57,9 @@ const btn = document.getElementById("userMenuBtn");
                         route: "forums"
                     },
                     {
-                        key: "nav:contact",
-                        label: "Контакт кутија",
-                        route: "contact"
-                    },
-                    {
                         key: "nav:broadcasts",
                         label: "Известувања",
-                        route: "broadcasts"
+                        route: "notifications"
                     },
                 ],
             },
@@ -97,7 +92,7 @@ const btn = document.getElementById("userMenuBtn");
             const active = item.key === selectedKey;
 
             const row = document.createElement("a");
-            row.href = `/admin/${item.route}`; // adjust base path as needed for your Laravel routes
+            row.href = `${item.route}`; // adjust base path as needed for your Laravel routes
             row.className = ROW_BASE + (active ? " border-transparent bg-[#582FF5] font-bold text-white" : "");
             row.dataset.key = item.key;
 

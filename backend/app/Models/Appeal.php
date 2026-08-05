@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Appeal extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'sanction_id', 'user_id', 'explanation', 'status',
         'admin_id', 'admin_response', 'resolved_at',

@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Comment;
 use App\Models\Report;
+use App\Models\Thread;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -12,36 +15,74 @@ class ReportController extends Controller
     {
         $reports = Report::query()
             ->with([
-            'reporter',
-            'reportable' => function ($morphTo) {
-                $morphTo->morphWith([
-                    \App\Models\Comment::class => ['user', 'thread.forum'],
-                    \App\Models\Thread::class  => ['user', 'forum'],
-                    \App\Models\User::class  => ['studentData.school.city'],
-                ]);
-            },
-        ])
-            ->when($request->filled("source"), function ($query) use ($request){
-                $query->where("source", $request->source);
+                'reporter',
+                'reportable' => function ($morphTo) {
+                    $morphTo->morphWith([
+                        Comment::class => ['user', 'thread.forum'],
+                        Thread::class => ['user', 'forum'],
+                        User::class => ['studentData.school.city'],
+                    ]);
+                    $morphTo->constrain([
+                        Comment::class => fn ($query) => $query->withTrashed(),
+                        Thread::class => fn ($query) => $query->withTrashed(),
+                    ]);
+                },
+            ])
+            ->when($request->filled('source'), function ($query) use ($request) {
+                $query->where('source', $request->source);
             })
-            ->when($request->filled("type"), function ($query) use ($request){
-                $query->where("reportable_type", "App\Models\\" . $request->type);
+            ->when($request->filled('type'), function ($query) use ($request) {
+                $query->where('reportable_type', "App\Models\\".$request->type);
             })
-            ->when($request->filled("reason"), function ($query) use ($request){
-                $query->where("reason", $request->reason);
+            ->when($request->filled('reason'), function ($query) use ($request) {
+                $query->where('reason', $request->reason);
             })
             ->where('status', 'pending')
-            ->whereHasMorph('reportable', [\App\Models\Comment::class, \App\Models\Thread::class, \App\Models\User::class])
+            ->whereHasMorph('reportable', [Comment::class, Thread::class, User::class], function ($query, $type) {
+                if (in_array($type, [Comment::class, Thread::class])) {
+                    $query->withTrashed();
+                }
+            })
             ->latest()
             ->paginate(10);
 
-        return view("admin.reports.index", compact("reports"));
+        $resolvedReports = Report::query()
+            ->with([
+                'reporter',
+                'reportable' => function ($morphTo) {
+                    $morphTo->morphWith([
+                        Comment::class => ['user', 'thread.forum'],
+                        Thread::class => ['user', 'forum'],
+                        User::class => ['studentData.school.city'],
+                    ]);
+                    $morphTo->constrain([
+                        Comment::class => fn ($query) => $query->withTrashed(),
+                        Thread::class => fn ($query) => $query->withTrashed(),
+                    ]);
+                },
+            ])
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            ->when($request->filled('type'), function ($query) use ($request) {
+                $query->where('reportable_type', "App\Models\\".$request->type);
+            })
+            ->whereIn('status', ['approved', 'rejected'])
+            ->whereHasMorph('reportable', [Comment::class, Thread::class, User::class], function ($query, $type) {
+                if (in_array($type, [Comment::class, Thread::class])) {
+                    $query->withTrashed();
+                }
+            })
+            ->latest('updated_at')
+            ->paginate(10, ['*'], 'history_page');
+
+        return view('admin.reports.index', compact('reports', 'resolvedReports'));
     }
 
     public function approve(Report $report)
     {
         $report->update([
-            "status" => "approved"
+            'status' => 'approved',
         ]);
 
         return back()->with(['success' => 'Successfully approved report!']);
@@ -50,7 +91,7 @@ class ReportController extends Controller
     public function reject(Report $report)
     {
         $report->update([
-            "status" => "rejected"
+            'status' => 'rejected',
         ]);
 
         return back()->with(['success' => 'Successfully rejected report!']);

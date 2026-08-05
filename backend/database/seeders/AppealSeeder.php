@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 class AppealSeeder extends Seeder
 {
     /**
-     * Sample appeals against sanctions.
+     * Appeals against seeded sanctions.
      * status: pending | accepted | rejected
      *
      * @var list<array{
@@ -24,18 +24,18 @@ class AppealSeeder extends Seeder
      */
     private const APPEALS = [
         [
-            'sanction_reason' => 'Повторено спам однесување (тест санкција).',
-            'user' => 'profesor@example.com',
-            'explanation' => 'Ова беше тест налог, не сум спамер. Ве молам отстранете ја забраната.',
+            'sanction_reason' => 'Навредувачки коментар на форумот Забава и култура.',
+            'user' => 'nikola@example.com',
+            'explanation' => 'Коментарот беше напишан во афект. Грешката ја признавам и барам благи мерки наместо забрана.',
             'status' => 'pending',
         ],
         [
-            'sanction_reason' => 'Навредувачки коментар на форумот Забава и култура.',
-            'user' => 'nikola@example.com',
-            'explanation' => 'Се извинувам, немав намера да навредам. Ќе внимавам во иднина.',
+            'sanction_reason' => 'Повторено спам однесување во дискусијата за матура.',
+            'user' => 'profesor@example.com',
+            'explanation' => 'Пратените линкови беа корисни материјали, не спам. Ќе се придржувам до правилата ако има дополнителни ограничувања.',
             'status' => 'accepted',
             'admin' => 'admin@srednoskolskiglas.mk',
-            'admin_response' => 'Предупредувањето останува во историјата, но нема дополнителни мерки.',
+            'admin_response' => 'Апелацијата е прифатена. Санкцијата е отстранета и корисникот може повторно да учествува.',
         ],
     ];
 
@@ -43,7 +43,7 @@ class AppealSeeder extends Seeder
     {
         foreach (self::APPEALS as $row) {
             $user = User::where('email', $row['user'])->first();
-            $sanction = Sanction::where('reason', $row['sanction_reason'])->first();
+            $sanction = Sanction::withTrashed()->where('reason', $row['sanction_reason'])->first();
 
             if ($user === null || $sanction === null) {
                 continue;
@@ -54,9 +54,7 @@ class AppealSeeder extends Seeder
                 $adminId = User::where('email', $row['admin'])->value('id');
             }
 
-            $resolved = in_array($row['status'], ['accepted', 'rejected'], true);
-
-            Appeal::updateOrCreate(
+            $appeal = Appeal::withTrashed()->updateOrCreate(
                 [
                     'sanction_id' => $sanction->id,
                     'user_id' => $user->id,
@@ -66,9 +64,13 @@ class AppealSeeder extends Seeder
                     'status' => $row['status'],
                     'admin_id' => $adminId,
                     'admin_response' => $row['admin_response'] ?? null,
-                    'resolved_at' => $resolved ? now()->subHours(5) : null,
+                    'resolved_at' => in_array($row['status'], ['accepted', 'rejected'], true) ? now()->subHours(5) : null,
                 ],
             );
+
+            if (in_array($row['status'], ['accepted', 'rejected'], true)) {
+                $appeal->delete();
+            }
         }
     }
 }
