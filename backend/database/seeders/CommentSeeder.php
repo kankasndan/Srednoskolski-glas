@@ -105,7 +105,7 @@ class CommentSeeder extends Seeder
             // Soft-deleted by moderator — demo tombstone for deleted_by.
             'thread' => 'Најдобри места за дружење во градот',
             'author' => 'nikola@example.com',
-            'content' => 'Оваа порака беше премногу груба и е отстранета од модератор.',
+            'content' => 'Ако не можеш да дадеш корисен одговор, подобро воопшто не коментирај.',
             'upvotes' => 0,
             'soft_deleted_by' => 'moderator@srednoskolskiglas.mk',
             'replies' => [],

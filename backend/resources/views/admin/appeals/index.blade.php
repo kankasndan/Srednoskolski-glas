@@ -1,0 +1,338 @@
+@extends('layouts.master')
+
+@section('title', 'Appeals')
+
+@section('content')
+    <div class="p-6">
+
+        <div class="max-w-6xl mx-auto">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Ban Appeals</h1>
+                    <p class="text-sm text-gray-500 mt-1">Review and resolve appeals submitted by banned members.</p>
+                </div>
+                <div>
+                    <span id="active-appeals-total"
+                        class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium">
+                        Total appeals: {{ $activeAppealsTotal }}
+                    </span>
+
+                    <span id="resolved-appeals-total" style="display: none;"
+                        class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium">
+                        Total resolved appeals: {{ $resolvedAppealsTotal }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-1 border-b border-gray-200 mb-6">
+                <button type="button" data-tab="queue"
+                    class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600">
+                    Appeal Queue
+                </button>
+                <button type="button" data-tab="history"
+                    class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                    History
+                </button>
+            </div>
+
+            <!-- ===================== QUEUE TAB ===================== -->
+            <div id="tab-queue" class="tab-panel">
+
+                <!-- Filter Form (server-side) -->
+                <form action="{{ route('appeal.index') }}" method="GET" id="filter-form"
+                    class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6 flex flex-wrap items-center gap-3">
+
+                    <input type="hidden" name="status" id="status-input" value="{{ request('status', 'all') }}">
+
+                    <button type="submit" data-filter="all"
+                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium {{ request('status', 'all') === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                        All
+                    </button>
+                    <button type="submit" data-filter="pending"
+                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium {{ request('status') === 'pending' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                        Pending
+                    </button>
+                    <button type="submit" data-filter="accepted"
+                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium {{ request('status') === 'accepted' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                        Accepted
+                    </button>
+                    <button type="submit" data-filter="rejected"
+                        class="filter-btn px-4 py-1.5 rounded-lg text-sm font-medium {{ request('status') === 'rejected' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                        Rejected
+                    </button>
+
+                    @if ((request('status') || request('search')) && request('status') != 'all')
+                        <a href="{{ route('appeal.index') }}"
+                            class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Clear filters
+                        </a>
+                    @endif
+                </form>
+
+                @if (session('success'))
+                    <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
+                        <ul class="list-disc pl-5 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <!-- Appeals Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs tracking-wide">
+                            <tr>
+                                <th class="text-left px-6 py-3">Member</th>
+                                <th class="text-left px-6 py-3">Ban Reason</th>
+                                <th class="text-left px-6 py-3">Ban Type</th>
+                                <th class="text-left px-6 py-3">Submitted</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse ($appeals as $appeal)
+                                <tr class="appeal-row hover:bg-gray-50 cursor-pointer" data-status="{{ $appeal->status }}"
+                                    onclick="window.location.href='{{ route('appeal.show', ['appeal' => $appeal->id]) }}'">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="{{ $appeal->user->imageUrl }}" alt=""
+                                                class="w-8 h-8 rounded-full">
+                                            <div>
+                                                <p class="font-medium text-gray-800">{{ $appeal->user->username }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-600">{{ $appeal->sanction->reason }}</td>
+                                    <td class="px-6 py-4">
+                                        <span
+                                            class="text-xs font-medium px-2 py-1 rounded-full {{ match ($appeal->sanction->type) {
+                                                'warning' => 'bg-yellow-100 text-yellow-700',
+                                                'permanent_ban' => 'bg-red-100 text-red-700',
+                                                '7-day' => 'bg-green-100 text-green-600',
+                                                default => 'bg-gray-100 text-gray-600',
+                                            } }}">
+                                            {{ $appeal->sanction->type }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-500">{{ $appeal->created_at->diffForHumans() }}</td>
+
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-10 text-center text-gray-400 text-sm">
+                                        No matching appeals.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex justify-center mt-4">
+                    <nav class="flex gap-1 text-sm">
+                        @if ($appeals->onFirstPage())
+                            <button disabled
+                                class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
+                                Previous
+                            </button>
+                        @else
+                            <a href="{{ $appeals->previousPageUrl() }}"
+                                class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
+                                Previous
+                            </a>
+                        @endif
+
+                        @if ($appeals->hasMorePages())
+                            <a href="{{ $appeals->nextPageUrl() }}"
+                                class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
+                                Next
+                            </a>
+                        @else
+                            <button disabled
+                                class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
+                                Next
+                            </button>
+                        @endif
+                    </nav>
+                </div>
+            </div>
+
+            <!-- ===================== HISTORY TAB ===================== -->
+            <div id="tab-history" class="tab-panel hidden">
+
+
+                <!-- History Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs tracking-wide">
+                            <tr>
+                                <th class="text-left px-6 py-3">Member</th>
+                                <th class="text-left px-6 py-3">Ban Reason</th>
+                                <th class="text-left px-6 py-3">Decision</th>
+                                <th class="text-left px-6 py-3">Resolved By</th>
+                                <th class="text-left px-6 py-3">Resolved On</th>
+                                <th class="text-right px-6 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse ($resolvedAppeals as $resolvedAppeal)
+                                <tr class="history-row hover:bg-gray-50 cursor-pointer"
+                                    onclick="window.location.href='{{ route('appeal.show', $resolvedAppeal->id) }}'">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-8 h-8 rounded-full bg-slate-500 flex items-center justify-center text-white text-xs font-semibold">
+                                                {{ strtoupper(substr($resolvedAppeal->user->username ?? '?', 0, 2)) }}
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-800">
+                                                    {{ $resolvedAppeal->user->username ?? 'Unknown' }}</p>
+                                                <p class="text-gray-400 text-xs">
+                                                    {{ '@' . ($resolvedAppeal->user->handle ?? '—') }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-600">{{ $resolvedAppeal->sanction->reason ?? '—' }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @if ($resolvedAppeal->status === 'accepted')
+                                            <span
+                                                class="px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-medium">Accepted
+                                                &amp; Unbanned</span>
+                                        @else
+                                            <span
+                                                class="px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-medium">Rejected</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-600">
+                                        {{ $resolvedAppeal->resolvedBy->username ?? 'System' }}</td>
+                                    <td class="px-6 py-4 text-gray-500">
+                                        {{ $resolvedAppeal->deleted_at?->diffForHumans() ?? '—' }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button type="button"
+                                            class="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
+                                            onclick="event.stopPropagation(); window.location.href='{{ route('appeal.show', $resolvedAppeal->id) }}'">
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-6 py-10 text-center text-gray-400 text-sm">
+                                        No resolved appeals found.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- History Pagination -->
+                <div class="flex justify-center mt-4">
+                    <nav class="flex gap-1 text-sm">
+                        @if ($resolvedAppeals->onFirstPage())
+                            <button disabled
+                                class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
+                                Previous
+                            </button>
+                        @else
+                            <a href="{{ $resolvedAppeals->previousPageUrl() }}"
+                                class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
+                                Previous
+                            </a>
+                        @endif
+
+                        @if ($resolvedAppeals->hasMorePages())
+                            <a href="{{ $resolvedAppeals->nextPageUrl() }}"
+                                class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
+                                Next
+                            </a>
+                        @else
+                            <button disabled
+                                class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
+                                Next
+                            </button>
+                        @endif
+                    </nav>
+                </div>
+
+            </div>
+
+        </div>
+
+        @push('scripts-appeals')
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+
+                    // Server-side status filter (Queue tab)
+                    const form = document.getElementById('filter-form');
+                    const statusInput = document.getElementById('status-input');
+                    const filterBtns = document.querySelectorAll('.filter-btn');
+
+                    filterBtns.forEach(function(btn) {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            statusInput.value = btn.getAttribute('data-filter');
+                            form.submit();
+                        });
+                    });
+
+                    // Server-side status filter (History tab)
+                    const historyForm = document.getElementById('history-filter-form');
+                    const historyStatusInput = document.getElementById('history-status-input');
+                    const historyFilterBtns = document.querySelectorAll('.history-filter-btn');
+
+                    historyFilterBtns.forEach(function(btn) {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            historyStatusInput.value = btn.getAttribute('data-history-filter');
+                            historyForm.submit();
+                        });
+                    });
+
+                    // Tab switching (Queue / History)
+                    const tabBtns = document.querySelectorAll('.tab-btn');
+                    const tabPanels = document.querySelectorAll('.tab-panel');
+
+                    tabBtns.forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            const target = btn.getAttribute('data-tab');
+
+                            tabBtns.forEach(function(b) {
+                                b.classList.remove('border-indigo-600', 'text-indigo-600');
+                                b.classList.add('border-transparent', 'text-gray-500');
+                            });
+                            btn.classList.add('border-indigo-600', 'text-indigo-600');
+                            btn.classList.remove('border-transparent', 'text-gray-500');
+
+                            tabPanels.forEach(function(panel) {
+                                panel.classList.toggle('hidden', panel.id !== 'tab-' + target);
+                            });
+
+                            document.getElementById('active-appeals-total').style.display = target ===
+                                'queue' ? '' : 'none';
+                            document.getElementById('resolved-appeals-total').style.display = target ===
+                                'history' ? 'inline-flex' : 'none';
+                        });
+                    });
+
+                });
+            </script>
+        @endpush
+    </div>
+@endsection

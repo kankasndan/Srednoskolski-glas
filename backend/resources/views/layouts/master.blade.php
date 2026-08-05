@@ -102,6 +102,8 @@
     @stack("scripts-forums")
     @stack("scripts-forum-show")
     @stack("scripts-reports")
+    @stack("scripts-sanctions")
+    @stack("scripts-appeals")
 
 
 </body>
