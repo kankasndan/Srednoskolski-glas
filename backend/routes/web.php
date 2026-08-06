@@ -16,7 +16,7 @@ Route::get('admin', [AuthContoller::class, 'redirecting']);
 Route::get('admin/login', [AuthContoller::class, 'index'])->name('login');
 Route::post('admin/login/login', [AuthContoller::class, 'login'])->name('admin.login');
 
-Route::prefix('admin')->middleware('auth')->group(function () {
+Route::prefix('admin')->middleware(['auth', 'role:super_admin|admin|moderator', 'permission: access admin panel'])->group(function () {
 
     // DAHSBOARD
     Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
@@ -89,20 +89,30 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('forums/liveSearch', [ForumController::class, 'liveSearch'])->name('forum.liveSearch');
     Route::get('forums/{forum}/show', [ForumController::class, 'show'])->name('forum.show');
 
-    // ROLES AND PERMISSION
-    Route::get('roles', [RoleController::class, 'index'])->name('role.index');
-    // UPDATE ROLE
-    Route::patch('roles/{user}/update', [RoleController::class, 'update'])->name('role.update');
-    Route::delete('roles/{user}/destroy', [RoleController::class, 'destroy'])->name('role.destroy');
-    Route::patch('roles/update/forum', [RoleController::class, 'updateForum'])->name('role.update.forum');
-    // SEARCH STAFF
-    Route::get('roles/live-search', [RoleController::class, 'liveSearch'])->name('role.liveSearch');
-    Route::get('roles/{user}/show', [RoleController::class, 'show'])->name('role.show');
-    // GRANT ROLE
-    Route::get('roles/grant-search', [RoleController::class, 'grantSearch'])->name('role.grantSearch');
-    Route::post('roles/grant', [RoleController::class, 'grant'])->name('role.grant');
+    // ROLES AND PERMISSIONS
+    Route::middleware('permission:view roles page')->group(function () {
+        Route::get('roles', [RoleController::class, 'index'])->name('role.index');
+        Route::get('roles/live-search', [RoleController::class, 'liveSearch'])->name('role.liveSearch');
+        Route::get('roles/{user}/show', [RoleController::class, 'show'])->name('role.show');
+    });
+
+        Route::middleware('permission:grant roles')->group(function () {
+            Route::get('roles/grant-search', [RoleController::class, 'grantSearch'])->name('role.grantSearch');
+            Route::post('roles/grant', [RoleController::class, 'grant'])->name('role.grant');
+        });
+
+        Route::middleware('permission:update user role')->group(function () {
+            Route::patch('roles/{user}/update', [RoleController::class, 'update'])->name('role.update');
+        });
+
+        Route::middleware('permission:delete user role')->group(function () {
+            Route::delete('roles/{user}/destroy', [RoleController::class, 'destroy'])->name('role.destroy');
+        });
+
+        Route::middleware('permission:update forum role settings')->group(function () {
+            Route::patch('roles/update/forum', [RoleController::class, 'updateForum'])->name('role.update.forum');
+        });
 
     // LOGOUT
     Route::get('logout', [AuthContoller::class, 'logout'])->name('admin.logout');
-
 });

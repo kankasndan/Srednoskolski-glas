@@ -104,11 +104,9 @@ class RoleController extends Controller
         ]);
 
         if(str_contains(url()->previous(), "show")){
-            return redirect()->route('role.show', ["user" => $request->user_id])->with('success', 'Moderator assigned successfully.');
+            return redirect()->route('role.show', ['user' => $request->user_id])->with('success', 'Moderator assigned successfully.');
         }
 
         return redirect()->route('role.index')->with('success', 'Moderator assigned successfully.');
     }
-
-    
 }
