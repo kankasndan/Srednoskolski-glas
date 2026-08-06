@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('issued_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->enum('type', ['warning', 'temporary_ban', 'permanent_ban']);
+            $table->enum('type', ['warning', '7-day', 'custom', 'permanent_ban']);
             $table->text('reason');
             $table->foreignId('report_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamp('expires_at')->nullable();
@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamp('revoked_at')->nullable();
             $table->foreignId('revoked_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

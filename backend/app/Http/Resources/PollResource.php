@@ -16,7 +16,10 @@ class PollResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $totalVotes = (int) ($this->votes_count ?? $this->votes->count());
+        // Prefer withCount('votes'); never use a filtered votes relation for the total.
+        $totalVotes = isset($this->votes_count)
+            ? (int) $this->votes_count
+            : (int) $this->votes()->count();
         $user = $request->user('web') ?? $request->user();
         $userVoteOptionId = null;
 

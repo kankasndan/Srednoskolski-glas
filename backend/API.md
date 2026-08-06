@@ -415,6 +415,11 @@ GET /api/me
         "city": {
           "id": 1,
           "name": "Скопје"
+        },
+        "forum": {
+          "id": 40,
+          "slug": "sugs_josip_broz_tito_skopje",
+          "type": "school"
         }
       },
       "vocation": {
@@ -426,7 +431,27 @@ GET /api/me
 }
 ```
 
-`student_data` may be `null` for non-students. `onboarding_completed_at` is `null` until onboarding is finished.
+`student_data` may be `null` for non-students. `onboarding_completed_at` is `null` until onboarding is finished. `school.forum` is included so the profile can link to that school’s forum (`/p/{slug}`).
+
+---
+
+### Profile tab counts
+
+```
+GET /api/me/counts
+```
+
+**Auth required.** Lightweight badge counts for the profile tabs (no list payloads).
+
+```json
+{
+  "data": {
+    "threads": 12,
+    "comments": 34,
+    "followed_forums": 5
+  }
+}
+```
 
 ---
 
@@ -436,7 +461,7 @@ GET /api/me
 GET /api/me/threads
 ```
 
-**Auth required.** Threads created by the current user, newest first. Same `Thread` resource shape as forum/feed lists (includes `forum.type`). Not paginated.
+**Auth required.** Threads created by the current user, newest first (max 50). Same `Thread` resource shape as forum/feed lists (includes `forum.type`).
 
 ```json
 {
@@ -475,7 +500,7 @@ GET /api/me/threads
 GET /api/me/comments
 ```
 
-**Auth required.** Comments written by the current user, newest first, each with parent thread + forum context for profile links. Soft-deleted comments are omitted. Not paginated.
+**Auth required.** Comments written by the current user, newest first (max 50), each with parent thread + forum context for profile links. Soft-deleted comments are omitted.
 
 ```json
 {
@@ -924,6 +949,63 @@ Polls expire after `duration_days` (`ends_at`). One poll per thread.
 
 ---
 
+### Update thread
+
+```
+PUT|POST /api/threads/{id}
+```
+
+**Auth required.** Author only. Prefer **`POST` `multipart/form-data`** when adding or removing attachments (PHP file uploads are unreliable on `PUT`). Plain `PUT` JSON still works for title/description only.
+
+| Field | Type | Rules |
+|-------|------|--------|
+| `title` | string | required; 3–200 characters |
+| `description` | string | optional; max 10000 |
+| `files[]` | file | optional; same mime/size rules as create |
+| `link` | url | optional; adds a new link attachment |
+| `remove_attachment_ids[]` | int[] | optional; attachment ids on **this** thread to delete |
+
+Same exclusivity as create for the **resulting** attachment set after removals + additions (link vs image/video; max 10 images / 1 video / 1 file / 1 link; file cannot combine with an existing poll). Polls and anonymity are not editable here.
+
+Sets `edited_at` to now. Attachment objects in responses include `id`, `url`, and `type`.
+
+**Success (`200`)** — `ThreadResource`.
+
+| Status | When |
+|--------|------|
+| `401` | Guest |
+| `403` | Not the author |
+| `404` | Missing / soft-deleted |
+| `422` | Validation failed |
+
+---
+
+### Delete thread
+
+```
+DELETE /api/threads/{id}
+```
+
+**Auth required.** Author only. Soft-deletes the thread (and its comments), stamps `deleted_by`, and decrements the forum’s `threads_count`.
+
+**Success (`200`)**
+
+```json
+{
+  "data": {
+    "deleted": true
+  }
+}
+```
+
+| Status | When |
+|--------|------|
+| `401` | Guest |
+| `403` | Not the author |
+| `404` | Missing / already deleted |
+
+---
+
 ## Poll vote
 
 ```
@@ -1022,6 +1104,59 @@ For a reply, `parent_id` is the parent comment’s id. Reload the thread via `GE
 
 ---
 
+### Update comment
+
+```
+PUT /api/comments/{id}
+```
+
+**Auth required.** Author only. JSON body:
+
+| Field | Type | Rules |
+|-------|------|--------|
+| `content` | string | required; 1–1000 characters |
+
+Sets `edited_at` to now. Soft-deleted comments cannot be updated (`404`).
+
+**Success (`200`)** — `Comment` resource (same shape as create).
+
+| Status | When |
+|--------|------|
+| `401` | Guest |
+| `403` | Not the author |
+| `404` | Missing / soft-deleted |
+| `422` | Validation failed |
+
+---
+
+### Delete comment
+
+```
+DELETE /api/comments/{id}
+```
+
+**Auth required.** Author only. Soft-deletes the comment and stamps `deleted_by`.
+
+Soft-deleted comments with replies remain in the thread tree as tombstones (`content` is `""`, `deleted_by` is set). Leaf comments disappear from the tree.
+
+**Success (`200`)**
+
+```json
+{
+  "data": {
+    "deleted": true
+  }
+}
+```
+
+| Status | When |
+|--------|------|
+| `401` | Guest |
+| `403` | Not the author |
+| `404` | Missing / already deleted |
+
+---
+
 ## Media
 
 ### Upload file
@@ -1088,6 +1223,7 @@ DELETE /api/media
 | `GET` | `/api/auth/{provider}/redirect` | — | Browser redirect |
 | `GET` | `/api/auth/{provider}/callback` | — | Browser redirect + session cookie |
 | `GET` | `/api/me` | yes | Current user |
+| `GET` | `/api/me/counts` | yes | Profile tab badge counts |
 | `GET` | `/api/me/threads` | yes | Current user’s threads |
 | `GET` | `/api/me/comments` | yes | Current user’s comments (+ thread context) |
 | `GET` | `/api/me/followed-forums` | yes | Forums the user follows |
@@ -1102,7 +1238,11 @@ DELETE /api/media
 | `POST` | `/api/p/{slug}/follow` | yes | Follow general forum |
 | `DELETE` | `/api/p/{slug}/follow` | yes | Unfollow general forum |
 | `POST` | `/api/threads` | yes | Create thread (+ files / link / poll) |
+| `PUT` | `/api/threads/{id}` | yes | Update thread (author) |
+| `DELETE` | `/api/threads/{id}` | yes | Soft-delete thread (author) |
 | `POST` | `/api/threads/{id}/comments` | yes | Create comment or nested reply |
+| `PUT` | `/api/comments/{id}` | yes | Update comment (author) |
+| `DELETE` | `/api/comments/{id}` | yes | Soft-delete comment (author) |
 | `POST` | `/api/polls/{id}/vote` | yes | Vote on poll option |
 | `POST` | `/api/threads/{id}/upvote` | yes | Toggle thread upvote |
 | `POST` | `/api/comments/{id}/upvote` | yes | Toggle comment upvote |
@@ -1115,7 +1255,6 @@ DELETE /api/media
 
 These are planned but **not** in routes today — do not call them:
 
-- Comment edit / delete
 - Reports, search, admin JSON APIs
 
 When they ship, this file should be updated.

@@ -7,17 +7,18 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 config.autoAddCss = false;
 
-export default function DocumentAttachment({ file, onAdd, onClose }) {
-  const type = file ? file.name.split(".").pop()?.toUpperCase() : null;
+export default function DocumentAttachment({ file, fileName, onAdd, onClose }) {
+  const name = file?.name ?? fileName ?? null;
+  const type = name ? name.split(".").pop()?.toUpperCase() : null;
 
   return (
     <div className="flex items-center gap-3 rounded-xl border border-[#CCCCCC] bg-white px-4 py-3">
       <img src="/new thread icons/documents.svg" alt="" className="h-5 w-auto" />
 
-      {file ? (
+      {name ? (
         <span className="flex min-w-0 flex-1 items-center gap-2">
           <span className="truncate font-[family-name:var(--font-manrope)] text-[14px] text-black">
-            {file.name}
+            {name}
           </span>
           <span className="shrink-0 font-[family-name:var(--font-manrope)] text-[12px] text-[#595959]">
             {type}

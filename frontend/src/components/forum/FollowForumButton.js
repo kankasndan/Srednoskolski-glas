@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { followForum, unfollowForum } from "@/api/forums";
 
 /**
  * Follow / unfollow a general forum.
@@ -24,24 +24,16 @@ export default function FollowForumButton({
     setPending(true);
 
     try {
-      const response = await apiFetch(`/api/p/${slug}/follow`, {
-        method: nextFollowing ? "POST" : "DELETE",
-      });
+      const data = nextFollowing
+        ? await followForum(slug)
+        : await unfollowForum(slug);
 
-      if (!response.ok) {
-        setFollowing(!nextFollowing);
-        return;
-      }
-
-      const payload = await response.json();
-      const data = payload.data ?? {};
-
-      if (typeof data.is_following === "boolean") {
+      if (typeof data?.is_following === "boolean") {
         setFollowing(data.is_following);
       }
 
       if (
-        typeof data.members_count === "number" &&
+        typeof data?.members_count === "number" &&
         typeof onMembersCountChange === "function"
       ) {
         onMembersCountChange(data.members_count);

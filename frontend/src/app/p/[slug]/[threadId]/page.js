@@ -21,11 +21,8 @@ function StatusMessage({ children }) {
 export default function ThreadPage() {
   const { slug, threadId } = useParams();
   const [sort, setSort] = useState("best");
-  const { forum, thread, comments, loading, error, missing } = useThread(
-    slug,
-    threadId,
-    sort,
-  );
+  const { forum, thread, comments, loading, error, missing, reload, patchThread } =
+    useThread(slug, threadId, sort);
 
   if (loading && !thread) {
     return (
@@ -51,16 +48,24 @@ export default function ThreadPage() {
     <AppShell>
       <div className="flex w-[990px] max-w-full flex-col gap-12 font-(family-name:--font-manrope)">
         <div className="self-start">
-          <BackButton label={`Назад кон ${forum.name}`} tone="muted" />
+          <BackButton
+            href={`/p/${forum.slug}`}
+            label={`Назад кон ${forum.name}`}
+            tone="muted"
+          />
         </div>
-        <ThreadPost forum={forum} thread={thread} />
-        <CommentComposer forumSlug={forum.slug} />
+        <ThreadPost forum={forum} thread={thread} onThreadUpdated={patchThread} />
+        <CommentComposer
+          forumSlug={forum.slug}
+          threadId={thread.id}
+          onCreated={() => reload()}
+        />
         <CommentsHeader
           count={thread.comments_count}
           sort={sort}
           onSortChange={setSort}
         />
-        <CommentList comments={comments} />
+        <CommentList comments={comments} threadId={thread.id} onCommentCreated={reload} />
       </div>
     </AppShell>
   );

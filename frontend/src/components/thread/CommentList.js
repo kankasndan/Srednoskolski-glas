@@ -1,6 +1,6 @@
 import Comment from "@/components/thread/Comment";
 
-export default function CommentList({ comments }) {
+export default function CommentList({ comments, threadId, onCommentCreated }) {
   return (
     <div className="flex flex-col gap-6">
       {comments.map((comment) => (
@@ -8,7 +8,11 @@ export default function CommentList({ comments }) {
           key={comment.id}
           className="rounded-3xl border-b border-b-[#CCCCCC] bg-white p-6 hover:bg-gray-50"
         >
-          <Comment comment={comment} />
+          <Comment
+            comment={comment}
+            threadId={threadId}
+            onCommentCreated={onCommentCreated}
+          />
         </article>
       ))}
     </div>

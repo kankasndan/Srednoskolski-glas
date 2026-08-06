@@ -1,16 +1,71 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { getProfileUser } from "@/api/profile";
 import FieldLabel from "@/components/ui/FieldLabel";
 import ForumIcon from "@/components/forum/ForumIcon";
 import ForumOption from "@/components/forum/ForumOption";
 import { useForums } from "@/hooks/useForums";
 
+function findUserSchoolForum(schoolsByCity, user) {
+  const studentData = user?.student_data ?? user?.studentData ?? null;
+  const schoolId = studentData?.school?.id ?? studentData?.school_id ?? null;
+
+  if (schoolId != null) {
+    for (const group of schoolsByCity) {
+      const match = (group.forums ?? []).find(
+        (forum) => forum.school_id === schoolId || forum.school_id === Number(schoolId),
+      );
+      if (match) {
+        return match;
+      }
+    }
+  }
+
+  const forum = studentData?.school?.forum;
+  if (forum?.slug) {
+    return forum;
+  }
+
+  return null;
+}
+
 export default function ForumSelect({ selected, onChange, onBlur, errorMessage }) {
-  const { general, loading, error } = useForums();
+  const { general, schoolsByCity, loading, error } = useForums();
+  const [schoolForum, setSchoolForum] = useState(null);
+  const [userLoading, setUserLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    let active = true;
+
+    getProfileUser()
+      .then((user) => {
+        if (!active) return;
+        setSchoolForum(findUserSchoolForum(schoolsByCity, user));
+      })
+      .catch(() => {
+        if (active) setSchoolForum(null);
+      })
+      .finally(() => {
+        if (active) setUserLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [schoolsByCity]);
+
+  const options = useMemo(() => {
+    if (!schoolForum) {
+      return general;
+    }
+
+    const withoutDuplicate = general.filter((forum) => forum.slug !== schoolForum.slug);
+    return [schoolForum, ...withoutDuplicate];
+  }, [general, schoolForum]);
 
   useEffect(() => {
     if (!open) return;
@@ -30,6 +85,8 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
     setOpen(false);
   }
 
+  const isLoading = loading || userLoading;
+
   return (
     <div className="flex w-[310px] max-w-full flex-col gap-2">
       <FieldLabel required>Каде сакаш да започнеш дискусија?</FieldLabel>
@@ -47,7 +104,7 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
       >
         <button
           type="button"
-          disabled={loading || !!error}
+          disabled={isLoading || !!error}
           aria-expanded={open}
           aria-describedby={errorMessage ? "forum-error" : undefined}
           onClick={() => setOpen((prev) => !prev)}
@@ -58,10 +115,17 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
           }`}
         >
           <span className="flex min-w-0 items-center gap-3">
-            {selected && <ForumIcon src={selected.imageUrl} />}
+            {selected && (
+              <ForumIcon
+                src={selected.imageUrl}
+                imageClassName={
+                  selected.type === "school" ? "size-4" : "size-9 max-w-none"
+                }
+              />
+            )}
             <span className="truncate leading-5">
               {selected?.name ??
-                (error ? "Не успеа вчитувањето" : loading ? "Се вчитува…" : "Избери форум")}
+                (error ? "Не успеа вчитувањето" : isLoading ? "Се вчитува…" : "Избери форум")}
             </span>
           </span>
           <Image
@@ -74,8 +138,8 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
         </button>
 
         {open && (
-          <div className="absolute left-0 top-11 z-10 flex w-full flex-col overflow-hidden rounded-xl border border-[#CCCCCC] bg-white py-1">
-            {general.map((forum) => (
+          <div className="absolute left-0 top-11 z-10 flex max-h-72 w-full flex-col overflow-y-auto overflow-x-hidden rounded-xl border border-[#CCCCCC] bg-white py-1">
+            {options.map((forum) => (
               <ForumOption key={forum.slug} forum={forum} onSelect={handleSelect} />
             ))}
           </div>

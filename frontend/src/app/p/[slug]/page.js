@@ -63,6 +63,7 @@ export default function ForumPage() {
             title={forum.name}
             description={forum.description}
             icon={forum.imageUrl}
+            banner={forum.bannerUrl}
             slug={forum.slug}
             type={forum.type}
             membersCount={forum.members_count}

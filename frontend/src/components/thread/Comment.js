@@ -9,7 +9,7 @@ import CommentComposer from "@/components/thread/CommentComposer";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ReportDialog from "@/components/ui/ReportDialog";
 
-export default function Comment({ comment, depth = 0 }) {
+export default function Comment({ comment, threadId, onCommentCreated, depth = 0 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [replying, setReplying] = useState(false);
   const [reporting, setReporting] = useState(false);
@@ -32,7 +32,9 @@ export default function Comment({ comment, depth = 0 }) {
         <CommentAuthor author={comment.author} createdAt={comment.created_at} />
         <CommentBody text={comment.content} muted={depth === 0} />
         <CommentActions
+          commentId={comment.id}
           votes={comment.upvotes}
+          hasVoted={comment.has_voted}
           hasReplies={hasReplies}
           collapsed={collapsed}
           onToggle={() => setCollapsed(!collapsed)}
@@ -59,13 +61,25 @@ export default function Comment({ comment, depth = 0 }) {
         />
 
         {replying ? (
-          <CommentComposer compact onClose={() => setReplying(false)} />
+          <CommentComposer
+            compact
+            threadId={threadId}
+            parentId={comment.id}
+            onClose={() => setReplying(false)}
+            onCreated={() => onCommentCreated?.()}
+          />
         ) : null}
 
         {showThread ? (
           <div className="flex flex-col gap-4 pt-1">
             {replies.map((reply) => (
-              <Comment key={reply.id} comment={reply} depth={depth + 1} />
+              <Comment
+                key={reply.id}
+                comment={reply}
+                threadId={threadId}
+                onCommentCreated={onCommentCreated}
+                depth={depth + 1}
+              />
             ))}
           </div>
         ) : null}

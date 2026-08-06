@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { formatCount } from "@/lib/formatCount";
 
 // Pill so glas/koment na kartichka za diskusija. Ako ima `href` e link (vodi kon
 // diskusijata), inaku e obichno kopche.
@@ -17,7 +18,7 @@ export default function ThreadActionButton({ icon, label, count, href, onClick }
         height={24}
         className="size-6 transition group-hover:brightness-0 group-hover:invert"
       />
-      {count}
+      {formatCount(count)}
     </>
   );
 

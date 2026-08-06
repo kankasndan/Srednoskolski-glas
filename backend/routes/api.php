@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->put('/onboarding', [OnboardingController::cla
 // Return the current authenticated user.
 Route::middleware('auth:sanctum')->get('/me', MeController::class)->name('me.show');
 // Profile activity lists for the authenticated user.
+Route::middleware('auth:sanctum')->get('/me/counts', [ProfileController::class, 'counts'])->name('me.counts');
 Route::middleware('auth:sanctum')->get('/me/threads', [ProfileController::class, 'threads'])->name('me.threads');
 Route::middleware('auth:sanctum')->get('/me/comments', [ProfileController::class, 'comments'])->name('me.comments');
 Route::middleware('auth:sanctum')->get('/me/followed-forums', [ProfileController::class, 'followedForums'])->name('me.followed-forums');
@@ -52,8 +53,16 @@ Route::get('/p/{forum:slug}/comments/{thread:id}', [ThreadController::class, 'sh
 Route::middleware('auth:sanctum')->group(function () {
     // Create a new thread (optional files, link, or poll).
     Route::post('/threads', [ThreadController::class, 'store'])->name('threads.store');
+    // Update a thread (author only). POST accepts multipart for attachment changes.
+    Route::match(['put', 'post'], '/threads/{thread}', [ThreadController::class, 'update'])->name('threads.update');
+    // Soft-delete a thread (author only).
+    Route::delete('/threads/{thread}', [ThreadController::class, 'destroy'])->name('threads.destroy');
     // Create a comment or reply on a thread.
     Route::post('/threads/{thread}/comments', [CommentController::class, 'store'])->name('comments.store');
+    // Update a comment (author only).
+    Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+    // Soft-delete a comment (author only).
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     // Vote on a poll option (or change an existing vote).
     Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->name('polls.vote');
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\FiltersThreads;
 use App\Http\Resources\ForumResource;
 use App\Http\Resources\ProfileCommentResource;
 use App\Http\Resources\ThreadResource;
@@ -10,6 +11,26 @@ use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
+    use FiltersThreads;
+
+    /**
+     * Lightweight tab badges for the profile page.
+     *
+     * GET /api/me/counts
+     */
+    public function counts(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'data' => [
+                'threads' => $user->threads()->count(),
+                'comments' => $user->comments()->count(),
+                'followed_forums' => $user->forums()->count(),
+            ],
+        ]);
+    }
+
     /**
      * Threads created by the authenticated user (newest first).
      *
@@ -20,25 +41,14 @@ class ProfileController extends Controller
         $user = $request->user();
 
         $threads = $user->threads()
-            ->with([
-                'user.studentData.school.city',
-                'forum',
-                'threadAttachment',
-                'poll.options' => fn ($q) => $q->withCount('votes'),
-                'poll.votes',
-            ])
+            ->with($this->threadListWith($user))
             ->withCount('comments')
             ->withExists([
                 'votes as has_voted' => fn ($votes) => $votes->where('user_id', $user->id),
             ])
             ->latest()
+            ->limit(50)
             ->get();
-
-        $threads->each(function ($thread): void {
-            if ($thread->poll) {
-                $thread->poll->loadCount('votes');
-            }
-        });
 
         return ThreadResource::collection($threads)->response();
     }
@@ -54,13 +64,13 @@ class ProfileController extends Controller
 
         $comments = $user->comments()
             ->with([
-                'user.studentData.school.city',
                 'thread.forum',
             ])
             ->withExists([
                 'votes as has_voted' => fn ($votes) => $votes->where('user_id', $user->id),
             ])
             ->latest()
+            ->limit(50)
             ->get();
 
         return ProfileCommentResource::collection($comments)->response();
@@ -76,6 +86,7 @@ class ProfileController extends Controller
         $forums = $request->user()
             ->forums()
             ->orderBy('name')
+            ->limit(100)
             ->get();
 
         return ForumResource::collection($forums)->response();

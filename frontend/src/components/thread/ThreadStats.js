@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { formatCount } from "@/lib/formatCount";
 
 function Stat({ icon, label, count }) {
   return (
@@ -6,7 +7,7 @@ function Stat({ icon, label, count }) {
       <Image src={icon} alt="" width={24} height={24} className="size-6" />
       <span className="text-[14px] leading-none text-black">
         <span className="sr-only">{label}: </span>
-        {count}
+        {formatCount(count)}
       </span>
     </div>
   );

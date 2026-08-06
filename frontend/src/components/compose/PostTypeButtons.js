@@ -30,18 +30,126 @@ const TYPES = [
 ];
 
 function revokeItem(item) {
-  URL.revokeObjectURL(item.url);
+  if (item.file) URL.revokeObjectURL(item.url);
 }
 
-export default function PostTypeButtons({ widthClassName = "w-[632px]", onAttachmentsChange }) {
+function fileNameFromUrl(url) {
+  try {
+    const path = new URL(url).pathname;
+    const name = decodeURIComponent(path.split("/").filter(Boolean).pop() || "датотека");
+    return name || "датотека";
+  } catch {
+    return "датотека";
+  }
+}
+
+function seedFromAttachments(initialAttachments) {
+  const mediaItems = (initialAttachments ?? [])
+    .filter((item) => item.type === "image" || item.type === "video")
+    .map((item) => ({
+      id: item.id,
+      url: item.url,
+      kind: item.type,
+      file: null,
+    }));
+
+  const existingDoc = (initialAttachments ?? []).find((item) => item.type === "file") ?? null;
+  const existingLink = (initialAttachments ?? []).find((item) => item.type === "link") ?? null;
+
+  return {
+    mediaItems,
+    existingDoc: existingDoc
+      ? {
+          id: existingDoc.id,
+          url: existingDoc.url,
+          name: fileNameFromUrl(existingDoc.url),
+        }
+      : null,
+    existingLinkId: existingLink?.id ?? null,
+    initialLinkUrl: existingLink?.url ?? "",
+    linkValue: existingLink?.url ?? "",
+    mediaMode: mediaItems.length > 0,
+    docMode: Boolean(existingDoc),
+    linkMode: Boolean(existingLink),
+  };
+}
+
+function appendUniqueId(ids, id) {
+  if (id == null || ids.includes(id)) return ids;
+  return [...ids, id];
+}
+
+function buildAttachmentsPayload({
+  mediaItems,
+  docFile,
+  removedIds,
+  linkMode,
+  linkValue,
+  existingLinkId,
+  initialLinkUrl,
+  allowPoll,
+  pollMode,
+  pollData,
+}) {
+  const files = [
+    ...mediaItems.map((item) => item.file).filter(Boolean),
+    ...(docFile ? [docFile] : []),
+  ];
+
+  const removeAttachmentIds = [...removedIds];
+  let link = "";
+
+  if (linkMode && linkValue.trim()) {
+    const trimmed = linkValue.trim();
+    const linkUnchanged = existingLinkId && trimmed === initialLinkUrl;
+
+    if (!linkUnchanged) {
+      if (existingLinkId) {
+        removeAttachmentIds.push(existingLinkId);
+      }
+      link = trimmed;
+    }
+  }
+
+  return {
+    files,
+    link,
+    removeAttachmentIds: [...new Set(removeAttachmentIds)],
+    poll:
+      allowPoll &&
+      pollMode &&
+      pollData?.question &&
+      pollData.options?.length >= 2 &&
+      pollData.duration_days
+        ? pollData
+        : null,
+  };
+}
+
+export default function PostTypeButtons({
+  widthClassName = "w-[632px]",
+  onAttachmentsChange,
+  initialAttachments = [],
+  allowPoll = true,
+}) {
+  const seedRef = useRef(null);
+  if (seedRef.current === null) {
+    seedRef.current = seedFromAttachments(initialAttachments);
+  }
+  const seed = seedRef.current;
+
   const [selected, setSelected] = useState(null);
-  /** Ordered mix of { url, file, kind: "image" | "video" } — order is submitted as-is. */
-  const [mediaItems, setMediaItems] = useState([]);
+  /** Ordered mix of { id?, url, file, kind: "image" | "video" } — order is submitted as-is. */
+  const [mediaItems, setMediaItems] = useState(seed.mediaItems);
   const [docFile, setDocFile] = useState(null);
-  const [linkValue, setLinkValue] = useState("");
-  const [mediaMode, setMediaMode] = useState(false);
-  const [docMode, setDocMode] = useState(false);
-  const [linkMode, setLinkMode] = useState(false);
+  const [existingDoc, setExistingDoc] = useState(seed.existingDoc);
+  const [existingLinkId, setExistingLinkId] = useState(seed.existingLinkId);
+  const [initialLinkUrl] = useState(seed.initialLinkUrl);
+  const [linkValue, setLinkValue] = useState(seed.linkValue);
+  const [removedIds, setRemovedIds] = useState([]);
+  const [mediaMode, setMediaMode] = useState(seed.mediaMode);
+  const [docMode, setDocMode] = useState(seed.docMode);
+  const [linkMode, setLinkMode] = useState(seed.linkMode);
   const [pollMode, setPollMode] = useState(false);
   const [pollData, setPollData] = useState(null);
   const photoInputRef = useRef(null);
@@ -54,23 +162,33 @@ export default function PostTypeButtons({ widthClassName = "w-[632px]", onAttach
   useEffect(() => {
     if (!onAttachmentsChange) return;
 
-    const files = [
-      ...mediaItems.map((item) => item.file).filter(Boolean),
-      ...(docFile ? [docFile] : []),
-    ];
-
-    onAttachmentsChange({
-      files,
-      link: linkMode ? linkValue.trim() : "",
-      poll:
-        pollMode &&
-        pollData?.question &&
-        pollData.options?.length >= 2 &&
-        pollData.duration_days
-          ? pollData
-          : null,
-    });
-  }, [mediaItems, docFile, linkValue, linkMode, pollMode, pollData, onAttachmentsChange]);
+    onAttachmentsChange(
+      buildAttachmentsPayload({
+        mediaItems,
+        docFile,
+        removedIds,
+        linkMode,
+        linkValue,
+        existingLinkId,
+        initialLinkUrl,
+        allowPoll,
+        pollMode,
+        pollData,
+      }),
+    );
+  }, [
+    mediaItems,
+    docFile,
+    linkValue,
+    linkMode,
+    pollMode,
+    pollData,
+    removedIds,
+    existingLinkId,
+    initialLinkUrl,
+    allowPoll,
+    onAttachmentsChange,
+  ]);
 
   function handleSelect(type) {
     if (type.label === "Слика") {
@@ -105,17 +223,29 @@ export default function PostTypeButtons({ widthClassName = "w-[632px]", onAttach
   }
 
   function closeMedia() {
+    const ids = mediaItems.map((item) => item.id).filter((id) => id != null);
     mediaItems.forEach(revokeItem);
+    if (ids.length) {
+      setRemovedIds((prev) => [...new Set([...prev, ...ids])]);
+    }
     setMediaItems([]);
     setMediaMode(false);
   }
 
   function closeDocument() {
+    if (existingDoc?.id != null) {
+      setRemovedIds((prev) => appendUniqueId(prev, existingDoc.id));
+    }
+    setExistingDoc(null);
     setDocFile(null);
     setDocMode(false);
   }
 
   function closeLink() {
+    if (existingLinkId != null) {
+      setRemovedIds((prev) => appendUniqueId(prev, existingLinkId));
+    }
+    setExistingLinkId(null);
     setLinkValue("");
     setLinkMode(false);
   }
@@ -126,13 +256,17 @@ export default function PostTypeButtons({ widthClassName = "w-[632px]", onAttach
   }
 
   function removeMedia(url) {
-    setMediaItems((prev) => {
-      const target = prev.find((item) => item.url === url);
-      if (target) revokeItem(target);
-      const next = prev.filter((item) => item.url !== url);
-      if (next.length === 0) setMediaMode(false);
-      return next;
-    });
+    const target = mediaItems.find((item) => item.url === url);
+    if (!target) return;
+
+    revokeItem(target);
+    if (target.id != null) {
+      setRemovedIds((ids) => appendUniqueId(ids, target.id));
+    }
+
+    const next = mediaItems.filter((item) => item.url !== url);
+    setMediaItems(next);
+    if (next.length === 0) setMediaMode(false);
   }
 
   function addPhotos(fileList) {
@@ -184,7 +318,10 @@ export default function PostTypeButtons({ widthClassName = "w-[632px]", onAttach
     linkMode && "Линк",
     pollMode && "Анкета",
   ];
-  const visibleTypes = TYPES.filter((type) => !hiddenLabels.includes(type.label));
+  const visibleTypes = TYPES.filter((type) => {
+    if (!allowPoll && type.label === "Анкета") return false;
+    return !hiddenLabels.includes(type.label);
+  });
 
   const exclusiveDisabledMessage = "Прво избришете го тековниот прилог за да додадете нов.";
 
@@ -215,6 +352,7 @@ export default function PostTypeButtons({ widthClassName = "w-[632px]", onAttach
       {docMode && (
         <DocumentAttachment
           file={docFile}
+          fileName={existingDoc?.name}
           onAdd={() => documentInputRef.current?.click()}
           onClose={closeDocument}
         />
@@ -222,7 +360,7 @@ export default function PostTypeButtons({ widthClassName = "w-[632px]", onAttach
 
       {linkMode && <LinkAttachment value={linkValue} onChange={setLinkValue} onClose={closeLink} />}
 
-      {pollMode && (
+      {allowPoll && pollMode && (
         <PollAttachment
           onClose={closePoll}
           onChange={setPollData}
@@ -287,7 +425,12 @@ export default function PostTypeButtons({ widthClassName = "w-[632px]", onAttach
             event.target.value = "";
             return;
           }
+          if (existingDoc?.id != null) {
+            setRemovedIds((prev) => appendUniqueId(prev, existingDoc.id));
+          }
+          setExistingDoc(null);
           setDocFile(file);
+          setDocMode(true);
           event.target.value = "";
         }}
       />

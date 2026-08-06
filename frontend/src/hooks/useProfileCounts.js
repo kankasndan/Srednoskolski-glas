@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  getMyThreads,
-  getMyComments,
-  getMyFollowedForums,
-  getMyFollowedThreads,
-} from "@/api/profile";
+import { getMyCounts } from "@/api/profile";
 
 export function useProfileCounts() {
   const [counts, setCounts] = useState(null);
@@ -14,19 +9,14 @@ export function useProfileCounts() {
   useEffect(() => {
     let active = true;
 
-    Promise.all([
-      getMyThreads(),
-      getMyComments(),
-      getMyFollowedForums(),
-      getMyFollowedThreads(),
-    ])
-      .then(([threads, comments, followedForums, followedThreads]) => {
+    getMyCounts()
+      .then((data) => {
         if (!active) return;
 
         setCounts({
-          threads: threads.length,
-          comments: comments.length,
-          follows: followedForums.length + followedThreads.length,
+          threads: data.threads ?? 0,
+          comments: data.comments ?? 0,
+          follows: data.followed_forums ?? 0,
         });
       })
       .catch(() => {

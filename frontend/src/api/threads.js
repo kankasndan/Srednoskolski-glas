@@ -2,25 +2,7 @@ import Cookies from "js-cookie";
 import { API_BASE_URL, apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { normalizeEmbedLink } from "@/lib/embeds";
 
-const USE_MOCK = false;
-
-const MOCK_THREADS = {
-  "drzhavna_matura/1": "/MOCK_JSON/thread-drzhavna-matura-mock.json",
-  "opshti_diskusii/101": "/MOCK_JSON/thread-opshti-diskusii-mock.json",
-  "opshti_diskusii/102": "/MOCK_JSON/thread-opshti-diskusii-102-mock.json",
-};
-
 export async function getThread(forumSlug, threadId, { sort = "best" } = {}) {
-  if (USE_MOCK) {
-    const url = MOCK_THREADS[`${forumSlug}/${threadId}`];
-    if (!url) return null;
-    const res = await fetch(url);
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`Failed to load thread: ${res.status}`);
-    const { data } = await res.json();
-    return data;
-  }
-
   const params = new URLSearchParams();
   if (sort) params.set("sort", sort);
   const query = params.toString();
@@ -87,6 +69,95 @@ export async function createThread(payload) {
 
   if (!response.ok) {
     const error = new Error(body.message || `Failed to create thread (${response.status})`);
+    error.status = response.status;
+    error.body = body;
+    throw error;
+  }
+
+  return body.data;
+}
+
+/**
+ * @param {number} threadId
+ * @param {{
+ *   title: string,
+ *   description?: string,
+ *   files?: File[],
+ *   link?: string,
+ *   removeAttachmentIds?: number[],
+ * }} payload
+ */
+export async function updateThread(threadId, payload) {
+  await ensureCsrfCookie();
+
+  const formData = new FormData();
+  formData.append("title", payload.title);
+  formData.append("description", payload.description ?? "");
+
+  const link = payload.link ? normalizeEmbedLink(payload.link) : null;
+  if (link) {
+    formData.append("link", link);
+  }
+
+  for (const file of payload.files ?? []) {
+    formData.append("files[]", file);
+  }
+
+  for (const id of payload.removeAttachmentIds ?? []) {
+    formData.append("remove_attachment_ids[]", String(id));
+  }
+
+  // POST multipart — PHP does not populate files reliably on PUT.
+  const response = await fetch(`${API_BASE_URL}/api/threads/${threadId}`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+      "X-XSRF-TOKEN": Cookies.get("XSRF-TOKEN") ?? "",
+    },
+    body: formData,
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Failed to update thread (${response.status})`);
+    error.status = response.status;
+    error.body = body;
+    throw error;
+  }
+
+  return body.data;
+}
+
+/** @param {number} threadId */
+export async function toggleThreadVote(threadId) {
+  const response = await apiFetch(`/api/threads/${threadId}/upvote`, {
+    method: "POST",
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Failed to vote on thread (${response.status})`);
+    error.status = response.status;
+    error.body = body;
+    throw error;
+  }
+
+  return body.data;
+}
+
+/** @param {number} threadId */
+export async function deleteThread(threadId) {
+  const response = await apiFetch(`/api/threads/${threadId}`, {
+    method: "DELETE",
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Failed to delete thread (${response.status})`);
     error.status = response.status;
     error.body = body;
     throw error;

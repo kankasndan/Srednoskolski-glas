@@ -4,18 +4,23 @@ import Image from "next/image";
 import { useState } from "react";
 import FollowForumButton from "@/components/forum/FollowForumButton";
 import StartDiscussionButton from "@/components/forum/StartDiscussionButton";
-import { bannerFor } from "@/lib/banners";
+import { isRemoteAssetUrl, resolveBannerUrl } from "@/lib/banners";
+
+const FALLBACK_ICON = "/icons/opshti_diskusii.svg";
 
 export default function ForumBanner({
   title,
   description,
   icon,
+  banner,
   slug,
   type,
   membersCount = 0,
   isFollowing = false,
 }) {
-  const bannerUrl = bannerFor(slug, type);
+  const bannerUrl = resolveBannerUrl({ bannerUrl: banner, slug, type });
+  const iconSrc = icon || FALLBACK_ICON;
+  const remoteIcon = isRemoteAssetUrl(iconSrc);
   const [memberTotal, setMemberTotal] = useState(membersCount);
   const isSchoolForum = type === "school";
   // Guests get no is_following from the API — hide the button until logged in.
@@ -31,14 +36,22 @@ export default function ForumBanner({
       <div className="flex min-h-[137px] items-center justify-between gap-6 border-t border-[#CFE9ED] bg-white p-6">
         <div className="flex min-w-0 items-center gap-6">
           <span className="relative size-20 shrink-0 overflow-hidden">
-            <Image
-              src={icon}
-              alt=""
-              width={150}
-              height={150}
-              className="absolute left-1/2 top-1/2 size-[150px] max-w-none -translate-x-1/2 -translate-y-1/2"
-              priority
-            />
+            {remoteIcon ? (
+              <img
+                src={iconSrc}
+                alt=""
+                className="absolute left-1/2 top-1/2 size-[150px] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover"
+              />
+            ) : (
+              <Image
+                src={iconSrc}
+                alt=""
+                width={150}
+                height={150}
+                className="absolute left-1/2 top-1/2 size-[150px] max-w-none -translate-x-1/2 -translate-y-1/2"
+                priority
+              />
+            )}
           </span>
 
           <div className="flex min-w-0 flex-col gap-2">

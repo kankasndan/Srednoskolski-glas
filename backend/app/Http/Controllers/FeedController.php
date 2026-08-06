@@ -30,13 +30,7 @@ class FeedController extends Controller
         $user = $request->user('web') ?? $request->user();
 
         $query = Thread::query()
-            ->with([
-                'user.studentData.school.city',
-                'threadAttachment',
-                'forum',
-                'poll.options' => fn ($q) => $q->withCount('votes'),
-                'poll.votes',
-            ])
+            ->with($this->threadListWith($user))
             ->withCount('comments');
 
         $this->applyHasVoted($query, $user);
@@ -52,12 +46,6 @@ class FeedController extends Controller
         }
 
         $threads = $query->paginate($this->threadsPerPage())->withQueryString();
-
-        $threads->getCollection()->each(function (Thread $thread): void {
-            if ($thread->poll) {
-                $thread->poll->loadCount('votes');
-            }
-        });
 
         return ThreadResource::collection($threads)->response();
     }

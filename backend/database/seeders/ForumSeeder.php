@@ -52,7 +52,7 @@ class ForumSeeder extends Seeder
                     'type' => 'general',
                     'school_id' => null,
                     'imageUrl' => '/icons/'.$slug.'.svg',
-                    'bannerUrl' => 'https://picsum.photos/seed/'.$slug.'/1200/300',
+                    'bannerUrl' => '/banners/'.$slug.'.svg',
                     'threads_count' => 0,
                     'members_count' => 0,
                 ],
@@ -76,8 +76,8 @@ class ForumSeeder extends Seeder
                     'slug' => $slug,
                     'description' => 'Форум на '.$school->name.' ('.$school->city->name.').',
                     'type' => 'school',
-                    'imageUrl' => '/icons/uciliste.svg',
-                    'bannerUrl' => 'https://picsum.photos/seed/'.$slug.'/1200/300',
+                    'imageUrl' => '/icons/uchilishte.svg',
+                    'bannerUrl' => '/banners/school.svg',
                     'threads_count' => 0,
                     'members_count' => 0,
                 ],
@@ -85,4 +85,3 @@ class ForumSeeder extends Seeder
         });
     }
 }
-

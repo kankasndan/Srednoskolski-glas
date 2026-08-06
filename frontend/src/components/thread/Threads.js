@@ -2,15 +2,16 @@
 
 import Image from "next/image";
 import { useId, useState, useEffect, useRef } from "react";
-import { formatDistanceToNow } from "date-fns";
-import { mk } from "date-fns/locale";
-import { API_BASE_URL } from "@/lib/api";
-import { stripHtml } from "@/lib/html";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
+import { toggleThreadVote } from "@/api/threads";
 import ForumEmptyState from "@/components/forum/ForumEmptyState";
 import ThreadAttachments from "@/components/thread/ThreadAttachments";
+import ThreadMetaTags, { buildThreadMetaTags } from "@/components/thread/ThreadMetaTags";
 import ThreadPoll from "@/components/thread/ThreadPoll";
+import { API_BASE_URL } from "@/lib/api";
+import { formatCount } from "@/lib/formatCount";
+import { stripHtml } from "@/lib/html";
+import { formatPostedAgo } from "@/lib/time";
 
 const SORT_OPTIONS = [
   { value: "trending", label: "Трендинг" },
@@ -45,111 +46,73 @@ function LoadingLogo() {
   );
 }
 
-function ActionButton({ icon, label, count, onclick, upvoteToggle }) {
+function ActionButton({ icon, label, count, onclick, active = false }) {
+  const baseClassName =
+    "group flex cursor-pointer items-center justify-center gap-4 rounded-2xl border px-4 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors";
+
   return (
     <button
       onClick={onclick}
       type="button"
       aria-label={label}
       className={
-        !upvoteToggle
-          ? "flex items-center justify-center gap-1 rounded-2xl border border-[#CCCCCC] hover:bg-gray-200 transition px-4 py-2 cursor-pointer"
-          : "bg-primary-300 text-white flex items-center justify-center gap-1 rounded-2xl border border-primary-300 hover:bg-primary-100 transition px-4 py-2 cursor-pointer"
+        active
+          ? `${baseClassName} border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white hover:border-[var(--color-primary-200)] hover:bg-[var(--color-primary-200)]`
+          : `${baseClassName} border-[#CCCCCC] text-black opacity-80 hover:border-[var(--color-primary-100)] hover:bg-[var(--color-primary-100)] hover:text-white hover:opacity-100`
       }
     >
-      {!upvoteToggle ? (
-        <Image src={icon} alt="" width={24} height={24} className="size-6" />
-      ) : (
-        <Image
-          src={icon}
-          alt=""
-          width={24}
-          height={24}
-          className="size-6 -scale-y-100 white-icon"
-        />
-      )}
-      <span>{!upvoteToggle ? (count ?? 0) : (count + 1 ?? 0)}</span>
+      <Image
+        src={icon}
+        alt=""
+        width={24}
+        height={24}
+        className={
+          active
+            ? "size-6 -scale-y-100 white-icon"
+            : "size-6 transition group-hover:brightness-0 group-hover:invert"
+        }
+      />
+      {formatCount(count ?? 0)}
     </button>
   );
 }
 
 function ThreadItem({ thread }) {
-  const [upvoteToggle, setUpvoteToggle] = useState(false);
+  const [upvotes, setUpvotes] = useState(thread.upvotes ?? 0);
+  const [hasVoted, setHasVoted] = useState(Boolean(thread.has_voted));
+  const [voting, setVoting] = useState(false);
   const router = useRouter();
   const threadHref = `/p/${thread.forum.slug}/${thread.id}`;
   const hasAttachments = (thread.attachments?.length ?? 0) > 0;
   const hasPoll = Boolean(thread.poll);
 
   async function upvote() {
-    const path = API_BASE_URL + "/api/threads/" + thread.id + "/upvote";
-    setUpvoteToggle((prev) => !prev);
-    await fetch(path, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "X-XSRF-TOKEN": Cookies.get("XSRF-TOKEN"),
-      },
-    });
+    if (voting) return;
+
+    setVoting(true);
+
+    try {
+      const data = await toggleThreadVote(thread.id);
+      setUpvotes(data.upvotes ?? upvotes);
+      setHasVoted(Boolean(data.has_voted));
+    } catch {
+      // Keep previous vote state on failure.
+    } finally {
+      setVoting(false);
+    }
   }
 
   return (
-    <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] hover:bg-gray-50 p-4 pt-6 rounded-3xl">
+    <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] p-4 pt-6 rounded-3xl transition-colors hover:bg-[#DCEBED]">
       <div className="flex w-full items-start justify-between gap-8">
         <div
           className="flex min-w-0 flex-1 cursor-pointer flex-col gap-4"
           onClick={() => router.push(threadHref)}
         >
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="bg-gray-100 rounded-xl py-1 px-2 flex gap-2 items-center">
-              {thread.forum.imageUrl ? (
-                <img
-                  src={thread.forum.imageUrl}
-                  className="w-5 h-5 rounded-full object-cover"
-                  alt=""
-                />
-              ) : (
-                <img
-                  src="/avatars/default-1.svg"
-                  className="w-5 h-5 rounded-full object-cover"
-                  alt=""
-                />
-              )}
-              {thread.forum.name}
-            </div>
-
-            {thread.author ? (
-              <>
-                <div className="bg-gray-100 rounded-xl py-1 px-2 flex gap-1 items-center">
-                  {thread.author.imageUrl ? (
-                    <img
-                      src={thread.author.imageUrl}
-                      className="w-5 h-5 rounded-full object-cover"
-                      alt=""
-                    />
-                  ) : (
-                    <img
-                      src="/avatars/default-1.svg"
-                      className="w-5 h-5 rounded-full object-cover"
-                      alt=""
-                    />
-                  )}
-                  {thread.author.username}
-                </div>
-                {thread.author.school?.name ? (
-                  <div className="bg-gray-100 rounded-xl py-1 px-2 flex gap-2 items-center">
-                    {thread.author.school.name}
-                  </div>
-                ) : null}
-              </>
-            ) : null}
-
-            <span className="text-sm">
-              {formatDistanceToNow(new Date(thread.created_at), {
-                addSuffix: true,
-                locale: mk,
-              })}
-            </span>
-          </div>
+          <ThreadMetaTags
+            tags={buildThreadMetaTags(thread.forum, thread)}
+            postedAgo={formatPostedAgo(thread.created_at)}
+          />
 
           <div className="flex min-h-[57px] w-[681px] max-w-full flex-col gap-2">
             <h3 className="w-fit max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[family-name:var(--font-manrope)] text-[20px] font-bold leading-[27px] text-black">
@@ -165,7 +128,7 @@ function ThreadItem({ thread }) {
           <div className="text-xs flex items-center gap-0.5">
             <img src="/eye-line.svg" alt="" />
             <span className="text-primary-300 font-bold">
-              {thread.views ?? 0}
+              {formatCount(thread.views ?? 0)}
             </span>
           </div>
         </div>
@@ -174,9 +137,9 @@ function ThreadItem({ thread }) {
           <ActionButton
             icon="/Chevrons up.svg"
             label="Гласај нагоре"
-            count={thread.upvotes}
+            count={upvotes}
             onclick={upvote}
-            upvoteToggle={upvoteToggle}
+            active={hasVoted}
           />
           <ActionButton
             icon="/chat-1-line.svg"
@@ -283,81 +246,53 @@ export default function Threads({ forum = null }) {
     (forum === null ? "/api/feed" : "/api/p/" + forum + "/threads");
 
   async function fetchThreads({
-    byPagination = false,
+    append = false,
     sort = selectedSort,
     time = selectedTimeFilter,
     page = paginationPage,
-  }) {
+  } = {}) {
+    if (append) {
+      if (loadingRef.current) return;
+      loadingRef.current = true;
+      setMoreThreadsLoading(true);
+    } else {
+      setHasLoaded(false);
+      setNoMoreThreads(false);
+      noMoreRef.current = false;
+      setPaginationPage(1);
+      pageRef.current = 1;
+      page = 1;
+    }
+
     try {
-      if (byPagination) {
-        if (loadingRef.current) return;
-        loadingRef.current = true;
-        setMoreThreadsLoading(true);
+      const response = await fetch(
+        `${BASE_URL}?page=${page}&time=${time.value}&sort=${sort.value}`,
+        { credentials: "include" },
+      );
 
-        const response = await fetch(
-          BASE_URL +
-            "?page=" +
-            page +
-            "&time=" +
-            time.value +
-            "&sort=" +
-            sort.value,
-          { credentials: "include" },
-        );
+      if (!response.ok) {
+        if (!append) setThreads([]);
+        setNoMoreThreads(true);
+        noMoreRef.current = true;
+        return;
+      }
 
-        if (!response.ok) {
-          setNoMoreThreads(true);
-          noMoreRef.current = true;
-          loadingRef.current = false;
-          setMoreThreadsLoading(false);
-          setHasLoaded(true);
-          return;
-        }
+      const payload = await response.json();
+      const next = Array.isArray(payload.data) ? payload.data : [];
 
-        const payload = await response.json();
-        const next = Array.isArray(payload.data) ? payload.data : [];
-        setThreads((prev) => [...prev, ...next]);
-        if (next.length < PAGE_SIZE) {
-          setNoMoreThreads(true);
-          noMoreRef.current = true;
-        }
-        loadingRef.current = false;
-        setMoreThreadsLoading(false);
-        setHasLoaded(true);
-      } else {
-        setNoMoreThreads(false);
-        noMoreRef.current = false;
-        setPaginationPage(1);
-        pageRef.current = 1;
-        const response = await fetch(
-          BASE_URL + "?page=1" + "&time=" + time.value + "&sort=" + sort.value,
-          { credentials: "include" },
-        );
+      setThreads((prev) => (append ? [...prev, ...next] : next));
 
-        if (!response.ok) {
-          setThreads([]);
-          setNoMoreThreads(true);
-          noMoreRef.current = true;
-          setHasLoaded(true);
-          return;
-        }
-
-        const payload = await response.json();
-        const next = Array.isArray(payload.data) ? payload.data : [];
-        setThreads(next);
-        // Page size is 5 — if the first page is short, there is nothing more to load.
-        if (next.length < PAGE_SIZE) {
-          setNoMoreThreads(true);
-          noMoreRef.current = true;
-        }
-        setHasLoaded(true);
+      if (next.length < PAGE_SIZE) {
+        setNoMoreThreads(true);
+        noMoreRef.current = true;
       }
     } catch {
-      setThreads([]);
-      loadingRef.current = false;
-      setMoreThreadsLoading(false);
+      if (!append) setThreads([]);
       setNoMoreThreads(true);
       noMoreRef.current = true;
+    } finally {
+      loadingRef.current = false;
+      setMoreThreadsLoading(false);
       setHasLoaded(true);
     }
   }
@@ -366,23 +301,21 @@ export default function Threads({ forum = null }) {
     setSelectedSort(option);
     setOpenSelect(null);
     setHasLoaded(false);
-    fetchThreads({ byPagination: false, sort: option, page: 1 });
+    fetchThreads({ append: false, sort: option, page: 1 });
   };
 
   const selectTimeFilterOption = (option) => {
     setSelectedTimeFilter(option);
     setOpenSelect(null);
     setHasLoaded(false);
-    fetchThreads({ byPagination: false, time: option, page: 1 });
+    fetchThreads({ append: false, time: option, page: 1 });
   };
 
   useEffect(() => {
-    setThreads([]);
-    setHasLoaded(false);
-    setNoMoreThreads(false);
-    setPaginationPage(1);
-    fetchThreads({ byPagination: false, page: 1 });
-    // Initial / forum change load — filter changes call fetchThreads directly.
+    // Reset + load when the forum route changes. Filter changes call fetchThreads directly.
+    void Promise.resolve().then(() => {
+      fetchThreads({ append: false, page: 1 });
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forum]);
 
@@ -415,7 +348,7 @@ export default function Threads({ forum = null }) {
         const nextPage = pageRef.current + 1;
         pageRef.current = nextPage;
         setPaginationPage(nextPage);
-        fetchThreads({ byPagination: true, page: nextPage });
+        fetchThreads({ append: true, page: nextPage });
       },
       { root: null, rootMargin: "240px 0px", threshold: 0 },
     );

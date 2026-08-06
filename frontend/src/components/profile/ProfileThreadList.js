@@ -24,6 +24,10 @@ export default function ProfileThreadList() {
     };
   }, []);
 
+  function handleDeleted(threadId) {
+    setThreads((prev) => (prev ?? []).filter((thread) => thread.id !== threadId));
+  }
+
   let content;
   if (threads === null) {
     content = <p className="text-[16px] text-[#595959]">Се вчитува…</p>;
@@ -35,7 +39,11 @@ export default function ProfileThreadList() {
     content = (
       <div className="flex flex-col gap-6">
         {threads.map((thread) => (
-          <ProfileThreadItem key={thread.id} thread={thread} />
+          <ProfileThreadItem
+            key={thread.id}
+            thread={thread}
+            onDeleted={handleDeleted}
+          />
         ))}
       </div>
     );

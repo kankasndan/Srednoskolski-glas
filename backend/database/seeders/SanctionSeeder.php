@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 class SanctionSeeder extends Seeder
 {
     /**
-     * Sample sanctions. type: warning | temporary_ban | permanent_ban
+     * Seeded sanctions. type: warning | 7-day | custom | permanent_ban
      *
      * @var list<array{
      *     user: string,
@@ -36,15 +36,15 @@ class SanctionSeeder extends Seeder
         [
             'user' => 'profesor@example.com',
             'issued_by' => 'admin@srednoskolskiglas.mk',
-            'type' => 'temporary_ban',
-            'reason' => 'Повторено спам однесување (тест санкција).',
+            'type' => '7-day',
+            'reason' => 'Повторено спам однесување во дискусијата за матура.',
             'expires_days' => 7,
             'acknowledged' => false,
         ],
         [
             'user' => 'nikola@example.com',
             'issued_by' => 'admin@srednoskolskiglas.mk',
-            'type' => 'temporary_ban',
+            'type' => 'permanent_ban',
             'reason' => 'Санкција што е повлечена — пример за revoked_at.',
             'expires_days' => 3,
             'revoked' => true,
@@ -64,7 +64,7 @@ class SanctionSeeder extends Seeder
 
             $reportId = null;
             if (! empty($row['report_reason'])) {
-                $reportId = Report::query()
+                $reportId = Report::withTrashed()
                     ->where('reason', $row['report_reason'])
                     ->where('status', 'approved')
                     ->value('id');
@@ -75,7 +75,7 @@ class SanctionSeeder extends Seeder
                 $revokedBy = User::where('email', $row['revoked_by'])->value('id');
             }
 
-            Sanction::updateOrCreate(
+            Sanction::withTrashed()->updateOrCreate(
                 [
                     'user_id' => $user->id,
                     'type' => $row['type'],

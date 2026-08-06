@@ -1,4 +1,8 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
+import { toggleCommentVote } from "@/api/comments";
 
 function ActionButton({ icon, iconClassName = "", label, onClick }) {
   return (
@@ -20,26 +24,53 @@ function ActionButton({ icon, iconClassName = "", label, onClick }) {
 }
 
 export default function CommentActions({
-  votes,
+  commentId,
+  votes: initialVotes = 0,
+  hasVoted: initialHasVoted = false,
   hasReplies,
   collapsed,
   onToggle,
   onReply,
   onReport,
 }) {
+  const [votes, setVotes] = useState(initialVotes);
+  const [hasVoted, setHasVoted] = useState(Boolean(initialHasVoted));
+  const [busy, setBusy] = useState(false);
+
+  async function handleVote() {
+    if (!commentId || busy) return;
+
+    setBusy(true);
+
+    try {
+      const data = await toggleCommentVote(commentId);
+      setVotes(data.upvotes ?? votes);
+      setHasVoted(Boolean(data.has_voted));
+    } catch {
+      // Keep previous vote state on failure.
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="flex items-center gap-4">
-      {/* TODO glasanje koga kje ima endpoint */}
       <button
         type="button"
-        className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#CCCCCC] px-4 py-2 text-[12px] leading-none text-black opacity-80"
+        disabled={busy}
+        onClick={handleVote}
+        className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-[12px] leading-none transition-colors disabled:opacity-60 ${
+          hasVoted
+            ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white"
+            : "border-[#CCCCCC] text-black opacity-80 hover:border-[var(--color-primary-100)]"
+        }`}
       >
         <Image
           src="/Chevrons up.svg"
           alt=""
           width={16}
           height={16}
-          className="size-4"
+          className={`size-4 ${hasVoted ? "brightness-0 invert" : ""}`}
         />
         {votes}
       </button>
@@ -54,8 +85,6 @@ export default function CommentActions({
         label="Пријави"
         onClick={onReport}
       />
-      {/* TODO spodeli koga kje ima endpoint */}
-      <ActionButton icon="/comments icon/share.svg" label="Сподели" />
 
       {hasReplies ? (
         <ActionButton

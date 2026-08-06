@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ThreadAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\ThreadAttachment
+ * @mixin ThreadAttachment
  */
 class ThreadAttachmentResource extends JsonResource
 {
@@ -16,6 +17,7 @@ class ThreadAttachmentResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'url' => $this->url,
             'type' => $this->slug,
         ];

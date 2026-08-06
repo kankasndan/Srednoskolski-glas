@@ -12,6 +12,7 @@ class MeController extends Controller
         return response()->json([
             'user' => $request->user()->load([
                 'studentData.school.city',
+                'studentData.school.forum',
                 'studentData.vocation',
             ]),
         ]);

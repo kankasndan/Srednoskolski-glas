@@ -11,33 +11,28 @@ export function useThread(forumSlug, threadId, sort = "best") {
   const reload = useCallback(() => {
     if (!forumSlug || !threadId) return Promise.resolve();
 
-    setLoading(true);
-    setError(null);
-
     return getThread(forumSlug, threadId, { sort })
       .then((payload) => {
         setData(payload);
+        setError(null);
       })
       .catch((err) => {
         setError(err);
-      })
-      .finally(() => {
-        setLoading(false);
       });
   }, [forumSlug, threadId, sort]);
 
   useEffect(() => {
     let active = true;
 
-    setLoading(true);
-    setError(null);
-
     getThread(forumSlug, threadId, { sort })
       .then((payload) => {
-        if (active) setData(payload);
+        if (!active) return;
+        setData(payload);
+        setError(null);
       })
       .catch((err) => {
-        if (active) setError(err);
+        if (!active) return;
+        setError(err);
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -48,6 +43,23 @@ export function useThread(forumSlug, threadId, sort = "best") {
     };
   }, [forumSlug, threadId, sort]);
 
+  const patchThread = useCallback((updated) => {
+    setData((prev) => {
+      if (!prev?.thread) return prev;
+
+      return {
+        ...prev,
+        thread: {
+          ...prev.thread,
+          ...updated,
+          forum: updated.forum ?? prev.thread.forum,
+          attachments: updated.attachments ?? prev.thread.attachments,
+          poll: updated.poll ?? prev.thread.poll,
+        },
+      };
+    });
+  }, []);
+
   return {
     forum: data?.thread?.forum ?? null,
     thread: data?.thread ?? null,
@@ -56,5 +68,6 @@ export function useThread(forumSlug, threadId, sort = "best") {
     error,
     missing: !loading && !error && data === null,
     reload,
+    patchThread,
   };
 }

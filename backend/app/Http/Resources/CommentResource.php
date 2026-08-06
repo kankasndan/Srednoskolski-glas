@@ -18,7 +18,8 @@ class CommentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'content' => $this->content,
+            // Hide body on soft-deleted tombstones; structure (replies) stays.
+            'content' => $this->trashed() ? '' : $this->content,
             'parent_id' => $this->parent_id,
             'upvotes' => $this->upvotes,
             'has_voted' => (bool) ($this->has_voted ?? false),

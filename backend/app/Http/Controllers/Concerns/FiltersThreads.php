@@ -68,4 +68,24 @@ trait FiltersThreads
             'votes as has_voted' => fn ($votes) => $votes->where('user_id', $user->id),
         ]);
     }
+
+    /**
+     * Shared eager-loads for thread cards (feed / forum / profile).
+     * Poll votes load only the current user's row (not every vote).
+     *
+     * @return array<string, mixed>
+     */
+    protected function threadListWith(mixed $user): array
+    {
+        return [
+            'user.studentData.school.city',
+            'threadAttachment',
+            'forum',
+            'poll' => fn ($q) => $q->withCount('votes'),
+            'poll.options' => fn ($q) => $q->withCount('votes'),
+            'poll.votes' => $user === null
+                ? fn ($q) => $q->whereRaw('0 = 1')
+                : fn ($q) => $q->where('user_id', $user->id),
+        ];
+    }
 }

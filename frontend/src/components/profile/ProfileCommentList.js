@@ -4,18 +4,53 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { mk } from "date-fns/locale";
+import { deleteComment, updateComment } from "@/api/comments";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import EditCommentDialog from "@/components/thread/EditCommentDialog";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ProfileForumTag from "@/components/profile/ProfileForumTag";
 import ThreadActionButton from "@/components/thread/ThreadActionButton";
 import { getMyComments } from "@/api/profile";
 
-function ProfileCommentItem({ comment }) {
+function ProfileCommentItem({ comment: initialComment, onDeleted }) {
+  const [comment, setComment] = useState(initialComment);
+  const [editing, setEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleted, setDeleted] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState("");
 
   const thread = comment.thread;
   const threadHref = `/p/${thread.forum.slug}/${thread.id}`;
+
+  async function handleSave({ content }) {
+    const updated = await updateComment(comment.id, { content });
+
+    setComment((prev) => ({
+      ...prev,
+      content: updated.content,
+      edited_at: updated.edited_at,
+    }));
+    setEditing(false);
+  }
+
+  async function handleConfirmDelete() {
+    if (busy) return;
+
+    setBusy(true);
+    setActionError("");
+
+    try {
+      await deleteComment(comment.id);
+      setConfirmingDelete(false);
+      setDeleted(true);
+    } catch (err) {
+      setActionError(err.message || "Неуспешно бришење. Обиди се повторно.");
+      setConfirmingDelete(false);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <article className="relative flex cursor-pointer items-center justify-between gap-8 rounded-3xl border-b border-b-[#CFE9ED] p-6 transition-colors hover:bg-[#DCEBED]">
@@ -45,20 +80,33 @@ function ProfileCommentItem({ comment }) {
           <span className="truncate">{thread.title}</span>
         </div>
 
-        <div className="relative z-10 flex items-center gap-4 font-(family-name:--font-manrope) text-[12px] font-medium leading-4.5 text-(--color-grays-400)">
-          <button
-            type="button"
-            className="cursor-pointer transition-colors hover:text-[#582FF5]"
-          >
-            Измени
-          </button>
-          <button
-            type="button"
-            onClick={() => setConfirmingDelete(true)}
-            className="cursor-pointer transition-colors hover:text-[#DC2626]"
-          >
-            Избриши
-          </button>
+        <div className="relative z-10 flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setEditing(true)}
+              className="cursor-pointer rounded-xl border border-(--color-primary-200) bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-(--color-primary-200) transition-colors hover:bg-[#EDE9FE] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Измени
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setActionError("");
+                setConfirmingDelete(true);
+              }}
+              className="cursor-pointer rounded-xl border border-[#DC2626] bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Избриши
+            </button>
+          </div>
+          {actionError ? (
+            <p className="font-(family-name:--font-manrope) text-[13px] text-[#DC2626]">
+              {actionError}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -71,21 +119,32 @@ function ProfileCommentItem({ comment }) {
         />
       </div>
 
+      {editing && (
+        <EditCommentDialog
+          open
+          comment={comment}
+          onClose={() => setEditing(false)}
+          onSave={handleSave}
+        />
+      )}
+
       <ConfirmDialog
         open={confirmingDelete}
         title="Дали си сигурен дека сакаш да го избришеш овој коментар?"
-        confirmLabel="Избриши"
-        onCancel={() => setConfirmingDelete(false)}
-        onConfirm={() => {
-          setConfirmingDelete(false);
-          setDeleted(true);
+        confirmLabel={busy ? "Се брише…" : "Избриши"}
+        onCancel={() => {
+          if (!busy) setConfirmingDelete(false);
         }}
+        onConfirm={handleConfirmDelete}
       />
 
       <InfoDialog
         open={deleted}
         title="Коментарот беше успешно избришан."
-        onClose={() => setDeleted(false)}
+        onClose={() => {
+          setDeleted(false);
+          onDeleted?.(comment.id);
+        }}
       />
     </article>
   );
@@ -110,6 +169,10 @@ export default function ProfileCommentList() {
     };
   }, []);
 
+  function handleDeleted(commentId) {
+    setComments((prev) => (prev ?? []).filter((comment) => comment.id !== commentId));
+  }
+
   if (comments === null) {
     return <p className="text-[16px] text-[#595959]">Се вчитува…</p>;
   }
@@ -123,7 +186,11 @@ export default function ProfileCommentList() {
   return (
     <div className="flex flex-col gap-6">
       {comments.map((comment) => (
-        <ProfileCommentItem key={comment.id} comment={comment} />
+        <ProfileCommentItem
+          key={comment.id}
+          comment={comment}
+          onDeleted={handleDeleted}
+        />
       ))}
     </div>
   );

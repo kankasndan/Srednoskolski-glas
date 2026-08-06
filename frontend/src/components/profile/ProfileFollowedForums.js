@@ -3,10 +3,26 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { unfollowForum } from "@/api/forums";
 import { getMyFollowedForums } from "@/api/profile";
 
-function FollowCard({ forum }) {
-  const [following, setFollowing] = useState(true);
+function FollowCard({ forum, onUnfollowed }) {
+  const [busy, setBusy] = useState(false);
+
+  async function handleUnfollow(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (busy) return;
+
+    setBusy(true);
+
+    try {
+      await unfollowForum(forum.slug);
+      onUnfollowed?.(forum.id);
+    } catch {
+      setBusy(false);
+    }
+  }
 
   return (
     <article className="relative flex items-center justify-between gap-6 rounded-2xl border border-[#CFE9ED] p-6 transition-colors hover:bg-gray-50">
@@ -18,12 +34,12 @@ function FollowCard({ forum }) {
 
       <div className="flex min-w-0 items-center gap-5">
         <span className="flex size-16 shrink-0 items-center justify-center overflow-hidden">
-          <Image
+          <img
             src={forum.imageUrl || "/avatars/default-1.svg"}
             alt=""
             width={120}
             height={120}
-            className="size-30 max-w-none"
+            className="size-30 max-w-none object-cover"
           />
         </span>
 
@@ -52,14 +68,11 @@ function FollowCard({ forum }) {
 
       <button
         type="button"
-        onClick={() => setFollowing((value) => !value)}
-        className={`relative z-10 flex h-10 w-36 shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none transition-colors ${
-          following
-            ? "bg-(--color-primary-200) text-(--color-grays-100) hover:bg-[#4B25E0]"
-            : "border border-(--color-primary-200) text-(--color-primary-200) hover:bg-[#F1EEFE]"
-        }`}
+        disabled={busy}
+        onClick={handleUnfollow}
+        className="relative z-10 flex h-10 w-36 shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-(--color-primary-200) px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-grays-100) transition-colors hover:bg-[#4B25E0] disabled:opacity-60"
       >
-        {following ? "Отследи" : "Следи"}
+        {busy ? "…" : "Отследи"}
       </button>
     </article>
   );
@@ -95,7 +108,13 @@ export default function ProfileFollowedForums() {
   return (
     <div className="flex flex-col gap-4">
       {forums.map((forum) => (
-        <FollowCard key={forum.id} forum={forum} />
+        <FollowCard
+          key={forum.id}
+          forum={forum}
+          onUnfollowed={(id) => {
+            setForums((prev) => prev.filter((item) => item.id !== id));
+          }}
+        />
       ))}
     </div>
   );

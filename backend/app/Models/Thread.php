@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Thread extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['title', 'description', 'upvotes', 'views', 'user_id', 'forum_id', 'is_anonymous'];
+    protected $fillable = ['title', 'description', 'upvotes', 'views', 'user_id', 'forum_id', 'is_anonymous', 'deleted_by'];
 
     /**
      * @return array<string, string>
@@ -24,6 +25,23 @@ class Thread extends Model
             'is_anonymous' => 'boolean',
             'edited_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Thread $thread): void {
+            if ($thread->isForceDeleting()) {
+                return;
+            }
+
+            $thread->deleted_by = Auth::id();
+            $thread->saveQuietly();
+        });
+
+        static::deleted(function (Thread $thread): void {
+            $thread->comments()->delete();
+            $thread->threadAttachment()->delete();
+        });
     }
 
     public function deletedBy(): BelongsTo
@@ -46,7 +64,7 @@ class Thread extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function forum(): BelongsTo
+    public function forum()
     {
         return $this->belongsTo(Forum::class);
     }
