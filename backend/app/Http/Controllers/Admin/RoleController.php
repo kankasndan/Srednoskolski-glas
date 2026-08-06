@@ -11,35 +11,37 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $users = User::orderBy("role")->with("forum")->get();
+        $users = User::orderBy('role')->with('forum')->get();
 
-        $roles = User::distinct()->get("role");
+        $roles = User::distinct()->get('role');
 
         $forums = Forum::get();
 
-        return view("admin.roles.index", compact("users", "forums", "roles"));
+        return view('admin.roles.index', compact('users', 'forums', 'roles'));
     }
 
     public function update(User $user, Request $request)
     {
-        if($user->role == "moderator"){
-            if($request->role == "admin" || $request->role == "super-admin"){
-                $forum = Forum::where("user_id", $user->id)->update([
-                    "user_id" => null
-                ]);;
+        if ($user->role == 'moderator') {
+            if ($request->role == 'admin' || $request->role == 'super-admin') {
+                $forum = Forum::where('user_id', $user->id)->update([
+                    'user_id' => null,
+                ]);
             }
         }
 
-        $user->update(["role" => $request->role]);
+        $user->update(['role' => $request->role]);
+        $user->syncRoles([$request->role]);
 
-        return back()->with(["success" => "User successfully updated."]);
+        return back()->with(['success' => 'User successfully updated.']);
     }
 
     public function destroy(User $user)
     {
-        $user->update(["role" => "user"]);
+        $user->update(['role' => 'user']);
+        $user->syncRoles([]);
 
-        return back()->with(["success" => "User successfully granted role 'user'."]);
+        return back()->with(['success' => "User successfully granted role 'user'."]);
     }
 
     public function liveSearch(Request $request)
@@ -58,7 +60,7 @@ class RoleController extends Controller
     {
         $forums = Forum::get();
 
-        return view("admin.roles.show", compact("user", "forums"));
+        return view('admin.roles.show', compact('user', 'forums'));
     }
 
     public function grantSearch(Request $request)
@@ -83,15 +85,16 @@ class RoleController extends Controller
         $user = User::findOrFail($request->user_id);
 
         $user->update(['role' => $request->role]);
+        $user->syncRoles([$request->role]);
 
         return back()->with(['success' => "Role granted successfully to {$user->username}."]);
     }
 
     public function updateForum(Request $request)
     {
-        $forum = Forum::where("user_id", $request->user_id);
+        $forum = Forum::where('user_id', $request->user_id);
 
-        if($forum){
+        if ($forum) {
             $forum->update([
                 'user_id' => null,
             ]);
@@ -103,7 +106,7 @@ class RoleController extends Controller
             'user_id' => $request->user_id,
         ]);
 
-        if(str_contains(url()->previous(), "show")){
+        if (str_contains(url()->previous(), 'show')) {
             return redirect()->route('role.show', ['user' => $request->user_id])->with('success', 'Moderator assigned successfully.');
         }
 
