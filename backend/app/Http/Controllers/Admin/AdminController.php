@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class AdminController extends Controller
@@ -33,19 +32,17 @@ class AdminController extends Controller
 
     public function updatePassword(User $user, Request $request)
     {
-        $request->validate([
+        // Self-service only — changing another user's password is not allowed here.
+        abort_unless($request->user()?->is($user), 403);
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
             'password' => ['required', 'confirmed', Password::min(8)->uncompromised()->mixedCase()->numbers()->symbols()],
         ]);
 
-        if (Hash::check($request->current_password, $user->password)) {
-            $user->update([
-                'password' => $request->current_password,
-            ]);
-        } else {
-            return back()->withErrors([
-                'invalid_password' => 'Invalid current password!',
-            ]);
-        }
+        $user->update([
+            'password' => $validated['password'],
+        ]);
 
         return back();
     }

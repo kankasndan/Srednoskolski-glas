@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('admin', [AuthController::class, 'redirecting']);
 
 Route::get('admin/login', [AuthController::class, 'index'])->name('login');
-Route::post('admin/login/login', [AuthController::class, 'login'])->name('admin.login');
+Route::post('admin/login/login', [AuthController::class, 'login'])
+    ->middleware('throttle:admin-login')
+    ->name('admin.login');
 
 Route::prefix('admin')->middleware(['auth', 'role:super_admin|admin|moderator', 'permission:access admin panel'])->group(function () {
 
@@ -119,6 +121,7 @@ Route::prefix('admin')->middleware(['auth', 'role:super_admin|admin|moderator', 
         Route::patch('roles/update/forum', [RoleController::class, 'updateForum'])->name('role.update.forum');
     });
 
-    // LOGOUT
-    Route::get('logout', [AuthController::class, 'logout'])->name('admin.logout');
+    // LOGOUT (POST + CSRF — avoid CSRF logout via GET)
+    Route::post('logout', [AuthController::class, 'logout'])->name('admin.logout');
 });
+

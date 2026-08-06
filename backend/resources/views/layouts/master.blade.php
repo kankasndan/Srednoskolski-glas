@@ -117,9 +117,12 @@
                     <a href="{{ route('admin.profile', ['user' => $currentAdmin->id]) }}"
                         class="block rounded-[8px] px-3 py-2 text-[14px] text-[#595959] hover:bg-[#F4F2FF]">Мој
                         профил</a>
-                    <a href="{{ route('admin.logout') }}"
-                        class="block rounded-[8px] px-3 py-2 text-[14px] font-semibold text-[#DC2626] hover:bg-[#FEE2E2]">Одјави
-                        се</a>
+                    <form method="POST" action="{{ route('admin.logout') }}">
+                        @csrf
+                        <button type="submit"
+                            class="block w-full rounded-[8px] px-3 py-2 text-left text-[14px] font-semibold text-[#DC2626] hover:bg-[#FEE2E2]">Одјави
+                            се</button>
+                    </form>
                 </div>
             </div>
 

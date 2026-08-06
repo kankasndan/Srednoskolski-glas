@@ -12,6 +12,7 @@ use App\Models\Forum;
 use App\Models\Poll;
 use App\Models\Thread;
 use App\Models\ThreadView;
+use App\Support\HtmlSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -60,7 +61,7 @@ class ThreadController extends Controller
         $thread = DB::transaction(function () use ($validated, $user, $files): Thread {
             $thread = Thread::query()->create([
                 'title' => $validated['title'],
-                'description' => $validated['description'] ?? '',
+                'description' => HtmlSanitizer::clean($validated['description'] ?? ''),
                 'forum_id' => $validated['forum_id'],
                 'user_id' => $user->id,
                 'is_anonymous' => (bool) ($validated['is_anonymous'] ?? false),
@@ -115,7 +116,7 @@ class ThreadController extends Controller
 
         DB::transaction(function () use ($thread, $validated, $files, $removeIds): void {
             $thread->title = $validated['title'];
-            $thread->description = $validated['description'] ?? '';
+            $thread->description = HtmlSanitizer::clean($validated['description'] ?? '');
             $thread->edited_at = now();
             $thread->save();
 

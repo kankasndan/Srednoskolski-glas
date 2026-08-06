@@ -12,9 +12,9 @@ class AuthController extends Controller
     {
         if (Auth::check()) {
             return redirect()->route('admin.dashboard');
-        } else {
-            return redirect()->route('login');
         }
+
+        return redirect()->route('login');
     }
 
     public function index()
@@ -31,13 +31,25 @@ class AuthController extends Controller
 
         $remember = $request->boolean('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-
-            return redirect()->route('admin.dashboard');
+        if (! Auth::attempt($credentials, $remember)) {
+            return back()->withErrors(['credentials' => 'Invalid credentials!']);
         }
 
-        return back()->withErrors(['credentials' => 'Invalid credentials!']);
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        if ($user === null || ! $user->can('access admin panel')) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'credentials' => 'You do not have access to the admin panel.',
+            ]);
+        }
+
+        return redirect()->route('admin.dashboard');
     }
 
     public function logout(Request $request)
@@ -47,6 +59,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return view('admin.auth.index');
+        return redirect()->route('login');
     }
 }

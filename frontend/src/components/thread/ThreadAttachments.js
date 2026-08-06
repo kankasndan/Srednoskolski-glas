@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight, faLink } from "@fortawesome/free-solid-svg-icons";
+import ImageLightbox from "@/components/thread/ImageLightbox";
 import { parseEmbed as parseEmbedPaste, toEmbedUrl } from "@/lib/embeds";
 
 config.autoAddCss = false;
@@ -42,6 +43,7 @@ function parseEmbed(input) {
 /** Scrollable gallery of images + videos, in the order they were attached. */
 function MediaGallery({ items }) {
   const trackRef = useRef(null);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
 
   function scrollByFrame(direction) {
     const track = trackRef.current;
@@ -71,7 +73,12 @@ function MediaGallery({ items }) {
                 className="relative z-10 size-full object-contain"
               />
             ) : (
-              <>
+              <button
+                type="button"
+                aria-label="Отвори слика на цел екран"
+                onClick={() => setLightboxSrc(item.url)}
+                className="relative z-10 size-full cursor-zoom-in"
+              >
                 <img
                   src={item.url}
                   alt=""
@@ -79,7 +86,7 @@ function MediaGallery({ items }) {
                   className="absolute inset-0 size-full scale-110 object-cover blur-2xl"
                 />
                 <img src={item.url} alt="" className="relative z-10 size-full object-contain" />
-              </>
+              </button>
             )}
           </div>
         ))}
@@ -105,6 +112,10 @@ function MediaGallery({ items }) {
           </button>
         </>
       )}
+
+      {lightboxSrc ? (
+        <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      ) : null}
     </div>
   );
 }

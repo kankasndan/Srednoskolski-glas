@@ -17,15 +17,19 @@ use App\Http\Controllers\VoteController;
 use Illuminate\Support\Facades\Route;
 
 // Social login needs the web middleware so OAuth can start a session cookie.
-Route::middleware('web')->group(function () {
+Route::middleware(['web', 'throttle:social-auth'])->group(function () {
     // Redirect the browser to Google/Facebook OAuth.
-    Route::get('/auth/{provider}/redirect', [SocialLoginController::class, 'redirect'])->name('social.redirect');
+    Route::get('/auth/{provider}/redirect', [SocialLoginController::class, 'redirect'])
+        ->whereIn('provider', ['google', 'facebook'])
+        ->name('social.redirect');
     // Handle the OAuth callback and log the user in.
-    Route::get('/auth/{provider}/callback', [SocialLoginController::class, 'callback'])->name('social.callback');
+    Route::get('/auth/{provider}/callback', [SocialLoginController::class, 'callback'])
+        ->whereIn('provider', ['google', 'facebook'])
+        ->name('social.callback');
 });
 
 // Save onboarding profile (and auto-follow the student's school forum).
-Route::middleware('auth:sanctum')->put('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
+Route::middleware(['auth:sanctum', 'not_banned', 'throttle:api-writes'])->put('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
 // Return the current authenticated user.
 Route::middleware('auth:sanctum')->get('/me', MeController::class)->name('me.show');
 // Profile activity lists for the authenticated user.
@@ -34,7 +38,7 @@ Route::middleware('auth:sanctum')->get('/me/threads', [ProfileController::class,
 Route::middleware('auth:sanctum')->get('/me/comments', [ProfileController::class, 'comments'])->name('me.comments');
 Route::middleware('auth:sanctum')->get('/me/followed-forums', [ProfileController::class, 'followedForums'])->name('me.followed-forums');
 // Log the user out and end the session.
-Route::middleware('auth:sanctum')->post('/logout', LogoutController::class)->name('auth.logout');
+Route::middleware(['auth:sanctum', 'throttle:api-writes'])->post('/logout', LogoutController::class)->name('auth.logout');
 
 // List thematic + school forums for the sidebar.
 Route::get('/forums', [ForumController::class, 'index'])->name('forums.index');
@@ -50,34 +54,60 @@ Route::get('/p/{forum:slug}/threads', [ThreadController::class, 'index'])->name(
 // Thread detail with nested comments (increments views; sort=best|newest|oldest).
 Route::get('/p/{forum:slug}/comments/{thread:id}', [ThreadController::class, 'show'])->name('forums.threads.show');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'not_banned'])->group(function () {
     // Create a new thread (optional files, link, or poll).
-    Route::post('/threads', [ThreadController::class, 'store'])->name('threads.store');
+    Route::post('/threads', [ThreadController::class, 'store'])
+        ->middleware('throttle:thread-create')
+        ->name('threads.store');
     // Update a thread (author only). POST accepts multipart for attachment changes.
-    Route::match(['put', 'post'], '/threads/{thread}', [ThreadController::class, 'update'])->name('threads.update');
+    Route::match(['put', 'post'], '/threads/{thread}', [ThreadController::class, 'update'])
+        ->middleware('throttle:api-writes')
+        ->name('threads.update');
     // Soft-delete a thread (author only).
-    Route::delete('/threads/{thread}', [ThreadController::class, 'destroy'])->name('threads.destroy');
+    Route::delete('/threads/{thread}', [ThreadController::class, 'destroy'])
+        ->middleware('throttle:api-writes')
+        ->name('threads.destroy');
     // Create a comment or reply on a thread.
-    Route::post('/threads/{thread}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::post('/threads/{thread}/comments', [CommentController::class, 'store'])
+        ->middleware('throttle:comment-create')
+        ->name('comments.store');
     // Update a comment (author only).
-    Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+    Route::put('/comments/{comment}', [CommentController::class, 'update'])
+        ->middleware('throttle:api-writes')
+        ->name('comments.update');
     // Soft-delete a comment (author only).
-    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
+        ->middleware('throttle:api-writes')
+        ->name('comments.destroy');
     // Vote on a poll option (or change an existing vote).
-    Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->name('polls.vote');
+    Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])
+        ->middleware('throttle:api-writes')
+        ->name('polls.vote');
 
     // Follow a general forum.
-    Route::post('/p/{forum:slug}/follow', [FollowForumController::class, 'store'])->name('forums.follow');
+    Route::post('/p/{forum:slug}/follow', [FollowForumController::class, 'store'])
+        ->middleware('throttle:api-writes')
+        ->name('forums.follow');
     // Unfollow a general forum.
-    Route::delete('/p/{forum:slug}/follow', [FollowForumController::class, 'destroy'])->name('forums.unfollow');
+    Route::delete('/p/{forum:slug}/follow', [FollowForumController::class, 'destroy'])
+        ->middleware('throttle:api-writes')
+        ->name('forums.unfollow');
 
     // Upload a media file.
-    Route::post('/media', [MediaController::class, 'store'])->name('media.store');
-    // Delete an uploaded media file.
-    Route::delete('/media', [MediaController::class, 'destroy'])->name('media.destroy');
+    Route::post('/media', [MediaController::class, 'store'])
+        ->middleware('throttle:media-upload')
+        ->name('media.store');
+    // Delete an uploaded media file (owner only).
+    Route::delete('/media', [MediaController::class, 'destroy'])
+        ->middleware('throttle:api-writes')
+        ->name('media.destroy');
 
     // Toggle upvote on a thread.
-    Route::post('/threads/{thread}/upvote', [VoteController::class, 'toggleThread'])->name('threads.upvote');
+    Route::post('/threads/{thread}/upvote', [VoteController::class, 'toggleThread'])
+        ->middleware('throttle:api-writes')
+        ->name('threads.upvote');
     // Toggle upvote on a comment.
-    Route::post('/comments/{comment}/upvote', [VoteController::class, 'toggleComment'])->name('comments.upvote');
+    Route::post('/comments/{comment}/upvote', [VoteController::class, 'toggleComment'])
+        ->middleware('throttle:api-writes')
+        ->name('comments.upvote');
 });

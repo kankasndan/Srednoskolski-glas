@@ -106,6 +106,21 @@ class User extends Authenticatable
         return $this->hasMany(Sanction::class, 'user_id');
     }
 
+    /**
+     * True when the user has an active non-warning sanction (temp or permanent ban).
+     */
+    public function isBanned(): bool
+    {
+        return $this->sanctions()
+            ->where('type', '!=', 'warning')
+            ->whereNull('revoked_at')
+            ->where(function ($query): void {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->exists();
+    }
+
     public function appeals()
     {
         return $this->hasMany(Appeal::class);

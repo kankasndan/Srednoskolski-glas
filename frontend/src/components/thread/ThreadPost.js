@@ -37,9 +37,12 @@ export default function ThreadPost({ forum, thread, onThreadUpdated }) {
       <hr className="border-[#CCCCCC]" />
 
       <ThreadStats
+        threadId={thread.id}
         views={thread.views}
         comments={thread.comments_count}
         votes={thread.upvotes}
+        hasVoted={thread.has_voted}
+        onVoted={(vote) => onThreadUpdated?.(vote)}
       />
     </article>
   );

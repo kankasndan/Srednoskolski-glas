@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { toggleCommentVote } from "@/api/comments";
+import { nextVoteState } from "@/lib/votes";
 
 function ActionButton({ icon, iconClassName = "", label, onClick }) {
   return (
@@ -40,14 +41,20 @@ export default function CommentActions({
   async function handleVote() {
     if (!commentId || busy) return;
 
+    const { previousVotes, previousHasVoted, nextVotes, nextHasVoted } =
+      nextVoteState(votes, hasVoted);
+
     setBusy(true);
+    setVotes(nextVotes);
+    setHasVoted(nextHasVoted);
 
     try {
       const data = await toggleCommentVote(commentId);
-      setVotes(data.upvotes ?? votes);
+      setVotes(data.upvotes ?? nextVotes);
       setHasVoted(Boolean(data.has_voted));
     } catch {
-      // Keep previous vote state on failure.
+      setVotes(previousVotes);
+      setHasVoted(previousHasVoted);
     } finally {
       setBusy(false);
     }
@@ -59,7 +66,7 @@ export default function CommentActions({
         type="button"
         disabled={busy}
         onClick={handleVote}
-        className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-[12px] leading-none transition-colors disabled:opacity-60 ${
+        className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-[12px] leading-none transition-colors disabled:opacity-70 ${
           hasVoted
             ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white"
             : "border-[#CCCCCC] text-black opacity-80 hover:border-[var(--color-primary-100)]"

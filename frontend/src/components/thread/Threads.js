@@ -12,6 +12,7 @@ import { API_BASE_URL } from "@/lib/api";
 import { formatCount } from "@/lib/formatCount";
 import { stripHtml } from "@/lib/html";
 import { formatPostedAgo } from "@/lib/time";
+import { nextVoteState } from "@/lib/votes";
 
 const SORT_OPTIONS = [
   { value: "trending", label: "Трендинг" },
@@ -89,14 +90,20 @@ function ThreadItem({ thread }) {
   async function upvote() {
     if (voting) return;
 
+    const { previousVotes, previousHasVoted, nextVotes, nextHasVoted } =
+      nextVoteState(upvotes, hasVoted);
+
     setVoting(true);
+    setUpvotes(nextVotes);
+    setHasVoted(nextHasVoted);
 
     try {
       const data = await toggleThreadVote(thread.id);
-      setUpvotes(data.upvotes ?? upvotes);
+      setUpvotes(data.upvotes ?? nextVotes);
       setHasVoted(Boolean(data.has_voted));
     } catch {
-      // Keep previous vote state on failure.
+      setUpvotes(previousVotes);
+      setHasVoted(previousHasVoted);
     } finally {
       setVoting(false);
     }
