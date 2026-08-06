@@ -31,6 +31,7 @@ class ThreadResource extends JsonResource
                 'id' => $this->forum->id,
                 'name' => $this->forum->name,
                 'slug' => $this->forum->slug,
+                'type' => $this->forum->type,
                 'imageUrl' => $this->forum->imageUrl,
             ]),
             'author' => $this->is_anonymous

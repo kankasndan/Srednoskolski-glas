@@ -11,6 +11,7 @@ use App\Http\Controllers\FollowForumController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\PollController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\VoteController;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,10 @@ Route::middleware('web')->group(function () {
 Route::middleware('auth:sanctum')->put('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
 // Return the current authenticated user.
 Route::middleware('auth:sanctum')->get('/me', MeController::class)->name('me.show');
+// Profile activity lists for the authenticated user.
+Route::middleware('auth:sanctum')->get('/me/threads', [ProfileController::class, 'threads'])->name('me.threads');
+Route::middleware('auth:sanctum')->get('/me/comments', [ProfileController::class, 'comments'])->name('me.comments');
+Route::middleware('auth:sanctum')->get('/me/followed-forums', [ProfileController::class, 'followedForums'])->name('me.followed-forums');
 // Log the user out and end the session.
 Route::middleware('auth:sanctum')->post('/logout', LogoutController::class)->name('auth.logout');
 

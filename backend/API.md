@@ -151,6 +151,7 @@ For school forums, `type` is `"school"` and `school` looks like:
     "id": 3,
     "name": "Државна матура",
     "slug": "drzhavna_matura",
+    "type": "general",
     "imageUrl": "https://…/forum.png"
   },
   "author": {
@@ -426,6 +427,114 @@ GET /api/me
 ```
 
 `student_data` may be `null` for non-students. `onboarding_completed_at` is `null` until onboarding is finished.
+
+---
+
+### My threads
+
+```
+GET /api/me/threads
+```
+
+**Auth required.** Threads created by the current user, newest first. Same `Thread` resource shape as forum/feed lists (includes `forum.type`). Not paginated.
+
+```json
+{
+  "data": [
+    {
+      "id": 15,
+      "title": "Како да се подготвам за матура?",
+      "description": "…",
+      "upvotes": 8,
+      "has_voted": false,
+      "views": 120,
+      "is_anonymous": false,
+      "comments_count": 4,
+      "created_at": "2026-07-18T10:22:00.000000Z",
+      "edited_at": null,
+      "forum": {
+        "id": 3,
+        "name": "Државна матура",
+        "slug": "drzhavna_matura",
+        "type": "general",
+        "imageUrl": "https://…/forum.png"
+      },
+      "author": { "id": 1, "username": "ana_mk", "imageUrl": "…", "school": null },
+      "attachments": [],
+      "poll": null
+    }
+  ]
+}
+```
+
+---
+
+### My comments
+
+```
+GET /api/me/comments
+```
+
+**Auth required.** Comments written by the current user, newest first, each with parent thread + forum context for profile links. Soft-deleted comments are omitted. Not paginated.
+
+```json
+{
+  "data": [
+    {
+      "id": 40,
+      "content": "Се согласувам.",
+      "parent_id": null,
+      "upvotes": 2,
+      "has_voted": false,
+      "created_at": "2026-07-18T11:00:00.000000Z",
+      "edited_at": null,
+      "deleted_by": null,
+      "author": { "id": 1, "username": "ana_mk", "imageUrl": "…", "school": null },
+      "thread": {
+        "id": 15,
+        "title": "Како да се подготвам за матура?",
+        "forum": {
+          "id": 3,
+          "name": "Државна матура",
+          "slug": "drzhavna_matura",
+          "type": "general",
+          "imageUrl": "https://…/forum.png"
+        }
+      }
+    }
+  ]
+}
+```
+
+---
+
+### My followed forums
+
+```
+GET /api/me/followed-forums
+```
+
+**Auth required.** Forums the current user follows (via `forum_user`), ordered by name. Same `Forum` resource shape as forum detail. Not paginated.
+
+```json
+{
+  "data": [
+    {
+      "id": 6,
+      "name": "Вештачка интелигенција",
+      "slug": "veshtachka_intelegencija",
+      "type": "general",
+      "school_id": null,
+      "imageUrl": "https://…/forum.png",
+      "threads_count": 26,
+      "members_count": 422,
+      "is_following": true,
+      "description": "…",
+      "bannerUrl": "https://…/banner.png"
+    }
+  ]
+}
+```
 
 ---
 
@@ -979,6 +1088,9 @@ DELETE /api/media
 | `GET` | `/api/auth/{provider}/redirect` | — | Browser redirect |
 | `GET` | `/api/auth/{provider}/callback` | — | Browser redirect + session cookie |
 | `GET` | `/api/me` | yes | Current user |
+| `GET` | `/api/me/threads` | yes | Current user’s threads |
+| `GET` | `/api/me/comments` | yes | Current user’s comments (+ thread context) |
+| `GET` | `/api/me/followed-forums` | yes | Forums the user follows |
 | `POST` | `/api/logout` | yes | End session |
 | `PUT` | `/api/onboarding` | yes | Save profile |
 | `GET` | `/api/cities` | — | Cities + schools |
