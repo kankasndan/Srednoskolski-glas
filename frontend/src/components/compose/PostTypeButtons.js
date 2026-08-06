@@ -62,7 +62,13 @@ export default function PostTypeButtons({ widthClassName = "w-[632px]", onAttach
     onAttachmentsChange({
       files,
       link: linkMode ? linkValue.trim() : "",
-      poll: pollMode && pollData?.question && pollData.options?.length >= 2 ? pollData : null,
+      poll:
+        pollMode &&
+        pollData?.question &&
+        pollData.options?.length >= 2 &&
+        pollData.duration_days
+          ? pollData
+          : null,
     });
   }, [mediaItems, docFile, linkValue, linkMode, pollMode, pollData, onAttachmentsChange]);
 

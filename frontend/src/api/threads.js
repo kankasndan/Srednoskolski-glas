@@ -10,7 +10,7 @@ const MOCK_THREADS = {
   "opshti_diskusii/102": "/MOCK_JSON/thread-opshti-diskusii-102-mock.json",
 };
 
-export async function getThread(forumSlug, threadId) {
+export async function getThread(forumSlug, threadId, { sort = "best" } = {}) {
   if (USE_MOCK) {
     const url = MOCK_THREADS[`${forumSlug}/${threadId}`];
     if (!url) return null;
@@ -21,7 +21,12 @@ export async function getThread(forumSlug, threadId) {
     return data;
   }
 
-  const res = await apiFetch(`/api/p/${forumSlug}/comments/${threadId}`);
+  const params = new URLSearchParams();
+  if (sort) params.set("sort", sort);
+  const query = params.toString();
+  const res = await apiFetch(
+    `/api/p/${forumSlug}/comments/${threadId}${query ? `?${query}` : ""}`,
+  );
 
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to load thread: ${res.status}`);
@@ -39,7 +44,7 @@ export async function getThread(forumSlug, threadId) {
  *   isAnonymous?: boolean,
  *   files?: File[],
  *   link?: string,
- *   poll?: { question: string, options: string[] } | null,
+ *   poll?: { question: string, options: string[], duration_days: number } | null,
  * }} payload
  */
 export async function createThread(payload) {
@@ -62,6 +67,7 @@ export async function createThread(payload) {
 
   if (payload.poll?.question && payload.poll.options?.length) {
     formData.append("poll[question]", payload.poll.question);
+    formData.append("poll[duration_days]", String(payload.poll.duration_days ?? 3));
     payload.poll.options.forEach((option, index) => {
       formData.append(`poll[options][${index}]`, option);
     });

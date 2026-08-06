@@ -9,13 +9,12 @@ use App\Models\PollVote;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class PollController extends Controller
 {
     /**
-     * Cast a single vote on a poll option (one choice per user).
+     * Cast or change a vote on a poll option (one choice per user; may switch options).
      *
      * POST /api/polls/{poll}/vote
      * Body: { "poll_option_id": 1 }
@@ -41,21 +40,16 @@ class PollController extends Controller
 
         $user = $request->user();
 
-        $alreadyVoted = PollVote::query()
-            ->where('poll_id', $poll->id)
-            ->where('user_id', $user->id)
-            ->exists();
-
-        if ($alreadyVoted) {
-            throw new ConflictHttpException('Веќе гласаше на оваа анкета.');
-        }
-
         DB::transaction(function () use ($poll, $option, $user): void {
-            PollVote::query()->create([
-                'poll_id' => $poll->id,
-                'poll_option_id' => $option->id,
-                'user_id' => $user->id,
-            ]);
+            PollVote::query()->updateOrCreate(
+                [
+                    'poll_id' => $poll->id,
+                    'user_id' => $user->id,
+                ],
+                [
+                    'poll_option_id' => $option->id,
+                ],
+            );
         });
 
         $poll->load(['options' => fn ($q) => $q->withCount('votes')])

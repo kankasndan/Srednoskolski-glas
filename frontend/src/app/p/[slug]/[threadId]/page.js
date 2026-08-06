@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { notFound, useParams } from "next/navigation";
 import AppShell from "@/components/shell/AppShell";
 import BackButton from "@/components/shell/BackButton";
@@ -19,9 +20,14 @@ function StatusMessage({ children }) {
 
 export default function ThreadPage() {
   const { slug, threadId } = useParams();
-  const { forum, thread, comments, loading, error, missing } = useThread(slug, threadId);
+  const [sort, setSort] = useState("best");
+  const { forum, thread, comments, loading, error, missing } = useThread(
+    slug,
+    threadId,
+    sort,
+  );
 
-  if (loading) {
+  if (loading && !thread) {
     return (
       <AppShell>
         <StatusMessage>Се вчитува…</StatusMessage>
@@ -29,7 +35,7 @@ export default function ThreadPage() {
     );
   }
 
-  if (error) {
+  if (error && !thread) {
     return (
       <AppShell>
         <StatusMessage>Не успеа вчитувањето на дискусијата.</StatusMessage>
@@ -49,7 +55,11 @@ export default function ThreadPage() {
         </div>
         <ThreadPost forum={forum} thread={thread} />
         <CommentComposer forumSlug={forum.slug} />
-        <CommentsHeader count={thread.comments_count} />
+        <CommentsHeader
+          count={thread.comments_count}
+          sort={sort}
+          onSortChange={setSort}
+        />
         <CommentList comments={comments} />
       </div>
     </AppShell>

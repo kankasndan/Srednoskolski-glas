@@ -59,7 +59,7 @@ it('requires authentication to vote on a poll', function () {
     ])->assertUnauthorized();
 });
 
-it('lets a logged-in user vote once and returns results', function () {
+it('lets a logged-in user vote and returns results', function () {
     ['poll' => $poll, 'optionA' => $optionA] = makePollThread();
     $voter = User::factory()->create();
 
@@ -72,12 +72,29 @@ it('lets a logged-in user vote once and returns results', function () {
         ->assertJsonPath('data.user_voted_option_id', $optionA->id)
         ->assertJsonPath('data.options.0.votes_count', 1)
         ->assertJsonPath('data.options.0.percentage', 100);
+});
+
+it('lets a user change their vote to another option', function () {
+    ['poll' => $poll, 'optionA' => $optionA, 'optionB' => $optionB] = makePollThread();
+    $voter = User::factory()->create();
 
     $this->actingAs($voter)
         ->postJson("/api/polls/{$poll->id}/vote", [
             'poll_option_id' => $optionA->id,
         ])
-        ->assertStatus(409);
+        ->assertSuccessful()
+        ->assertJsonPath('data.user_voted_option_id', $optionA->id);
+
+    $this->actingAs($voter)
+        ->postJson("/api/polls/{$poll->id}/vote", [
+            'poll_option_id' => $optionB->id,
+        ])
+        ->assertSuccessful()
+        ->assertJsonPath('data.total_votes', 1)
+        ->assertJsonPath('data.user_voted_option_id', $optionB->id)
+        ->assertJsonPath('data.options.0.votes_count', 0)
+        ->assertJsonPath('data.options.1.votes_count', 1)
+        ->assertJsonPath('data.options.1.percentage', 100);
 });
 
 it('rejects votes after the poll has ended', function () {

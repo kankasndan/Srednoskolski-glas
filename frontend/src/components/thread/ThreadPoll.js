@@ -52,10 +52,12 @@ export default function ThreadPoll({ poll: initialPoll }) {
 
   const hasVoted = poll.user_voted_option_id != null;
   const showResults = hasVoted || poll.has_ended;
+  const canChangeVote = hasVoted && !poll.has_ended;
   const endsLabel = formatEndsAt(poll.ends_at);
 
   async function handleVote(optionId) {
-    if (showResults || submitting) return;
+    if (poll.has_ended || submitting) return;
+    if (poll.user_voted_option_id === optionId) return;
 
     setSubmitting(true);
     setError("");
@@ -98,13 +100,10 @@ export default function ThreadPoll({ poll: initialPoll }) {
           const percentage = option.percentage ?? 0;
 
           if (showResults) {
-            return (
-              <div
-                key={option.id}
-                className={`relative overflow-hidden rounded-xl border px-4 py-3 ${
-                  selected ? "border-[#582FF5]" : "border-[#CCCCCC]"
-                }`}
-              >
+            const interactive = canChangeVote && !selected;
+
+            const content = (
+              <>
                 <div
                   className={`absolute inset-y-0 left-0 ${
                     selected ? "bg-[#EDE7FE]" : "bg-[#F5F5F5]"
@@ -119,6 +118,31 @@ export default function ThreadPoll({ poll: initialPoll }) {
                     {percentage}%
                   </span>
                 </div>
+              </>
+            );
+
+            if (interactive) {
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => handleVote(option.id)}
+                  className="relative w-full overflow-hidden rounded-xl border border-[#CCCCCC] px-4 py-3 text-left transition-colors hover:border-[#582FF5] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {content}
+                </button>
+              );
+            }
+
+            return (
+              <div
+                key={option.id}
+                className={`relative overflow-hidden rounded-xl border px-4 py-3 ${
+                  selected ? "border-[#582FF5]" : "border-[#CCCCCC]"
+                }`}
+              >
+                {content}
               </div>
             );
           }
@@ -140,6 +164,7 @@ export default function ThreadPoll({ poll: initialPoll }) {
       <p className="font-[family-name:var(--font-manrope)] text-[12px] text-[#595959]">
         {poll.total_votes ?? 0}{" "}
         {(poll.total_votes ?? 0) === 1 ? "глас" : "гласови"}
+        {canChangeVote ? " · Кликни друга опција за да го смениш гласот" : ""}
       </p>
 
       {error ? (

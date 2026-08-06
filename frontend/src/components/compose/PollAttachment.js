@@ -11,19 +11,29 @@ config.autoAddCss = false;
 const MIN_OPTIONS = 2;
 const MAX_OPTIONS = 4;
 
+const DURATION_OPTIONS = [
+  { value: 1, label: "1 ден" },
+  { value: 3, label: "3 дена" },
+  { value: 7, label: "1 недела" },
+  { value: 14, label: "2 недели" },
+  { value: 30, label: "1 месец" },
+];
+
 const INPUT_CLASS =
   "h-10 w-full rounded-xl border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 text-black placeholder:text-[#595959] focus:border-[#582FF5] focus:outline-none";
 
 export default function PollAttachment({ onClose, onChange }) {
   const [title, setTitle] = useState("");
   const [options, setOptions] = useState(["", ""]);
+  const [durationDays, setDurationDays] = useState(3);
 
   useEffect(() => {
     onChange?.({
       question: title.trim(),
       options: options.map((option) => option.trim()).filter(Boolean),
+      duration_days: durationDays,
     });
-  }, [title, options, onChange]);
+  }, [title, options, durationDays, onChange]);
 
   function updateOption(index, value) {
     setOptions((prev) => prev.map((option, i) => (i === index ? value : option)));
@@ -60,6 +70,23 @@ export default function PollAttachment({ onClose, onChange }) {
         placeholder="Прашање за анкетата"
         className={INPUT_CLASS}
       />
+
+      <label className="flex flex-col gap-2">
+        <span className="font-[family-name:var(--font-manrope)] text-[13px] font-medium text-[#595959]">
+          Колку долго ќе трае анкетата?
+        </span>
+        <select
+          value={durationDays}
+          onChange={(event) => setDurationDays(Number(event.target.value))}
+          className={`${INPUT_CLASS} cursor-pointer bg-white`}
+        >
+          {DURATION_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div className="flex flex-col gap-2">
         {options.map((option, index) => (

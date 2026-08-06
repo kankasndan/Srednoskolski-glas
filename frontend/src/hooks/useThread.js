@@ -1,17 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getThread } from "@/api/threads";
 
-export function useThread(forumSlug, threadId) {
+export function useThread(forumSlug, threadId, sort = "best") {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const reload = useCallback(() => {
+    if (!forumSlug || !threadId) return Promise.resolve();
+
+    setLoading(true);
+    setError(null);
+
+    return getThread(forumSlug, threadId, { sort })
+      .then((payload) => {
+        setData(payload);
+      })
+      .catch((err) => {
+        setError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [forumSlug, threadId, sort]);
+
   useEffect(() => {
     let active = true;
 
-    getThread(forumSlug, threadId)
+    setLoading(true);
+    setError(null);
+
+    getThread(forumSlug, threadId, { sort })
       .then((payload) => {
         if (active) setData(payload);
       })
@@ -25,7 +46,7 @@ export function useThread(forumSlug, threadId) {
     return () => {
       active = false;
     };
-  }, [forumSlug, threadId]);
+  }, [forumSlug, threadId, sort]);
 
   return {
     forum: data?.thread?.forum ?? null,
@@ -34,5 +55,6 @@ export function useThread(forumSlug, threadId) {
     loading,
     error,
     missing: !loading && !error && data === null,
+    reload,
   };
 }

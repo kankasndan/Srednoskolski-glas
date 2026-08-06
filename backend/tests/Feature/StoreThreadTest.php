@@ -70,6 +70,7 @@ it('creates a thread with optional description, link, and poll', function () {
         'poll' => [
             'question' => 'Кога ќе полагаш?',
             'options' => ['Јуни', 'Август', 'Не знам'],
+            'duration_days' => 7,
         ],
     ]);
 
@@ -79,10 +80,28 @@ it('creates a thread with optional description, link, and poll', function () {
         ->assertJsonCount(3, 'data.poll.options')
         ->assertJsonPath('data.attachments.0.type', 'link');
 
+    $endsAt = Poll::query()->first()->ends_at;
+
     expect(Thread::query()->count())->toBe(1)
         ->and(Poll::query()->count())->toBe(1)
         ->and($forum->fresh()->threads_count)->toBe(1)
-        ->and(Poll::query()->first()->ends_at->isAfter(now()->addDays(2)))->toBeTrue();
+        ->and($endsAt->isAfter(now()->addDays(6)))->toBeTrue()
+        ->and($endsAt->isBefore(now()->addDays(8)))->toBeTrue();
+});
+
+it('rejects poll duration longer than one month', function () {
+    $user = User::factory()->create();
+    $forum = makeGeneralForum();
+
+    $this->actingAs($user)->post('/api/threads', [
+        'forum_id' => $forum->id,
+        'title' => 'Анкета премногу долга',
+        'poll' => [
+            'question' => 'Прашање?',
+            'options' => ['А', 'Б'],
+            'duration_days' => 31,
+        ],
+    ])->assertUnprocessable();
 });
 
 it('uploads files to imagekit and stores attachments', function () {
@@ -120,6 +139,7 @@ it('rejects combining a document with a poll', function () {
         'poll' => [
             'question' => 'Прашање?',
             'options' => ['А', 'Б'],
+            'duration_days' => 3,
         ],
     ])->assertUnprocessable();
 });

@@ -47,6 +47,8 @@ class StoreThreadRequest extends FormRequest
             'poll.question' => ['required_with:poll', 'string', 'min:1', 'max:255'],
             'poll.options' => ['required_with:poll', 'array', 'min:2', 'max:4'],
             'poll.options.*' => ['required', 'string', 'min:1', 'max:100'],
+            // How long the poll stays open after creation (1–30 days).
+            'poll.duration_days' => ['required_with:poll', 'integer', 'min:1', 'max:30'],
         ];
     }
 

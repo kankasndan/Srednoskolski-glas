@@ -114,7 +114,7 @@ class ThreadController extends Controller
                 $poll = Poll::query()->create([
                     'thread_id' => $thread->id,
                     'question' => $validated['poll']['question'],
-                    'ends_at' => now()->addDays(3),
+                    'ends_at' => now()->addDays((int) $validated['poll']['duration_days']),
                 ]);
 
                 foreach (array_values($validated['poll']['options']) as $index => $label) {
@@ -191,8 +191,9 @@ class ThreadController extends Controller
 
         $commentsQuery = $thread->comments()
             ->whereNull('parent_id')
-            ->with(['user.studentData.school.city', 'allReplies'])
-            ->latest();
+            ->with(['user.studentData.school.city', 'allReplies']);
+
+        $this->applyCommentSort($commentsQuery, (string) $request->query('sort', 'best'));
         $this->applyHasVoted($commentsQuery, $user);
         $comments = $commentsQuery->get();
 
@@ -202,5 +203,20 @@ class ThreadController extends Controller
                 'comments' => CommentResource::collection($comments),
             ],
         ]);
+    }
+
+    /**
+     * Top-level comment order for thread detail.
+     *
+     * Query: sort=best|newest|oldest (default: best)
+     */
+    private function applyCommentSort($query, string $sort): void
+    {
+        match ($sort) {
+            'newest' => $query->latest('created_at')->orderByDesc('id'),
+            'oldest' => $query->oldest('created_at')->orderBy('id'),
+            // best: highest upvotes, then newest as tiebreaker
+            default => $query->orderByDesc('upvotes')->latest('created_at')->orderByDesc('id'),
+        };
     }
 }

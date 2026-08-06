@@ -767,7 +767,21 @@ If the thread does not belong to that forum → `404`.
 }
 ```
 
-`comments` is only top-level comments; replies are nested in each comment’s `replies` array. Currently ordered newest first. Comment sort params (`best` / `newest` / `oldest`) are not implemented yet.
+`comments` is only top-level comments; replies are nested in each comment’s `replies` array (chronological).
+
+| Query | Values | Default | Meaning |
+|-------|--------|---------|---------|
+| `sort` | `best`, `newest`, `oldest` | `best` | Top-level comment order |
+
+| `sort` | Order |
+|--------|-------|
+| `best` | upvotes ↓, then newest |
+| `newest` | created_at ↓ |
+| `oldest` | created_at ↑ |
+
+```
+GET /api/p/drzhavna_matura/comments/15?sort=newest
+```
 
 ---
 
@@ -789,12 +803,13 @@ POST /api/threads
 | `link` | url | optional; stored as attachment `type: link` |
 | `poll[question]` | string | optional |
 | `poll[options][]` | string[] | required with poll; 2–4 options |
+| `poll[duration_days]` | int | required with poll; **1–30** (max one month). Sets `ends_at` from now |
 
 **Exclusivity (same as UI):** link cannot combine with image/video; images + one video are allowed together; document / poll cannot combine.
 
 Files are uploaded with `Media::upload($file, "threads/{id}")` → ImageKit, then saved on `thread_attachments`.
 
-Polls expire **3 days** after creation (`ends_at`). One poll per thread.
+Polls expire after `duration_days` (`ends_at`). One poll per thread.
 
 **Success (`201`)** — `ThreadResource` (includes `attachments` + `poll` when present).
 
@@ -808,9 +823,10 @@ POST /api/polls/{id}/vote
 
 **Auth required.** Body JSON: `{ "poll_option_id": 1 }`
 
-- One vote per user per poll
+- One active vote per user per poll (unique `poll_id` + `user_id`)
+- Users **may change** their vote to another option while the poll is open
 - Results always returned (`votes_count`, `percentage`, `total_votes`, `user_voted_option_id`)
-- Rejected after `ends_at` (`422`) or if already voted (`409`)
+- Rejected after `ends_at` (`422`)
 
 ---
 
@@ -970,7 +986,7 @@ DELETE /api/media
 | `GET` | `/api/feed` | optional | Paginated personalized / site-wide feed (5/page) |
 | `GET` | `/api/p/{slug}` | optional | Forum metadata only (`is_following` when auth) |
 | `GET` | `/api/p/{slug}/threads` | — | Paginated threads (page 1, filters, scroll) |
-| `GET` | `/api/p/{slug}/comments/{id}` | — | Thread + comment tree (records view if logged in) |
+| `GET` | `/api/p/{slug}/comments/{id}` | — | Thread + comment tree (`sort=best\|newest\|oldest`) |
 | `POST` | `/api/p/{slug}/follow` | yes | Follow general forum |
 | `DELETE` | `/api/p/{slug}/follow` | yes | Unfollow general forum |
 | `POST` | `/api/threads` | yes | Create thread (+ files / link / poll) |

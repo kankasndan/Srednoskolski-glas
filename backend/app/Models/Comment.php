@@ -46,7 +46,10 @@ class Comment extends Model
 
     public function allReplies(): HasMany
     {
-        $relation = $this->replies()->with(['user.studentData.school.city', 'allReplies']);
+        // Nested replies stay chronological so a conversation reads top-to-bottom.
+        $relation = $this->replies()
+            ->oldest()
+            ->with(['user.studentData.school.city', 'allReplies']);
 
         $userId = auth('web')->id() ?? auth()->id();
 
