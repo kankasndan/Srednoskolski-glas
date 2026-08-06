@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -36,15 +37,22 @@ class AdminController extends Controller
             "password" => ["required", "confirmed", Password::min(8)->uncompromised()->mixedCase()->numbers()->symbols()],
         ]);
 
-        if(Hash::check($request->current_password, $user->password)){
+        if (Hash::check($request->current_password, $user->password)) {
             $user->update([
                 "password" => $request->current_password
             ]);
-        } else{
+        } else {
             return back()->withErrors([
                 "invalid_password" => "Invalid current password!"
             ]);
         }
+
+        return back();
+    }
+
+    public function readAllNotifications()
+    {
+        Auth::user()?->unreadNotifications->markAsRead();
 
         return back();
     }

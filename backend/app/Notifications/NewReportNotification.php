@@ -20,10 +20,12 @@ class NewReportNotification extends Notification
     public function toArray($notifiable)
     {
         return [
+            'kind' => 'report',
             'title' => 'Ново пријавување',
             'message' => "Пријавено: {$this->report->reason}",
             'url' => route('report.index'),
             'report_id' => $this->report->id,
+            'created_at' => $this->report->created_at,
         ];
     }
 }

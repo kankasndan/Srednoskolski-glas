@@ -24,21 +24,76 @@
         <!-- Right side (col 3) -->
         <div class="flex items-center gap-4 justify-self-end">
 
+            @php
+                $unreadCount = auth()->user()?->unreadNotifications()->count() ?? 0;
+            @endphp
+
             <!-- Notification bell -->
-            <button id="bellBtn"
-                class="relative flex h-9 w-9 items-center justify-center rounded-full border border-[#E6E8F0] text-[#595959] hover:bg-[#F4F2FF]">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                    <path d="M13.73 21a2 2 0 01-3.46 0" />
-                </svg>
-                <span
-                    class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#F88DD5] text-[10px] font-bold text-white">4</span>
-            </button>
+            <div class="relative">
+                <button id="bellBtn"
+                    class="relative flex h-9 w-9 items-center justify-center rounded-full border border-[#E6E8F0] text-[#595959] hover:bg-[#F4F2FF]">
+                    <i class="fa-regular fa-bell"></i>
+
+                    @if ($unreadCount > 0)
+                        <span
+                            class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#F88DD5] text-[10px] font-bold text-white">
+                            {{ $unreadCount }}
+                        </span>
+                    @endif
+                </button>
+
+                <!-- Notifications dropdown -->
+                <div id="notifMenu"
+                    class="absolute right-0 top-[52px] hidden w-[320px] rounded-[10px] border border-[#E6E8F0] bg-white p-2 shadow-lg z-50">
+
+                    <div class="mb-2 flex items-center justify-between px-2">
+                        <span class="text-[13px] font-bold text-[#1F2333]">Нотификации</span>
+
+                        @if ($unreadCount > 0)
+                            <form method="POST" action="{{ route('admin.notifications.readAll') }}">
+                                @csrf
+                                <button type="submit" class="text-[11px] text-[#582FF5] hover:underline">
+                                    Обележи ги сите како прочитани
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+
+                    @php
+                        $notifications = auth()->user()?->notifications()->latest()->take(10)->get();
+                    @endphp
+
+                    @forelse($notifications as $notification)
+                        @php
+                            $data = $notification->data;
+                            $isUnread = is_null($notification->read_at);
+                        @endphp
+
+                        <a href="{{ $data['url'] ?? '#' }}"
+                            class="block rounded-[8px] px-3 py-2 text-[13px] hover:bg-[#F4F2FF] {{ $isUnread ? 'bg-[#F9F5FF]' : '' }}">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-[#1F2333]">
+                                    {{ $data['title'] ?? 'Нотификација' }}
+                                </span>
+                                @if ($isUnread)
+                                    <span class="ml-2 h-2 w-2 rounded-full bg-[#582FF5]"></span>
+                                @endif
+                            </div>
+                            <div class="text-[12px] text-[#595959]">
+                                {{ $data['message'] ?? '' }}
+                            </div>
+                        </a>
+                    @empty
+                        <div class="px-3 py-2 text-[13px] text-[#9598A6]">
+                            Нема нотификации.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
 
             <div class="h-8 w-px bg-[#E6E8F0]"></div>
 
-            <!-- Admin dropdown -->
+            <!-- Admin dropdown (unchanged) -->
             <div class="relative">
                 <button id="userMenuBtn" class="flex items-center gap-2 rounded-[10px] px-2 py-1 hover:bg-[#F4F2FF]">
                     @if ($currentAdmin->imageUrl)
@@ -69,7 +124,6 @@
             </div>
 
         </div>
-
     </header>
 
     <main class="flex h-[calc(100vh-72px)] justify-center overflow-hidden">
@@ -121,11 +175,10 @@
                 <div class="px-1 pt-4 pb-1 text-[12px] font-bold uppercase tracking-wide text-[#9598A6]">
                     Систем
                 </div>
-                
+
                 <a href="{{ route('role.index') }}" data-nav-key="nav:roles">
                     Улоги и пермисии
                 </a>
-            
             @endrole
 
         </nav>

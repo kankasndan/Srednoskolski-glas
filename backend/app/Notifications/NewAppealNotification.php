@@ -2,43 +2,30 @@
 
 namespace App\Notifications;
 
+use App\Models\Appeal;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class NewAppealNotification extends Notification
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct()
+    public function __construct(public Appeal $appeal) {}
+
+    public function via($notifiable)
     {
-        //
+        return ['database']; // in-app/bell notifications only
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['database'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toArray($notifiable)
     {
         return [
-            'title' => 'Ново пријавување',
-            'message' => "Пријавено: {$this->report->reason}",
-            'url' => route('report.index'),
-            'report_id' => $this->report->id,
+            'kind' => 'appeal',
+            'title' => 'Нова жалба',
+            'message' => "Жалба за санкција #{$this->appeal->id}",
+            'url' => route('appeal.index'),
+            'appeal_id' => $this->appeal->id,
+            'status' => $this->appeal->status,
         ];
     }
 }

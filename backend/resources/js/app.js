@@ -104,3 +104,21 @@ function styleSidebarLinks() {
 document.addEventListener("DOMContentLoaded", () => {
     styleSidebarLinks();
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const bellBtn = document.getElementById("bellBtn");
+    const notifMenu = document.getElementById("notifMenu");
+
+    if (bellBtn && notifMenu) {
+        bellBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            notifMenu.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!notifMenu.contains(e.target)) {
+                notifMenu.classList.add("hidden");
+            }
+        });
+    }
+});

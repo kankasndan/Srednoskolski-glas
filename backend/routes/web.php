@@ -18,6 +18,12 @@ Route::post('admin/login/login', [AuthContoller::class, 'login'])->name('admin.l
 
 Route::prefix('admin')->middleware(['auth', 'role:super_admin|admin|moderator', 'permission:access admin panel'])->group(function () {
 
+    // NOTIFICATIONS
+
+        // MARK AS READ
+        Route::post('notifications/read-all', [AdminController::class, 'readAllNotifications'])
+    ->name('admin.notifications.readAll');
+
     // DAHSBOARD
     Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('dashboard/export', [DashboardController::class, 'exportPdf'])->name('admin.dashboard.export');
