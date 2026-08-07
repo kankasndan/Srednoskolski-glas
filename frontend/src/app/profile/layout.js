@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import AppShell from "@/components/AppShell";
-import ProfileBanner from "@/components/ProfileBanner";
-import ProfileTabs from "@/components/ProfileTabs";
+import AppShell from "@/components/shell/AppShell";
+import ProfileBanner from "@/components/profile/ProfileBanner";
+import ProfileTabs from "@/components/profile/ProfileTabs";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileCounts } from "@/hooks/useProfileCounts";
 

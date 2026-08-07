@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AppealController;
-use App\Http\Controllers\Admin\AuthContoller;
+use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ForumController;
 use App\Http\Controllers\Admin\ReportController;
@@ -11,12 +11,20 @@ use App\Http\Controllers\Admin\SanctionController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('admin', [AuthContoller::class, 'redirecting']);
+Route::get('admin', [AuthController::class, 'redirecting']);
 
-Route::get('admin/login', [AuthContoller::class, 'index'])->name('login');
-Route::post('admin/login/login', [AuthContoller::class, 'login'])->name('admin.login');
+Route::get('admin/login', [AuthController::class, 'index'])->name('login');
+Route::post('admin/login/login', [AuthController::class, 'login'])
+    ->middleware('throttle:admin-login')
+    ->name('admin.login');
 
-Route::prefix('admin')->middleware('auth')->group(function () {
+Route::prefix('admin')->middleware(['auth', 'role:super_admin|admin|moderator', 'permission:access admin panel'])->group(function () {
+
+    // NOTIFICATIONS
+
+    // MARK AS READ
+    Route::post('notifications/read-all', [AdminController::class, 'readAllNotifications'])
+        ->name('admin.notifications.readAll');
 
     // DAHSBOARD
     Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
@@ -89,20 +97,31 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('forums/liveSearch', [ForumController::class, 'liveSearch'])->name('forum.liveSearch');
     Route::get('forums/{forum}/show', [ForumController::class, 'show'])->name('forum.show');
 
-    // ROLES AND PERMISSION
-    Route::get('roles', [RoleController::class, 'index'])->name('role.index');
-    // UPDATE ROLE
-    Route::patch('roles/{user}/update', [RoleController::class, 'update'])->name('role.update');
-    Route::delete('roles/{user}/destroy', [RoleController::class, 'destroy'])->name('role.destroy');
-    Route::patch('roles/update/forum', [RoleController::class, 'updateForum'])->name('role.update.forum');
-    // SEARCH STAFF
-    Route::get('roles/live-search', [RoleController::class, 'liveSearch'])->name('role.liveSearch');
-    Route::get('roles/{user}/show', [RoleController::class, 'show'])->name('role.show');
-    // GRANT ROLE
-    Route::get('roles/grant-search', [RoleController::class, 'grantSearch'])->name('role.grantSearch');
-    Route::post('roles/grant', [RoleController::class, 'grant'])->name('role.grant');
+    // ROLES AND PERMISSIONS
+    Route::middleware('permission:view roles page')->group(function () {
+        Route::get('roles', [RoleController::class, 'index'])->name('role.index');
+        Route::get('roles/live-search', [RoleController::class, 'liveSearch'])->name('role.liveSearch');
+        Route::get('roles/{user}/show', [RoleController::class, 'show'])->name('role.show');
+    });
 
-    // LOGOUT
-    Route::get('logout', [AuthContoller::class, 'logout'])->name('admin.logout');
+    Route::middleware('permission:grant roles')->group(function () {
+        Route::get('roles/grant-search', [RoleController::class, 'grantSearch'])->name('role.grantSearch');
+        Route::post('roles/grant', [RoleController::class, 'grant'])->name('role.grant');
+    });
 
+    Route::middleware('permission:update user role')->group(function () {
+        Route::patch('roles/{user}/update', [RoleController::class, 'update'])->name('role.update');
+    });
+
+    Route::middleware('permission:delete user role')->group(function () {
+        Route::delete('roles/{user}/destroy', [RoleController::class, 'destroy'])->name('role.destroy');
+    });
+
+    Route::middleware('permission:update forum role settings')->group(function () {
+        Route::patch('roles/update/forum', [RoleController::class, 'updateForum'])->name('role.update.forum');
+    });
+
+    // LOGOUT (POST + CSRF — avoid CSRF logout via GET)
+    Route::post('logout', [AuthController::class, 'logout'])->name('admin.logout');
 });
+

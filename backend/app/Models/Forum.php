@@ -26,6 +26,6 @@ class Forum extends Model
 
     public function moderator()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

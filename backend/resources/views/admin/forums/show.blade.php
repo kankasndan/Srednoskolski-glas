@@ -28,11 +28,21 @@
 
     {{-- Forum Header: banner, icon, name, description, type, city, slug --}}
     <div class="bg-white rounded-xl shadow overflow-hidden">
-        <div class="h-32 w-full bg-gray-200"></div>
+        @if ($forum->bannerUrl)
+            <div class="h-32 w-full bg-gray-200 bg-cover bg-center"
+                style="background-image: url('{{ $forum->bannerUrl }}')"></div>
+        @else
+            <div class="h-32 w-full bg-gray-200"></div>
+        @endif
 
         <div class="p-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div class="flex items-start gap-4">
-                <div class="w-16 h-16 rounded-xl bg-gray-300 -mt-14 border-4 border-white shrink-0"></div>
+                @if ($forum->imageUrl)
+                    <img src="{{ $forum->imageUrl }}" alt=""
+                        class="w-16 h-16 rounded-xl object-cover bg-gray-100 -mt-14 border-4 border-white shrink-0">
+                @else
+                    <div class="w-16 h-16 rounded-xl bg-gray-300 -mt-14 border-4 border-white shrink-0"></div>
+                @endif
 
                 <div>
                     <div class="flex items-center gap-2">
@@ -100,7 +110,7 @@
 
                 <div class="flex items-center gap-6 text-sm text-gray-500">
                     <span>▲ {{ $thread->upvotes }} upvotes</span>
-                    <span>💬 {{ $thread->comments->count() }} comments</span>
+                    <span>💬 {{ $thread->comments_count }} comments</span>
                     <button type="button"
                     {{-- {{ route('thread.destroy', ['thread' => $thread->id]) }} --}}
                         onclick="openDeleteThreadModal('', '{{ $thread->name }}')"
@@ -189,12 +199,22 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="text-sm text-gray-600">Image</label>
-                    <input type="file" class="w-full text-sm border border-gray-300 p-2 rounded-md" name="imageUrl">
+                    <label class="text-sm text-gray-600">Icon</label>
+                    @if ($forum->imageUrl)
+                        <img src="{{ $forum->imageUrl }}" alt="" class="mb-2 h-12 w-12 rounded-lg object-cover">
+                    @endif
+                    <input type="file" accept="image/*"
+                        class="w-full text-sm border border-gray-300 p-2 rounded-md" name="icon">
+                    <p class="text-xs text-gray-400 mt-1">Leave empty to keep the current icon.</p>
                 </div>
                 <div>
                     <label class="text-sm text-gray-600">Banner</label>
-                    <input type="file" class="w-full text-sm border border-gray-300 p-2 rounded-md" name="bannerUrl">
+                    @if ($forum->bannerUrl)
+                        <img src="{{ $forum->bannerUrl }}" alt="" class="mb-2 h-12 w-full rounded-lg object-cover">
+                    @endif
+                    <input type="file" accept="image/*"
+                        class="w-full text-sm border border-gray-300 p-2 rounded-md" name="banner">
+                    <p class="text-xs text-gray-400 mt-1">Leave empty to keep the current banner.</p>
                 </div>
             </div>
             <div class="flex justify-end gap-2 pt-2">

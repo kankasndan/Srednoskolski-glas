@@ -31,6 +31,7 @@ class ThreadResource extends JsonResource
                 'id' => $this->forum->id,
                 'name' => $this->forum->name,
                 'slug' => $this->forum->slug,
+                'type' => $this->forum->type,
                 'imageUrl' => $this->forum->imageUrl,
             ]),
             'author' => $this->is_anonymous
@@ -38,6 +39,10 @@ class ThreadResource extends JsonResource
                 : new UserResource($this->whenLoaded('user')),
             'attachments' => ThreadAttachmentResource::collection(
                 $this->whenLoaded('threadAttachment'),
+            ),
+            'poll' => $this->when(
+                $this->relationLoaded('poll'),
+                fn () => $this->poll === null ? null : new PollResource($this->poll),
             ),
         ];
     }

@@ -88,7 +88,12 @@
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
                                     {{-- Forum icon --}}
-                                    <div class="w-8 h-8 rounded-lg bg-gray-200"></div>
+                                    @if ($forum->imageUrl)
+                                        <img src="{{ $forum->imageUrl }}" alt=""
+                                            class="w-8 h-8 rounded-lg object-cover bg-gray-100">
+                                    @else
+                                        <div class="w-8 h-8 rounded-lg bg-gray-200"></div>
+                                    @endif
                                     <div>
                                         <div class="font-medium text-gray-900">{{ $forum->name }}</div>
                                         <div class="text-xs text-gray-400">{{ $forum->description }}</div>
@@ -151,22 +156,27 @@
                 <button type="button" onclick="closeForumModal()" class="text-gray-400 hover:text-gray-600">✕</button>
             </div>
 
-            <form class="space-y-3" method="POST" action="{{ route('forum.store') }}">
+            <form class="space-y-3" method="POST" action="{{ route('forum.store') }}"
+                enctype="multipart/form-data">
+                @csrf
                 <div>
                     <label class="text-sm text-gray-600">Name</label>
-                    <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="name">
+                    <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="name"
+                        required>
                 </div>
 
                 <div>
                     <label class="text-sm text-gray-600">Slug</label>
-                    <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="slug">
-                    <p class="text-xs text-gray-400 mt-1">Renaming re-links all threads, comments, saves, and follows
-                        automatically.</p>
+                    <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="slug"
+                        placeholder="Optional — generated from name if empty">
+                    <p class="text-xs text-gray-400 mt-1">Leave blank to auto-generate from the name. Must match frontend
+                        slug rules.</p>
                 </div>
 
                 <div>
                     <label class="text-sm text-gray-600">Description</label>
-                    <textarea rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="description"></textarea>
+                    <textarea rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="description"
+                        required></textarea>
                 </div>
 
                 <div>
@@ -179,19 +189,24 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-sm text-gray-600">Image</label>
-                        <input type="file" class="w-full text-sm border border-gray-300 p-2 rounded-md" name="imageUrl">
+                        <label class="text-sm text-gray-600">Icon</label>
+                        <input type="file" accept="image/*"
+                            class="w-full text-sm border border-gray-300 p-2 rounded-md" name="icon">
+                        <p class="text-xs text-gray-400 mt-1">Optional. Uploads to ImageKit. Otherwise uses
+                            /icons/&#123;slug&#125;.svg</p>
                     </div>
                     <div>
                         <label class="text-sm text-gray-600">Banner</label>
-                        <input type="file" class="w-full text-sm border border-gray-300 p-2 rounded-md"
-                            name="bannerUrl">
+                        <input type="file" accept="image/*"
+                            class="w-full text-sm border border-gray-300 p-2 rounded-md" name="banner">
+                        <p class="text-xs text-gray-400 mt-1">Optional. Uploads to ImageKit. Otherwise uses
+                            /banners/&#123;slug&#125;.svg</p>
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="closeForumModal()"
                         class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button
+                    <button type="submit"
                         class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">Save
                         Forum</button>
                 </div>
