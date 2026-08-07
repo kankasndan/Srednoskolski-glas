@@ -1,17 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getMyThreads, getUserThreads } from "@/api/profile";
 import StartDiscussionButton from "@/components/forum/StartDiscussionButton";
 import ProfileThreadItem from "@/components/profile/ProfileThreadItem";
-import { getMyThreads } from "@/api/profile";
 
-export default function ProfileThreadList() {
+export default function ProfileThreadList({
+  username = null,
+  isOwnProfile = true,
+}) {
   const [threads, setThreads] = useState(null);
 
   useEffect(() => {
     let active = true;
 
-    getMyThreads()
+    const loader = username ? getUserThreads(username) : getMyThreads();
+
+    loader
       .then((data) => {
         if (active) setThreads(data);
       })
@@ -22,7 +27,7 @@ export default function ProfileThreadList() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [username]);
 
   function handleDeleted(threadId) {
     setThreads((prev) => (prev ?? []).filter((thread) => thread.id !== threadId));
@@ -33,7 +38,11 @@ export default function ProfileThreadList() {
     content = <p className="text-[16px] text-[#595959]">Се вчитува…</p>;
   } else if (threads.length === 0) {
     content = (
-      <p className="text-[16px] text-[#595959]">Сè уште немаш започнато дискусии.</p>
+      <p className="text-[16px] text-[#595959]">
+        {isOwnProfile
+          ? "Сè уште немаш започнато дискусии."
+          : "Овој корисник сè уште нема започнато дискусии."}
+      </p>
     );
   } else {
     content = (
@@ -43,6 +52,7 @@ export default function ProfileThreadList() {
             key={thread.id}
             thread={thread}
             onDeleted={handleDeleted}
+            canManage={isOwnProfile}
           />
         ))}
       </div>
@@ -51,7 +61,7 @@ export default function ProfileThreadList() {
 
   return (
     <div className="flex flex-col gap-6">
-      <StartDiscussionButton />
+      {isOwnProfile ? <StartDiscussionButton /> : null}
       {content}
     </div>
   );

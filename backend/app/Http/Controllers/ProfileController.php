@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\FiltersThreads;
 use App\Http\Resources\ForumResource;
 use App\Http\Resources\ProfileCommentResource;
+use App\Http\Resources\PublicUserResource;
 use App\Http\Resources\ThreadResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,6 +28,7 @@ class ProfileController extends Controller
                 'threads' => $user->threads()->count(),
                 'comments' => $user->comments()->count(),
                 'followed_forums' => $user->forums()->count(),
+                'following_users' => $user->following()->count(),
             ],
         ]);
     }
@@ -91,4 +93,28 @@ class ProfileController extends Controller
 
         return ForumResource::collection($forums)->response();
     }
+
+    /**
+     * Users the authenticated user follows.
+     *
+     * GET /api/me/following-users
+     */
+    public function followingUsers(Request $request): JsonResponse
+    {
+        $users = $request->user()
+            ->following()
+            ->whereNotNull('username')
+            ->whereNotNull('onboarding_completed_at')
+            ->with([
+                'studentData.school.city',
+                'studentData.school.forum',
+                'studentData.vocation',
+            ])
+            ->orderBy('username')
+            ->limit(100)
+            ->get();
+
+        return PublicUserResource::collection($users)->response();
+    }
 }
+

@@ -198,7 +198,7 @@ class ThreadController extends Controller
                 $query->whereNull('comments.deleted_at')
                     ->orWhereHas('replies', fn ($replies) => $replies->withoutTrashed());
             })
-            ->with(['user.studentData.school.city', 'allReplies']);
+            ->with(['user.studentData.school.city', 'user.studentData.school.forum', 'allReplies']);
 
         $this->applyCommentSort($commentsQuery, (string) $request->query('sort', 'best'));
         $this->applyHasVoted($commentsQuery, $user);

@@ -13,6 +13,7 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ThreadController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\VoteController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,8 +38,23 @@ Route::middleware('auth:sanctum')->get('/me/counts', [ProfileController::class, 
 Route::middleware('auth:sanctum')->get('/me/threads', [ProfileController::class, 'threads'])->name('me.threads');
 Route::middleware('auth:sanctum')->get('/me/comments', [ProfileController::class, 'comments'])->name('me.comments');
 Route::middleware('auth:sanctum')->get('/me/followed-forums', [ProfileController::class, 'followedForums'])->name('me.followed-forums');
+Route::middleware('auth:sanctum')->get('/me/following-users', [ProfileController::class, 'followingUsers'])->name('me.following-users');
 // Log the user out and end the session.
 Route::middleware(['auth:sanctum', 'throttle:api-writes'])->post('/logout', LogoutController::class)->name('auth.logout');
+
+// Public user profiles (by username).
+Route::get('/u/{username}', [UserProfileController::class, 'show'])
+    ->where('username', '[A-Za-z0-9_.-]+')
+    ->name('users.profile.show');
+Route::get('/u/{username}/threads', [UserProfileController::class, 'threads'])
+    ->where('username', '[A-Za-z0-9_.-]+')
+    ->name('users.profile.threads');
+Route::get('/u/{username}/comments', [UserProfileController::class, 'comments'])
+    ->where('username', '[A-Za-z0-9_.-]+')
+    ->name('users.profile.comments');
+Route::get('/u/{username}/followed-forums', [UserProfileController::class, 'followedForums'])
+    ->where('username', '[A-Za-z0-9_.-]+')
+    ->name('users.profile.followed-forums');
 
 // List thematic + school forums for the sidebar.
 Route::get('/forums', [ForumController::class, 'index'])->name('forums.index');
@@ -55,6 +71,16 @@ Route::get('/p/{forum:slug}/threads', [ThreadController::class, 'index'])->name(
 Route::get('/p/{forum:slug}/comments/{thread:id}', [ThreadController::class, 'show'])->name('forums.threads.show');
 
 Route::middleware(['auth:sanctum', 'not_banned'])->group(function () {
+    // Follow / unfollow another user.
+    Route::post('/u/{username}/follow', [UserProfileController::class, 'follow'])
+        ->middleware('throttle:api-writes')
+        ->where('username', '[A-Za-z0-9_.-]+')
+        ->name('users.follow');
+    Route::delete('/u/{username}/follow', [UserProfileController::class, 'unfollow'])
+        ->middleware('throttle:api-writes')
+        ->where('username', '[A-Za-z0-9_.-]+')
+        ->name('users.unfollow');
+
     // Create a new thread (optional files, link, or poll).
     Route::post('/threads', [ThreadController::class, 'store'])
         ->middleware('throttle:thread-create')

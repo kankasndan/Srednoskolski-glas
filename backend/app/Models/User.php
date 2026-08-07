@@ -69,6 +69,20 @@ class User extends Authenticatable
         return $this->belongsToMany(Forum::class)->withTimestamps();
     }
 
+    /** Users who follow this user. */
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'user_follows', 'following_id', 'follower_id')
+            ->withTimestamps();
+    }
+
+    /** Users this user follows. */
+    public function following(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'user_follows', 'follower_id', 'following_id')
+            ->withTimestamps();
+    }
+
     public function threadViews()
     {
         return $this->hasMany(ThreadView::class);

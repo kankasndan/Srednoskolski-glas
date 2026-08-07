@@ -448,10 +448,77 @@ GET /api/me/counts
   "data": {
     "threads": 12,
     "comments": 34,
-    "followed_forums": 5
+    "followed_forums": 5,
+    "following_users": 3
   }
 }
 ```
+
+```
+GET /api/me/following-users
+```
+
+**Auth required.** Users the current user follows (newest username order, max 100). Same public user shape as `/api/u/{username}`.
+
+---
+
+### Public user profile
+
+```
+GET /api/u/{username}
+```
+
+**Public.** Profile header for a completed-onboarding user. When the request is authenticated (session cookie), includes whether the viewer follows them.
+
+```json
+{
+  "data": {
+    "user": {
+      "id": 1,
+      "username": "ana_mk",
+      "imageUrl": "…",
+      "created_at": "…",
+      "student_data": {
+        "grade": 3,
+        "school": {
+          "id": 12,
+          "name": "СУГС Јосип Броз Тито",
+          "city": { "id": 1, "name": "Скопје" },
+          "forum": { "id": 40, "slug": "sugs_josip_broz_tito_skopje", "name": "…" }
+        },
+        "vocation": { "id": 3, "name": "Гимназиско" }
+      }
+    },
+    "counts": {
+      "threads": 12,
+      "comments": 34,
+      "followed_forums": 5,
+      "followers": 8
+    },
+    "is_following": false,
+    "is_own_profile": false
+  }
+}
+```
+
+Related list endpoints (same shapes as `/api/me/*`):
+
+- `GET /api/u/{username}/threads`
+- `GET /api/u/{username}/comments`
+- `GET /api/u/{username}/followed-forums`
+
+Follow / unfollow (**auth required**):
+
+```
+POST   /api/u/{username}/follow
+DELETE /api/u/{username}/follow
+```
+
+```json
+{ "data": { "is_following": true, "followers": 9 } }
+```
+
+Self-follow returns `422`.
 
 ---
 
@@ -1227,6 +1294,13 @@ DELETE /api/media
 | `GET` | `/api/me/threads` | yes | Current user’s threads |
 | `GET` | `/api/me/comments` | yes | Current user’s comments (+ thread context) |
 | `GET` | `/api/me/followed-forums` | yes | Forums the user follows |
+| `GET` | `/api/me/following-users` | yes | Users the current user follows |
+| `GET` | `/api/u/{username}` | no | Public user profile + counts |
+| `GET` | `/api/u/{username}/threads` | no | User’s threads |
+| `GET` | `/api/u/{username}/comments` | no | User’s comments |
+| `GET` | `/api/u/{username}/followed-forums` | no | Forums the user follows |
+| `POST` | `/api/u/{username}/follow` | yes | Follow user |
+| `DELETE` | `/api/u/{username}/follow` | yes | Unfollow user |
 | `POST` | `/api/logout` | yes | End session |
 | `PUT` | `/api/onboarding` | yes | Save profile |
 | `GET` | `/api/cities` | — | Cities + schools |

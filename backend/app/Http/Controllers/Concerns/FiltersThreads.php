@@ -79,6 +79,7 @@ trait FiltersThreads
     {
         return [
             'user.studentData.school.city',
+            'user.studentData.school.forum',
             'threadAttachment',
             'forum',
             'poll' => fn ($q) => $q->withCount('votes'),

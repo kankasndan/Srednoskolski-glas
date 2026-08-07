@@ -20,7 +20,8 @@ class UserSeeder extends Seeder
         ['username' => 'elena_s', 'email' => 'elena@example.com', 'onboarded' => true, 'role' => 'user'],
         ['username' => 'stefan_t', 'email' => 'stefan@example.com', 'onboarded' => true, 'role' => 'user'],
         ['username' => 'ivana_m', 'email' => 'ivana@example.com', 'onboarded' => true, 'role' => 'user'],
-        ['username' => 'nikola_d', 'email' => 'nikola@example.com', 'onboarded' => false, 'role' => 'user'],
+        // Has threads/comments/student data in other seeders — must be onboarded for /u/{username}.
+        ['username' => 'nikola_d', 'email' => 'nikola@example.com', 'onboarded' => true, 'role' => 'user'],
         ['username' => 'profesor_x', 'email' => 'profesor@example.com', 'onboarded' => false, 'role' => 'user'],
     ];
 

@@ -3,11 +3,35 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const TABS = [
-  { href: "/profile", label: "Твои дискусии", countKey: "threads" },
-  { href: "/profile/comments", label: "Коментари", countKey: "comments" },
-  { href: "/profile/following", label: "Следиш", countKey: "follows" },
-];
+function buildTabs(basePath, isOwnProfile) {
+  const tabs = [
+    {
+      href: basePath,
+      label: isOwnProfile ? "Твои дискусии" : "Дискусии",
+      countKey: "threads",
+    },
+    {
+      href: `${basePath}/comments`,
+      label: "Коментари",
+      countKey: "comments",
+    },
+    {
+      href: `${basePath}/following`,
+      label: isOwnProfile ? "Форуми" : "Следи",
+      countKey: "follows",
+    },
+  ];
+
+  if (isOwnProfile) {
+    tabs.push({
+      href: `${basePath}/people`,
+      label: "Корисници",
+      countKey: "followingUsers",
+    });
+  }
+
+  return tabs;
+}
 
 function TabLink({ href, label, count, active }) {
   return (
@@ -38,12 +62,17 @@ function TabLink({ href, label, count, active }) {
   );
 }
 
-export default function ProfileTabs({ counts }) {
+export default function ProfileTabs({
+  counts,
+  basePath = "/profile",
+  isOwnProfile = true,
+}) {
   const pathname = usePathname();
+  const tabs = buildTabs(basePath, isOwnProfile);
 
   return (
     <nav className="flex items-center gap-8 border-b border-(--color-grays-300)">
-      {TABS.map((tab) => (
+      {tabs.map((tab) => (
         <TabLink
           key={tab.href}
           href={tab.href}

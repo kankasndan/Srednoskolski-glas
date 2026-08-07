@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { mk } from "date-fns/locale";
 import Image from "next/image";
 import Link from "next/link";
+import { followUser, unfollowUser } from "@/api/profile";
 import { apiFetch } from "@/lib/api";
 
 const GRADE_LABELS = {
@@ -45,9 +46,16 @@ function readStudentData(user) {
   return user?.student_data ?? user?.studentData ?? null;
 }
 
-export default function ProfileBanner({ user }) {
+export default function ProfileBanner({
+  user,
+  isOwnProfile = true,
+  isFollowing = false,
+  onFollowChange,
+}) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [following, setFollowing] = useState(Boolean(isFollowing));
+  const [followBusy, setFollowBusy] = useState(false);
 
   const studentData = readStudentData(user);
   const school = studentData?.school ?? null;
@@ -60,6 +68,10 @@ export default function ProfileBanner({ user }) {
   const schoolLabel = [school?.name, city].filter(Boolean).join(", ");
   const joined = user.created_at ? joinedLabel(user.created_at) : null;
 
+  useEffect(() => {
+    setFollowing(Boolean(isFollowing));
+  }, [isFollowing]);
+
   async function handleLogout() {
     setLoggingOut(true);
 
@@ -68,6 +80,36 @@ export default function ProfileBanner({ user }) {
     } finally {
       localStorage.removeItem("onboarding_pending");
       router.replace("/feed");
+    }
+  }
+
+  async function handleFollowToggle() {
+    if (!user?.username || followBusy) return;
+
+    const nextFollowing = !following;
+    setFollowing(nextFollowing);
+    setFollowBusy(true);
+
+    try {
+      const data = nextFollowing
+        ? await followUser(user.username)
+        : await unfollowUser(user.username);
+
+      const resolvedFollowing =
+        typeof data?.is_following === "boolean" ? data.is_following : nextFollowing;
+
+      setFollowing(resolvedFollowing);
+      onFollowChange?.({
+        is_following: resolvedFollowing,
+        followers: data?.followers,
+      });
+    } catch (err) {
+      setFollowing(!nextFollowing);
+      if (err?.status === 401) {
+        router.push("/login");
+      }
+    } finally {
+      setFollowBusy(false);
     }
   }
 
@@ -107,20 +149,37 @@ export default function ProfileBanner({ user }) {
       </div>
 
       <div className="flex shrink-0 flex-col gap-2">
-        <button
-          type="button"
-          className="flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-primary-200) transition-colors hover:bg-[#F1EEFE]"
-        >
-          Уреди профил
-        </button>
-        <button
-          type="button"
-          onClick={handleLogout}
-          disabled={loggingOut}
-          className="flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-primary-200) transition-colors hover:bg-[#F1EEFE] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {loggingOut ? "Се одјавува…" : "Одјави се"}
-        </button>
+        {isOwnProfile ? (
+          <>
+            <button
+              type="button"
+              className="flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-primary-200) transition-colors hover:bg-[#F1EEFE]"
+            >
+              Уреди профил
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-primary-200) transition-colors hover:bg-[#F1EEFE] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loggingOut ? "Се одјавува…" : "Одјави се"}
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={handleFollowToggle}
+            disabled={followBusy}
+            className={`flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none transition-colors disabled:opacity-60 ${
+              following
+                ? "bg-(--color-primary-200) text-white hover:bg-[#4B25E0]"
+                : "border border-(--color-primary-200) text-(--color-primary-200) hover:bg-[#F1EEFE]"
+            }`}
+          >
+            {followBusy ? "…" : following ? "Отследи" : "Следи"}
+          </button>
+        )}
       </div>
     </section>
   );
