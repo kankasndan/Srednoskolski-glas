@@ -2,13 +2,13 @@ export default function NewPageFooter() {
   return (
     <footer className="border-t border-[#E5E5E5] px-14 py-6 font-[family-name:var(--font-manrope)] text-[12px]">
       <nav aria-label="Правни информации" className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[#595959]">
-        <a className="cursor-pointer transition-colors hover:text-black">
+        <a href="/terms" className="cursor-pointer transition-colors hover:text-black">
           Услови за користење
         </a>
-        <a className="cursor-pointer transition-colors hover:text-black">
+        <a href="/privacy" className="cursor-pointer transition-colors hover:text-black">
           Приватност
         </a>
-        <a className="cursor-pointer transition-colors hover:text-black">
+        <a href="/rules" className="cursor-pointer transition-colors hover:text-black">
           Правила
         </a>
       </nav>

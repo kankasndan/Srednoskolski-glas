@@ -43,8 +43,14 @@ export default function DialogShell({
           aria-modal="true"
           aria-label={label}
           onClick={(event) => event.stopPropagation()}
-          className={`relative flex w-full flex-col items-center gap-6 rounded-xl bg-white p-6 shadow-[0_12px_24px_rgba(88,47,245,0.14)] ${widthClassName}`}
+          className={`relative flex w-full flex-col items-center gap-8 overflow-hidden rounded-xl bg-white p-10 shadow-[0_12px_24px_rgba(0,0,0,0.12)] ${widthClassName}`}
         >
+          {/* Grayscale go vadi violetovoto od sharata za da ostane siva. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[url('/pop-up%20backround.png')] bg-[length:95%] bg-center bg-no-repeat opacity-[0.06] grayscale"
+          />
+
           <button
             type="button"
             aria-label="Затвори"
@@ -54,7 +60,10 @@ export default function DialogShell({
             <CrossIcon />
           </button>
 
-          {children}
+          {/* relative za da stoi nad sharata */}
+          <div className="relative flex w-full flex-col items-center gap-8">
+            {children}
+          </div>
         </div>
       </div>
     </div>,
