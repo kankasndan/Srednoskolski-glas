@@ -2,12 +2,17 @@ import Image from "next/image";
 
 const FALLBACK_ICON = "/icons/opshti_diskusii.svg";
 
-export default function ForumIcon({ src, active = false, imageClassName = "size-9 max-w-none" }) {
+export default function ForumIcon({
+  src,
+  active = false,
+  className = "size-4",
+  imageClassName = "size-9 max-w-none",
+}) {
   const iconSrc = src || FALLBACK_ICON;
   const isRemote = /^https?:\/\//i.test(iconSrc);
 
   return (
-    <span className="relative size-4 shrink-0">
+    <span className={`relative shrink-0 ${className}`}>
       {isRemote ? (
         <img
           src={iconSrc}

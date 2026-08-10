@@ -21,7 +21,7 @@ const DOCUMENT_ACCEPT = ".pdf,.doc,.docx";
 
 const TYPES = [
   { label: "Слика", icon: "/new thread icons/photo.svg" },
-  { label: "Видео", icon: "/new thread icons/video.svg", iconClassName: "h-5" },
+  { label: "Видео", icon: "/new thread icons/video.svg" },
   { label: "Датотека", icon: "/new thread icons/documents.svg" },
   { label: "Анкета", icon: "/new thread icons/poll.svg" },
   { label: "Линк", faIcon: faLink },
@@ -182,9 +182,9 @@ export default function PostTypeButtons({ widthClassName = "w-[779px]" }) {
               disabledMessage={disabled ? exclusiveDisabledMessage : undefined}
               leading={
                 type.faIcon ? (
-                  <FontAwesomeIcon icon={type.faIcon} className="h-4 w-4" />
+                  <FontAwesomeIcon icon={type.faIcon} className="size-8" />
                 ) : (
-                  type.icon && <img src={type.icon} alt="" className={`${type.iconClassName ?? "h-4"} w-auto`} />
+                  type.icon && <img src={type.icon} alt="" className="size-8 object-contain" />
                 )
               }
               className="flex-1"
