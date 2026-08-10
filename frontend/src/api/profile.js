@@ -8,8 +8,15 @@ export async function getProfileUser() {
   }
 
   const payload = await res.json();
+  const user = payload.user ?? payload.data ?? payload;
 
-  return payload.user ?? payload.data ?? payload;
+  // Attach top-level capability/permission payloads used for create gates.
+  if (user && typeof user === "object") {
+    user.capabilities = payload.capabilities ?? user.capabilities ?? null;
+    user.permissions = payload.permissions ?? user.permissions ?? [];
+  }
+
+  return user;
 }
 
 export async function getMyCounts() {

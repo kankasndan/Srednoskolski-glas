@@ -456,11 +456,28 @@ GET /api/me
         "name": "Гимназиско"
       }
     }
+  },
+  "permissions": ["create comments", "create threads"],
+  "capabilities": {
+    "can_create_comments": true,
+    "can_create_threads": true,
+    "school_forum_id": 40
   }
 }
 ```
 
 `student_data` may be `null` for non-students. `onboarding_completed_at` is `null` until onboarding is finished. `school.forum` is included so the profile can link to that school’s forum (`/p/{slug}`).
+
+**Content permissions (Spatie)**
+
+| Who | Comment | Create thread |
+|-----|---------|---------------|
+| Guest | no | no |
+| Logged in, onboarding incomplete | no | no |
+| Onboarded, no school | yes (any thread) | no |
+| Onboarded, has school | yes (any thread, including other schools) | yes in **general** forums + **own school** forum only |
+
+`POST /api/threads` and `POST /api/threads/{id}/comments` enforce this (`403` when denied). Forum payloads also include `can_create_thread` for the current user.
 
 ---
 
@@ -853,16 +870,18 @@ GET /api/p/{slug}
 
 ---
 
-### Follow / unfollow a general forum
+### Follow / unfollow a forum
 
 ```
 POST   /api/p/{slug}/follow
 DELETE /api/p/{slug}/follow
 ```
 
-**Auth required.** Only `type: "general"` forums can be followed or unfollowed.
+**Auth required.** Works for both `general` and `school` forums.
 
-School forums (`type: "school"`) are attached automatically when a student completes onboarding and **cannot** be followed or unfollowed via this API (422). Users can only belong to their own school forum that way.
+Following school forums adds them to the user’s home-feed affinity (same as general follows). The user’s **own** school forum is still attached at onboarding and **cannot** be unfollowed (`422`). Other school forums can be followed and unfollowed freely.
+
+Forum detail may include `is_own_school_forum: true` for the caller’s school.
 
 | Path | Example |
 |------|---------|

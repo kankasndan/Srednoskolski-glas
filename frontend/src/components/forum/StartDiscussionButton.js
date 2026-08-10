@@ -1,7 +1,17 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useProfile } from "@/hooks/useProfile";
+import { canCreateThreads } from "@/lib/capabilities";
 
 export default function StartDiscussionButton({ className = "" }) {
+  const { user, loading } = useProfile();
+
+  if (loading || !canCreateThreads(user)) {
+    return null;
+  }
+
   return (
     <Link
       href="/new"

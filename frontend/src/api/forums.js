@@ -12,7 +12,7 @@ export async function getForums() {
 }
 
 /**
- * Follow a general forum.
+ * Follow a forum (general or school).
  * POST /api/p/{slug}/follow → { data: { is_following, members_count } }
  */
 export async function followForum(slug) {
@@ -23,7 +23,7 @@ export async function followForum(slug) {
 }
 
 /**
- * Unfollow a general forum.
+ * Unfollow a forum (not allowed for the caller's own school forum).
  * DELETE /api/p/{slug}/follow → { data: { is_following, members_count } }
  */
 export async function unfollowForum(slug) {

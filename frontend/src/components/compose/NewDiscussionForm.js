@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AnonymousToggle from "@/components/compose/AnonymousToggle";
 import ForumSelect from "@/components/forum/ForumSelect";
@@ -8,6 +9,8 @@ import PostTypeButtons from "@/components/compose/PostTypeButtons";
 import RichTextEditor from "@/components/compose/RichTextEditor";
 import TitleInput from "@/components/compose/TitleInput";
 import { createThread } from "@/api/threads";
+import { useProfile } from "@/hooks/useProfile";
+import { canCreateThreadInForum, canCreateThreads } from "@/lib/capabilities";
 
 function getPlainTextFromHtml(html) {
   const container = document.createElement("div");
@@ -22,6 +25,7 @@ const REQUIRED_FIELD_MESSAGES = {
 
 export default function NewDiscussionForm() {
   const router = useRouter();
+  const { user, loading: profileLoading } = useProfile();
   const [title, setTitle] = useState("");
   const [selectedForum, setSelectedForum] = useState(null);
   const [errors, setErrors] = useState({});
@@ -36,11 +40,19 @@ export default function NewDiscussionForm() {
   async function handleSubmit(event) {
     event.preventDefault();
 
+    if (!canCreateThreads(user)) {
+      setSubmitError("Немаш дозвола да започнеш дискусија. Потребно е да си дел од училиште.");
+      return;
+    }
+
     const nextErrors = {};
     const formData = new FormData(event.currentTarget);
     const content = formData.get("content")?.toString() ?? "";
 
     if (!selectedForum) nextErrors.forum = REQUIRED_FIELD_MESSAGES.forum;
+    else if (!canCreateThreadInForum(user, selectedForum)) {
+      nextErrors.forum = "Не можеш да започнеш дискусија во овој форум.";
+    }
     if (!title.trim()) nextErrors.title = REQUIRED_FIELD_MESSAGES.title;
 
     setErrors(nextErrors);
@@ -67,12 +79,39 @@ export default function NewDiscussionForm() {
         setSubmitError(Object.values(validation).flat().join(" "));
       } else if (error.status === 401) {
         setSubmitError("Мора да си најавен за да објавиш дискусија.");
+      } else if (error.status === 403) {
+        setSubmitError(error.message || "Немаш дозвола да започнеш дискусија во овој форум.");
       } else {
         setSubmitError(error.message || "Неуспешно објавување. Обиди се повторно.");
       }
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (profileLoading) {
+    return (
+      <p className="font-[family-name:var(--font-manrope)] text-[14px] text-[#595959]">
+        Се вчитува…
+      </p>
+    );
+  }
+
+  if (!canCreateThreads(user)) {
+    return (
+      <div className="max-w-xl rounded-3xl border border-[#CCCCCC] bg-[#F7F7F7] p-6 font-[family-name:var(--font-manrope)] text-[14px] leading-6 text-[#595959]">
+        {user == null ? (
+          <>
+            <Link href="/login" className="font-bold text-[#582FF5] hover:underline">
+              Најави се
+            </Link>{" "}
+            и заврши го onboarding процесот со училиште за да започнеш дискусија.
+          </>
+        ) : (
+          "Само корисници кои се дел од училиште можат да започнат дискусија. Сè уште можеш да коментираш на постоечки дискусии."
+        )}
+      </div>
+    );
   }
 
   return (
