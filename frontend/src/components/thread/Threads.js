@@ -5,6 +5,7 @@ import { useId, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toggleThreadVote } from "@/api/threads";
 import ForumEmptyState from "@/components/forum/ForumEmptyState";
+import NoMoreThreads from "@/components/thread/NoMoreThreads";
 import ThreadAttachments from "@/components/thread/ThreadAttachments";
 import ThreadMetaTags, { buildThreadMetaTags } from "@/components/thread/ThreadMetaTags";
 import ThreadPoll from "@/components/thread/ThreadPoll";
@@ -429,9 +430,7 @@ export default function Threads({ forum = null }) {
             <div ref={sentinelRef} className="h-1 w-full shrink-0" aria-hidden />
           ) : null}
           {moreThreadsLoading ? <LoadingLogo /> : null}
-          {noMoreThreads && !moreThreadsLoading ? (
-            <span className="font-bold text-primary-300 text-xl">Нема веќе :/</span>
-          ) : null}
+          {noMoreThreads && !moreThreadsLoading ? <NoMoreThreads /> : null}
         </>
       ) : null}
     </section>
