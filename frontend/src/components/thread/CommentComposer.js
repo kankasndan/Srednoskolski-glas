@@ -95,7 +95,7 @@ export default function CommentComposer({
         ) : (
           <Link
             href={`/p/${forumSlug}`}
-            className="text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px]"
+            className="cursor-pointer text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px] transition-colors hover:text-black"
           >
             Внимавај на правилата на заедницата.
           </Link>

@@ -111,7 +111,7 @@ function ThreadItem({ thread }) {
   }
 
   return (
-    <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] p-4 pt-6 rounded-3xl transition-colors hover:bg-[#DCEBED]">
+    <article className="relative flex flex-col items-start justify-center gap-4 rounded-3xl border-b border-b-[#CFE9ED] bg-transparent px-4 py-5 transition-colors hover:bg-[#DCEBED]">
       <div className="flex w-full items-start justify-between gap-8">
         <div
           className="flex min-w-0 flex-1 cursor-pointer flex-col gap-4"
@@ -193,7 +193,7 @@ function FeedSelect({
         aria-expanded={isOpen}
         aria-controls={listboxId}
         onClick={onToggle}
-        className="w-40 flex py-2 px-3 rounded-xl cursor-pointer items-center justify-center gap-1 bg-gray-100 font-bold hover:bg-gray-200 transition"
+        className="flex h-10 w-40 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#CCCCCC] bg-white px-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#DCEBED]"
       >
         <span className={`text-nowrap`}>{selected.label}</span>
         <Image

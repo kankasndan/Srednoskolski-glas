@@ -33,6 +33,7 @@ Route::middleware(['web', 'throttle:social-auth'])->group(function () {
 Route::middleware(['auth:sanctum', 'not_banned', 'throttle:api-writes'])->put('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
 // Return the current authenticated user.
 Route::middleware('auth:sanctum')->get('/me', MeController::class)->name('me.show');
+Route::middleware(['auth:sanctum', 'not_banned', 'throttle:api-writes'])->put('/me', [ProfileController::class, 'update'])->name('me.update');
 // Profile activity lists for the authenticated user.
 Route::middleware('auth:sanctum')->get('/me/counts', [ProfileController::class, 'counts'])->name('me.counts');
 Route::middleware('auth:sanctum')->get('/me/threads', [ProfileController::class, 'threads'])->name('me.threads');

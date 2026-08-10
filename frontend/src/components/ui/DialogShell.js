@@ -43,7 +43,7 @@ export default function DialogShell({
           aria-modal="true"
           aria-label={label}
           onClick={(event) => event.stopPropagation()}
-          className={`relative flex w-full flex-col items-center gap-8 rounded-xl bg-white p-10 shadow-[0_12px_24px_rgba(88,47,245,0.14)] ${widthClassName}`}
+          className={`relative flex w-full flex-col items-center gap-6 rounded-xl bg-white p-6 shadow-[0_12px_24px_rgba(88,47,245,0.14)] ${widthClassName}`}
         >
           <button
             type="button"

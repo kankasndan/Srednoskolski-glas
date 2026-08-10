@@ -10,7 +10,7 @@ export default function SubmitButton({ label, disabled, disabledTooltip }) {
       <button
         type="submit"
         disabled={disabled}
-        className="h-12 w-full rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[16px] font-bold text-white transition-colors hover:bg-[#4B25E0] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:bg-gray-300 2xl:h-14 2xl:text-[18px]"
+        className="h-12 w-full cursor-pointer rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[16px] font-bold text-white transition-colors hover:bg-[#4B25E0] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:bg-gray-300 2xl:h-14 2xl:text-[18px]"
       >
         {label}
       </button>

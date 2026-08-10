@@ -4,7 +4,7 @@ export default function ConfirmDialog({
   open,
   title,
   confirmLabel,
-  cancelLabel = "Назад",
+  cancelLabel = "Откажи",
   onConfirm,
   onCancel,
 }) {

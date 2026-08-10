@@ -433,6 +433,25 @@ GET /api/me
 
 `student_data` may be `null` for non-students. `onboarding_completed_at` is `null` until onboarding is finished. `school.forum` is included so the profile can link to that school’s forum (`/p/{slug}`).
 
+### Update current user
+
+```
+PUT /api/me
+```
+
+**Auth required.** Username cannot be changed. Send only the fields you want to update.
+
+| Field | Type | Rules |
+|-------|------|--------|
+| `image_url` | string \| null | optional; default avatar path (`/avatars/default-1.svg` … `default-4.svg`), `https?` URL from media upload, or `""` to reset to the first default |
+| `school` | string | with `area` + `year`: `"School Name\|City Name"` (same as onboarding) |
+| `area` | string | vocation name |
+| `year` | string | `1`–`4` or `Прва`/`Втора`/`Трета`/`Четврта` |
+
+Changing school moves the user to that school’s forum (unfollows the previous school forum).
+
+**Success** — same envelope as `GET /api/me` (`{ user }`).
+
 ---
 
 ### Profile tab counts
@@ -1290,6 +1309,7 @@ DELETE /api/media
 | `GET` | `/api/auth/{provider}/redirect` | — | Browser redirect |
 | `GET` | `/api/auth/{provider}/callback` | — | Browser redirect + session cookie |
 | `GET` | `/api/me` | yes | Current user |
+| `PUT` | `/api/me` | yes | Update avatar / school info |
 | `GET` | `/api/me/counts` | yes | Profile tab badge counts |
 | `GET` | `/api/me/threads` | yes | Current user’s threads |
 | `GET` | `/api/me/comments` | yes | Current user’s comments (+ thread context) |
