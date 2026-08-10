@@ -7,7 +7,9 @@ use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FeedController;
+use App\Http\Controllers\FeedHideController;
 use App\Http\Controllers\FollowForumController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\PollController;
@@ -136,4 +138,20 @@ Route::middleware(['auth:sanctum', 'not_banned'])->group(function () {
     Route::post('/comments/{comment}/upvote', [VoteController::class, 'toggleComment'])
         ->middleware('throttle:api-writes')
         ->name('comments.upvote');
+
+    // Hide / unhide a thread from the personalized feed.
+    Route::post('/threads/{thread}/hide', [FeedHideController::class, 'store'])
+        ->middleware('throttle:api-writes')
+        ->name('threads.hide');
+    Route::delete('/threads/{thread}/hide', [FeedHideController::class, 'destroy'])
+        ->middleware('throttle:api-writes')
+        ->name('threads.unhide');
+
+    // Report thread / comment (also hides reported threads from the reporter's feed).
+    Route::post('/threads/{thread}/report', [ReportController::class, 'storeThread'])
+        ->middleware('throttle:api-writes')
+        ->name('threads.report');
+    Route::post('/comments/{comment}/report', [ReportController::class, 'storeComment'])
+        ->middleware('throttle:api-writes')
+        ->name('comments.report');
 });

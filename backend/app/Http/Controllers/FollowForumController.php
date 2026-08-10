@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Forum;
+use App\Services\Feed\FeedCache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -40,6 +41,9 @@ class FollowForumController extends Controller
             ];
         });
 
+        // Affinity / home-bucket changed — rebuild ranked IDs on next feed load.
+        FeedCache::forgetForUser($user);
+
         return response()->json([
             'data' => $result,
         ]);
@@ -71,6 +75,8 @@ class FollowForumController extends Controller
                 'members_count' => (int) $forum->members_count,
             ];
         });
+
+        FeedCache::forgetForUser($user);
 
         return response()->json([
             'data' => $result,

@@ -88,6 +88,11 @@ class User extends Authenticatable
         return $this->hasMany(ThreadView::class);
     }
 
+    public function feedHides()
+    {
+        return $this->hasMany(FeedHide::class);
+    }
+
     public function viewedThreads(): BelongsToMany
     {
         return $this->belongsToMany(Thread::class, 'thread_views')

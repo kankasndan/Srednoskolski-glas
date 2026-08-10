@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { reportThread } from "@/api/moderation";
 import { deleteThread, updateThread } from "@/api/threads";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import InfoDialog from "@/components/ui/InfoDialog";
@@ -104,10 +105,19 @@ export default function ThreadActionsMenu({ thread, isOwner, onUpdated }) {
       {reporting && (
         <ReportDialog
           open
-          onClose={() => setReporting(false)}
-          onSubmit={() => {
-            setReporting(false);
-            setReported(true);
+          onClose={busy ? undefined : () => setReporting(false)}
+          onSubmit={async ({ reason, details }) => {
+            if (busy) return;
+            setBusy(true);
+            try {
+              await reportThread(thread.id, { reason, details });
+              setReporting(false);
+              setReported(true);
+            } catch {
+              setReporting(false);
+            } finally {
+              setBusy(false);
+            }
           }}
         />
       )}

@@ -8,6 +8,7 @@ use App\Http\Resources\ProfileCommentResource;
 use App\Http\Resources\PublicUserResource;
 use App\Http\Resources\ThreadResource;
 use App\Models\User;
+use App\Services\Feed\FeedCache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -111,6 +112,9 @@ class UserProfileController extends Controller
 
         $viewer->following()->syncWithoutDetaching([$profileUser->id]);
 
+        // Author-affinity signal changed for the personalized feed.
+        FeedCache::forgetForUser($viewer);
+
         return response()->json([
             'data' => [
                 'is_following' => true,
@@ -128,6 +132,8 @@ class UserProfileController extends Controller
         $viewer = $request->user();
 
         $viewer->following()->detach($profileUser->id);
+
+        FeedCache::forgetForUser($viewer);
 
         return response()->json([
             'data' => [

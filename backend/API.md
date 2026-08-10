@@ -290,15 +290,41 @@ GET /api/feed?sort=trending&time=week&page=1
 3. Scroll: `GET /api/feed?page=2&sort=…&time=…` → **append** `data`  
 4. Stop when `meta.current_page >= meta.last_page` (or `links.next` is `null`)
 
-**Behavior**
+**Behavior (`sort=trending`, default)**
+
+The trending feed uses a **short-TTL ranked-ID cache** (45s) and a **tighter candidate window**:
+
+1. Look up cached ordered thread IDs for `(user|guest, sort, time)`  
+2. On miss: load up to **250 lean candidates from the last 30 days** (or tighter if `time=day|week|month`), score in PHP, mix, diversify, store only the ID list  
+3. Slice the 5 IDs for the requested page and **hydrate only those rows** with full relations  
+4. Hide/report busts that user’s feed cache immediately  
+
+Scoring still uses:
+
+1. **Hot score** — Hacker-News style time decay using upvotes + comments + last-24h vote/comment velocity  
+2. **Affinity** — boosts for followed forums, school forum (cold start), recently engaged forums, followed authors, preferred authors  
+3. **Seen demotion** — threads in `thread_views` are strongly downranked (not boosted)  
+4. **Negative filters** — threads the user hid (`feed_hides`) or reported are excluded  
+5. **Mix** — ~60% home (followed + school), ~20% discovery, ~20% fresh (&lt;24h)  
+6. **Diversity** — avoid 3+ consecutive threads from the same forum  
+7. **Paginate** — 5 per page from the cached ID list  
 
 | Who | What you get |
 |-----|----------------|
-| Guest | Site-wide threads (same sort/time filters as forum lists) |
-| Logged in, **no** followed forums | Same as guest — site-wide trending |
-| Logged in, **≥1** followed forums | Still the **full site-wide** pool (so 1–2 follows don’t hide everything else). Threads from followed forums get a soft boost (+30), and threads the user previously opened get a smaller boost (+15), then normal sort metrics apply |
+| Guest | Hot score + diversity (no affinity / mix buckets) |
+| Logged in, no follows | Hot + school-forum cold start (if onboarded) + discovery mix |
+| Logged in, follows forums | Full personalized pipeline above |
+
+`sort=newest|top|discussed` stay simple DB sorts, but still exclude hidden/reported threads for the session user.
 
 Opening a thread via `GET /api/p/{slug}/comments/{id}` while logged in records a row in `thread_views` (and increments the public `views` counter).
+
+Related write endpoints:
+
+- `POST /api/threads/{id}/hide` — hide from feed  
+- `DELETE /api/threads/{id}/hide` — unhide  
+- `POST /api/threads/{id}/report` — create report + auto-hide from reporter feed  
+- `POST /api/comments/{id}/report` — create comment report
 
 ```json
 {
@@ -1323,6 +1349,10 @@ DELETE /api/media
 | `POST` | `/api/threads` | yes | Create thread (+ files / link / poll) |
 | `PUT` | `/api/threads/{id}` | yes | Update thread (author) |
 | `DELETE` | `/api/threads/{id}` | yes | Soft-delete thread (author) |
+| `POST` | `/api/threads/{id}/hide` | yes | Hide thread from personalized feed |
+| `DELETE` | `/api/threads/{id}/hide` | yes | Unhide thread |
+| `POST` | `/api/threads/{id}/report` | yes | Report thread (+ auto-hide from reporter feed) |
+| `POST` | `/api/comments/{id}/report` | yes | Report comment |
 | `POST` | `/api/threads/{id}/comments` | yes | Create comment or nested reply |
 | `PUT` | `/api/comments/{id}` | yes | Update comment (author) |
 | `DELETE` | `/api/comments/{id}` | yes | Soft-delete comment (author) |
