@@ -142,6 +142,7 @@ For school forums, `type` is `"school"` and `school` looks like:
   "description": "<p>Текст на постот…</p>",
   "upvotes": 8,
   "has_voted": false,
+  "is_owner": false,
   "views": 120,
   "is_anonymous": false,
   "comments_count": 4,
@@ -179,6 +180,7 @@ Notes:
 - `edited_at` is set when the post was edited; otherwise `null`.
 - `attachments[].type` comes from the attachment slug (e.g. image/file/link/video).
 - `has_voted` is `true` when the current authenticated user has upvoted this item; guests always get `false`.
+- `is_owner` is `true` when the current authenticated user created the thread (including anonymous posts); guests always get `false`.
 
 ### Comment (nested tree)
 
@@ -307,6 +309,7 @@ Opening a thread via `GET /api/p/{slug}/comments/{id}` while logged in records a
       "description": "…",
       "upvotes": 8,
       "has_voted": false,
+      "is_owner": false,
       "views": 120,
       "is_anonymous": false,
       "comments_count": 4,
@@ -539,6 +542,7 @@ GET /api/me/threads
       "description": "…",
       "upvotes": 8,
       "has_voted": false,
+      "is_owner": false,
       "views": 120,
       "is_anonymous": false,
       "comments_count": 4,
@@ -1031,8 +1035,13 @@ PUT|POST /api/threads/{id}
 | `files[]` | file | optional; same mime/size rules as create |
 | `link` | url | optional; adds a new link attachment |
 | `remove_attachment_ids[]` | int[] | optional; attachment ids on **this** thread to delete |
+| `poll[question]` | string | optional; create or update the thread poll |
+| `poll[options][]` | string[] | required with poll; 2–4 options |
+| `poll[option_ids][]` | int[] | optional; existing option ids in the same order as `poll[options]` (omit for new options) |
+| `poll[duration_days]` | int | required with poll; **1–30**. Sets `ends_at` from now |
+| `remove_poll` | bool | optional; deletes the thread poll (cannot combine with `poll`) |
 
-Same exclusivity as create for the **resulting** attachment set after removals + additions (link vs image/video; max 10 images / 1 video / 1 file / 1 link; file cannot combine with an existing poll). Polls and anonymity are not editable here.
+Same exclusivity as create for the **resulting** attachment set after removals + additions (link vs image/video; max 10 images / 1 video / 1 file / 1 link; file cannot combine with a poll). Omitting `poll` leaves an existing poll unchanged. Anonymity is not editable here.
 
 Sets `edited_at` to now. Attachment objects in responses include `id`, `url`, and `type`.
 

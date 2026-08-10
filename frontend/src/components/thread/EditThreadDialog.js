@@ -14,6 +14,8 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
     files: [],
     link: "",
     removeAttachmentIds: [],
+    poll: null,
+    removePoll: false,
   });
 
   const handleAttachmentsChange = useCallback((next) => {
@@ -21,6 +23,8 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
       files: next.files ?? [],
       link: next.link ?? "",
       removeAttachmentIds: next.removeAttachmentIds ?? [],
+      poll: next.poll ?? null,
+      removePoll: Boolean(next.removePoll),
     });
   }, []);
 
@@ -46,6 +50,8 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
         files: attachments.files,
         link: attachments.link,
         removeAttachmentIds: attachments.removeAttachmentIds,
+        poll: attachments.poll,
+        removePoll: attachments.removePoll,
       });
     } catch (err) {
       const validation = err.body?.errors;
@@ -86,7 +92,8 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
           <PostTypeButtons
             widthClassName="w-full"
             initialAttachments={thread?.attachments ?? []}
-            allowPoll={false}
+            initialPoll={thread?.poll ?? null}
+            allowPoll
             onAttachmentsChange={handleAttachmentsChange}
           />
 
