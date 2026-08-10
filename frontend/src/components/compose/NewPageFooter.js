@@ -4,13 +4,13 @@ export default function NewPageFooter() {
   return (
     <footer className="font-[family-name:var(--font-manrope)] text-[12px]">
       <nav aria-label="Правни информации" className="flex items-center gap-3 text-[#595959]">
-        <a href="#" className="transition-colors hover:text-black">
+        <a href="/terms" className="transition-colors hover:text-black">
           Услови за користење
         </a>
-        <a href="#" className="transition-colors hover:text-black">
+        <a href="/privacy" className="transition-colors hover:text-black">
           Приватност
         </a>
-        <a href="#" className="transition-colors hover:text-black">
+        <a href="/rules" className="transition-colors hover:text-black">
           Правила
         </a>
       </nav>
