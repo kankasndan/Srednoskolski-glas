@@ -12,6 +12,7 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\VoteController;
@@ -63,6 +64,8 @@ Route::get('/forums', [ForumController::class, 'index'])->name('forums.index');
 Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
 // Paginated cross-forum home feed.
 Route::get('/feed', [FeedController::class, 'index'])->name('feed.index');
+// Live search + explore page (threads + matching forums).
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 
 // Forum banner/metadata only (no threads).
 Route::get('/p/{forum:slug}', [ForumController::class, 'show'])->name('forums.show');

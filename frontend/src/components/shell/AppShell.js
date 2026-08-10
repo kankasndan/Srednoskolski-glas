@@ -14,6 +14,7 @@ let sidebarCollapsed = false;
 
 function getSelectedKey(pathname) {
   if (pathname === "/feed") return "nav:home";
+  if (pathname === "/search" || pathname?.startsWith("/search?")) return "nav:explore";
   if (pathname?.startsWith("/p/")) {
     const slug = pathname.split("/")[2];
     if (slug) return `forum:${slug}`;

@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import SearchBar from "@/components/shell/SearchBar";
+import SearchBar, { SearchBarFallback } from "@/components/shell/SearchBar";
 import AuthButtons from "@/components/shell/AuthButtons";
 
 export default function Header() {
@@ -19,7 +20,9 @@ export default function Header() {
           className="block h-14 w-60"
         />
       </Link>
-      <SearchBar />
+      <Suspense fallback={<SearchBarFallback />}>
+        <SearchBar />
+      </Suspense>
       <AuthButtons />
     </header>
   );

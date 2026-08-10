@@ -3,7 +3,7 @@ import NavItem from "@/components/shell/NavItem";
 const NAV_ITEMS = [
   { key: "nav:home", label: "Почетна", href: "/feed", icon: "/collapsed icons/home.png" },
   { key: "nav:latest", label: "Најнови дискусии", icon: "/collapsed icons/new.png" },
-  { key: "nav:explore", label: "Истражи", icon: "/collapsed icons/search.png" },
+  { key: "nav:explore", label: "Истражи", href: "/search", icon: "/collapsed icons/search.png" },
 ];
 
 export default function SidebarNav({ selectedKey, onSelect, collapsed }) {

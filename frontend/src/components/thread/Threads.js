@@ -230,7 +230,8 @@ function FeedSelect({
   );
 }
 
-export default function Threads({ forum = null }) {
+export default function Threads({ forum = null, searchQuery = null }) {
+  const isSearch = searchQuery !== null;
   const sortListboxId = useId();
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
@@ -249,9 +250,23 @@ export default function Threads({ forum = null }) {
   const noMoreRef = useRef(false);
   const pageRef = useRef(1);
   const hasLoadedRef = useRef(false);
-  const BASE_URL =
-    API_BASE_URL +
-    (forum === null ? "/api/feed" : "/api/p/" + forum + "/threads");
+
+  function buildListUrl({ page, sort, time }) {
+    const params = new URLSearchParams({
+      page: String(page),
+      time: time.value,
+      sort: sort.value,
+    });
+
+    if (isSearch) {
+      if (searchQuery) params.set("q", searchQuery);
+      if (forum) params.set("forum", forum);
+      return `${API_BASE_URL}/api/search?${params}`;
+    }
+
+    const path = forum === null ? "/api/feed" : `/api/p/${forum}/threads`;
+    return `${API_BASE_URL}${path}?${params}`;
+  }
 
   async function fetchThreads({
     append = false,
@@ -273,10 +288,9 @@ export default function Threads({ forum = null }) {
     }
 
     try {
-      const response = await fetch(
-        `${BASE_URL}?page=${page}&time=${time.value}&sort=${sort.value}`,
-        { credentials: "include" },
-      );
+      const response = await fetch(buildListUrl({ page, sort, time }), {
+        credentials: "include",
+      });
 
       if (!response.ok) {
         if (!append) setThreads([]);
@@ -320,12 +334,12 @@ export default function Threads({ forum = null }) {
   };
 
   useEffect(() => {
-    // Reset + load when the forum route changes. Filter changes call fetchThreads directly.
+    // Reset + load when the forum route or search query changes. Filter changes call fetchThreads directly.
     void Promise.resolve().then(() => {
       fetchThreads({ append: false, page: 1 });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forum]);
+  }, [forum, searchQuery]);
 
   useEffect(() => {
     loadingRef.current = moreThreadsLoading;
@@ -364,10 +378,11 @@ export default function Threads({ forum = null }) {
     observer.observe(node);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasLoaded, noMoreThreads, threads.length, forum, selectedSort, selectedTimeFilter]);
+  }, [hasLoaded, noMoreThreads, threads.length, forum, searchQuery, selectedSort, selectedTimeFilter]);
 
   // Sort only reorders; an empty list with time=all means the forum truly has no threads.
   const isTrulyEmptyForum =
+    !isSearch &&
     forum !== null &&
     hasLoaded &&
     threads.length === 0 &&
@@ -415,7 +430,9 @@ export default function Threads({ forum = null }) {
           <LoadingLogo />
         ) : threads.length === 0 ? (
           <p className="py-8 text-center font-[family-name:var(--font-manrope)] text-[16px] text-[#595959]">
-            Нема дискусии за избраните филтри.
+            {isSearch && searchQuery.trim()
+              ? "Нема резултати за ова пребарување."
+              : "Нема дискусии за избраните филтри."}
           </p>
         ) : (
           threads.map((thread) => (
