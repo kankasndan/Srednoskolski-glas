@@ -89,7 +89,9 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
 
   return (
     <div className="flex w-[310px] max-w-full flex-col gap-2">
-      <FieldLabel required>Каде сакаш да започнеш дискусија?</FieldLabel>
+      <FieldLabel htmlFor="forum-select" required>
+        Каде сакаш да започнеш дискусија?
+      </FieldLabel>
       <input type="hidden" name="forum" value={selected?.slug ?? ""} />
 
       <div
@@ -103,9 +105,12 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
         }}
       >
         <button
+          id="forum-select"
           type="button"
           disabled={isLoading || !!error}
+          aria-haspopup="listbox"
           aria-expanded={open}
+          aria-invalid={!!errorMessage}
           aria-describedby={errorMessage ? "forum-error" : undefined}
           onClick={() => setOpen((prev) => !prev)}
           className={`flex h-10 w-full cursor-pointer items-center justify-between gap-4 rounded-xl border px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors ${
@@ -138,7 +143,11 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
         </button>
 
         {open && (
-          <div className="absolute left-0 top-11 z-10 flex max-h-72 w-full flex-col overflow-y-auto overflow-x-hidden rounded-xl border border-[#CCCCCC] bg-white py-1">
+          <div
+            role="listbox"
+            aria-labelledby="forum-select"
+            className="absolute left-0 top-11 z-10 flex max-h-72 w-full flex-col overflow-y-auto overflow-x-hidden rounded-xl border border-[#CCCCCC] bg-white py-1"
+          >
             {options.map((forum) => (
               <ForumOption key={forum.slug} forum={forum} onSelect={handleSelect} />
             ))}
