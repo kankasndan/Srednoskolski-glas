@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Forum;
-use App\Models\School;
 use App\Models\StudentData;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -20,13 +19,13 @@ class DashboardController extends Controller
 
         $totalUsers = User::count();
 
-        $activeUsers = User::where("last_active_at", ">=", now()->subDays(7))->count();
+        $activeUsers = User::where('last_active_at', '>=', now()->subDays(7))->count();
 
         $newRegistrations30d = User::where('created_at', '>=', now()->subDays(30))->count();
 
-        $usersByCity = City::whereHas("studentData")->withCount("studentData")->get();
+        $usersByCity = City::whereHas('studentData')->withCount('studentData')->get();
 
-        $usersBySchool = StudentData::with("school")->selectRaw('school_id, count(*) as total')
+        $usersBySchool = StudentData::with('school')->selectRaw('school_id, count(*) as total')
             ->groupBy('school_id')
             ->get();
 
@@ -35,15 +34,15 @@ class DashboardController extends Controller
 
         $registrationLabels = $this->registrationLabels($range);
         $registrationCounts = $this->registrationCounts($range);
-        // 
+        //
 
-        return view('admin.dashboard.index', compact("totalUsers", "activeUsers", "newRegistrations30d", "usersBySchool", "usersByCity", "topForums", "registrationLabels", "registrationCounts"));
+        return view('admin.dashboard.index', compact('totalUsers', 'activeUsers', 'newRegistrations30d', 'usersBySchool', 'usersByCity', 'topForums', 'registrationLabels', 'registrationCounts'));
     }
 
     private function registrationLabels(int $range): array
     {
         return collect(range($range - 1, 0))
-            ->map(fn($daysAgo) => now()->subDays($daysAgo)->format('M d'))
+            ->map(fn ($daysAgo) => now()->subDays($daysAgo)->format('M d'))
             ->toArray();
     }
 
@@ -57,6 +56,7 @@ class DashboardController extends Controller
         return collect(range($range - 1, 0))
             ->map(function ($daysAgo) use ($counts) {
                 $date = now()->subDays($daysAgo)->format('Y-m-d');
+
                 return $counts[$date] ?? 0;
             })
             ->toArray();
@@ -95,9 +95,9 @@ class DashboardController extends Controller
                 'newRegistrations30d',
                 'usersBySchool',
                 'usersByCity',
-                "topForums",
-                "registrationCounts",
-                "registrationLabels"
+                'topForums',
+                'registrationCounts',
+                'registrationLabels'
             );
         });
     }
@@ -108,6 +108,6 @@ class DashboardController extends Controller
 
         $pdf = Pdf::loadView('admin.dashboard.export', $this->getDashboardData($range));
 
-        return $pdf->download('dashboard-report-' . now()->format('Y-m-d') . '.pdf');
+        return $pdf->download('dashboard-report-'.now()->format('Y-m-d').'.pdf');
     }
 }

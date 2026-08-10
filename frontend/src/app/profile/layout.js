@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import AppShell from "@/components/AppShell";
-import ProfileBanner from "@/components/ProfileBanner";
-import ProfileTabs from "@/components/ProfileTabs";
+import AppShell from "@/components/shell/AppShell";
+import ProfileBanner from "@/components/profile/ProfileBanner";
+import ProfileTabs from "@/components/profile/ProfileTabs";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileCounts } from "@/hooks/useProfileCounts";
 
@@ -32,9 +32,9 @@ export default function ProfileLayout({ children }) {
   return (
     <AppShell>
       <div className="flex w-247.5 max-w-full flex-col">
-        <ProfileBanner user={user} />
+        <ProfileBanner user={user} isOwnProfile />
         <div className="mt-18 flex flex-col gap-12">
-          <ProfileTabs counts={counts} />
+          <ProfileTabs counts={counts} basePath="/profile" isOwnProfile />
           {children}
         </div>
       </div>

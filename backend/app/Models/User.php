@@ -23,6 +23,7 @@ use Spatie\Permission\Traits\HasRoles;
     'provider_id',
     'role',
     'onboarding_completed_at',
+    'last_active_at',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -39,6 +40,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'onboarding_completed_at' => 'datetime',
+            'last_active_at' => 'datetime',
         ];
     }
 
@@ -65,6 +67,20 @@ class User extends Authenticatable
     public function forums(): BelongsToMany
     {
         return $this->belongsToMany(Forum::class)->withTimestamps();
+    }
+
+    /** Users who follow this user. */
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'user_follows', 'following_id', 'follower_id')
+            ->withTimestamps();
+    }
+
+    /** Users this user follows. */
+    public function following(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'user_follows', 'follower_id', 'following_id')
+            ->withTimestamps();
     }
 
     public function threadViews()
@@ -101,7 +117,22 @@ class User extends Authenticatable
 
     public function sanctions()
     {
-        return $this->hasMany(Sanction::class, "user_id");
+        return $this->hasMany(Sanction::class, 'user_id');
+    }
+
+    /**
+     * True when the user has an active non-warning sanction (temp or permanent ban).
+     */
+    public function isBanned(): bool
+    {
+        return $this->sanctions()
+            ->where('type', '!=', 'warning')
+            ->whereNull('revoked_at')
+            ->where(function ($query): void {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->exists();
     }
 
     public function appeals()
@@ -116,6 +147,6 @@ class User extends Authenticatable
 
     public function topics()
     {
-        return $this->belongsToMany(Topic::class, "feed_topics");
+        return $this->belongsToMany(Topic::class, 'feed_topics');
     }
 }

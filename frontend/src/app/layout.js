@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono, Manrope, Oswald, Roboto } from "next/font/google";
 import "./globals.css";
-import NavigationTracker from "@/components/NavigationTracker";
+import NavigationTracker from "@/components/shell/NavigationTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

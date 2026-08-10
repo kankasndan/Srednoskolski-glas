@@ -11,7 +11,7 @@ use Illuminate\Database\Seeder;
 class ReportSeeder extends Seeder
 {
     /**
-     * Sample moderation reports against threads/comments.
+     * Moderation reports tied to seeded threads and comments.
      *
      * reason: spam | insulting_content | misinformation | age_inappropriate | other
      * status: pending | approved | rejected
@@ -34,7 +34,7 @@ class ReportSeeder extends Seeder
     private const REPORTS = [
         [
             'type' => 'comment',
-            'comment' => 'Оваа порака беше премногу груба и е отстранета од модератор.',
+            'comment' => 'Ако не можеш да дадеш корисен одговор, подобро воопшто не коментирај.',
             'reporter' => 'ana@example.com',
             'reason' => 'insulting_content',
             'status' => 'approved',
@@ -65,7 +65,7 @@ class ReportSeeder extends Seeder
             'comment' => 'Внимавајте да не се потпирате целосно, проверувајте ги информациите.',
             'reporter' => 'demo@example.com',
             'reason' => 'other',
-            'other_reason' => 'Мислам дека е оф-топик за темата.',
+            'other_reason' => 'Оф-топик е за дискусијата.',
             'status' => 'pending',
             'source' => 'human',
         ],
@@ -81,7 +81,7 @@ class ReportSeeder extends Seeder
             }
 
             $reportable = match ($row['type']) {
-                'thread' => Thread::where('title', $row['title'] ?? '')->first(),
+                'thread' => Thread::withTrashed()->where('title', $row['title'] ?? '')->first(),
                 'comment' => Comment::withTrashed()->where('content', $row['comment'] ?? '')->first(),
                 default => null,
             };
@@ -95,7 +95,7 @@ class ReportSeeder extends Seeder
                 $reviewerId = User::where('email', $row['reviewer'])->value('id');
             }
 
-            $report = Report::updateOrCreate(
+            $report = Report::withTrashed()->updateOrCreate(
                 [
                     'reporter_id' => $reporter->id,
                     'reportable_type' => $reportable::class,

@@ -5,14 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Thread extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['title', 'description', 'upvotes', 'views', 'user_id', 'forum_id', 'is_anonymous'];
+    protected $fillable = ['title', 'description', 'upvotes', 'views', 'user_id', 'forum_id', 'is_anonymous', 'deleted_by'];
 
     /**
      * @return array<string, string>
@@ -25,6 +27,23 @@ class Thread extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Thread $thread): void {
+            if ($thread->isForceDeleting()) {
+                return;
+            }
+
+            $thread->deleted_by = Auth::id();
+            $thread->saveQuietly();
+        });
+
+        static::deleted(function (Thread $thread): void {
+            $thread->comments()->delete();
+            $thread->threadAttachment()->delete();
+        });
+    }
+
     public function deletedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
@@ -32,7 +51,7 @@ class Thread extends Model
 
     public function threadAttachment(): HasMany
     {
-        return $this->hasMany(ThreadAttachment::class);
+        return $this->hasMany(ThreadAttachment::class)->orderBy('id');
     }
 
     public function comments(): HasMany
@@ -45,7 +64,7 @@ class Thread extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function forum(): BelongsTo
+    public function forum()
     {
         return $this->belongsTo(Forum::class);
     }
@@ -68,5 +87,10 @@ class Thread extends Model
     public function votes(): MorphMany
     {
         return $this->morphMany(Vote::class, 'votable');
+    }
+
+    public function poll(): HasOne
+    {
+        return $this->hasOne(Poll::class);
     }
 }

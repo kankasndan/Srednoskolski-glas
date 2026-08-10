@@ -1,12 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { notFound, useParams } from "next/navigation";
-import AppShell from "@/components/AppShell";
-import BackButton from "@/components/BackButton";
-import CommentComposer from "@/components/CommentComposer";
-import CommentList from "@/components/CommentList";
-import CommentsHeader from "@/components/CommentsHeader";
-import ThreadPost from "@/components/ThreadPost";
+import AppShell from "@/components/shell/AppShell";
+import BackButton from "@/components/shell/BackButton";
+import CommentComposer from "@/components/thread/CommentComposer";
+import CommentList from "@/components/thread/CommentList";
+import CommentsHeader from "@/components/thread/CommentsHeader";
+import ThreadPost from "@/components/thread/ThreadPost";
 import { useThread } from "@/hooks/useThread";
 
 function StatusMessage({ children }) {
@@ -19,9 +20,11 @@ function StatusMessage({ children }) {
 
 export default function ThreadPage() {
   const { slug, threadId } = useParams();
-  const { forum, thread, comments, loading, error, missing } = useThread(slug, threadId);
+  const [sort, setSort] = useState("best");
+  const { forum, thread, comments, loading, error, missing, reload, patchThread } =
+    useThread(slug, threadId, sort);
 
-  if (loading) {
+  if (loading && !thread) {
     return (
       <AppShell>
         <StatusMessage>Се вчитува…</StatusMessage>
@@ -29,7 +32,7 @@ export default function ThreadPage() {
     );
   }
 
-  if (error) {
+  if (error && !thread) {
     return (
       <AppShell>
         <StatusMessage>Не успеа вчитувањето на дискусијата.</StatusMessage>
@@ -45,12 +48,24 @@ export default function ThreadPage() {
     <AppShell>
       <div className="flex w-[990px] max-w-full flex-col gap-12 font-(family-name:--font-manrope)">
         <div className="self-start">
-          <BackButton label={`Назад кон ${forum.name}`} tone="muted" />
+          <BackButton
+            href={`/p/${forum.slug}`}
+            label={`Назад кон ${forum.name}`}
+            tone="muted"
+          />
         </div>
-        <ThreadPost forum={forum} thread={thread} />
-        <CommentComposer forumSlug={forum.slug} />
-        <CommentsHeader count={thread.comments_count} />
-        <CommentList comments={comments} />
+        <ThreadPost forum={forum} thread={thread} onThreadUpdated={patchThread} />
+        <CommentComposer
+          forumSlug={forum.slug}
+          threadId={thread.id}
+          onCreated={() => reload()}
+        />
+        <CommentsHeader
+          count={thread.comments_count}
+          sort={sort}
+          onSortChange={setSort}
+        />
+        <CommentList comments={comments} threadId={thread.id} onCommentCreated={reload} />
       </div>
     </AppShell>
   );

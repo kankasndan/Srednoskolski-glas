@@ -1,8 +1,8 @@
-import OnboardingGuard from "@/components/OnboardingGuard";
-import AvatarUploadCard from "@/components/AvatarUploadCard";
-import AuthHero from "@/components/AuthHero";
-import OnboardingMasthead from "@/components/OnboardingMasthead";
-import BackButton from "@/components/BackButton";
+import OnboardingGuard from "@/components/auth/OnboardingGuard";
+import AvatarUploadCard from "@/components/auth/AvatarUploadCard";
+import AuthHero from "@/components/auth/AuthHero";
+import OnboardingMasthead from "@/components/auth/OnboardingMasthead";
+import BackButton from "@/components/shell/BackButton";
 
 export default function OnboardingAvatar() {
   return (

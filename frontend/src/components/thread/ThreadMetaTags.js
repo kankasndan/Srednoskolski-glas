@@ -1,0 +1,115 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { isRemoteAssetUrl } from "@/lib/banners";
+import { authorProfileHref, forumHref, schoolForumHref } from "@/lib/profileLinks";
+
+const SCHOOL_ICON = "/icons/uchilishte.svg";
+const DEFAULT_AVATAR = "/Generic avatar.svg";
+
+export function buildThreadMetaTags(forum, thread) {
+  const forumData = thread?.forum ?? forum;
+
+  const tags = [
+    {
+      key: "forum",
+      label: forumData?.name ?? "Форум",
+      icon: forumData?.imageUrl,
+      zoom: true,
+      href: forumHref(forumData),
+    },
+    {
+      key: "author",
+      label: thread.is_anonymous
+        ? "Анонимен"
+        : (thread.author?.username ?? "Корисник"),
+      icon: thread.is_anonymous
+        ? DEFAULT_AVATAR
+        : (thread.author?.imageUrl ?? DEFAULT_AVATAR),
+      avatar: true,
+      href: thread.is_anonymous ? null : authorProfileHref(thread.author),
+    },
+  ];
+
+  if (!thread.is_anonymous && thread.author?.school?.name) {
+    tags.push({
+      key: "school",
+      label: thread.author.school.name,
+      icon: SCHOOL_ICON,
+      href: schoolForumHref(thread.author.school),
+    });
+  }
+
+  return tags;
+}
+
+function MetaTag({ tag }) {
+  const remoteIcon = isRemoteAssetUrl(tag.icon);
+  const iconBoxClass = tag.avatar
+    ? "relative size-6 shrink-0 overflow-hidden rounded-full"
+    : "relative size-5 shrink-0 overflow-hidden";
+  const iconClass = tag.avatar
+    ? "size-6 object-cover"
+    : tag.zoom
+      ? "size-11"
+      : "size-5";
+  const iconSize = tag.avatar ? 24 : tag.zoom ? 44 : 20;
+
+  const className =
+    "relative z-10 flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 text-[12px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB]";
+
+  const content = (
+    <>
+      {tag.icon ? (
+        <span className={iconBoxClass}>
+          {remoteIcon ? (
+            <img
+              src={tag.icon}
+              alt=""
+              className={`absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2 ${iconClass}`}
+            />
+          ) : (
+            <Image
+              src={tag.icon}
+              alt=""
+              width={iconSize}
+              height={iconSize}
+              className={`absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2 ${iconClass}`}
+            />
+          )}
+        </span>
+      ) : null}
+      {tag.label}
+    </>
+  );
+
+  if (tag.href) {
+    return (
+      <Link
+        href={tag.href}
+        className={className}
+        onClick={(event) => event.stopPropagation()}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return <span className={className.replace("cursor-pointer ", "")}>{content}</span>;
+}
+
+export default function ThreadMetaTags({ tags, postedAgo }) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {tags.map((tag) => (
+        <MetaTag key={tag.key ?? tag.label} tag={tag} />
+      ))}
+      {postedAgo ? (
+        <span className="text-[12px] leading-none text-[#595959]">
+          {postedAgo}
+        </span>
+      ) : null}
+    </div>
+  );
+}

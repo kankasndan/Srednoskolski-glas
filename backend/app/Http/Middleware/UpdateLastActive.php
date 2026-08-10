@@ -15,15 +15,15 @@ class UpdateLastActive
      * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next)
-{
-    if (Auth::check()) {
-        $user = Auth::user();
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
 
-        if (! $user->last_active_at || $user->last_active_at->lt(now()->subMinutes(2))) {
-            $user->update(['last_active_at' => now()]);
+            if (! $user->last_active_at || $user->last_active_at->lt(now()->subMinutes(2))) {
+                $user->update(['last_active_at' => now()]);
+            }
         }
-    }
 
-    return $next($request);
-}
+        return $next($request);
+    }
 }

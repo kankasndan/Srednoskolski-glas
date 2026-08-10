@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             // Reference data
             OnboardingReferenceSeeder::class,
             ForumSeeder::class,
-            RoleSeeder::class,
+            RolePermissionSeeder::class,
 
             // Users (regular + admin/moderator with Spatie roles)
             UserSeeder::class,

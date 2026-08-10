@@ -1,6 +1,6 @@
-import AppShell from "@/components/AppShell";
-import CommunityBanner from "@/components/CommunityBanner";
-import Threads from "@/components/Threads";
+import AppShell from "@/components/shell/AppShell";
+import CommunityBanner from "@/components/shell/CommunityBanner";
+import Threads from "@/components/thread/Threads";
 
 export default function FeedPage() {
   return (
