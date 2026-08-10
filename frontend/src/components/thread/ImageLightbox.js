@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faXmark } from "@fortawesome/free-solid-svg-icons";
 
@@ -73,7 +74,11 @@ export default function ImageLightbox({ src, onClose }) {
     }
   }
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  // Portal to body so feed/profile stacking contexts (e.g. relative z-10)
+  // cannot trap this overlay under the sticky header (z-50).
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -110,6 +115,7 @@ export default function ImageLightbox({ src, onClose }) {
         onClick={(event) => event.stopPropagation()}
         className="max-h-full max-w-full object-contain"
       />
-    </div>
+    </div>,
+    document.body,
   );
 }
