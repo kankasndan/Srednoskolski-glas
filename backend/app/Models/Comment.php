@@ -7,12 +7,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Comment extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['thread_id', 'parent_id', 'user_id', 'content'];
+    protected $fillable = ['thread_id', 'parent_id', 'user_id', 'content', 'deleted_by'];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Comment $comment): void {
+            if ($comment->isForceDeleting()) {
+                return;
+            }
+
+            $comment->deleted_by = Auth::id();
+            $comment->saveQuietly();
+        });
+    }
 
     /**
      * @return array<string, string>
@@ -24,9 +37,14 @@ class Comment extends Model
         ];
     }
 
-    public function thread(): BelongsTo
+    public function thread()
     {
         return $this->belongsTo(Thread::class);
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
     }
 
     public function deletedBy(): BelongsTo
@@ -36,12 +54,15 @@ class Comment extends Model
 
     public function replies(): HasMany
     {
-        return $this->hasMany(Comment::class, 'parent_id');
+        return $this->hasMany(Comment::class, 'parent_id')->withTrashed();
     }
 
     public function allReplies(): HasMany
     {
-        $relation = $this->replies()->with(['user.studentData.school.city', 'allReplies']);
+        // Nested replies stay chronological so a conversation reads top-to-bottom.
+        $relation = $this->replies()
+            ->oldest()
+            ->with(['user.studentData.school.city', 'user.studentData.school.forum', 'allReplies']);
 
         $userId = auth('web')->id() ?? auth()->id();
 

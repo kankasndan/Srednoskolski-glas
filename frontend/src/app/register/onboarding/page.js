@@ -1,8 +1,8 @@
-import AuthHero from "@/components/AuthHero";
-import BackButton from "@/components/BackButton";
-import OnboardingGuard from "@/components/OnboardingGuard";
-import OnboardingMasthead from "@/components/OnboardingMasthead";
-import OnboardingForm from "@/components/OnboardingForm";
+import AuthHero from "@/components/auth/AuthHero";
+import BackButton from "@/components/shell/BackButton";
+import OnboardingGuard from "@/components/auth/OnboardingGuard";
+import OnboardingMasthead from "@/components/auth/OnboardingMasthead";
+import OnboardingForm from "@/components/auth/OnboardingForm";
 
 export default function Onboarding() {
   return (

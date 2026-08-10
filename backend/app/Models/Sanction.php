@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Sanction extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'user_id', 'issued_by', 'type', 'reason', 'report_id',
         'expires_at', 'acknowledged_at', 'revoked_at', 'revoked_by',

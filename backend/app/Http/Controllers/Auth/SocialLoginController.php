@@ -4,30 +4,49 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SocialLoginController extends Controller
 {
-    // 1. Redirect to Google/Facebook
-    public function redirect($provider)
+    /** @var list<string> */
+    private const ALLOWED_PROVIDERS = ['google', 'facebook'];
+
+    public function redirect(string $provider): RedirectResponse
     {
+        $this->assertAllowedProvider($provider);
+
         return Socialite::driver($provider)->stateless()->redirect();
     }
 
-    // 2. Handle callback from Google/Facebook
-    public function callback($provider)
+    public function callback(string $provider): RedirectResponse
     {
+        $this->assertAllowedProvider($provider);
+
+        $frontendUrl = rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'), '/');
+
         try {
             $socialUser = Socialite::driver($provider)->stateless()->user();
+            $providerId = (string) $socialUser->getId();
+            $email = $socialUser->getEmail() ?: sprintf('%s-%s@social.local', $provider, $providerId);
 
-            $email = $socialUser->getEmail() ?: sprintf('%s-%s@social.local', $provider, $socialUser->getId());
+            // Prefer stable provider identity over email alone (avoids takeover via email clash).
+            $user = User::query()
+                ->where('provider', $provider)
+                ->where('provider_id', $providerId)
+                ->first();
 
-            $user = User::firstOrNew(['email' => $email]);
+            if ($user === null) {
+                $user = User::query()->firstOrNew(['email' => $email]);
+            }
+
             $user->fill([
+                'email' => $user->email ?: $email,
                 'provider' => $provider,
-                'provider_id' => $socialUser->getId(),
+                'provider_id' => $providerId,
             ]);
             $user->save();
 
@@ -39,19 +58,23 @@ class SocialLoginController extends Controller
 
             $onboardingStatus = $user->onboarding_completed_at ? 'complete' : 'required';
 
-            $frontendUrl = rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'));
-
             return redirect()->to("{$frontendUrl}/auth/callback?onboarding={$onboardingStatus}");
-
+        } catch (NotFoundHttpException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Social login failed', [
                 'provider' => $provider,
                 'message' => $e->getMessage(),
             ]);
 
-            $frontendUrl = rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'));
-
             return redirect()->to("{$frontendUrl}/login?error=auth_failed");
+        }
+    }
+
+    private function assertAllowedProvider(string $provider): void
+    {
+        if (! in_array($provider, self::ALLOWED_PROVIDERS, true)) {
+            throw new NotFoundHttpException('Unsupported auth provider.');
         }
     }
 }

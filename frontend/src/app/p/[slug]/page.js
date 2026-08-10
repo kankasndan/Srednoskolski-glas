@@ -1,84 +1,84 @@
 "use client";
 
-import { notFound, useParams } from "next/navigation";
-import AppShell from "@/components/AppShell";
-import ForumBanner from "@/components/ForumBanner";
-import ForumEmptyState from "@/components/ForumEmptyState";
-import ForumFilters from "@/components/ForumFilters";
-import ForumThreadList from "@/components/ForumThreadList";
-import { useForums } from "@/hooks/useForums";
-import drzhavnaMaturaPageMock from "../../../../public/MOCK_JSON/forum-page-mock.json";
-import opshtiDiskusiiPageMock from "../../../../public/MOCK_JSON/forum-page-opshti-diskusii-mock.json";
+import AppShell from "@/components/shell/AppShell";
+import Threads from "@/components/thread/Threads";
+import ForumBanner from "@/components/forum/ForumBanner";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
-// Static page mocks keyed by their forum slug. Add a mock here to give a forum
-// its own banner + threads until the real forum page endpoint is wired up.
-const FORUM_PAGE_MOCKS = [drzhavnaMaturaPageMock, opshtiDiskusiiPageMock];
-
-export default function TopicForumPage() {
+export default function ForumPage() {
   const { slug } = useParams();
-  const { general, schoolsByCity, loading, error } = useForums();
+  const [forum, setForum] = useState(null);
+  const [forumError, setForumError] = useState(null);
 
-  if (loading) {
-    return (
-      <AppShell>
-        <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal text-[#595959]">
-          Се вчитува…
-        </p>
-      </AppShell>
-    );
-  }
+  useEffect(() => {
+    let cancelled = false;
 
-  if (error) {
-    return (
-      <AppShell>
-        <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal text-[#595959]">
-          Не успеа вчитувањето на форумот.
-        </p>
-      </AppShell>
-    );
-  }
+    async function fetchForum() {
+      setForum(null);
+      setForumError(null);
 
-  const mockPage = FORUM_PAGE_MOCKS.find((entry) => entry.forum.slug === slug) ?? null;
-  const schoolForums = schoolsByCity.flatMap((entry) => entry.forums);
-  const forum =
-    mockPage?.forum ?? [...general, ...schoolForums].find((item) => item.slug === slug);
-  const threads = mockPage ? mockPage.threads : [];
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/p/${slug}`, {
+          credentials: "include",
+        });
 
-  if (!forum) {
-    notFound();
-  }
+        if (!response.ok) {
+          throw new Error(`Failed to load forum: ${response.status}`);
+        }
 
-  if (threads.length === 0) {
-    return (
-      <AppShell>
-        <div className="flex w-[990px] max-w-full flex-col gap-6">
-          <ForumBanner
-            title={forum.name}
-            description={forum.description}
-            icon={forum.imageUrl}
-            slug={forum.slug}
-            type={forum.type}
-            membersCount={forum.members_count}
-          />
-          <ForumEmptyState />
-        </div>
-      </AppShell>
-    );
-  }
+        const responseData = await response.json();
+        if (!cancelled) {
+          setForum(responseData.data.forum);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setForumError(error.message || "Failed to load forum");
+        }
+      }
+    }
+
+    if (slug) {
+      fetchForum();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
 
   return (
     <AppShell>
-      <div className="flex w-[990px] max-w-full flex-col gap-6">
-        <ForumBanner
-          title={forum.name}
-          description={forum.description}
-          icon={forum.imageUrl}
-          slug={forum.slug}
-          type={forum.type}
-          membersCount={forum.members_count}
-        />
-        <ForumFilters />
-        <ForumThreadList forumName={forum.name} forumSlug={forum.slug} threads={threads} />
+      <div className="flex w-[990px] max-w-full flex-col gap-8">
+        {forumError ? (
+          <p className="font-(family-name:--font-manrope) text-[16px] text-[#595959]">
+            Форумот не може да се вчита.
+          </p>
+        ) : null}
+
+        {forum ? (
+          <ForumBanner
+            key={forum.slug}
+            title={forum.name}
+            description={forum.description}
+            icon={forum.imageUrl}
+            banner={forum.bannerUrl}
+            slug={forum.slug}
+            type={forum.type}
+            membersCount={forum.members_count}
+            isFollowing={forum.is_following}
+          />
+        ) : !forumError ? (
+          <div
+            className="h-[180px] w-full animate-pulse rounded-3xl bg-[#E8F4F6]"
+            aria-busy="true"
+            aria-label="Се вчитува форумот"
+          />
+        ) : null}
+
+        {/* Threads wait for forum metadata so /api/p/{slug} finishes before /threads. */}
+        {forum ? <Threads forum={forum.slug} /> : null}
       </div>
     </AppShell>
   );

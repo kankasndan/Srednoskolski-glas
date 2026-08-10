@@ -1,8 +1,8 @@
-import BackButton from "@/components/BackButton";
-import Header from "@/components/Header";
+import BackButton from "@/components/shell/BackButton";
+import Header from "@/components/shell/Header";
 import Image from "next/image";
-import NewDiscussionForm from "@/components/NewDiscussionForm";
-import NewPageFooter from "@/components/NewPageFooter";
+import NewDiscussionForm from "@/components/compose/NewDiscussionForm";
+import NewPageFooter from "@/components/compose/NewPageFooter";
 
 export default function NewDiscussionPage() {
   return (

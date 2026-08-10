@@ -20,6 +20,7 @@ return new class extends Migration
             $table->text('ai_reasoning')->nullable();
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -30,7 +30,7 @@ class FeedController extends Controller
         $user = $request->user('web') ?? $request->user();
 
         $query = Thread::query()
-            ->with(['user.studentData.school.city', 'threadAttachment', 'forum'])
+            ->with($this->threadListWith($user))
             ->withCount('comments');
 
         $this->applyHasVoted($query, $user);
