@@ -53,7 +53,7 @@ function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = tr
   }
 
   return (
-    <article className="relative flex cursor-pointer items-center justify-between gap-8 rounded-3xl border-b border-b-[#CFE9ED] p-6 transition-colors hover:bg-[#DCEBED]">
+    <article className="relative flex cursor-pointer items-center justify-between gap-8 rounded-3xl border-b border-b-[#CFE9ED] px-4 py-5 transition-colors hover:bg-[#DCEBED]">
       <Link
         href={threadHref}
         aria-label={thread.title}
@@ -195,7 +195,7 @@ export default function ProfileCommentList({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       {comments.map((comment) => (
         <ProfileCommentItem
           key={comment.id}

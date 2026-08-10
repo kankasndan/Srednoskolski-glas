@@ -27,7 +27,7 @@ function Chip({ children, href }) {
     return (
       <Link
         href={href}
-        className={`${className} transition-colors hover:border-(--color-primary-200) hover:bg-[#F1EEFE] hover:text-(--color-primary-200)`}
+        className={`${className} cursor-pointer transition-colors hover:border-(--color-primary-200) hover:bg-[#F1EEFE] hover:text-(--color-primary-200)`}
       >
         {children}
       </Link>
@@ -163,12 +163,12 @@ export default function ProfileBanner({
       <div className="flex shrink-0 flex-col gap-2">
         {isOwnProfile ? (
           <>
-            <button
-              type="button"
+            <Link
+              href="/profile/edit"
               className="flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-primary-200) transition-colors hover:bg-[#F1EEFE]"
             >
               Уреди профил
-            </button>
+            </Link>
             <button
               type="button"
               onClick={handleLogout}

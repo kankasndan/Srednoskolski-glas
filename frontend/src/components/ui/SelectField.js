@@ -32,7 +32,7 @@ export default function SelectField({
           disabled={disabled}
           value={value}
           onChange={onChange}
-          className={`${fieldClass} appearance-none pr-11 disabled:cursor-not-allowed disabled:bg-[#F5F5F5] disabled:text-[#B3B3B3] ${
+          className={`${fieldClass} cursor-pointer appearance-none pr-11 disabled:cursor-not-allowed disabled:bg-[#F5F5F5] disabled:text-[#B3B3B3] ${
             value ? "text-[#000000]" : "text-[#595959]"
           }`}
         >

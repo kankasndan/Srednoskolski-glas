@@ -46,7 +46,7 @@ export default function ProfileThreadList({
     );
   } else {
     content = (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col">
         {threads.map((thread) => (
           <ProfileThreadItem
             key={thread.id}

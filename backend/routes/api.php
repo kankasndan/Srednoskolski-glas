@@ -14,6 +14,7 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\VoteController;
@@ -35,6 +36,7 @@ Route::middleware(['web', 'throttle:social-auth'])->group(function () {
 Route::middleware(['auth:sanctum', 'not_banned', 'throttle:api-writes'])->put('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
 // Return the current authenticated user.
 Route::middleware('auth:sanctum')->get('/me', MeController::class)->name('me.show');
+Route::middleware(['auth:sanctum', 'not_banned', 'throttle:api-writes'])->put('/me', [ProfileController::class, 'update'])->name('me.update');
 // Profile activity lists for the authenticated user.
 Route::middleware('auth:sanctum')->get('/me/counts', [ProfileController::class, 'counts'])->name('me.counts');
 Route::middleware('auth:sanctum')->get('/me/threads', [ProfileController::class, 'threads'])->name('me.threads');
@@ -64,6 +66,8 @@ Route::get('/forums', [ForumController::class, 'index'])->name('forums.index');
 Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
 // Paginated cross-forum home feed.
 Route::get('/feed', [FeedController::class, 'index'])->name('feed.index');
+// Live search + explore page (threads + matching forums).
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 
 // Forum banner/metadata only (no threads).
 Route::get('/p/{forum:slug}', [ForumController::class, 'show'])->name('forums.show');

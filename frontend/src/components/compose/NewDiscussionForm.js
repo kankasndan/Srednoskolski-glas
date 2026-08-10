@@ -115,7 +115,7 @@ export default function NewDiscussionForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col items-start gap-6">
+    <form onSubmit={handleSubmit} noValidate className="flex w-full flex-col items-start gap-6">
       <ForumSelect
         selected={selectedForum}
         onChange={(forum) => {
@@ -131,17 +131,19 @@ export default function NewDiscussionForm() {
           setErrors((current) => ({ ...current, title: undefined }));
         }}
         errorMessage={errors.title}
+        widthClassName="w-full"
       />
       <RichTextEditor
         errorMessage={errors.content}
+        widthClassName="w-full"
         onContentChange={(nextContent) => {
           if (!getPlainTextFromHtml(nextContent)) return;
           setErrors((current) => ({ ...current, content: undefined }));
         }}
       />
-      <PostTypeButtons onAttachmentsChange={handleAttachmentsChange} />
+      <PostTypeButtons widthClassName="w-full" onAttachmentsChange={handleAttachmentsChange} />
       <AnonymousToggle
-        className="w-[632px] max-w-full"
+        className="w-full"
         checked={isAnonymous}
         onChange={setIsAnonymous}
         action={
@@ -155,7 +157,7 @@ export default function NewDiscussionForm() {
         }
       />
       {submitError ? (
-        <p className="w-[632px] max-w-full font-[family-name:var(--font-manrope)] text-[13px] text-[var(--color-error)]">
+        <p className="w-full font-[family-name:var(--font-manrope)] text-[13px] text-[var(--color-error)]">
           {submitError}
         </p>
       ) : null}

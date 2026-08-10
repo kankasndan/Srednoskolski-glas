@@ -226,6 +226,7 @@ Used by:
 
 - `GET /api/feed`
 - `GET /api/p/{slug}/threads`
+- `GET /api/search` (plus `q`, `forum`, `per_page` — see [Search](#search))
 
 | Query | Values | Default | Meaning |
 |-------|--------|---------|---------|
@@ -368,6 +369,92 @@ Related write endpoints:
 
 ---
 
+## Search
+
+### Search threads and forums
+
+```
+GET /api/search
+```
+
+**Public** (works for guests). Same thread card shape as the feed.
+
+Used by the header live-search dropdown (`per_page=5`) and the **Истражи** page (`/search`).
+
+| Query | Values | Default | Meaning |
+|-------|--------|---------|---------|
+| `q` | string, max 200 | empty | Match thread title, body, or comments (`LIKE`). Empty `q` is explore: trending threads |
+| `forum` | forum slug | — | Limit threads to that forum. Unknown slug → `404`. Hides forum suggestions |
+| `page` | integer ≥ 1 | `1` | Page number |
+| `per_page` | 1–20 | `5` | Page size (dropdown uses 5) |
+| `sort` | `relevance`, `trending`, `top`, `newest`, `discussed` | `relevance` when `q` is set, else `trending` | Order. `trending` with a query is treated as `relevance` |
+| `time` | `day`, `week`, `month`, `six-months`, `year`, `all` | `all` | Only threads created in this window |
+
+**Relevance:** title matches first, then body, then comment hits; then upvotes ↓, then newest.
+
+Response is a normal paginated thread list (`data`, `links`, `meta`) plus a `forums` array of up to 3 sidebar-style forum cards whose name or description matches `q`. `forums` is `[]` when `q` is empty or `forum` is set.
+
+```
+GET /api/search?q=матура
+GET /api/search?q=матура&forum=drzhavna_matura
+GET /api/search?q=матура&per_page=5
+GET /api/search?page=2&sort=newest&time=week
+```
+
+```json
+{
+  "data": [
+    {
+      "id": 15,
+      "title": "Како да се подготвам за матура?",
+      "description": "…",
+      "upvotes": 8,
+      "has_voted": false,
+      "views": 120,
+      "is_anonymous": false,
+      "comments_count": 4,
+      "created_at": "2026-07-18T10:22:00.000000Z",
+      "edited_at": null,
+      "forum": {
+        "id": 3,
+        "name": "Државна матура",
+        "slug": "drzhavna_matura",
+        "type": "general",
+        "imageUrl": "https://…/forum.png"
+      },
+      "author": { "id": 1, "username": "ana_mk", "imageUrl": "…", "school": null },
+      "attachments": []
+    }
+  ],
+  "forums": [
+    {
+      "id": 3,
+      "name": "Државна матура",
+      "slug": "drzhavna_matura",
+      "type": "general",
+      "school_id": null,
+      "imageUrl": "https://…/forum.png",
+      "threads_count": 12,
+      "members_count": 40
+    }
+  ],
+  "links": {
+    "first": "http://localhost:8000/api/search?q=%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%B0&page=1",
+    "last": "http://localhost:8000/api/search?q=%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%B0&page=1",
+    "prev": null,
+    "next": null
+  },
+  "meta": {
+    "current_page": 1,
+    "last_page": 1,
+    "per_page": 5,
+    "total": 1
+  }
+}
+```
+
+---
+
 ## Auth
 
 ### Start social login (browser redirect)
@@ -478,6 +565,25 @@ GET /api/me
 | Onboarded, has school | yes (any thread, including other schools) | yes in **general** forums + **own school** forum only |
 
 `POST /api/threads` and `POST /api/threads/{id}/comments` enforce this (`403` when denied). Forum payloads also include `can_create_thread` for the current user.
+
+### Update current user
+
+```
+PUT /api/me
+```
+
+**Auth required.** Username cannot be changed. Send only the fields you want to update.
+
+| Field | Type | Rules |
+|-------|------|--------|
+| `image_url` | string \| null | optional; default avatar path (`/avatars/default-1.svg` … `default-4.svg`), `https?` URL from media upload, or `""` to reset to the first default |
+| `school` | string | with `area` + `year`: `"School Name\|City Name"` (same as onboarding) |
+| `area` | string | vocation name |
+| `year` | string | `1`–`4` or `Прва`/`Втора`/`Трета`/`Четврта` |
+
+Changing school moves the user to that school’s forum (unfollows the previous school forum).
+
+**Success** — same envelope as `GET /api/me` (`{ user }`).
 
 ---
 
@@ -1344,6 +1450,7 @@ DELETE /api/media
 | `GET` | `/api/auth/{provider}/redirect` | — | Browser redirect |
 | `GET` | `/api/auth/{provider}/callback` | — | Browser redirect + session cookie |
 | `GET` | `/api/me` | yes | Current user |
+| `PUT` | `/api/me` | yes | Update avatar / school info |
 | `GET` | `/api/me/counts` | yes | Profile tab badge counts |
 | `GET` | `/api/me/threads` | yes | Current user’s threads |
 | `GET` | `/api/me/comments` | yes | Current user’s comments (+ thread context) |
@@ -1360,6 +1467,7 @@ DELETE /api/media
 | `GET` | `/api/cities` | — | Cities + schools |
 | `GET` | `/api/forums` | — | Sidebar forums |
 | `GET` | `/api/feed` | optional | Paginated personalized / site-wide feed (5/page) |
+| `GET` | `/api/search` | — | Search threads (+ matching forums); empty `q` = explore |
 | `GET` | `/api/p/{slug}` | optional | Forum metadata only (`is_following` when auth) |
 | `GET` | `/api/p/{slug}/threads` | — | Paginated threads (page 1, filters, scroll) |
 | `GET` | `/api/p/{slug}/comments/{id}` | — | Thread + comment tree (`sort=best\|newest\|oldest`) |
@@ -1387,6 +1495,6 @@ DELETE /api/media
 
 These are planned but **not** in routes today — do not call them:
 
-- Reports, search, admin JSON APIs
+- Reports, admin JSON APIs
 
 When they ship, this file should be updated.

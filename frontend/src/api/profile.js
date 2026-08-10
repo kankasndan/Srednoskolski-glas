@@ -1,5 +1,43 @@
 import { apiFetch } from "@/lib/api";
 
+export async function getCities() {
+  const res = await apiFetch("/api/cities");
+
+  if (!res.ok) {
+    throw new Error(`Failed to load cities: ${res.status}`);
+  }
+
+  const payload = await res.json();
+
+  return payload.cities ?? [];
+}
+
+/**
+ * @param {{
+ *   image_url?: string | null,
+ *   school?: string,
+ *   area?: string,
+ *   year?: string,
+ * }} payload
+ */
+export async function updateProfile(payload) {
+  const res = await apiFetch("/api/me", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+
+  const body = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const error = new Error(body.message || `Failed to update profile (${res.status})`);
+    error.status = res.status;
+    error.body = body;
+    throw error;
+  }
+
+  return body.user ?? body.data ?? body;
+}
+
 export async function getProfileUser() {
   const res = await apiFetch("/api/me");
 
