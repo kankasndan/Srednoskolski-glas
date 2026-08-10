@@ -61,3 +61,10 @@
 .white-icon {
   filter: brightness(0) invert(1);
 }
+
+/* Hide the thread filter controls when an ancestor wrapper requests it.
+   This keeps the shared Threads component unchanged while allowing
+   specific pages (e.g. explore) to hide the UI. */
+.explore-hide-filters section > .flex.self-end.gap-2 {
+  display: none !important;
+}

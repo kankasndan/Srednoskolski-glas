@@ -4,7 +4,7 @@ export default function FieldLabel({ children, required = false, htmlFor }) {
   return (
     <Tag
       htmlFor={htmlFor}
-      className="font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black"
+      className="mb-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black"
     >
       {required && <span className="text-red-500">*</span>}
       {children}

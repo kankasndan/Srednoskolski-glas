@@ -7,7 +7,6 @@ import { CITIES } from "@/lib/schools";
 import TextField from "@/components/ui/TextField";
 import SelectField from "@/components/ui/SelectField";
 import SchoolSelect from "@/components/ui/SchoolSelect";
-import Checkbox from "@/components/ui/Checkbox";
 import TermsCheckbox from "@/components/auth/TermsCheckbox";
 import SubmitButton from "@/components/ui/SubmitButton";
 
@@ -36,7 +35,6 @@ const AREAS = [
 ];
 
 const YEARS = ["Прва", "Втора", "Трета", "Четврта"];
-const LOCKED_HINT = "Само средношколци можат да го пополнат ова поле.";
 
 function formatApiError(data) {
   if (data?.errors) {
@@ -52,10 +50,11 @@ export default function OnboardingForm() {
   const [school, setSchool] = useState("");
   const [area, setArea] = useState("");
   const [year, setYear] = useState("");
-  const [notStudent, setNotStudent] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const [notStudent, setNotStudent] = useState(false);
 
   const schoolGroups = [...CITIES].sort(
     (a, b) => b.schools.length - a.schools.length,
@@ -67,6 +66,9 @@ export default function OnboardingForm() {
       setSchool("");
       setArea("");
       setYear("");
+    }
+    else {
+      setSchool("");
     }
   }
 
@@ -118,7 +120,7 @@ export default function OnboardingForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mx-auto mt-12 flex w-full max-w-100 flex-col gap-3"
+      className="mx-auto mt-12 flex w-full max-w-[400px] flex-col gap-3 2xl:max-w-[440px] 2xl:gap-4"
     >
       <TextField
         id="pseudonym"
@@ -129,11 +131,12 @@ export default function OnboardingForm() {
         maxLength={20}
       />
 
-      <Checkbox checked={notStudent} onChange={handleNotStudentChange}>
-        <span className="font-(family-name:--font-manrope) text-[12px] font-normal leading-[19.4px] text-[#595959] 2xl:text-[14px]">
-          Не сум средношколец
-        </span>
-      </Checkbox>
+      <div className="flex flex-col gap-0">
+        <p className="-mt-1 mb-3 font-(family-name:--font-manrope) text-[12px] text-[#595959] 2xl:text-[14px]">
+          Доколку не си средношколец, можеш да ја користиш платформата само за
+          читање и коментирање на дискусии.
+        </p>
+      </div>
 
       <SchoolSelect
         id="school"
@@ -146,31 +149,27 @@ export default function OnboardingForm() {
         notStudent={notStudent}
         onNotStudentChange={handleNotStudentChange}
         disabled={notStudent}
-        tooltip={notStudent ? LOCKED_HINT : undefined}
       />
 
       <SelectField
         id="area"
-        label="Подрачје"
-        required={!notStudent}
+        label="Подрачје на образование"
+        required
         value={area}
         onChange={(e) => setArea(e.target.value)}
-        placeholder="Избери подрачје"
+        placeholder="Избери струка"
         options={AREAS}
         disabled={notStudent}
-        tooltip={notStudent ? LOCKED_HINT : undefined}
       />
 
       <SelectField
         id="year"
-        label="Година"
-        required={!notStudent}
+        label="Година (опционално)"
         value={year}
         onChange={(e) => setYear(e.target.value)}
         placeholder="Избери година"
         options={YEARS}
         disabled={notStudent}
-        tooltip={notStudent ? LOCKED_HINT : undefined}
       />
 
       <TermsCheckbox
@@ -187,7 +186,7 @@ export default function OnboardingForm() {
       <div className="mt-4">
         <SubmitButton
           label={submitting ? "Зачувување..." : "Продолжи"}
-          disabled={!agreed || submitting}
+          disabled={!agreed || submitting || (!notStudent && (!school || !area))}
           disabledTooltip="Прифати ги условите за да продолжиш"
         />
       </div>
