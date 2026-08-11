@@ -54,7 +54,7 @@ export function useThread(forumSlug, threadId, sort = "best") {
           ...updated,
           forum: updated.forum ?? prev.thread.forum,
           attachments: updated.attachments ?? prev.thread.attachments,
-          poll: updated.poll ?? prev.thread.poll,
+          poll: Object.hasOwn(updated, "poll") ? updated.poll : prev.thread.poll,
         },
       };
     });

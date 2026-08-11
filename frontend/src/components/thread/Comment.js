@@ -6,6 +6,7 @@ import CommentActions from "@/components/thread/CommentActions";
 import CommentAuthor from "@/components/thread/CommentAuthor";
 import CommentBody from "@/components/thread/CommentBody";
 import CommentComposer from "@/components/thread/CommentComposer";
+import { reportComment } from "@/api/moderation";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ReportDialog from "@/components/ui/ReportDialog";
 
@@ -14,6 +15,7 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
   const [replying, setReplying] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [reported, setReported] = useState(false);
+  const [reportBusy, setReportBusy] = useState(false);
   const replies = comment.replies ?? [];
   const hasReplies = replies.length > 0;
   const showThread = !collapsed && hasReplies;
@@ -46,10 +48,19 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
         {reporting && (
           <ReportDialog
             open
-            onClose={() => setReporting(false)}
-            onSubmit={() => {
-              setReporting(false);
-              setReported(true);
+            onClose={reportBusy ? undefined : () => setReporting(false)}
+            onSubmit={async ({ reason, details }) => {
+              if (reportBusy) return;
+              setReportBusy(true);
+              try {
+                await reportComment(comment.id, { reason, details });
+                setReporting(false);
+                setReported(true);
+              } catch {
+                setReporting(false);
+              } finally {
+                setReportBusy(false);
+              }
             }}
           />
         )}

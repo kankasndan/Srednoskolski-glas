@@ -123,9 +123,85 @@ class ThreadController extends Controller
             $this->removeAttachments($thread, $removeIds);
             $this->attachUploadedFiles($thread, $files);
             $this->attachLink($thread, $validated['link'] ?? null);
+            $this->syncPoll($thread, $validated);
         });
 
         return (new ThreadResource($this->loadThreadResource($thread->refresh())))->response();
+    }
+
+    /**
+     * Create, update, or remove the thread poll from an update payload.
+     * Omitting poll leaves the existing one unchanged.
+     *
+     * @param  array<string, mixed>  $validated
+     */
+    private function syncPoll(Thread $thread, array $validated): void
+    {
+        if (! empty($validated['remove_poll'])) {
+            $thread->poll?->delete();
+
+            return;
+        }
+
+        if (empty($validated['poll']['question'])) {
+            return;
+        }
+
+        $pollData = $validated['poll'];
+        $endsAt = now()->addDays((int) $pollData['duration_days']);
+        $labels = array_values($pollData['options']);
+        $optionIds = array_values($pollData['option_ids'] ?? []);
+
+        $poll = $thread->poll;
+
+        if ($poll === null) {
+            $poll = Poll::query()->create([
+                'thread_id' => $thread->id,
+                'question' => $pollData['question'],
+                'ends_at' => $endsAt,
+            ]);
+
+            foreach ($labels as $index => $label) {
+                $poll->options()->create([
+                    'label' => $label,
+                    'position' => $index,
+                ]);
+            }
+
+            return;
+        }
+
+        $poll->question = $pollData['question'];
+        $poll->ends_at = $endsAt;
+        $poll->save();
+
+        $keptIds = [];
+
+        foreach ($labels as $index => $label) {
+            $optionId = isset($optionIds[$index]) && is_numeric($optionIds[$index])
+                ? (int) $optionIds[$index]
+                : null;
+
+            if ($optionId !== null) {
+                $option = $poll->options()->whereKey($optionId)->first();
+                if ($option !== null) {
+                    $option->label = $label;
+                    $option->position = $index;
+                    $option->save();
+                    $keptIds[] = $option->id;
+
+                    continue;
+                }
+            }
+
+            $created = $poll->options()->create([
+                'label' => $label,
+                'position' => $index,
+            ]);
+            $keptIds[] = $created->id;
+        }
+
+        $poll->options()->whereNotIn('id', $keptIds)->delete();
     }
 
     /**

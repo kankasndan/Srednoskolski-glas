@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import SearchBar from "@/components/shell/SearchBar";
+import SearchBar, { SearchBarFallback } from "@/components/shell/SearchBar";
 import AuthButtons from "@/components/shell/AuthButtons";
 
 export default function Header() {
@@ -8,7 +9,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 flex w-full items-center justify-between gap-6 bg-white shadow-sm px-14 py-4">
       <Link
         href="/feed"
-        className="flex h-14 w-60 shrink-0 items-center justify-center gap-3 overflow-hidden"
+        className="flex h-14 w-60 shrink-0 cursor-pointer items-center justify-center gap-3 overflow-hidden"
       >
         <Image
           src="/logo-with-text.svg?v=large-header"
@@ -19,7 +20,9 @@ export default function Header() {
           className="block h-14 w-60"
         />
       </Link>
-      <SearchBar />
+      <Suspense fallback={<SearchBarFallback />}>
+        <SearchBar />
+      </Suspense>
       <AuthButtons />
     </header>
   );

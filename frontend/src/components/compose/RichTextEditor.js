@@ -89,7 +89,7 @@ function ToolbarButton({ editor, button, active, onClick }) {
       aria-label={button.label}
       aria-pressed={active}
       onClick={() => (onClick ?? button.onClick)(editor)}
-      className={`flex size-9 items-center justify-center rounded-lg text-[16px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] ${
+      className={`flex size-9 cursor-pointer items-center justify-center rounded-lg text-[16px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] ${
         active
           ? "bg-[#CFE9ED] text-black"
           : "text-[#595959] hover:bg-[#DCEBED] hover:text-black"

@@ -1,14 +1,15 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { reportThread } from "@/api/moderation";
 import { deleteThread, updateThread } from "@/api/threads";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ReportDialog from "@/components/ui/ReportDialog";
 import ThreeDotsMenu from "@/components/ui/ThreeDotsMenu";
-import { useProfile } from "@/hooks/useProfile";
 
 const EditThreadDialog = dynamic(
   () => import("@/components/thread/EditThreadDialog"),
@@ -17,10 +18,8 @@ const EditThreadDialog = dynamic(
 
 export default function ThreadActionsMenu({ thread, isOwner, onUpdated }) {
   const router = useRouter();
-  const { user } = useProfile();
-  const showOwnerActions =
-    isOwner ??
-    (user != null && thread?.author?.id != null && user.id === thread.author.id);
+  // Prefer API `is_owner` (covers anonymous threads). Optional prop overrides.
+  const showOwnerActions = isOwner ?? Boolean(thread?.is_owner);
 
   const [editing, setEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -29,20 +28,28 @@ export default function ThreadActionsMenu({ thread, isOwner, onUpdated }) {
   const [reporting, setReporting] = useState(false);
   const [reported, setReported] = useState(false);
 
-  const items = showOwnerActions
-    ? [
-        { label: "Измени", onSelect: () => setEditing(true) },
-        { label: "Избриши", onSelect: () => setConfirmingDelete(true) },
-      ]
-    : [{ label: "Пријави", onSelect: () => setReporting(true) }];
+  const ownerItems = [
+    { label: "Измени", onSelect: () => setEditing(true) },
+    { label: "Избриши", onSelect: () => setConfirmingDelete(true) },
+  ];
 
-  async function handleSave({ title, content, files, link, removeAttachmentIds }) {
+  async function handleSave({
+    title,
+    content,
+    files,
+    link,
+    removeAttachmentIds,
+    poll,
+    removePoll,
+  }) {
     const updated = await updateThread(thread.id, {
       title,
-      description: content,
+      content,
       files,
       link,
       removeAttachmentIds,
+      poll,
+      removePoll,
     });
 
     onUpdated?.(updated);
@@ -67,7 +74,24 @@ export default function ThreadActionsMenu({ thread, isOwner, onUpdated }) {
 
   return (
     <>
-      <ThreeDotsMenu items={items} />
+      {showOwnerActions ? (
+        <ThreeDotsMenu items={ownerItems} />
+      ) : (
+        <button
+          type="button"
+          aria-label="Пријави"
+          onClick={() => setReporting(true)}
+          className="grid size-9 cursor-pointer place-items-center rounded-lg text-[#333333] transition-colors hover:bg-[#E5E5E5]"
+        >
+          <Image
+            src="/comments icon/report.svg"
+            alt=""
+            width={18}
+            height={18}
+            className="size-[18px]"
+          />
+        </button>
+      )}
 
       {editing && (
         <EditThreadDialog
@@ -81,10 +105,19 @@ export default function ThreadActionsMenu({ thread, isOwner, onUpdated }) {
       {reporting && (
         <ReportDialog
           open
-          onClose={() => setReporting(false)}
-          onSubmit={() => {
-            setReporting(false);
-            setReported(true);
+          onClose={busy ? undefined : () => setReporting(false)}
+          onSubmit={async ({ reason, details }) => {
+            if (busy) return;
+            setBusy(true);
+            try {
+              await reportThread(thread.id, { reason, details });
+              setReporting(false);
+              setReported(true);
+            } catch {
+              setReporting(false);
+            } finally {
+              setBusy(false);
+            }
           }}
         />
       )}

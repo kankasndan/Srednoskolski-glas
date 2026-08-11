@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
+use App\Support\SyncUserContentPermissions;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -73,8 +75,13 @@ class RolePermissionSeeder extends Seeder
             // Auth
             'logout admin',
 
+            // Content moderation (staff)
             'manage threads',
             'manage comments',
+
+            // Content creation (students / onboarded users)
+            'create threads',
+            'create comments',
         ];
 
         foreach ($permissions as $perm) {
@@ -185,9 +192,20 @@ class RolePermissionSeeder extends Seeder
             'view forum details',
         ]);
 
-        $user->givePermissionTo([
-            'manage threads',
-            'manage comments',
+        // Onboarded users may comment anywhere. "create threads" is granted per-user
+        // only when they belong to a school (see SyncUserContentPermissions).
+        $user->syncPermissions([
+            'create comments',
         ]);
+
+        $sync = app(SyncUserContentPermissions::class);
+        User::query()
+            ->whereNotNull('onboarding_completed_at')
+            ->orderBy('id')
+            ->chunkById(100, function ($users) use ($sync): void {
+                foreach ($users as $existingUser) {
+                    $sync->handle($existingUser);
+                }
+            });
     }
 }

@@ -11,7 +11,7 @@ export default function NewDiscussionPage() {
 
       <div className="flex flex-1 flex-col items-center px-14 pb-8">
         <div className="flex w-fit max-w-full flex-col items-start gap-6">
-          <BackButton label="Врати се назад" />
+          <BackButton />
 
           <div className="flex items-start gap-[152px]">
             <main

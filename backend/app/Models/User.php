@@ -88,6 +88,11 @@ class User extends Authenticatable
         return $this->hasMany(ThreadView::class);
     }
 
+    public function feedHides()
+    {
+        return $this->hasMany(FeedHide::class);
+    }
+
     public function viewedThreads(): BelongsToMany
     {
         return $this->belongsToMany(Thread::class, 'thread_views')
@@ -148,5 +153,46 @@ class User extends Authenticatable
     public function topics()
     {
         return $this->belongsToMany(Topic::class, 'feed_topics');
+    }
+
+    public function hasCompletedOnboarding(): bool
+    {
+        return $this->onboarding_completed_at !== null;
+    }
+
+    /**
+     * True when the user has student school data (required to start threads).
+     */
+    public function belongsToSchool(): bool
+    {
+        $this->loadMissing('studentData');
+
+        return $this->studentData?->school_id !== null;
+    }
+
+    /**
+     * Forum id for the user's school, if any.
+     */
+    public function schoolForumId(): ?int
+    {
+        $this->loadMissing('studentData.school.forum');
+
+        $forumId = $this->studentData?->school?->forum?->id;
+
+        return $forumId !== null ? (int) $forumId : null;
+    }
+
+    /**
+     * Whether the user may create a thread in this forum (Spatie + school rules).
+     */
+    public function canCreateThreadIn(Forum $forum): bool
+    {
+        return $this->can('create', [Thread::class, $forum]);
+    }
+
+    public function canCreateComments(): bool
+    {
+        return $this->hasCompletedOnboarding()
+            && ($this->can('create comments') || $this->can('manage comments'));
     }
 }

@@ -2,22 +2,35 @@
 
 import { useState } from "react";
 import { followForum, unfollowForum } from "@/api/forums";
+import { useProfile } from "@/hooks/useProfile";
+
+const GUEST_ERROR = "Мора да си најавен за да следиш форум.";
 
 /**
- * Follow / unfollow a general forum.
- * School forums never render this button — membership is fixed at onboarding.
+ * Follow / unfollow a forum (general or school).
+ * Own-school membership can be locked (unfollow disabled).
  */
 export default function FollowForumButton({
   slug,
   initialFollowing = false,
   onMembersCountChange,
+  locked = false,
   className = "",
 }) {
+  const { user, loading: profileLoading } = useProfile();
   const [following, setFollowing] = useState(Boolean(initialFollowing));
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
 
   async function toggleFollow() {
-    if (!slug || pending) return;
+    if (!slug || pending || locked) return;
+
+    setError("");
+
+    if (!profileLoading && user == null) {
+      setError(GUEST_ERROR);
+      return;
+    }
 
     const nextFollowing = !following;
     setFollowing(nextFollowing);
@@ -38,8 +51,11 @@ export default function FollowForumButton({
       ) {
         onMembersCountChange(data.members_count);
       }
-    } catch {
+    } catch (err) {
       setFollowing(!nextFollowing);
+      if (err?.status === 401) {
+        setError(GUEST_ERROR);
+      }
     } finally {
       setPending(false);
     }
@@ -50,18 +66,26 @@ export default function FollowForumButton({
     : "bg-[#582FF5] text-white hover:bg-[#DCEBED] hover:text-[#0A0A0A]";
 
   return (
-    <button
-      type="button"
-      aria-pressed={following}
-      disabled={pending}
-      onClick={toggleFollow}
-      className={`flex h-10 w-[268px] shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none transition-colors disabled:cursor-wait disabled:opacity-80 ${stateClasses} ${className}`}
-    >
-      {following && <CheckIcon />}
-      <span className="flex h-[19px] items-center leading-none">
-        {following ? "Следиш" : "Следи го форумот"}
-      </span>
-    </button>
+    <div className="flex w-[268px] shrink-0 flex-col gap-1">
+      <button
+        type="button"
+        aria-pressed={following}
+        disabled={pending || locked}
+        onClick={toggleFollow}
+        title={locked ? "Форумот на твоето училиште е секогаш следен" : undefined}
+        className={`flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-80 ${stateClasses} ${className}`}
+      >
+        {following && <CheckIcon />}
+        <span className="flex h-[19px] items-center leading-none">
+          {following ? "Следиш" : "Следи го форумот"}
+        </span>
+      </button>
+      {error ? (
+        <p className="font-[family-name:var(--font-manrope)] text-[12px] leading-4 text-[#DC2626]">
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
 }
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Forum;
+use App\Models\Thread;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Validator;
@@ -25,7 +27,28 @@ class StoreThreadRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        $user = $this->user();
+        if ($user === null) {
+            return false;
+        }
+
+        $forumId = $this->input('forum_id');
+        if (! is_numeric($forumId)) {
+            // Let validation return a field error for missing/invalid forum_id.
+            return true;
+        }
+
+        $forum = Forum::query()->find((int) $forumId);
+        if ($forum === null) {
+            return true;
+        }
+
+        return $user->can('create', [Thread::class, $forum]);
+    }
+
+    protected function failedAuthorization(): void
+    {
+        abort(403, 'Немаш дозвола да започнеш дискусија во овој форум.');
     }
 
     /**

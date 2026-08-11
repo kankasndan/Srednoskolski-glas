@@ -5,6 +5,7 @@ import { useId, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toggleThreadVote } from "@/api/threads";
 import ForumEmptyState from "@/components/forum/ForumEmptyState";
+import NoMoreThreads from "@/components/thread/NoMoreThreads";
 import ThreadAttachments from "@/components/thread/ThreadAttachments";
 import ThreadMetaTags, { buildThreadMetaTags } from "@/components/thread/ThreadMetaTags";
 import ThreadPoll from "@/components/thread/ThreadPoll";
@@ -110,7 +111,7 @@ function ThreadItem({ thread }) {
   }
 
   return (
-    <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] p-4 pt-6 rounded-3xl transition-colors hover:bg-[#DCEBED]">
+    <article className="relative flex flex-col items-start justify-center gap-4 rounded-3xl border-b border-b-[#CFE9ED] bg-transparent px-4 py-5 transition-colors hover:bg-[#DCEBED]">
       <div className="flex w-full items-start justify-between gap-8">
         <div
           className="flex min-w-0 flex-1 cursor-pointer flex-col gap-4"
@@ -192,7 +193,7 @@ function FeedSelect({
         aria-expanded={isOpen}
         aria-controls={listboxId}
         onClick={onToggle}
-        className="w-40 flex py-2 px-3 rounded-xl cursor-pointer items-center justify-center gap-1 bg-gray-100 font-bold hover:bg-gray-200 transition"
+        className="flex h-10 w-40 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#CCCCCC] bg-white px-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#DCEBED]"
       >
         <span className={`text-nowrap`}>{selected.label}</span>
         <Image
@@ -229,7 +230,8 @@ function FeedSelect({
   );
 }
 
-export default function Threads({ forum = null }) {
+export default function Threads({ forum = null, searchQuery = null }) {
+  const isSearch = searchQuery !== null;
   const sortListboxId = useId();
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
@@ -248,9 +250,23 @@ export default function Threads({ forum = null }) {
   const noMoreRef = useRef(false);
   const pageRef = useRef(1);
   const hasLoadedRef = useRef(false);
-  const BASE_URL =
-    API_BASE_URL +
-    (forum === null ? "/api/feed" : "/api/p/" + forum + "/threads");
+
+  function buildListUrl({ page, sort, time }) {
+    const params = new URLSearchParams({
+      page: String(page),
+      time: time.value,
+      sort: sort.value,
+    });
+
+    if (isSearch) {
+      if (searchQuery) params.set("q", searchQuery);
+      if (forum) params.set("forum", forum);
+      return `${API_BASE_URL}/api/search?${params}`;
+    }
+
+    const path = forum === null ? "/api/feed" : `/api/p/${forum}/threads`;
+    return `${API_BASE_URL}${path}?${params}`;
+  }
 
   async function fetchThreads({
     append = false,
@@ -272,10 +288,9 @@ export default function Threads({ forum = null }) {
     }
 
     try {
-      const response = await fetch(
-        `${BASE_URL}?page=${page}&time=${time.value}&sort=${sort.value}`,
-        { credentials: "include" },
-      );
+      const response = await fetch(buildListUrl({ page, sort, time }), {
+        credentials: "include",
+      });
 
       if (!response.ok) {
         if (!append) setThreads([]);
@@ -319,12 +334,12 @@ export default function Threads({ forum = null }) {
   };
 
   useEffect(() => {
-    // Reset + load when the forum route changes. Filter changes call fetchThreads directly.
+    // Reset + load when the forum route or search query changes. Filter changes call fetchThreads directly.
     void Promise.resolve().then(() => {
       fetchThreads({ append: false, page: 1 });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forum]);
+  }, [forum, searchQuery]);
 
   useEffect(() => {
     loadingRef.current = moreThreadsLoading;
@@ -363,10 +378,11 @@ export default function Threads({ forum = null }) {
     observer.observe(node);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasLoaded, noMoreThreads, threads.length, forum, selectedSort, selectedTimeFilter]);
+  }, [hasLoaded, noMoreThreads, threads.length, forum, searchQuery, selectedSort, selectedTimeFilter]);
 
   // Sort only reorders; an empty list with time=all means the forum truly has no threads.
   const isTrulyEmptyForum =
+    !isSearch &&
     forum !== null &&
     hasLoaded &&
     threads.length === 0 &&
@@ -414,7 +430,9 @@ export default function Threads({ forum = null }) {
           <LoadingLogo />
         ) : threads.length === 0 ? (
           <p className="py-8 text-center font-[family-name:var(--font-manrope)] text-[16px] text-[#595959]">
-            Нема дискусии за избраните филтри.
+            {isSearch && searchQuery.trim()
+              ? "Нема резултати за ова пребарување."
+              : "Нема дискусии за избраните филтри."}
           </p>
         ) : (
           threads.map((thread) => (
@@ -429,9 +447,7 @@ export default function Threads({ forum = null }) {
             <div ref={sentinelRef} className="h-1 w-full shrink-0" aria-hidden />
           ) : null}
           {moreThreadsLoading ? <LoadingLogo /> : null}
-          {noMoreThreads && !moreThreadsLoading ? (
-            <span className="font-bold text-primary-300 text-xl">Нема веќе :/</span>
-          ) : null}
+          {noMoreThreads && !moreThreadsLoading ? <NoMoreThreads /> : null}
         </>
       ) : null}
     </section>

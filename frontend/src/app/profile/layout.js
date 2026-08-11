@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import AppShell from "@/components/shell/AppShell";
 import ProfileBanner from "@/components/profile/ProfileBanner";
 import ProfileTabs from "@/components/profile/ProfileTabs";
@@ -10,8 +10,10 @@ import { useProfileCounts } from "@/hooks/useProfileCounts";
 
 export default function ProfileLayout({ children }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, loading, error } = useProfile();
   const counts = useProfileCounts();
+  const isEditPage = pathname === "/profile/edit";
 
   useEffect(() => {
     if (!loading && (error || !user)) {
@@ -29,11 +31,15 @@ export default function ProfileLayout({ children }) {
     );
   }
 
+  if (isEditPage) {
+    return <AppShell>{children}</AppShell>;
+  }
+
   return (
     <AppShell>
       <div className="flex w-247.5 max-w-full flex-col">
         <ProfileBanner user={user} isOwnProfile />
-        <div className="mt-18 flex flex-col gap-12">
+        <div className="mt-8 flex flex-col gap-8">
           <ProfileTabs counts={counts} basePath="/profile" isOwnProfile />
           {children}
         </div>

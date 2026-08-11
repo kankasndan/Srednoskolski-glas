@@ -43,7 +43,11 @@ export default function DialogShell({
           aria-modal="true"
           aria-label={label}
           onClick={(event) => event.stopPropagation()}
+<<<<<<< HEAD
           className={`relative flex w-full flex-col items-center gap-8 overflow-hidden rounded-xl bg-white p-10 shadow-[0_12px_24px_rgba(0,0,0,0.12)] ${widthClassName}`}
+=======
+          className={`relative flex w-full flex-col items-center gap-6 rounded-xl bg-white p-6 shadow-[0_12px_24px_rgba(88,47,245,0.14)] ${widthClassName}`}
+>>>>>>> c42688fb1c9b1329ab49ece69ce477207ea48cf1
         >
           {/* Grayscale go vadi violetovoto od sharata za da ostane siva. */}
           <div

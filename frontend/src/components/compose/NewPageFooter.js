@@ -1,6 +1,6 @@
 export default function NewPageFooter() {
   return (
-    <footer className="border-t border-[#E5E5E5] px-14 pb-10 pt-8 font-[family-name:var(--font-manrope)] text-[12px]">
+    <footer className="border-t border-[#E5E5E5] px-14 py-6 font-[family-name:var(--font-manrope)] text-[12px]">
       <nav aria-label="Правни информации" className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[#595959]">
         <a href="/terms" className="cursor-pointer transition-colors hover:text-black">
           Услови за користење

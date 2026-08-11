@@ -67,7 +67,7 @@ export default function PublicProfileLayout({ children }) {
           isFollowing={isFollowing}
           onFollowChange={patchFollow}
         />
-        <div className="mt-18 flex flex-col gap-12">
+        <div className="mt-8 flex flex-col gap-8">
           <ProfileTabs
             counts={counts}
             basePath={basePath}
