@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Appeals')
+@section('title', 'Жалби')
 
 @section('content')
     <div class="p-6">
@@ -10,18 +10,18 @@
             <!-- Header -->
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-800">Ban Appeals</h1>
-                    <p class="text-sm text-gray-500 mt-1">Review and resolve appeals submitted by banned members.</p>
+                    <h1 class="text-2xl font-bold text-gray-800">Жалби на забрани</h1>
+                    <p class="text-sm text-gray-500 mt-1">Прегледај и реши жалби поднесени од банирани членови.</p>
                 </div>
                 <div>
                     <span id="active-appeals-total"
-                        class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium">
-                        Total appeals: {{ $appeals->total() }}
+                        class="inline-flex items-center px-3 py-1 rounded-full bg-my-purple/10 text-my-purple text-sm font-medium">
+                        Вкупно жалби: {{ $appeals->total() }}
                     </span>
 
                     <span id="resolved-appeals-total" style="display: none;"
-                        class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium">
-                        Total resolved appeals: {{ $resolvedAppeals->total() }}
+                        class="inline-flex items-center px-3 py-1 rounded-full bg-my-purple/10 text-my-purple text-sm font-medium">
+                        Вкупно решени жалби: {{ $resolvedAppeals->total() }}
                     </span>
                 </div>
             </div>
@@ -29,12 +29,12 @@
             <!-- Tabs -->
             <div class="flex gap-1 border-b border-gray-200 mb-6">
                 <button type="button" data-tab="queue"
-                    class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600">
-                    Appeal 
+                    class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-my-purple text-my-purple">
+                    Жалби
                 </button>
                 <button type="button" data-tab="history"
                     class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">
-                    History
+                    Историја
                 </button>
             </div>
 
@@ -63,10 +63,10 @@
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs tracking-wide">
                             <tr>
-                                <th class="text-left px-6 py-3">Member</th>
-                                <th class="text-left px-6 py-3">Ban Reason</th>
-                                <th class="text-left px-6 py-3">Ban Type</th>
-                                <th class="text-left px-6 py-3">Submitted</th>
+                                <th class="text-left px-6 py-3">Член</th>
+                                <th class="text-left px-6 py-3">Причина за забрана</th>
+                                <th class="text-left px-6 py-3">Тип на забрана</th>
+                                <th class="text-left px-6 py-3">Поднесена</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -86,12 +86,18 @@
                                     <td class="px-6 py-4">
                                         <span
                                             class="text-xs font-medium px-2 py-1 rounded-full {{ match ($appeal->sanction->type) {
-                                                'warning' => 'bg-yellow-100 text-yellow-700',
+                                                'warning' => 'bg-my-yellow/30 text-gray-800',
                                                 'permanent_ban' => 'bg-red-100 text-red-700',
                                                 '7-day' => 'bg-green-100 text-green-600',
                                                 default => 'bg-gray-100 text-gray-600',
                                             } }}">
-                                            {{ $appeal->sanction->type }}
+                                            {{ match ($appeal->sanction->type) {
+                                                'warning' => 'Предупредување',
+                                                'permanent_ban' => 'Трајна забрана',
+                                                '7-day' => '7-дневна забрана',
+                                                'custom' => 'Прилагодена',
+                                                default => $appeal->sanction->type,
+                                            } }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-gray-500">{{ $appeal->created_at->diffForHumans() }}</td>
@@ -100,7 +106,7 @@
                             @empty
                                 <tr>
                                     <td colspan="5" class="px-6 py-10 text-center text-gray-400 text-sm">
-                                        No matching appeals.
+                                        Нема совпаѓачки жалби.
                                     </td>
                                 </tr>
                             @endforelse
@@ -114,24 +120,24 @@
                         @if ($appeals->onFirstPage())
                             <button disabled
                                 class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                                Previous
+                                Претходна
                             </button>
                         @else
                             <a href="{{ $appeals->previousPageUrl() }}"
                                 class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                                Previous
+                                Претходна
                             </a>
                         @endif
 
                         @if ($appeals->hasMorePages())
                             <a href="{{ $appeals->nextPageUrl() }}"
                                 class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                                Next
+                                Следна
                             </a>
                         @else
                             <button disabled
                                 class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                                Next
+                                Следна
                             </button>
                         @endif
                     </nav>
@@ -147,12 +153,12 @@
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs tracking-wide">
                             <tr>
-                                <th class="text-left px-6 py-3">Member</th>
-                                <th class="text-left px-6 py-3">Ban Reason</th>
-                                <th class="text-left px-6 py-3">Decision</th>
-                                <th class="text-left px-6 py-3">Resolved By</th>
-                                <th class="text-left px-6 py-3">Resolved On</th>
-                                <th class="text-right px-6 py-3">Actions</th>
+                                <th class="text-left px-6 py-3">Член</th>
+                                <th class="text-left px-6 py-3">Причина за забрана</th>
+                                <th class="text-left px-6 py-3">Одлука</th>
+                                <th class="text-left px-6 py-3">Решено од</th>
+                                <th class="text-left px-6 py-3">Решено на</th>
+                                <th class="text-right px-6 py-3">Акции</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -167,7 +173,7 @@
                                             </div>
                                             <div>
                                                 <p class="font-medium text-gray-800">
-                                                    {{ $resolvedAppeal->user->username ?? 'Unknown' }}</p>
+                                                    {{ $resolvedAppeal->user->username ?? 'Непознато' }}</p>
                                                 <p class="text-gray-400 text-xs">
                                                     {{ '@' . ($resolvedAppeal->user->handle ?? '—') }}</p>
                                             </div>
@@ -182,25 +188,25 @@
                                                 &amp; Unbanned</span>
                                         @else
                                             <span
-                                                class="px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-medium">Rejected</span>
+                                                class="px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-medium">Одбиена</span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 text-gray-600">
-                                        {{ $resolvedAppeal->resolvedBy->username ?? 'System' }}</td>
+                                        {{ $resolvedAppeal->resolvedBy->username ?? 'Систем' }}</td>
                                     <td class="px-6 py-4 text-gray-500">
                                         {{ $resolvedAppeal->deleted_at?->diffForHumans() ?? '—' }}</td>
                                     <td class="px-6 py-4 text-right">
                                         <button type="button"
-                                            class="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
+                                            class="text-my-purple hover:text-my-purple font-medium text-sm"
                                             onclick="event.stopPropagation(); window.location.href='{{ route('appeal.show', $resolvedAppeal->id) }}'">
-                                            View
+                                            Види
                                         </button>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
                                     <td colspan="6" class="px-6 py-10 text-center text-gray-400 text-sm">
-                                        No resolved appeals found.
+                                        Нема решени жалби.
                                     </td>
                                 </tr>
                             @endforelse
@@ -214,24 +220,24 @@
                         @if ($resolvedAppeals->onFirstPage())
                             <button disabled
                                 class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                                Previous
+                                Претходна
                             </button>
                         @else
                             <a href="{{ $resolvedAppeals->previousPageUrl() }}"
                                 class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                                Previous
+                                Претходна
                             </a>
                         @endif
 
                         @if ($resolvedAppeals->hasMorePages())
                             <a href="{{ $resolvedAppeals->nextPageUrl() }}"
                                 class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                                Next
+                                Следна
                             </a>
                         @else
                             <button disabled
                                 class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                                Next
+                                Следна
                             </button>
                         @endif
                     </nav>
@@ -280,10 +286,10 @@
                             const target = btn.getAttribute('data-tab');
 
                             tabBtns.forEach(function(b) {
-                                b.classList.remove('border-indigo-600', 'text-indigo-600');
+                                b.classList.remove('border-my-purple', 'text-my-purple');
                                 b.classList.add('border-transparent', 'text-gray-500');
                             });
-                            btn.classList.add('border-indigo-600', 'text-indigo-600');
+                            btn.classList.add('border-my-purple', 'text-my-purple');
                             btn.classList.remove('border-transparent', 'text-gray-500');
 
                             tabPanels.forEach(function(panel) {

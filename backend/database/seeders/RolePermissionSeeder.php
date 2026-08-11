@@ -97,100 +97,61 @@ class RolePermissionSeeder extends Seeder
         $moderator = Role::firstOrCreate(['name' => 'moderator', 'guard_name' => 'web']);
         $user = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
 
-        // Attach permissions to roles
-        $superAdmin->givePermissionTo($permissions);
-
-        $moderator->givePermissionTo([
-            // Admin access
+        // Moderator: day-to-day moderation only (no forum CRUD, appeal resolution, ban removal, exports, roles).
+        $moderatorPermissions = [
             'access admin panel',
 
-            // Dashboard
             'view dashboard',
-            'export dashboard',
 
-            // Profile
             'view own profile',
             'update own profile',
             'update own profile images',
             'update own password',
 
-            // Reports
             'view reports',
             'approve reports',
             'reject reports',
 
-            // Sanctions
             'view sanctions',
             'create sanctions',
-            'remove sanctions',
 
-            // Appeals
             'view appeals',
             'search appeals',
-            'view appeal details',   // show
-            'accept appeals',
-            'reject appeals',
+            'view appeal details',
 
-            // Users
             'view users',
             'search users',
             'view user details',
-            'export user as pdf',
 
-            // Forums
             'view forums',
             'search forums',
-            'create forums',
-            'update forums',
-            'delete forums',
             'view forum details',
-        ]);
 
-        $admin->givePermissionTo([
-            // Admin access
-            'access admin panel',
+            'logout admin',
 
-            // Dashboard
-            'view dashboard',
+            'manage threads',
+            'manage comments',
+        ];
+
+        // Admin: operational powers including forums, appeals, sanction removal — not staff role management.
+        $adminPermissions = array_merge($moderatorPermissions, [
             'export dashboard',
 
-            // Profile
-            'view own profile',
-            'update own profile',
-            'update own profile images',
-            'update own password',
-
-            // Reports
-            'view reports',
-            'approve reports',
-            'reject reports',
-
-            // Sanctions
-            'view sanctions',
-            'create sanctions',
             'remove sanctions',
 
-            // Appeals
-            'view appeals',
-            'search appeals',
-            'view appeal details',   // show
             'accept appeals',
             'reject appeals',
 
-            // Users
-            'view users',
-            'search users',
-            'view user details',
             'export user as pdf',
 
-            // Forums
-            'view forums',
-            'search forums',
             'create forums',
             'update forums',
             'delete forums',
-            'view forum details',
         ]);
+
+        $superAdmin->syncPermissions($permissions);
+        $admin->syncPermissions($adminPermissions);
+        $moderator->syncPermissions($moderatorPermissions);
 
         // Onboarded users may comment anywhere. "create threads" is granted per-user
         // only when they belong to a school (see SyncUserContentPermissions).

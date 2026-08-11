@@ -32,7 +32,7 @@ class AuthController extends Controller
         $remember = $request->boolean('remember');
 
         if (! Auth::attempt($credentials, $remember)) {
-            return back()->withErrors(['credentials' => 'Invalid credentials!']);
+            return back()->withErrors(['credentials' => 'Невалидни податоци за најава!']);
         }
 
         $request->session()->regenerate();
@@ -45,7 +45,7 @@ class AuthController extends Controller
             $request->session()->regenerateToken();
 
             return back()->withErrors([
-                'credentials' => 'You do not have access to the admin panel.',
+                'credentials' => 'Немате пристап до админ панелот.',
             ]);
         }
 

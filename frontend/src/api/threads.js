@@ -152,6 +152,42 @@ export async function updateThread(threadId, payload) {
 }
 
 /** @param {number} threadId */
+export async function followThread(threadId) {
+  const response = await apiFetch(`/api/threads/${threadId}/follow`, {
+    method: "POST",
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Failed to follow thread (${response.status})`);
+    error.status = response.status;
+    error.body = body;
+    throw error;
+  }
+
+  return body.data;
+}
+
+/** @param {number} threadId */
+export async function unfollowThread(threadId) {
+  const response = await apiFetch(`/api/threads/${threadId}/follow`, {
+    method: "DELETE",
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Failed to unfollow thread (${response.status})`);
+    error.status = response.status;
+    error.body = body;
+    throw error;
+  }
+
+  return body.data;
+}
+
+/** @param {number} threadId */
 export async function toggleThreadVote(threadId) {
   const response = await apiFetch(`/api/threads/${threadId}/upvote`, {
     method: "POST",

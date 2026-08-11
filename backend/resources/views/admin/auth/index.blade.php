@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Најави се - Средношколски Глас</title>
+    <title>Најава — Админ Панел — Средношколски Глас</title>
     <script src="https://kit.fontawesome.com/75475ebc14.js" crossorigin="anonymous"></script>
     @vite('resources/css/app.css', 'resources/js/app.js')
     <style>
@@ -38,7 +38,7 @@
                     Е-пошта <span class="text-[#DC2626]">*</span>
                 </label>
                 <input type="email" placeholder="admin@example.com" name="email"
-                    class="w-full rounded-[10px] border border-[#E0E2EC] bg-[#F7F8FC] px-4 py-3 text-[14px] text-[#3A3D4D] outline-none focus:border-[#582FF5] focus:ring-2 focus:ring-[#582FF5]/20 placeholder:text-[#9598A6]" />
+                    class="w-full rounded-[10px] border border-[#E0E2EC] bg-[#F7F8FC] px-4 py-3 text-[14px] text-[#3A3D4D] outline-none focus:border-my-purple focus:ring-2 focus:ring-my-purple/20 placeholder:text-[#9598A6]" />
                 @error('email')
                     <span class="text-xs text-red-600">{{ $message }}</span>
                 @enderror
@@ -49,9 +49,9 @@
                 </label>
                 <div class="relative">
                     <input id="password" type="password" placeholder="••••••••" name="password"
-                        class="w-full rounded-[10px] border border-[#E0E2EC] bg-[#F7F8FC] px-4 py-3 pr-12 text-[14px] text-[#3A3D4D] outline-none focus:border-[#582FF5] focus:ring-2 focus:ring-[#582FF5]/20 placeholder:text-[#9598A6]" />
+                        class="w-full rounded-[10px] border border-[#E0E2EC] bg-[#F7F8FC] px-4 py-3 pr-12 text-[14px] text-[#3A3D4D] outline-none focus:border-my-purple focus:ring-2 focus:ring-my-purple/20 placeholder:text-[#9598A6]" />
                     <button type="button" id="togglePassword"
-                        class="absolute inset-y-0 right-0 flex items-center px-4 text-[#8A8FA3] transition hover:text-[#582FF5]"
+                        class="absolute inset-y-0 right-0 flex items-center px-4 text-[#8A8FA3] transition hover:text-my-purple"
                         aria-label="Покажи лозинка">
                         <i class="fa-solid fa-eye" id="togglePasswordIcon"></i>
                     </button>
@@ -62,12 +62,12 @@
             </div>
 
             <label class="flex items-center gap-2 text-[14px] text-[#595959]">
-                <input type="checkbox" class="h-4 w-4 rounded border-[#CCCCCC] text-[#582FF5] focus:ring-[#582FF5]" name="remember" />
+                <input type="checkbox" class="h-4 w-4 rounded border-[#CCCCCC] text-my-purple focus:ring-my-purple" name="remember" />
                 Запомни ме
             </label>
 
             <button type="submit"
-                class="mt-2 w-full rounded-[10px] bg-[#582FF5] py-3 text-[15px] font-bold text-white transition hover:bg-[#4A26D6]">
+                class="mt-2 w-full rounded-[10px] bg-my-purple py-3 text-[15px] font-bold text-white transition hover:bg-my-purple/90">
                 Најави се
                 <script>
                     const passwordInput = document.getElementById('password');

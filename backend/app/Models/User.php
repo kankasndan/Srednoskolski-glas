@@ -105,6 +105,12 @@ class User extends Authenticatable
         return $this->hasMany(Thread::class);
     }
 
+    /** Threads this user follows (spec 6.6 — visual only in MVP). */
+    public function followedThreads(): BelongsToMany
+    {
+        return $this->belongsToMany(Thread::class, 'thread_follows')->withTimestamps();
+    }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);

@@ -9,6 +9,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\FeedHideController;
 use App\Http\Controllers\FollowForumController;
+use App\Http\Controllers\FollowThreadController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MediaController;
@@ -42,6 +43,7 @@ Route::middleware('auth:sanctum')->get('/me/counts', [ProfileController::class, 
 Route::middleware('auth:sanctum')->get('/me/threads', [ProfileController::class, 'threads'])->name('me.threads');
 Route::middleware('auth:sanctum')->get('/me/comments', [ProfileController::class, 'comments'])->name('me.comments');
 Route::middleware('auth:sanctum')->get('/me/followed-forums', [ProfileController::class, 'followedForums'])->name('me.followed-forums');
+Route::middleware('auth:sanctum')->get('/me/followed-threads', [ProfileController::class, 'followedThreads'])->name('me.followed-threads');
 Route::middleware('auth:sanctum')->get('/me/following-users', [ProfileController::class, 'followingUsers'])->name('me.following-users');
 // Log the user out and end the session.
 Route::middleware(['auth:sanctum', 'throttle:api-writes'])->post('/logout', LogoutController::class)->name('auth.logout');
@@ -124,6 +126,14 @@ Route::middleware(['auth:sanctum', 'not_banned'])->group(function () {
     Route::delete('/p/{forum:slug}/follow', [FollowForumController::class, 'destroy'])
         ->middleware('throttle:api-writes')
         ->name('forums.unfollow');
+
+    // Follow / unfollow a thread (visual only in MVP).
+    Route::post('/threads/{thread}/follow', [FollowThreadController::class, 'store'])
+        ->middleware('throttle:api-writes')
+        ->name('threads.follow');
+    Route::delete('/threads/{thread}/follow', [FollowThreadController::class, 'destroy'])
+        ->middleware('throttle:api-writes')
+        ->name('threads.unfollow');
 
     // Upload a media file.
     Route::post('/media', [MediaController::class, 'store'])

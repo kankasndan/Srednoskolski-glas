@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Facades\Media;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 
@@ -15,36 +17,73 @@ class AdminController extends Controller
         return view('admin.dashboard');
     }
 
-    public function profile(User $user)
+    public function profile(User $user, Request $request)
     {
+        $this->authorize('view own profile');
+        abort_unless($request->user()?->is($user), 403);
+
         return view('admin.myprofile.index', compact('user'));
     }
 
     public function update(User $user, Request $request)
     {
-        $user->update([
-            'username' => $request->username,
-            'email' => $request->email,
+        $this->authorize('update own profile');
+        // Self-service only — never allow editing another user's profile.
+        abort_unless($request->user()?->is($user), 403);
+
+        $validated = $request->validate([
+            'username' => ['required', 'string', 'max:255', 'unique:users,username,'.$user->id],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
         ]);
 
-        return view('admin.myprofile.index', compact('user'));
+        $user->update([
+            'username' => $validated['username'],
+            'email' => $validated['email'],
+        ]);
+
+        return redirect()
+            ->route('admin.profile', $user)
+            ->with('success', 'Профилот е успешно ажуриран.');
     }
 
     public function updatePassword(User $user, Request $request)
     {
+        $this->authorize('update own password');
         // Self-service only — changing another user's password is not allowed here.
         abort_unless($request->user()?->is($user), 403);
-
-        $validated = $request->validate([
+        $request->validate([
             'current_password' => ['required', 'current_password'],
             'password' => ['required', 'confirmed', Password::min(8)->uncompromised()->mixedCase()->numbers()->symbols()],
         ]);
 
         $user->update([
-            'password' => $validated['password'],
+            'password' => $request['password'],
         ]);
 
-        return back();
+        return back()->with(['success' => 'Лозинката е успешно ажурирана.']);
+    }
+
+    public function updateImages(User $user, Request $request)
+    {
+        $this->authorize('update own profile images');
+        abort_unless($request->user()?->is($user), 403);
+
+        $validated = $request->validate([
+            'image' => ['required', 'image', 'max:5120'],
+        ]);
+
+        $uploaded = $validated['image'];
+        if (! $uploaded instanceof UploadedFile) {
+            return back()->withErrors(['image' => 'Прикачи валидна слика.']);
+        }
+
+        $imageUrl = Media::upload($uploaded, 'users/images')->url;
+
+        $user->update([
+            'imageUrl' => $imageUrl,
+        ]);
+
+        return back()->with(['success' => 'Профилната слика е успешно ажурирана.']);
     }
 
     public function readAllNotifications()
@@ -52,5 +91,15 @@ class AdminController extends Controller
         Auth::user()?->unreadNotifications->markAsRead();
 
         return back();
+    }
+
+    public function readNotification(string $id)
+    {
+        $notification = Auth::user()?->notifications()->where('id', $id)->firstOrFail();
+        $notification->markAsRead();
+
+        $url = $notification->data['url'] ?? route('report.index');
+
+        return redirect($url);
     }
 }

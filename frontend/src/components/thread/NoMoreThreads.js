@@ -2,24 +2,22 @@ import Image from "next/image";
 
 export default function NoMoreThreads() {
   return (
-    <div role="status" className="flex w-full flex-col items-center gap-4 pt-2">
-      <div className="h-px w-full bg-[#CFE9ED]" aria-hidden="true" />
-      <div className="flex w-full max-w-[420px] flex-col items-center gap-3 rounded-3xl bg-[#DCEBED] px-8 py-6 text-center">
-        <Image
-          src="/logo.svg"
-          alt=""
-          width={72}
-          height={48}
-          className="h-12 w-[72px] object-contain"
-        />
-        <div className="flex flex-col items-center gap-2">
-          <p className="font-[family-name:var(--font-oswald)] text-[18px] font-bold uppercase leading-none text-black">
-            Нема веќе
-          </p>
-          <p className="font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 text-[#595959]">
-            Ги виде сите дискусии засега.
-          </p>
-        </div>
+    <div className="flex h-[175px] w-[388px] max-w-full flex-col items-center justify-center gap-6 text-center">
+      <Image
+        src="/gray-logo.svg"
+        alt=""
+        width={115}
+        height={77}
+        priority
+        className="object-contain"
+      />
+      <div className="flex flex-col items-center gap-4">
+        <h1 className="font-[family-name:var(--font-oswald)] text-[20px] font-bold uppercase leading-[27px] text-black">
+          Нема веќе дискусии
+        </h1>
+        <p className="w-[388px] max-w-full font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
+          Ги прегледа сите дискусии што ги имаме за тебе засега.
+        </p>
       </div>
     </div>
   );
