@@ -130,13 +130,8 @@ export default function CommentComposer({
           </button>
         ) : (
           <Link
-<<<<<<< HEAD
             href="/rules"
-            className="text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px]"
-=======
-            href={`/p/${forumSlug}`}
             className="cursor-pointer text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px] transition-colors hover:text-black"
->>>>>>> c42688fb1c9b1329ab49ece69ce477207ea48cf1
           >
             Внимавај на правилата на заедницата.
           </Link>
