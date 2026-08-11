@@ -25,7 +25,7 @@ export default function CommunityBanner() {
           <h2 className="h-[30px] w-[452px] font-[family-name:var(--font-oswald)] text-[20px] font-bold leading-none text-black">
             МЕСТО КАДЕ СЕКОЈ СРЕДНОШКОЛЕЦ ИМА ГЛАС
           </h2>
-          <p className="h-[22px] w-[452px] font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-none text-[#595959]">
+          <p className="h-[22px] w-[452px] whitespace-nowrap font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-none text-[#595959]">
             {showCreate
               ? "Прашувај, споделувај и откриј што мислат твоите врсници."
               : "Придружи се на разговорите во заедницата."}

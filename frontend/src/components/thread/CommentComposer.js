@@ -9,7 +9,6 @@ import { canCreateComments } from "@/lib/capabilities";
 const MAX_COMMENT_LENGTH = 1000;
 
 export default function CommentComposer({
-  forumSlug,
   threadId,
   parentId = null,
   compact = false,
@@ -131,7 +130,7 @@ export default function CommentComposer({
           </button>
         ) : (
           <Link
-            href={`/p/${forumSlug}`}
+            href="/rules"
             className="cursor-pointer text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px] transition-colors hover:text-black"
           >
             Внимавај на правилата на заедницата.

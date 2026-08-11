@@ -5,8 +5,10 @@ export default function TextField({
   label,
   required = false,
   placeholder,
-  minLength,
   maxLength,
+  value,
+  onChange,
+  error,
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -18,12 +20,24 @@ export default function TextField({
         id={id}
         name={id}
         type="text"
-        required={required}
-        minLength={minLength}
+        value={value}
+        onChange={onChange}
         maxLength={maxLength}
         placeholder={placeholder}
-        className={`${fieldClass} text-[#000000] placeholder:text-[#595959]`}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${id}-error` : undefined}
+        className={`${fieldClass} text-[#000000] placeholder:text-[#595959] ${
+          error ? "border-[var(--color-error)] focus:border-[var(--color-error)]" : ""
+        }`}
       />
+      {error && (
+        <p
+          id={`${id}-error`}
+          className="-mt-1 font-(family-name:--font-manrope) text-[12px] leading-[16px] text-[var(--color-error)] 2xl:text-[14px]"
+        >
+          {error}
+        </p>
+      )}
     </div>
   );
 }

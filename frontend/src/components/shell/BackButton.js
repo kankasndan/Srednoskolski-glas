@@ -37,6 +37,7 @@ export default function BackButton({
     <button
       type="button"
       onClick={handleBack}
+      aria-label={label ? undefined : "Назад"}
       className={`flex h-10 cursor-pointer items-center gap-2 rounded-full font-[family-name:var(--font-manrope)] text-[14px] font-medium leading-none transition-colors hover:text-black ${LABEL_TONES[tone]}`}
     >
       <FontAwesomeIcon icon={faChevronLeft} className="h-4" />

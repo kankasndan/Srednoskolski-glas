@@ -281,7 +281,7 @@ export default function EditProfileForm({ user: initialUser }) {
           id="school"
           label="Училиште"
           value={school}
-          onChange={(event) => setSchool(event.target.value)}
+          onChange={setSchool}
           placeholder="Избери училиште"
           groups={schoolGroups}
         />
@@ -289,7 +289,7 @@ export default function EditProfileForm({ user: initialUser }) {
           id="area"
           label="Подрачје на образование"
           value={area}
-          onChange={(event) => setArea(event.target.value)}
+          onChange={setArea}
           placeholder="Избери подрачје"
           options={area && !AREAS.includes(area) ? [area, ...AREAS] : AREAS}
         />
@@ -297,7 +297,7 @@ export default function EditProfileForm({ user: initialUser }) {
           id="year"
           label="Година"
           value={year}
-          onChange={(event) => setYear(event.target.value)}
+          onChange={setYear}
           placeholder="Избери година"
           options={YEARS}
         />
