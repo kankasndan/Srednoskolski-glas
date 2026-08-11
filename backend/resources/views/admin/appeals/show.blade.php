@@ -137,7 +137,13 @@
                             @endif
                         </p>
                         <p class="text-sm text-gray-700">
-                            {{ $reportableType === 'Comment' ? $reportable?->content : ($reportableType === 'Thread' ? $reportable?->description : $report->reason) }}
+                            @if ($reportableType === 'Comment')
+                                {{ $reportable?->content }}
+                            @elseif ($reportableType === 'Thread')
+                                {{ \App\Support\HtmlSanitizer::plainText($reportable?->description) }}
+                            @else
+                                {{ $report->reason }}
+                            @endif
                         </p>
                     @else
                         <p class="text-sm text-gray-500">Нема поврзана пријава за оваа санкција.</p>

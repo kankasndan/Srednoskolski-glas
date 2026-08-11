@@ -23,6 +23,22 @@ class HtmlSanitizer
         'a' => ['href', 'target', 'rel'],
     ];
 
+    /**
+     * TipTap HTML → plain text for admin previews (no visible tags).
+     */
+    public static function plainText(?string $html): string
+    {
+        if ($html === null || trim($html) === '') {
+            return '';
+        }
+
+        // Turn block/break tags into spaces so adjacent paragraphs don't glue together.
+        $withBreaks = preg_replace('/<\s*\/?\s*(p|div|br|li|h[1-6]|blockquote|tr)\b[^>]*>/iu', ' ', $html) ?? $html;
+        $text = html_entity_decode(strip_tags($withBreaks), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return trim(preg_replace('/\s+/u', ' ', $text) ?? '');
+    }
+
     public static function clean(?string $html): string
     {
         if ($html === null) {

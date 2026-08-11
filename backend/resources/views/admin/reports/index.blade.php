@@ -99,7 +99,7 @@
                     @php
                         $type = 'thread';
                         $content = $report->reportable?->title ?? '[Содржината повеќе не е достапна]';
-                        $description = $report->reportable?->description ?? '';
+                        $description = \App\Support\HtmlSanitizer::plainText($report->reportable?->description);
                     @endphp
                 @else
                     @php
