@@ -12,6 +12,7 @@ import ProfileForumTag from "@/components/profile/ProfileForumTag";
 import ThreadAttachments from "@/components/thread/ThreadAttachments";
 import ThreadPoll from "@/components/thread/ThreadPoll";
 import ThreadStatButtons from "@/components/thread/ThreadStatButtons";
+import ThreadViewCount from "@/components/thread/ThreadViewCount";
 import { stripHtml } from "@/lib/html";
 
 const EditThreadDialog = dynamic(
@@ -95,6 +96,7 @@ export default function ProfileThreadItem({
             <p className="font-(family-name:--font-manrope) text-[16px] leading-5.5 text-[#595959]">
               {stripHtml(thread.description)}
             </p>
+            <ThreadViewCount views={thread.views} />
           </div>
         </div>
 

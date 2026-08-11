@@ -7,6 +7,7 @@ import { toggleThreadVote } from "@/api/threads";
 import ThreadAttachments from "@/components/thread/ThreadAttachments";
 import ThreadMetaTags, { buildThreadMetaTags } from "@/components/thread/ThreadMetaTags";
 import ThreadPoll from "@/components/thread/ThreadPoll";
+import ThreadViewCount from "@/components/thread/ThreadViewCount";
 import { formatCount } from "@/lib/formatCount";
 import { stripHtml } from "@/lib/html";
 import { formatPostedAgo } from "@/lib/time";
@@ -14,7 +15,7 @@ import { nextVoteState } from "@/lib/votes";
 
 function ActionButton({ icon, label, count, onClick, active = false }) {
   const baseClassName =
-    "group flex cursor-pointer items-center justify-center gap-4 rounded-2xl border px-4 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors";
+    "group flex h-10 w-24 cursor-pointer items-center justify-center gap-4 rounded-2xl border font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors";
 
   return (
     <button
@@ -99,16 +100,11 @@ export default function ThreadCard({ thread }) {
                 {stripHtml(thread.description)}
               </p>
             ) : null}
+            <ThreadViewCount views={thread.views} />
           </div>
         </div>
 
-        <div className="relative z-10 flex shrink-0 flex-col gap-2">
-          <ActionButton
-            icon="/eye-line.svg"
-            label="Прегледи"
-            count={thread.views}
-            onClick={openThread}
-          />
+        <div className="relative z-10 flex shrink-0 self-center flex-col gap-2">
           <ActionButton
             icon="/Chevrons up.svg"
             label="Гласај нагоре"

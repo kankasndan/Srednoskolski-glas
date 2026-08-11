@@ -4,20 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { CITIES } from "@/lib/schools";
-<<<<<<< HEAD:frontend/src/components/OnboardingForm.js
-import TextField from "@/components/TextField";
-import SelectField from "@/components/SelectField";
-import TermsCheckbox from "@/components/TermsCheckbox";
-import SubmitButton from "@/components/SubmitButton";
-import SchoolSelect from "@/components/SchoolSelect";
-=======
 import TextField from "@/components/ui/TextField";
 import SelectField from "@/components/ui/SelectField";
 import SchoolSelect from "@/components/ui/SchoolSelect";
 import Checkbox from "@/components/ui/Checkbox";
 import TermsCheckbox from "@/components/auth/TermsCheckbox";
 import SubmitButton from "@/components/ui/SubmitButton";
->>>>>>> origin/dev:frontend/src/components/auth/OnboardingForm.js
 
 const AREAS = [
   "Геолошко-рударска и металуршка струка",
