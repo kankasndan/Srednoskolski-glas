@@ -22,14 +22,17 @@
             <div class="flex items-center gap-3">
                 <h1 class="text-xl font-bold text-gray-800">{{ $user->username ?? 'No username' }}</h1>
 
-                @if ($user->sanctions->contains(fn ($s) => $s->type !== 'warning' && ($s->expires_at === null || $s->expires_at->isFuture())))
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Banned</span>
+                @if ($user->sanctions->contains(fn($s) => $s->type !== 'warning' && ($s->expires_at === null || $s->expires_at->isFuture())))
+                    <span
+                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Banned</span>
                 @else
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
+                    <span
+                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
                 @endif
 
                 @foreach ($user->roles as $role)
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-my-purple capitalize">
+                    <span
+                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-my-purple capitalize">
                         {{ $role->name }}
                     </span>
                 @endforeach
@@ -52,11 +55,10 @@
         </div>
 
         <div class="flex gap-3">
-            {{-- {{ route('users.sanction', $user->id) }} --}}
-            <a href="" 
+            <button type="button" id="openSanctionModalBtn"
                 class="bg-red-600 text-white px-3 py-2 rounded-lg text-xs font-medium hover:bg-red-700">
                 Sanction
-            </a>
+            </button>
         </div>
     </div>
 
@@ -126,19 +128,6 @@
             @else
                 <p class="text-sm text-gray-400">No student profile set up.</p>
             @endif
-
-            <div class="text-sm pt-2 border-t border-gray-100">
-                <p class="text-gray-400 mb-1">Feed topics</p>
-                <div class="flex flex-wrap gap-1">
-                    @forelse ($user->topics as $topic)
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                            {{ $topic->name }}
-                        </span>
-                    @empty
-                        <span class="text-gray-400 text-sm">No topics selected</span>
-                    @endforelse
-                </div>
-            </div>
         </div>
 
         {{-- Sanctions --}}
@@ -148,7 +137,8 @@
             @forelse ($user->sanctions as $sanction)
                 <div class="border-b border-gray-100 last:border-0 py-3">
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-800 capitalize">{{ str_replace('_', ' ', $sanction->type) }}</span>
+                        <span
+                            class="text-sm font-medium text-gray-800 capitalize">{{ str_replace('_', ' ', $sanction->type) }}</span>
                         @if ($sanction->type !== 'warning' && ($sanction->expires_at === null || $sanction->expires_at->isFuture()))
                             <span class="text-xs font-medium text-red-600">Active</span>
                         @else
@@ -189,10 +179,11 @@
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mt-6">
         <h2 class="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-4">Recent Threads</h2>
         @forelse ($user->threads as $thread)
-            <div class="border-b border-gray-100 last:border-0 py-2 text-sm">
+            <a href="{{ route("forums.threads.show", ['forum' => $thread->forum->slug, "thread" => $thread->id]) }}" class="border-b border-gray-100 last:border-0 py-2 text-sm" target="_blank">
                 <p class="font-medium text-gray-800">{{ $thread->title }}</p>
-                <p class="text-xs text-gray-400">{{ $thread->created_at?->format('M d, Y') }} &middot; {{ $thread->upvotes_count ?? 0 }} upvotes</p>
-            </div>
+                <p class="text-xs text-gray-400">{{ $thread->created_at?->format('M d, Y') }} &middot;
+                    {{ $thread->upvotes_count ?? 0 }} upvotes</p>
+            </a>
         @empty
             <p class="text-sm text-gray-400">No threads posted.</p>
         @endforelse
@@ -204,4 +195,96 @@
             Export Profile as PDF
         </a>
     </div>
+
+
+    <div id="newSanctionModal" class="modal hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="modal-box bg-white rounded-xl w-full max-w-md p-6 space-y-5">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-bold text-slate-900">Sanction User</h2>
+                <button onclick="document.getElementById('newSanctionModal').classList.add('hidden')">✕</button>
+            </div>
+
+            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                <div class="text-xs font-semibold text-indigo-700 uppercase mb-1">System Recommendation</div>
+                <p class="text-sm text-indigo-900">
+                    Based on 2 prior offenses, a <span class="font-semibold">7-day ban</span> is recommended
+                    for consistency.
+                </p>
+            </div>
+
+            <form action="{{ route('sanction.create') }}" method="POST" class="space-y-2">
+                @csrf
+
+                <input type="hidden" name="user_id" value="{{ $user->id }}">
+
+                <label
+                    class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
+                    <input type="radio" name="type" value="warning" class="sanction-radio text-indigo-600">
+                    <div>
+                        <div class="text-sm font-medium text-slate-800">Warning</div>
+                        <div class="text-xs text-slate-500">User is notified but not restricted</div>
+                    </div>
+                </label>
+                <label
+                    class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-indigo-300 bg-indigo-50 cursor-pointer">
+                    <input type="radio" name="type" value="7-day" class="sanction-radio text-indigo-600" checked>
+                    <div>
+                        <div class="text-sm font-medium text-slate-800">7-Day Ban <span
+                                class="text-indigo-600 text-xs">(recommended)</span></div>
+                        <div class="text-xs text-slate-500">Account locked for one week</div>
+                    </div>
+                </label>
+                <label
+                    class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
+                    <input type="radio" name="type" value="permanent_ban" class="sanction-radio text-indigo-600">
+                    <div>
+                        <div class="text-sm font-medium text-slate-800">Permanent Ban</div>
+                        <div class="text-xs text-slate-500">Account is permanently disabled</div>
+                    </div>
+                </label>
+                <label
+                    class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
+                    <input type="radio" name="type" value="custom" class="sanction-radio text-indigo-600">
+                    <div class="flex-1">
+                        <div class="text-sm font-medium text-slate-800">Custom Duration</div>
+                        <input id="customDaysInput" type="number" placeholder="Days"
+                            class="hidden mt-2 w-24 rounded-lg border-slate-300 text-sm p-1.5 border">
+                    </div>
+                </label>
+                <textarea rows="3" placeholder="Reason..." name="reason"
+                    class="w-full rounded-lg text-sm p-3 border border-slate-200 "></textarea>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="document.getElementById('newSanctionModal').classList.add('hidden')">
+                        Откажи
+                    </button>
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700">
+                        Confirm Sanction
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @push('scripts-user-show')
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const openBtn = document.getElementById('openSanctionModalBtn');
+                const modal = document.getElementById('newSanctionModal');
+
+                if (openBtn && modal) {
+                    openBtn.addEventListener('click', () => {
+                        modal.classList.remove('hidden');
+                    });
+
+                    // Optional: close when clicking outside the modal content
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            modal.classList.add('hidden');
+                        }
+                    });
+                }
+            });
+        </script>
+    @endpush
 @endsection

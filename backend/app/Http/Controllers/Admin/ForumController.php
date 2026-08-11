@@ -6,6 +6,7 @@ use App\Facades\Media;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Forum;
+use App\Models\School;
 use App\Support\Slug;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -35,7 +36,10 @@ class ForumController extends Controller
 
         $cities = City::all();
 
-        return view('admin.forums.index', compact('forums', 'cities'));
+        $schools = School::all();
+
+
+        return view('admin.forums.index', compact('forums', 'cities', 'schools'));
     }
 
     public function store(Request $request)
@@ -48,7 +52,6 @@ class ForumController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:forums,slug'],
-            'type' => ['required', Rule::in(['general', 'school'])],
             'icon' => ['nullable', 'image', 'max:5120'],
             'banner' => ['nullable', 'image', 'max:10240'],
         ]);
@@ -72,7 +75,6 @@ class ForumController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'],
             'slug' => $slug,
-            'type' => $validated['type'],
             'imageUrl' => $imageUrl,
             'bannerUrl' => $bannerUrl,
         ]);
@@ -84,7 +86,7 @@ class ForumController extends Controller
     {
         $query = $request->q;
 
-        $forums = Forum::where('slug', 'like', "%{$query}%")
+        $forums = Forum::where('name', 'like', "%{$query}%")
             ->limit(10)
             ->get();
 
@@ -106,7 +108,6 @@ class ForumController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'slug' => ['required', 'string', 'max:255', Rule::unique('forums', 'slug')->ignore($forum->id)],
-            'type' => ['required', Rule::in(['general', 'school'])],
             'icon' => ['nullable', 'image', 'max:5120'],
             'banner' => ['nullable', 'image', 'max:10240'],
         ]);
@@ -126,7 +127,6 @@ class ForumController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'],
             'slug' => $validated['slug'],
-            'type' => $validated['type'],
             'imageUrl' => $imageUrl,
             'bannerUrl' => $bannerUrl,
         ]);

@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Appeal;
 use App\Models\Report;
 use App\Models\Sanction;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SanctionController extends Controller
 {
@@ -33,7 +35,7 @@ class SanctionController extends Controller
     {
 
         $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => ['required', 'exists:users,id',],
             'type' => ['required', 'in:warning,7-day,permanent_ban'],
             'days' => ['required_if:type,custom', 'nullable', 'integer', 'min:1'],
             'reason' => ['required', 'string', 'max:1000'],
@@ -47,28 +49,43 @@ class SanctionController extends Controller
             default => null,
         };
 
+        $sanctionedUser = User::findOrFail($validated['user_id']);
+
+        if (! $sanctionedUser->hasRole('user')) {
+            // You can abort or return a validation-like error
+            return back()
+                ->withErrors(['user_id' => 'Sanctions can only be applied to users with the user role.'])
+                ->withInput();
+        }
+
         Sanction::create([
             'user_id' => $validated['user_id'],
             'type' => $validated['type'],
             'reason' => $validated['reason'],
             'expires_at' => $expiresAt,
-            'issued_by' => auth()->id(),
+            'issued_by' => Auth::id(),
         ]);
 
         if (str_contains(url()->previous(), 'admin/reports')) {
 
             $report = Report::find($request->report_id);
 
+            if ($request->boolean('content') && ($report->reportable_type == "App\Models\Comment" || $report->reportable_type == "App\Models\Thread")) {
+                $report->reportable->delete();
+            }
+
             $report->update([
                 'status' => 'approved',
             ]);
 
-            if ($request->boolean('content')) {
-                $report->reportable->delete();
-            }
-
             return redirect()
                 ->route('report.index')
+                ->with('success', 'Санкцијата е успешно издадена.');
+        }
+
+        if (str_contains(url()->previous(), 'admin/users')) {
+            return redirect()
+                ->route('user.index')
                 ->with('success', 'Санкцијата е успешно издадена.');
         }
 

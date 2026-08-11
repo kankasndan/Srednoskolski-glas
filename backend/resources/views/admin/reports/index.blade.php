@@ -273,7 +273,7 @@
                         <form action="{{ route('sanction.create') }}" method="POST" class="space-y-2">
                             @csrf
 
-                            <input type="hidden" name="user_id" value="{{ $report->reportable->id }}">
+                            <input type="hidden" name="user_id" value="{{ $report->reportable->user->id }}">
                             <input type="hidden" name="report_id" value="{{ $report->id }}">
 
                             <label
