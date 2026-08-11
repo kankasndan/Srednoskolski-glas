@@ -23,3 +23,9 @@ it('keeps safe tip tap markup', function () {
         ->and($clean)->toContain('href="https://example.com"')
         ->and($clean)->toContain('rel="noopener noreferrer ugc"');
 });
+
+it('converts tip tap html to plain text without tags', function () {
+    $html = '<p>Hello</p><p>world <strong>bold</strong></p>';
+
+    expect(HtmlSanitizer::plainText($html))->toBe('Hello world bold');
+});
