@@ -1,5 +1,21 @@
 import { apiFetch } from "@/lib/api";
 
+export function reportErrorMessage(error) {
+  if (error?.status === 401) {
+    return "Мора да си најавен за да пријавиш содржина.";
+  }
+  if (error?.status === 422) {
+    return (
+      error.body?.message ||
+      Object.values(error.body?.errors || {})
+        .flat()
+        .join(" ") ||
+      "Провери ја пријавата и обиди се повторно."
+    );
+  }
+  return error?.message || "Неуспешна пријава. Обиди се повторно.";
+}
+
 /** @param {number} threadId */
 export async function hideThread(threadId) {
   const response = await apiFetch(`/api/threads/${threadId}/hide`, {

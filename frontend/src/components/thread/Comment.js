@@ -6,7 +6,7 @@ import CommentActions from "@/components/thread/CommentActions";
 import CommentAuthor from "@/components/thread/CommentAuthor";
 import CommentBody from "@/components/thread/CommentBody";
 import CommentComposer from "@/components/thread/CommentComposer";
-import { reportComment } from "@/api/moderation";
+import { reportComment, reportErrorMessage } from "@/api/moderation";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ReportDialog from "@/components/ui/ReportDialog";
 
@@ -15,11 +15,23 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
   const [replying, setReplying] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [reported, setReported] = useState(false);
-  const [reportBusy, setReportBusy] = useState(false);
   const replies = comment.replies ?? [];
   const hasReplies = replies.length > 0;
   const showThread = !collapsed && hasReplies;
   const showLine = hasReplies || depth > 0;
+
+  async function handleReport({ reason, details }) {
+    try {
+      await reportComment(comment.id, { reason, details });
+      setReporting(false);
+      setReported(true);
+    } catch (error) {
+      const next = new Error(reportErrorMessage(error));
+      next.status = error?.status;
+      next.body = error?.body;
+      throw next;
+    }
+  }
 
   return (
     <div className="flex gap-2">
@@ -44,24 +56,11 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
           onReport={() => setReporting(true)}
         />
 
-        {/* Se renderira samo dodeka e otvoren, za da se resetira formata. */}
         {reporting && (
           <ReportDialog
             open
-            onClose={reportBusy ? undefined : () => setReporting(false)}
-            onSubmit={async ({ reason, details }) => {
-              if (reportBusy) return;
-              setReportBusy(true);
-              try {
-                await reportComment(comment.id, { reason, details });
-                setReporting(false);
-                setReported(true);
-              } catch {
-                setReporting(false);
-              } finally {
-                setReportBusy(false);
-              }
-            }}
+            onClose={() => setReporting(false)}
+            onSubmit={handleReport}
           />
         )}
 

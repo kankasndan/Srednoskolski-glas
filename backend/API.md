@@ -1495,6 +1495,6 @@ DELETE /api/media
 
 These are planned but **not** in routes today — do not call them:
 
-- Reports, admin JSON APIs
+- Admin JSON APIs (admin panel currently uses web routes)
 
 When they ship, this file should be updated.
