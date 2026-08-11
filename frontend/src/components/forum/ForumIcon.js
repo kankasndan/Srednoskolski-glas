@@ -5,14 +5,16 @@ const FALLBACK_ICON = "/icons/opshti_diskusii.svg";
 export default function ForumIcon({
   src,
   active = false,
-  className = "size-4",
+  className,
   imageClassName = "size-9 max-w-none",
+  wrapperClassName = "size-4",
 }) {
   const iconSrc = src || FALLBACK_ICON;
   const isRemote = /^https?:\/\//i.test(iconSrc);
+  const wrapper = className ?? wrapperClassName;
 
   return (
-    <span className={`relative shrink-0 ${className}`}>
+    <span className={`relative shrink-0 ${wrapper}`}>
       {isRemote ? (
         <img
           src={iconSrc}

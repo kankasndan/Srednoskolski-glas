@@ -64,7 +64,7 @@ class Comment extends Model
             ->oldest()
             ->with(['user.studentData.school.city', 'user.studentData.school.forum', 'allReplies']);
 
-        $userId = auth('web')->id() ?? auth()->id();
+        $userId = auth('web')->id() ?? Auth::id();
 
         if ($userId !== null) {
             $relation->withExists([

@@ -90,6 +90,7 @@ function buildAttachmentsPayload({
   allowPoll,
   pollMode,
   pollData,
+  hadInitialPoll,
 }) {
   const files = [
     ...mediaItems.map((item) => item.file).filter(Boolean),
@@ -111,18 +112,21 @@ function buildAttachmentsPayload({
     }
   }
 
+  const poll =
+    allowPoll &&
+    pollMode &&
+    pollData?.question &&
+    pollData.options?.length >= 2 &&
+    pollData.duration_days
+      ? pollData
+      : null;
+
   return {
     files,
     link,
     removeAttachmentIds: [...new Set(removeAttachmentIds)],
-    poll:
-      allowPoll &&
-      pollMode &&
-      pollData?.question &&
-      pollData.options?.length >= 2 &&
-      pollData.duration_days
-        ? pollData
-        : null,
+    poll,
+    removePoll: Boolean(allowPoll && hadInitialPoll && !pollMode),
   };
 }
 
@@ -130,6 +134,7 @@ export default function PostTypeButtons({
   widthClassName = "w-[632px]",
   onAttachmentsChange,
   initialAttachments = [],
+  initialPoll = null,
   allowPoll = true,
 }) {
   const seedRef = useRef(null);
@@ -137,6 +142,7 @@ export default function PostTypeButtons({
     seedRef.current = seedFromAttachments(initialAttachments);
   }
   const seed = seedRef.current;
+  const hadInitialPoll = Boolean(initialPoll?.id ?? initialPoll?.question);
 
   const [selected, setSelected] = useState(null);
   /** Ordered mix of { id?, url, file, kind: "image" | "video" } — order is submitted as-is. */
@@ -150,7 +156,7 @@ export default function PostTypeButtons({
   const [mediaMode, setMediaMode] = useState(seed.mediaMode);
   const [docMode, setDocMode] = useState(seed.docMode);
   const [linkMode, setLinkMode] = useState(seed.linkMode);
-  const [pollMode, setPollMode] = useState(false);
+  const [pollMode, setPollMode] = useState(hadInitialPoll);
   const [pollData, setPollData] = useState(null);
   const photoInputRef = useRef(null);
   const videoInputRef = useRef(null);
@@ -174,6 +180,7 @@ export default function PostTypeButtons({
         allowPoll,
         pollMode,
         pollData,
+        hadInitialPoll,
       }),
     );
   }, [
@@ -187,6 +194,7 @@ export default function PostTypeButtons({
     existingLinkId,
     initialLinkUrl,
     allowPoll,
+    hadInitialPoll,
     onAttachmentsChange,
   ]);
 
@@ -362,6 +370,7 @@ export default function PostTypeButtons({
 
       {allowPoll && pollMode && (
         <PollAttachment
+          initialPoll={initialPoll}
           onClose={closePoll}
           onChange={setPollData}
         />

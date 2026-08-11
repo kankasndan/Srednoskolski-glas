@@ -17,8 +17,8 @@ export default function PillButton({
         disabled
           ? "cursor-not-allowed border-[#CCCCCC] bg-[#F5F5F5] text-[#B3B3B3]"
           : selected
-            ? "border-[#582FF5] bg-[#CFE9ED] text-black"
-            : "border-[#CCCCCC] bg-white text-[#595959] hover:bg-[#DCEBED] hover:text-black"
+            ? "cursor-pointer border-[#582FF5] bg-[#CFE9ED] text-black"
+            : "cursor-pointer border-[#CCCCCC] bg-white text-[#595959] hover:bg-[#DCEBED] hover:text-black"
       }`}
     >
       {leading}

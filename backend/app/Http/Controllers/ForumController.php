@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ForumResource;
 use App\Models\Forum;
+use App\Models\School;
 use Illuminate\Http\JsonResponse;
 
 class ForumController extends Controller

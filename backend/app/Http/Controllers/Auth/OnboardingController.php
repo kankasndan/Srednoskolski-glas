@@ -9,6 +9,7 @@ use App\Models\School;
 use App\Models\StudentData;
 use App\Models\User;
 use App\Models\Vocation;
+use App\Support\SyncUserContentPermissions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
@@ -26,7 +27,7 @@ class OnboardingController extends Controller
 
     private const SCHOOL_SEPARATOR = '|';
 
-    public function store(StoreOnboardingRequest $request): JsonResponse
+    public function store(StoreOnboardingRequest $request, SyncUserContentPermissions $syncPermissions): JsonResponse
     {
         $validated = $request->validated();
         $user = $request->user();
@@ -70,9 +71,19 @@ class OnboardingController extends Controller
             $user->studentData()?->delete();
         }
 
+        $user = $user->fresh(['studentData.school.city', 'studentData.school.forum', 'studentData.vocation']);
+        $syncPermissions->handle($user);
+
         return response()->json([
             'message' => 'Onboarding saved',
-            'user' => $user->fresh(['studentData.school.city', 'studentData.vocation']),
+            'user' => $user,
+            'permissions' => $user->getAllPermissions()->pluck('name')->values(),
+            'capabilities' => [
+                'can_create_comments' => $user->canCreateComments(),
+                'can_create_threads' => $user->hasCompletedOnboarding()
+                    && ($user->can('create threads') || $user->can('manage threads')),
+                'school_forum_id' => $user->schoolForumId(),
+            ],
         ]);
     }
 

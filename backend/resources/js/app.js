@@ -63,7 +63,7 @@ function styleSidebarLinks() {
         const isActive = key === activeKey;
 
         // Reset classes, then apply base + active
-        link.className = ROW_BASE + (isActive ? " border-transparent bg-[#582FF5] font-bold text-white" : "");
+        link.className = ROW_BASE + (isActive ? " border-transparent bg-my-purple font-bold text-white" : "");
 
         // Clear any existing children; we rebuild structure
         const originalLabel = link.textContent.trim();
@@ -94,7 +94,7 @@ function styleSidebarLinks() {
             const badgeSpan = document.createElement("span");
             badgeSpan.className =
                 "ml-auto rounded-full px-2 py-[1px] text-[11px] font-bold " +
-                (isActive ? "bg-white text-[#582FF5]" : "bg-[#F88DD5] text-white");
+                (isActive ? "bg-white text-my-purple" : "bg-my-pink text-white");
             badgeSpan.textContent = badgeValue;
             link.appendChild(badgeSpan);
         }

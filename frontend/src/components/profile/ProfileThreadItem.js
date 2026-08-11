@@ -74,7 +74,7 @@ export default function ProfileThreadItem({
   }
 
   return (
-    <article className="relative flex cursor-pointer flex-col gap-4 rounded-3xl border-b border-b-[#CFE9ED] p-6 transition-colors hover:bg-[#DCEBED]">
+    <article className="relative flex cursor-pointer flex-col gap-4 rounded-3xl border-b border-b-[#CFE9ED] px-4 py-5 transition-colors hover:bg-[#DCEBED]">
       <Link href={href} aria-label={thread.title} className="absolute inset-0 rounded-3xl" />
 
       <div className="flex items-center justify-between gap-8">

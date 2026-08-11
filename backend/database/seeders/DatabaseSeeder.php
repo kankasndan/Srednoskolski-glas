@@ -32,6 +32,9 @@ class DatabaseSeeder extends Seeder
             CommentSeeder::class,
             MentionSeeder::class,
 
+            // Optional bulk load for feed/performance testing (1000 threads + extra users):
+            // php artisan db:seed --class=LargeThreadSeeder
+
             // Moderation
             ReportSeeder::class,
             SanctionSeeder::class,

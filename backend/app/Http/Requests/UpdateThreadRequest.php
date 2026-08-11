@@ -46,6 +46,15 @@ class UpdateThreadRequest extends FormRequest
             'files.*' => ['bail', 'file', 'max:'.self::MAX_FILE_KILOBYTES],
             'remove_attachment_ids' => ['nullable', 'array'],
             'remove_attachment_ids.*' => ['integer', 'distinct'],
+            'remove_poll' => ['sometimes', 'boolean'],
+            'poll' => ['nullable', 'array'],
+            'poll.question' => ['required_with:poll', 'string', 'min:1', 'max:255'],
+            'poll.options' => ['required_with:poll', 'array', 'min:2', 'max:4'],
+            'poll.options.*' => ['required', 'string', 'min:1', 'max:100'],
+            // Parallel ids for existing options (same order as poll.options). Empty = new option.
+            'poll.option_ids' => ['nullable', 'array', 'max:4'],
+            'poll.option_ids.*' => ['nullable', 'integer'],
+            'poll.duration_days' => ['required_with:poll', 'integer', 'min:1', 'max:30'],
         ];
     }
 
@@ -84,7 +93,9 @@ class UpdateThreadRequest extends FormRequest
             $videoCount = $remaining->where('slug', 'video')->count();
             $docCount = $remaining->where('slug', 'file')->count();
             $linkCount = $remaining->where('slug', 'link')->count();
-            $hasPoll = $thread->poll()->exists();
+            $removingPoll = filter_var($this->input('remove_poll'), FILTER_VALIDATE_BOOLEAN);
+            $hasPoll = (! $removingPoll && $thread->poll()->exists())
+                || filled($this->input('poll.question'));
 
             $files = $this->file('files', []);
             if (! is_array($files)) {
@@ -154,6 +165,31 @@ class UpdateThreadRequest extends FormRequest
             if ($docCount > 0 && $hasPoll) {
                 $validator->errors()->add('files', 'Датотека и анкета не може да се комбинираат.');
             }
+
+            if ($removingPoll && filled($this->input('poll.question'))) {
+                $validator->errors()->add('poll', 'Не може истовремено да отстраниш и да зачуваш анкета.');
+            }
+
+            $optionIds = collect($this->input('poll.option_ids', []))
+                ->filter(fn ($id) => $id !== null && $id !== '')
+                ->map(fn ($id) => (int) $id)
+                ->values();
+
+            if ($optionIds->isNotEmpty()) {
+                $poll = $thread->poll;
+                if ($poll === null) {
+                    $validator->errors()->add('poll.option_ids', 'Нема постоечка анкета за овие опции.');
+                } else {
+                    $ownedIds = $poll->options()->pluck('id');
+                    $invalid = $optionIds->diff($ownedIds);
+                    if ($invalid->isNotEmpty()) {
+                        $validator->errors()->add(
+                            'poll.option_ids',
+                            'Можеш да уредуваш само опции од оваа анкета.',
+                        );
+                    }
+                }
+            }
         });
     }
 
@@ -165,12 +201,18 @@ class UpdateThreadRequest extends FormRequest
             $removeIds = $removeIds !== null && $removeIds !== '' ? [$removeIds] : [];
         }
 
-        $this->merge([
+        $merge = [
             'remove_attachment_ids' => array_values(array_filter(
                 array_map(static fn ($id) => is_numeric($id) ? (int) $id : null, $removeIds),
                 static fn ($id) => $id !== null,
             )),
-        ]);
+        ];
+
+        if ($this->has('remove_poll')) {
+            $merge['remove_poll'] = filter_var($this->input('remove_poll'), FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $this->merge($merge);
 
         if ($this->filled('link')) {
             $this->merge([

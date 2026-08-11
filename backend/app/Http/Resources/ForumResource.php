@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Forum;
+use App\Models\Thread;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -42,6 +43,13 @@ class ForumResource extends JsonResource
             'is_following' => $this->when(
                 $this->withDetails && $user !== null,
                 fn () => $user->forums()->where('forums.id', $this->id)->exists(),
+            ),
+            'can_create_thread' => $user !== null
+                && $user->can('create', [Thread::class, $this->resource]),
+            // Own school forum stays followed from onboarding; others may follow/unfollow.
+            'is_own_school_forum' => $this->when(
+                $this->withDetails && $user !== null && $this->type === 'school',
+                fn () => $user->schoolForumId() === (int) $this->id,
             ),
             'description' => $this->when($this->withDetails, $this->description),
             'bannerUrl' => $this->when($this->withDetails, $this->bannerUrl),

@@ -1,16 +1,18 @@
 @extends('layouts.master')
 
+@section('title', 'Персонал: '.($user->username ?? 'Профил'))
+
 @section('content')
     {{-- Page header --}}
     <div class="flex flex-col items-start justify-between mb-6">
         <div class="mb-6">
             <a href="{{ route('role.index') }}" class="text-sm text-gray-500 hover:text-my-purple flex items-center gap-1">
-                &larr; Back to users
+                &larr; Назад кон корисници
             </a>
         </div>
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">Staff Profile</h1>
-            <p class="text-sm text-gray-500">View and manage this staff member's role and permissions</p>
+            <h1 class="text-2xl font-bold text-gray-800">Профил на персонал</h1>
+            <p class="text-sm text-gray-500">Прегледај и управувај со улогата и пермисиите на овој член од персоналот</p>
         </div>
         
     </div>
@@ -32,21 +34,26 @@
 
                 <span
                     class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                    {{ $user->role == 'super_admin' ? 'bg-purple-100 text-purple-700' : ($user->role == 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700') }}">
-                    {{ ucfirst(str_replace('_', ' ', $user->role)) }}
+                    {{ $user->role == 'super_admin' ? 'bg-my-purple/10 text-my-purple' : ($user->role == 'admin' ? 'bg-my-blue text-my-purple' : 'bg-green-100 text-green-700') }}">
+                    {{ match ($user->role) {
+                        'super_admin' => 'Супер админ',
+                        'admin' => 'Админ',
+                        'moderator' => 'Модератор',
+                        default => $user->role,
+                    } }}
                 </span>
 
                 <div class="mt-6 border-t border-gray-100 pt-4 text-left space-y-2">
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-500">Joined</span>
+                        <span class="text-gray-500">Приклучен</span>
                         <span class="text-gray-800">{{ $user->created_at->format('M d, Y') }}</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-500">Last updated</span>
+                        <span class="text-gray-500">Последно ажурирање</span>
                         <span class="text-gray-800">{{ $user->updated_at->diffForHumans() }}</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-500">User ID</span>
+                        <span class="text-gray-500">ID на корисник</span>
                         <span class="text-gray-800">#{{ $user->id }}</span>
                     </div>
                 </div>
@@ -59,7 +66,7 @@
             {{-- Moderation info, only for moderators --}}
             @if ($user->role == 'moderator')
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6">
-                    <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Forum</h3>
+                    <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Форум</h3>
 
                     @if ($user->forum)
                         <div class="flex items-center gap-4">
@@ -70,34 +77,34 @@
                             </div>
                         </div>
                         <div class="flex flex-col items-start gap-1">
-                            <p class="text-sm text-gray-500 mb-3">Change moderator's forum</p>
+                            <p class="text-sm text-gray-500 mb-3">Смени форум на модераторот</p>
                             <form action="{{ route('role.update.forum') }}" method="POST" class="flex gap-2">
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="user_id" value="{{ $user->id }}">
                                 <select name="forum" class="border border-gray-300 rounded-lg text-sm px-3 py-2 flex-1">
-                                    <option value="">Select forum</option>
+                                    <option value="">Избери форум</option>
                                     @foreach ($forums as $forum)
                                         <option value="{{ $forum->id }}">{{ $forum->name }}</option>
                                     @endforeach
                                 </select>
                                 <button
-                                    class="px-4 py-2 rounded-lg text-sm font-medium bg-green-100 text-black">Assign</button>
+                                    class="px-4 py-2 rounded-lg text-sm font-medium bg-green-100 text-black">Додели</button>
                             </form>
                         </div>
                     @else
-                        <p class="text-sm text-gray-500 mb-3">This moderator has no forum assigned yet.</p>
+                        <p class="text-sm text-gray-500 mb-3">Овој модератор сè уште нема доделен форум.</p>
                         <form action="{{ route('role.update.forum') }}" method="POST" class="flex gap-2">
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="user_id" value="{{ $user->id }}">
                             <select name="forum" class="border border-gray-300 rounded-lg text-sm px-3 py-2 flex-1">
-                                <option value="">Select forum</option>
+                                <option value="">Избери форум</option>
                                 @foreach ($forums as $forum)
                                     <option value="{{ $forum->id }}">{{ $forum->name }}</option>
                                 @endforeach
                             </select>
-                            <button class="px-4 py-2 rounded-lg text-sm font-medium bg-green-100 text-black">Assign</button>
+                            <button class="px-4 py-2 rounded-lg text-sm font-medium bg-green-100 text-black">Додели</button>
                         </form>
                     @endif
                 </div>
@@ -105,22 +112,29 @@
 
             {{-- Role management --}}
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Role Management</h3>
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Управување со улоги</h3>
 
-                @if ($user->role == 'admin' || $user->role == 'moderator')
+                @if ($canManage && count($assignableRoles) > 0)
                     <div class="flex items-center gap-3">
                         <form action="{{ route('role.update', ['user' => $user->id]) }}" method="POST"
                             class="flex items-center gap-2">
                             @csrf
                             @method('PATCH')
                             <select class="border border-gray-300 rounded-lg text-sm px-3 py-2" name="role">
-                                <option value="super_admin">Super admin</option>
-                                <option value="admin">Admin</option>
-                                <option value="moderator">Moderator</option>
+                                @foreach ($assignableRoles as $assignableRole)
+                                    <option value="{{ $assignableRole }}" @selected($user->role === $assignableRole)>
+                                        {{ match ($assignableRole) {
+                                            'super_admin' => 'Супер админ',
+                                            'admin' => 'Админ',
+                                            'moderator' => 'Модератор',
+                                            default => $assignableRole,
+                                        } }}
+                                    </option>
+                                @endforeach
                             </select>
                             <button
                                 class="px-4 py-2 rounded-lg text-sm font-medium bg-green-100 text-black hover:bg-green-200">
-                                Update Role
+                                Ажурирај улога
                             </button>
                         </form>
 
@@ -129,30 +143,30 @@
                             @method('DELETE')
                             <button
                                 class="px-4 py-2 rounded-lg text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50">
-                                Revoke Access
+                                Одземи пристап
                             </button>
                         </form>
                     </div>
                 @else
-                    <p class="text-sm text-gray-400 italic">This account is protected and cannot be modified.</p>
+                    <p class="text-sm text-gray-400 italic">Оваа сметка е заштитена и не може да се измени.</p>
                 @endif
             </div>
 
             {{-- Activity stats placeholder --}}
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Activity Overview</h3>
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Преглед на активност</h3>
                 <div class="grid grid-cols-3 gap-4 text-center">
                     <div>
                         <p class="text-xl font-bold text-gray-800">{{ $user->threads_count ?? 0 }}</p>
-                        <p class="text-xs text-gray-500">Threads</p>
+                        <p class="text-xs text-gray-500">Дискусии</p>
                     </div>
                     <div>
                         <p class="text-xl font-bold text-gray-800">{{ $user->reports_reviewed_count ?? 0 }}</p>
-                        <p class="text-xs text-gray-500">Reports Reviewed</p>
+                        <p class="text-xs text-gray-500">Прегледани пријави</p>
                     </div>
                     <div>
                         <p class="text-xl font-bold text-gray-800">{{ $user->sanctions_issued_count ?? 0 }}</p>
-                        <p class="text-xs text-gray-500">Sanctions Issued</p>
+                        <p class="text-xs text-gray-500">Издадени санкции</p>
                     </div>
                 </div>
             </div>

@@ -10,6 +10,8 @@ class AppealController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('view appeals');
+
         $appeals = Appeal::query()
             ->with('sanction', 'user')
             ->where('status', 'pending')
@@ -27,6 +29,8 @@ class AppealController extends Controller
 
     public function show(Appeal $appeal)
     {
+        $this->authorize('view appeal details');
+
         $appeal->load([
             'sanction.issuedBy',
             'sanction.report.reportable',
@@ -39,25 +43,31 @@ class AppealController extends Controller
 
     public function accept(Appeal $appeal)
     {
-        $appeal->with('sanction.report');
+        $this->authorize('accept appeals');
 
-        $appeal->sanction->report->delete();
+        $appeal->loadMissing('sanction.report');
 
-        $appeal->sanction->delete();
+        if ($appeal->sanction?->report) {
+            $appeal->sanction->report->delete();
+        }
+
+        $appeal->sanction?->delete();
 
         $appeal->update([
             'status' => 'accepted',
         ]);
 
-        return redirect()->route('appeal.index')->with(['success' => 'Successfully appeal accepted']);
+        return redirect()->route('appeal.index')->with(['success' => 'Жалбата е успешно прифатена.']);
     }
 
     public function reject(Appeal $appeal)
     {
+        $this->authorize('reject appeals');
+
         $appeal->update([
             'status' => 'rejected',
         ]);
 
-        return redirect()->route('appeal.index')->with(['success' => 'Successfully appeal rejected.']);
+        return redirect()->route('appeal.index')->with(['success' => 'Жалбата е успешно одбиена.']);
     }
 }

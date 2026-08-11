@@ -15,7 +15,9 @@ let sidebarCollapsed = false;
 function getSelectedKey(pathname) {
   if (pathname === "/feed") return "nav:home";
   if (pathname === "/newest") return "nav:latest";
-  if (pathname === "/explore") return "nav:explore";
+  if (pathname === "/explore" || pathname === "/search" || pathname?.startsWith("/search?")) {
+    return "nav:explore";
+  }
   if (pathname?.startsWith("/p/")) {
     const slug = pathname.split("/")[2];
     if (slug) return `forum:${slug}`;
@@ -23,7 +25,7 @@ function getSelectedKey(pathname) {
   return null;
 }
 
-export default function AppShell({ children, contentClassName = "pl-8" }) {
+export default function AppShell({ children, contentClassName = "" }) {
   const router = useRouter();
   const pathname = usePathname();
   const { general, schoolsByCity, loading, error } = useForums();
@@ -61,7 +63,7 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
             type="button"
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Прошири мени" : "Собери мени"}
-            className="mb-1 flex size-10 shrink-0 cursor-pointer items-center justify-center"
+            className="mb-1 flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
           >
             <Image
               src="/collapsed icons/menu-collapse.svg"
@@ -105,7 +107,7 @@ export default function AppShell({ children, contentClassName = "pl-8" }) {
           </div>
         </aside>
         <main
-          className={`flex flex-1 items-start justify-center overflow-y-auto pb-12 pt-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${contentClassName}`}
+          className={`flex flex-1 items-start justify-center overflow-y-auto pb-10 pt-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${contentClassName}`}
         >
           {children}
         </main>

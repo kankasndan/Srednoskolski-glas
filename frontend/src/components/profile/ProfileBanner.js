@@ -8,6 +8,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { followUser, unfollowUser } from "@/api/profile";
 import { apiFetch } from "@/lib/api";
+import { useProfile } from "@/hooks/useProfile";
+
+const GUEST_FOLLOW_ERROR = "Мора да си најавен за да следиш корисник.";
 
 const GRADE_LABELS = {
   1: "1ва",
@@ -24,7 +27,7 @@ function Chip({ children, href }) {
     return (
       <Link
         href={href}
-        className={`${className} transition-colors hover:border-(--color-primary-200) hover:bg-[#F1EEFE] hover:text-(--color-primary-200)`}
+        className={`${className} cursor-pointer transition-colors hover:border-(--color-primary-200) hover:bg-[#F1EEFE] hover:text-(--color-primary-200)`}
       >
         {children}
       </Link>
@@ -53,9 +56,11 @@ export default function ProfileBanner({
   onFollowChange,
 }) {
   const router = useRouter();
+  const { user: viewer, loading: viewerLoading } = useProfile();
   const [loggingOut, setLoggingOut] = useState(false);
   const [following, setFollowing] = useState(Boolean(isFollowing));
   const [followBusy, setFollowBusy] = useState(false);
+  const [followError, setFollowError] = useState("");
 
   const studentData = readStudentData(user);
   const school = studentData?.school ?? null;
@@ -86,6 +91,13 @@ export default function ProfileBanner({
   async function handleFollowToggle() {
     if (!user?.username || followBusy) return;
 
+    setFollowError("");
+
+    if (!viewerLoading && viewer == null) {
+      setFollowError(GUEST_FOLLOW_ERROR);
+      return;
+    }
+
     const nextFollowing = !following;
     setFollowing(nextFollowing);
     setFollowBusy(true);
@@ -106,7 +118,7 @@ export default function ProfileBanner({
     } catch (err) {
       setFollowing(!nextFollowing);
       if (err?.status === 401) {
-        router.push("/login");
+        setFollowError(GUEST_FOLLOW_ERROR);
       }
     } finally {
       setFollowBusy(false);
@@ -151,12 +163,12 @@ export default function ProfileBanner({
       <div className="flex shrink-0 flex-col gap-2">
         {isOwnProfile ? (
           <>
-            <button
-              type="button"
+            <Link
+              href="/profile/edit"
               className="flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-primary-200) transition-colors hover:bg-[#F1EEFE]"
             >
               Уреди профил
-            </button>
+            </Link>
             <button
               type="button"
               onClick={handleLogout}
@@ -167,18 +179,25 @@ export default function ProfileBanner({
             </button>
           </>
         ) : (
-          <button
-            type="button"
-            onClick={handleFollowToggle}
-            disabled={followBusy}
-            className={`flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none transition-colors disabled:opacity-60 ${
-              following
-                ? "bg-(--color-primary-200) text-white hover:bg-[#4B25E0]"
-                : "border border-(--color-primary-200) text-(--color-primary-200) hover:bg-[#F1EEFE]"
-            }`}
-          >
-            {followBusy ? "…" : following ? "Отследи" : "Следи"}
-          </button>
+          <div className="flex w-36 flex-col gap-1">
+            <button
+              type="button"
+              onClick={handleFollowToggle}
+              disabled={followBusy}
+              className={`flex h-10 w-full cursor-pointer items-center justify-center rounded-xl px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none transition-colors disabled:opacity-60 ${
+                following
+                  ? "bg-(--color-primary-200) text-white hover:bg-[#4B25E0]"
+                  : "border border-(--color-primary-200) text-(--color-primary-200) hover:bg-[#F1EEFE]"
+              }`}
+            >
+              {followBusy ? "…" : following ? "Отследи" : "Следи"}
+            </button>
+            {followError ? (
+              <p className="font-(family-name:--font-manrope) text-[12px] leading-4 text-[#DC2626]">
+                {followError}
+              </p>
+            ) : null}
+          </div>
         )}
       </div>
     </section>

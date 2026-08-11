@@ -46,7 +46,7 @@ export default function ThreadPage() {
 
   return (
     <AppShell>
-      <div className="flex w-[990px] max-w-full flex-col gap-12 font-(family-name:--font-manrope)">
+      <div className="flex w-[990px] max-w-full flex-col gap-8 font-(family-name:--font-manrope)">
         <div className="self-start">
           <BackButton
             href={`/p/${forum.slug}`}

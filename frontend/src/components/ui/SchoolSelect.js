@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { labelClass, fieldClass } from "@/lib/fieldStyles";
 
 const rowClass =
-  "flex h-10 w-full items-center justify-between gap-3 px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-normal leading-none transition-colors duration-300 ease-out hover:bg-[#E5E5E5]";
+  "flex h-10 w-full cursor-pointer items-center justify-between gap-3 px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-normal leading-none transition-colors duration-300 ease-out hover:bg-[#E5E5E5]";
 
 const summaryClass = "cursor-pointer list-none [&::-webkit-details-marker]:hidden";
 

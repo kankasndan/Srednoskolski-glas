@@ -7,7 +7,6 @@ import { CITIES } from "@/lib/schools";
 import TextField from "@/components/ui/TextField";
 import SelectField from "@/components/ui/SelectField";
 import SchoolSelect from "@/components/ui/SchoolSelect";
-import Checkbox from "@/components/ui/Checkbox";
 import TermsCheckbox from "@/components/auth/TermsCheckbox";
 import SubmitButton from "@/components/ui/SubmitButton";
 

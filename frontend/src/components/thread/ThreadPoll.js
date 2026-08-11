@@ -128,7 +128,7 @@ export default function ThreadPoll({ poll: initialPoll }) {
                   type="button"
                   disabled={submitting}
                   onClick={() => handleVote(option.id)}
-                  className="relative w-full overflow-hidden rounded-xl border border-[#CCCCCC] px-4 py-3 text-left transition-colors hover:border-[#582FF5] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="relative w-full cursor-pointer overflow-hidden rounded-xl border border-[#CCCCCC] px-4 py-3 text-left transition-colors hover:border-[#582FF5] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {content}
                 </button>
@@ -153,7 +153,7 @@ export default function ThreadPoll({ poll: initialPoll }) {
               type="button"
               disabled={submitting}
               onClick={() => handleVote(option.id)}
-              className="rounded-xl border border-[#CCCCCC] px-4 py-3 text-left font-[family-name:var(--font-manrope)] text-[14px] text-black transition-colors hover:border-[#582FF5] hover:bg-[#F8F6FF] disabled:cursor-not-allowed disabled:opacity-60"
+              className="cursor-pointer rounded-xl border border-[#CCCCCC] px-4 py-3 text-left font-[family-name:var(--font-manrope)] text-[14px] text-black transition-colors hover:border-[#582FF5] hover:bg-[#F8F6FF] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {option.label}
             </button>

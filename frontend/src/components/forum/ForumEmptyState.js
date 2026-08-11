@@ -3,8 +3,8 @@ import StartDiscussionButton from "@/components/forum/StartDiscussionButton";
 
 export default function ForumEmptyState() {
   return (
-    <section className="flex h-[334px] w-[990px] max-w-full flex-col items-center justify-center gap-12 rounded-3xl py-8">
-      <div className="flex h-[175px] w-[388px] max-w-full flex-col items-center justify-center gap-6 text-center">
+    <section className="flex w-[990px] max-w-full flex-col items-center justify-center gap-6 rounded-3xl bg-[#CFE9ED] px-6 py-10">
+      <div className="flex w-[388px] max-w-full flex-col items-center justify-center gap-6 text-center">
         <Image
           src="/gray-logo.svg"
           alt=""

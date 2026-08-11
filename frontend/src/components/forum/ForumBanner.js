@@ -17,14 +17,13 @@ export default function ForumBanner({
   type,
   membersCount = 0,
   isFollowing = false,
+  isOwnSchoolForum = false,
 }) {
   const bannerUrl = resolveBannerUrl({ bannerUrl: banner, slug, type });
   const iconSrc = icon || FALLBACK_ICON;
   const remoteIcon = isRemoteAssetUrl(iconSrc);
   const [memberTotal, setMemberTotal] = useState(membersCount);
-  const isSchoolForum = type === "school";
-  // Guests get no is_following from the API — hide the button until logged in.
-  const canFollow = !isSchoolForum && typeof isFollowing === "boolean";
+  const lockOwnSchool = Boolean(isOwnSchoolForum);
 
   return (
     <section className="w-[990px] max-w-full overflow-hidden rounded-3xl border border-[#CFE9ED] bg-[#DEDFD9]">
@@ -78,13 +77,12 @@ export default function ForumBanner({
 
         <div className="flex shrink-0 flex-col gap-2">
           <StartDiscussionButton />
-          {canFollow ? (
-            <FollowForumButton
-              slug={slug}
-              initialFollowing={isFollowing}
-              onMembersCountChange={setMemberTotal}
-            />
-          ) : null}
+          <FollowForumButton
+            slug={slug}
+            initialFollowing={Boolean(isFollowing) || lockOwnSchool}
+            locked={lockOwnSchool}
+            onMembersCountChange={setMemberTotal}
+          />
         </div>
       </div>
     </section>

@@ -1,6 +1,17 @@
 import { apiFetch } from "@/lib/api";
 
 /**
+ * Single forum banner/metadata.
+ * GET /api/p/{slug} → { data: { forum } }
+ */
+export async function getForum(slug) {
+  const res = await apiFetch(`/api/p/${slug}`);
+  if (!res.ok) throw new Error(`Failed to load forum: ${res.status}`);
+  const payload = await res.json();
+  return payload.data?.forum ?? payload.data ?? payload;
+}
+
+/**
  * Sidebar forums: thematic (`general`) + school forums by city.
  * GET /api/forums → { data: { general, schools_by_city } }
  */
@@ -12,7 +23,7 @@ export async function getForums() {
 }
 
 /**
- * Follow a general forum.
+ * Follow a forum (general or school).
  * POST /api/p/{slug}/follow → { data: { is_following, members_count } }
  */
 export async function followForum(slug) {
@@ -23,7 +34,7 @@ export async function followForum(slug) {
 }
 
 /**
- * Unfollow a general forum.
+ * Unfollow a forum (not allowed for the caller's own school forum).
  * DELETE /api/p/{slug}/follow → { data: { is_following, members_count } }
  */
 export async function unfollowForum(slug) {

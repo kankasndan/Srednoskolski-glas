@@ -23,11 +23,18 @@ function buildTabs(basePath, isOwnProfile) {
   ];
 
   if (isOwnProfile) {
-    tabs.push({
-      href: `${basePath}/people`,
-      label: "Корисници",
-      countKey: "followingUsers",
-    });
+    tabs.push(
+      {
+        href: `${basePath}/followed-threads`,
+        label: "Следени дискусии",
+        countKey: "followedThreads",
+      },
+      {
+        href: `${basePath}/people`,
+        label: "Корисници",
+        countKey: "followingUsers",
+      },
+    );
   }
 
   return tabs;

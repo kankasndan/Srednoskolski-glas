@@ -1,5 +1,43 @@
 import { apiFetch } from "@/lib/api";
 
+export async function getCities() {
+  const res = await apiFetch("/api/cities");
+
+  if (!res.ok) {
+    throw new Error(`Failed to load cities: ${res.status}`);
+  }
+
+  const payload = await res.json();
+
+  return payload.cities ?? [];
+}
+
+/**
+ * @param {{
+ *   image_url?: string | null,
+ *   school?: string,
+ *   area?: string,
+ *   year?: string,
+ * }} payload
+ */
+export async function updateProfile(payload) {
+  const res = await apiFetch("/api/me", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+
+  const body = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const error = new Error(body.message || `Failed to update profile (${res.status})`);
+    error.status = res.status;
+    error.body = body;
+    throw error;
+  }
+
+  return body.user ?? body.data ?? body;
+}
+
 export async function getProfileUser() {
   const res = await apiFetch("/api/me");
 
@@ -8,8 +46,15 @@ export async function getProfileUser() {
   }
 
   const payload = await res.json();
+  const user = payload.user ?? payload.data ?? payload;
 
-  return payload.user ?? payload.data ?? payload;
+  // Attach top-level capability/permission payloads used for create gates.
+  if (user && typeof user === "object") {
+    user.capabilities = payload.capabilities ?? user.capabilities ?? null;
+    user.permissions = payload.permissions ?? user.permissions ?? [];
+  }
+
+  return user;
 }
 
 export async function getMyCounts() {
@@ -47,6 +92,10 @@ export function getMyComments() {
 
 export function getMyFollowedForums() {
   return getProfileList("/api/me/followed-forums");
+}
+
+export function getMyFollowedThreads() {
+  return getProfileList("/api/me/followed-threads");
 }
 
 export function getMyFollowingUsers() {

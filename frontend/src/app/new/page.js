@@ -1,29 +1,42 @@
+import Image from "next/image";
 import BackButton from "@/components/shell/BackButton";
 import Header from "@/components/shell/Header";
-import Image from "next/image";
 import NewDiscussionForm from "@/components/compose/NewDiscussionForm";
 import NewPageFooter from "@/components/compose/NewPageFooter";
 
 export default function NewDiscussionPage() {
   return (
-    <div className="relative min-h-screen w-full overflow-x-clip bg-white">
+    <div className="flex min-h-screen w-full flex-col overflow-x-clip bg-white">
       <Header />
-      <Image
-        src="/avatar.svg"
-        alt=""
-        width={395}
-        height={366}
-        aria-hidden="true"
-        className="pointer-events-none fixed left-[936px] top-[329px] hidden h-[366px] w-[395px] select-none xl:block"
-        priority
-      />
-      <div className="relative z-10 flex flex-col items-start gap-6 px-14">
+
+      <div className="flex flex-1 flex-col px-14 pb-8">
         <BackButton label="Врати се назад" />
-        <NewDiscussionForm />
-        <div className="mt-4">
-          <NewPageFooter />
+
+        <div className="mt-6 grid w-full grid-cols-1 items-start xl:grid-cols-2">
+          <main
+            aria-label="Започни дискусија"
+            className="flex w-full min-w-0 flex-col gap-6 xl:pr-8"
+          >
+            <NewDiscussionForm />
+          </main>
+
+          <div
+            aria-hidden="true"
+            className="pointer-events-none hidden min-h-[520px] select-none xl:flex xl:items-center xl:justify-center"
+          >
+            <Image
+              src="/avatar.svg"
+              alt=""
+              width={395}
+              height={366}
+              priority
+              className="h-[366px] w-[395px]"
+            />
+          </div>
         </div>
       </div>
+
+      <NewPageFooter />
     </div>
   );
 }

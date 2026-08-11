@@ -100,29 +100,52 @@ it('allows unfollowing a general forum', function () {
     expect($forum->fresh()->members_count)->toBe(0);
 });
 
-it('rejects following a school forum', function () {
+it('allows following another school forum', function () {
     $user = User::factory()->create();
     $forum = makeSchoolForum();
 
     $this->actingAs($user)
         ->postJson("/api/p/{$forum->slug}/follow")
-        ->assertUnprocessable();
+        ->assertSuccessful()
+        ->assertJsonPath('data.is_following', true)
+        ->assertJsonPath('data.members_count', 2);
 
-    expect($user->fresh()->forums()->pluck('forums.id')->all())->not->toContain($forum->id);
-    expect($forum->fresh()->members_count)->toBe(1);
+    expect($user->fresh()->forums()->pluck('forums.id')->all())->toContain($forum->id);
 });
 
-it('rejects unfollowing a school forum', function () {
+it('allows unfollowing another school forum', function () {
     $user = User::factory()->create();
     $forum = makeSchoolForum();
     $user->forums()->attach($forum->id);
 
     $this->actingAs($user)
         ->deleteJson("/api/p/{$forum->slug}/follow")
+        ->assertSuccessful()
+        ->assertJsonPath('data.is_following', false);
+
+    expect($user->fresh()->forums()->pluck('forums.id')->all())->not->toContain($forum->id);
+});
+
+it('rejects unfollowing the user own school forum', function () {
+    $user = User::factory()->create([
+        'username' => 'ucenik_own',
+        'onboarding_completed_at' => now(),
+    ]);
+    $forum = makeSchoolForum();
+
+    \App\Models\StudentData::query()->create([
+        'user_id' => $user->id,
+        'school_id' => $forum->school_id,
+        'vocation_id' => null,
+        'grade' => 3,
+    ]);
+    $user->forums()->attach($forum->id);
+
+    $this->actingAs($user->fresh(['studentData.school.forum']))
+        ->deleteJson("/api/p/{$forum->slug}/follow")
         ->assertUnprocessable();
 
     expect($user->fresh()->forums()->pluck('forums.id')->all())->toContain($forum->id);
-    expect($forum->fresh()->members_count)->toBe(1);
 });
 
 it('includes is_following on forum detail when authenticated', function () {

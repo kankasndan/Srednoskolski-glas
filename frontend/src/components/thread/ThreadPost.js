@@ -43,7 +43,9 @@ export default function ThreadPost({ forum, thread, onThreadUpdated }) {
         comments={thread.comments_count}
         votes={thread.upvotes}
         hasVoted={thread.has_voted}
+        isFollowing={thread.is_following}
         onVoted={(vote) => onThreadUpdated?.(vote)}
+        onFollowingChange={(is_following) => onThreadUpdated?.({ is_following })}
       />
     </article>
   );

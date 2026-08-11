@@ -68,6 +68,7 @@ export default function ForumPage() {
             type={forum.type}
             membersCount={forum.members_count}
             isFollowing={forum.is_following}
+            isOwnSchoolForum={forum.is_own_school_forum}
           />
         ) : !forumError ? (
           <div

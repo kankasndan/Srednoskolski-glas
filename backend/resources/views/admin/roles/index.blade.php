@@ -1,21 +1,23 @@
 @extends('layouts.master')
 
+@section('title', 'Управување со персонал')
+
 @section('content')
     {{-- Page header --}}
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">Staff Management</h1>
-            <p class="text-sm text-gray-500">Grant or revoke Admin and Moderator roles</p>
+            <h1 class="text-2xl font-bold text-gray-800">Управување со персонал</h1>
+            <p class="text-sm text-gray-500">Додели или одземи улоги Админ и Модератор</p>
         </div>
         <button type="button" onclick="document.getElementById('grant-role-modal').classList.remove('hidden')"
             class="bg-my-purple text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-my-purple/90">
-            + Grant Role
+            + Додели улога
         </button>
     </div>
 
     {{-- Search bar --}}
     <div class="flex items-center gap-3 mb-6 relative">
-        <input type="text" id="staff-search" placeholder="Search staff by username..."
+        <input type="text" id="staff-search" placeholder="Пребарај персонал по корисничко име..."
             class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
 
         <div id="search-results"
@@ -30,16 +32,21 @@
     <section class="mb-8 space-y-6">
         @foreach ($roles as $role)
             @if ($role->role != 'user')
-                <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{{ $role->role }}s</h2>
+                <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{{ match ($role->role) {
+                    'super_admin' => 'Супер админи',
+                    'admin' => 'Админи',
+                    'moderator' => 'Модератори',
+                    default => $role->role,
+                } }}</h2>
                 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm ">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 text-gray-500 text-left">
                             <tr>
-                                <th class="px-4 py-3">User</th>
-                                <th class="px-4 py-3">Email</th>
-                                <th class="px-4 py-3">Role</th>
+                                <th class="px-4 py-3">Корисник</th>
+                                <th class="px-4 py-3">Е-пошта</th>
+                                <th class="px-4 py-3">Улога</th>
                                 @if ($role->role == 'moderator')
-                                    <th class="px-4 py-3">Forum</th>
+                                    <th class="px-4 py-3">Форум</th>
                                 @endif
                             </tr>
                         </thead>
@@ -54,7 +61,12 @@
                                             <td class="px-4 py-3 text-gray-500">{{ $user->email }}</td>
                                             <td class="px-4 py-3">
                                                 <span
-                                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{{ $user->role }}</span>
+                                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{{ match ($user->role) {
+                                                        'super_admin' => 'Супер админ',
+                                                        'admin' => 'Админ',
+                                                        'moderator' => 'Модератор',
+                                                        default => $user->role,
+                                                    } }}</span>
                                             </td>
                                             @if ($user->role == 'moderator')
                                                 <td class="px-4 py-3 text-left">
@@ -65,7 +77,7 @@
                                                                     class="py-3 text-gray-800">{{ $user->forum->name }}</span>
                                                             @else
                                                                 <span
-                                                                    class="py-3 text-gray-400">No forum selected</span>
+                                                                    class="py-3 text-gray-400">Нема избран форум</span>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -85,12 +97,12 @@
 
     </div>
 
-    {{-- Grant Role Modal --}}
-    {{-- Grant Role Modal --}}
+    {{-- Додели улога Modal --}}
+    {{-- Додели улога Modal --}}
     <div id="grant-role-modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Grant Staff Role</h3>
+                <h3 class="text-lg font-semibold text-gray-800">Додели улога на персонал</h3>
                 <button type="button" onclick="document.getElementById('grant-role-modal').classList.add('hidden')"
                     class="text-gray-400 hover:text-gray-600">✕</button>
             </div>
@@ -99,8 +111,8 @@
                 @csrf
 
                 <div class="mb-4 relative">
-                    <label class="text-sm font-medium text-gray-700">Search user by username</label>
-                    <input type="text" id="grant-search" autocomplete="off" placeholder="Type an username..."
+                    <label class="text-sm font-medium text-gray-700">Пребарај корисник по корисничко име</label>
+                    <input type="text" id="grant-search" autocomplete="off" placeholder="Внеси корисничко име..."
                         class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
 
                     <input type="hidden" name="user_id" id="grant-selected-user-id">
@@ -111,21 +123,25 @@
                 </div>
 
                 <div class="mb-6">
-                    <label class="text-sm font-medium text-gray-700">Assign role</label>
+                    <label class="text-sm font-medium text-gray-700">Додели улога</label>
                     <select name="role" required class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                        <option value="">Select a role</option>
-                        <option value="super_admin">Super admin</option>
-                        <option value="admin">Admin</option>
-                        <option value="moderator">Moderator</option>
+                        <option value="">Избери улога</option>
+                        @foreach ($assignableRoles as $assignableRole)
+                            <option value="{{ $assignableRole }}">{{ match ($assignableRole) {
+                                'super_admin' => 'Супер админ',
+                                'admin' => 'Админ',
+                                'moderator' => 'Модератор',
+                                default => $assignableRole,
+                            } }}</option>
+                        @endforeach
                     </select>
                 </div>
 
                 <div class="flex justify-end gap-2">
                     <button type="button" onclick="document.getElementById('grant-role-modal').classList.add('hidden')"
-                        class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Cancel</button>
+                        class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Откажи</button>
                     <button type="submit"
-                        class="px-4 py-2 text-sm bg-my-purple text-white rounded-lg hover:bg-my-purple/90">Grant
-                        Role</button>
+                        class="px-4 py-2 text-sm bg-my-purple text-white rounded-lg hover:bg-my-purple/90">Додели улога</button>
                 </div>
             </form>
         </div>
@@ -158,7 +174,7 @@
                 resultsBox.innerHTML = '';
 
                 if (users.length === 0) {
-                    resultsBox.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">No matching users</div>`;
+                    resultsBox.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">Нема совпаѓања</div>`;
                     resultsBox.classList.remove('hidden');
                     return;
                 }
@@ -169,7 +185,7 @@
                     row.className =
                         'block px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center text-sm border-b border-gray-100 last:border-0 no-underline text-inherit';
                     row.innerHTML = `
-                <span class="font-medium text-gray-800">${user.username ?? 'No username'}</span>
+                <span class="font-medium text-gray-800">${user.username ?? 'Нема корисничко име'}</span>
                 <span class="text-gray-400 text-xs">${user.email}</span>
             `;
                     resultsBox.appendChild(row);
@@ -208,7 +224,7 @@
                 grantResultsBox.innerHTML = '';
 
                 if (users.length === 0) {
-                    grantResultsBox.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">No matching users</div>`;
+                    grantResultsBox.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">Нема совпаѓања</div>`;
                     grantResultsBox.classList.remove('hidden');
                     return;
                 }
@@ -217,7 +233,7 @@
                     const row = document.createElement('div');
                     row.className = 'px-3 py-2 hover:bg-gray-50 cursor-pointer flex justify-between text-sm';
                     row.innerHTML = `
-                <span class="font-medium text-gray-800">${user.username ?? 'No username'}</span>
+                <span class="font-medium text-gray-800">${user.username ?? 'Нема корисничко име'}</span>
                 <span class="text-gray-400 text-xs">${user.email}</span>
             `;
 

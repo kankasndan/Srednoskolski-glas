@@ -22,29 +22,75 @@ const DURATION_OPTIONS = [
 const INPUT_CLASS =
   "h-10 w-full rounded-xl border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 text-black placeholder:text-[#595959] focus:border-[#582FF5] focus:outline-none";
 
-export default function PollAttachment({ onClose, onChange }) {
-  const [title, setTitle] = useState("");
-  const [options, setOptions] = useState(["", ""]);
-  const [durationDays, setDurationDays] = useState(3);
+function seedOptions(initialPoll) {
+  const fromPoll = (initialPoll?.options ?? [])
+    .slice()
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+    .map((option) => ({
+      id: option.id ?? null,
+      label: option.label ?? "",
+    }));
+
+  if (fromPoll.length >= MIN_OPTIONS) return fromPoll;
+
+  const padded = [...fromPoll];
+  while (padded.length < MIN_OPTIONS) {
+    padded.push({ id: null, label: "" });
+  }
+  return padded;
+}
+
+export function durationDaysFromEndsAt(endsAt) {
+  if (!endsAt) return 3;
+
+  const ms = new Date(endsAt).getTime() - Date.now();
+  const days = Math.max(1, Math.min(30, Math.ceil(ms / (1000 * 60 * 60 * 24))));
+  const allowed = DURATION_OPTIONS.map((option) => option.value);
+
+  return allowed.reduce((best, current) =>
+    Math.abs(current - days) < Math.abs(best - days) ? current : best,
+  );
+}
+
+export default function PollAttachment({ onClose, onChange, initialPoll = null }) {
+  const [title, setTitle] = useState(initialPoll?.question ?? "");
+  const [options, setOptions] = useState(() => seedOptions(initialPoll));
+  const [durationDays, setDurationDays] = useState(() =>
+    durationDaysFromEndsAt(initialPoll?.ends_at),
+  );
 
   useEffect(() => {
+    const trimmedOptions = options
+      .map((option) => ({
+        id: option.id ?? null,
+        label: option.label.trim(),
+      }))
+      .filter((option) => option.label);
+
     onChange?.({
       question: title.trim(),
-      options: options.map((option) => option.trim()).filter(Boolean),
+      options: trimmedOptions.map((option) => option.label),
+      option_ids: trimmedOptions.map((option) => option.id),
       duration_days: durationDays,
     });
   }, [title, options, durationDays, onChange]);
 
   function updateOption(index, value) {
-    setOptions((prev) => prev.map((option, i) => (i === index ? value : option)));
+    setOptions((prev) =>
+      prev.map((option, i) => (i === index ? { ...option, label: value } : option)),
+    );
   }
 
   function addOption() {
-    setOptions((prev) => (prev.length < MAX_OPTIONS ? [...prev, ""] : prev));
+    setOptions((prev) =>
+      prev.length < MAX_OPTIONS ? [...prev, { id: null, label: "" }] : prev,
+    );
   }
 
   function removeOption(index) {
-    setOptions((prev) => (prev.length > MIN_OPTIONS ? prev.filter((_, i) => i !== index) : prev));
+    setOptions((prev) =>
+      prev.length > MIN_OPTIONS ? prev.filter((_, i) => i !== index) : prev,
+    );
   }
 
   return (
@@ -90,10 +136,10 @@ export default function PollAttachment({ onClose, onChange }) {
 
       <div className="flex flex-col gap-2">
         {options.map((option, index) => (
-          <div key={index} className="flex items-center gap-2">
+          <div key={option.id ?? `new-${index}`} className="flex items-center gap-2">
             <input
               type="text"
-              value={option}
+              value={option.label}
               onChange={(event) => updateOption(index, event.target.value)}
               placeholder={`Опција ${index + 1}`}
               className={INPUT_CLASS}

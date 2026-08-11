@@ -85,6 +85,13 @@ export async function createThread(payload) {
  *   files?: File[],
  *   link?: string,
  *   removeAttachmentIds?: number[],
+ *   poll?: {
+ *     question: string,
+ *     options: string[],
+ *     option_ids?: (number|null)[],
+ *     duration_days: number,
+ *   } | null,
+ *   removePoll?: boolean,
  * }} payload
  */
 export async function updateThread(threadId, payload) {
@@ -92,7 +99,7 @@ export async function updateThread(threadId, payload) {
 
   const formData = new FormData();
   formData.append("title", payload.title);
-  formData.append("description", payload.description ?? "");
+  formData.append("description", payload.description ?? payload.content ?? "");
 
   const link = payload.link ? normalizeEmbedLink(payload.link) : null;
   if (link) {
@@ -105,6 +112,20 @@ export async function updateThread(threadId, payload) {
 
   for (const id of payload.removeAttachmentIds ?? []) {
     formData.append("remove_attachment_ids[]", String(id));
+  }
+
+  if (payload.removePoll) {
+    formData.append("remove_poll", "1");
+  } else if (payload.poll?.question && payload.poll.options?.length) {
+    formData.append("poll[question]", payload.poll.question);
+    formData.append("poll[duration_days]", String(payload.poll.duration_days ?? 3));
+    payload.poll.options.forEach((option, index) => {
+      formData.append(`poll[options][${index}]`, option);
+      const optionId = payload.poll.option_ids?.[index];
+      if (optionId != null) {
+        formData.append(`poll[option_ids][${index}]`, String(optionId));
+      }
+    });
   }
 
   // POST multipart — PHP does not populate files reliably on PUT.
@@ -122,6 +143,42 @@ export async function updateThread(threadId, payload) {
 
   if (!response.ok) {
     const error = new Error(body.message || `Failed to update thread (${response.status})`);
+    error.status = response.status;
+    error.body = body;
+    throw error;
+  }
+
+  return body.data;
+}
+
+/** @param {number} threadId */
+export async function followThread(threadId) {
+  const response = await apiFetch(`/api/threads/${threadId}/follow`, {
+    method: "POST",
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Failed to follow thread (${response.status})`);
+    error.status = response.status;
+    error.body = body;
+    throw error;
+  }
+
+  return body.data;
+}
+
+/** @param {number} threadId */
+export async function unfollowThread(threadId) {
+  const response = await apiFetch(`/api/threads/${threadId}/follow`, {
+    method: "DELETE",
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Failed to unfollow thread (${response.status})`);
     error.status = response.status;
     error.body = body;
     throw error;
