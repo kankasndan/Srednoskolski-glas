@@ -30,12 +30,8 @@
         {{-- Left: Avatar + banner preview card --}}
         <div class="lg:col-span-1">
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                <div class="h-24 bg-gradient-to-r from-my-purple to-purple-400 relative">
-                    @if ($user->bannerUrl)
-                        <img src="{{ $user->bannerUrl }}" class="w-full h-full object-cover">
-                    @endif
-                </div>
-                <div class="p-6 text-center -mt-12">
+
+                <div class="p-6 text-center">
                     <img src="{{ $user->imageUrl ?? 'https://via.placeholder.com/96' }}"
                         class="w-24 h-24 rounded-full mx-auto border-4 border-white shadow-sm object-cover">
                     <h2 class="text-lg font-bold text-gray-800 mt-3">{{ $user->username }}</h2>
@@ -76,13 +72,7 @@
 
                     <div>
                         <label class="text-sm font-medium text-gray-700">Avatar</label>
-                        <input type="file" name="avatar" accept="image/*"
-                            class="mt-1 block w-full text-sm border border-gray-300 rounded-lg px-3 py-2">
-                    </div>
-
-                    <div>
-                        <label class="text-sm font-medium text-gray-700">Banner</label>
-                        <input type="file" name="banner" accept="image/*"
+                        <input type="file" name="image" accept="image/*"
                             class="mt-1 block w-full text-sm border border-gray-300 rounded-lg px-3 py-2">
                     </div>
 

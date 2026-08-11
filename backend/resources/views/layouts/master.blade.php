@@ -173,6 +173,10 @@
                 Форуми
             </a>
 
+            <a href="{{ route('school.index') }}" data-nav-key="nav:schools">
+                Училишта
+            </a>
+
             {{-- Систем --}}
             @role('super_admin')
                 <div class="px-1 pt-4 pb-1 text-[12px] font-bold uppercase tracking-wide text-[#9598A6]">
@@ -201,6 +205,10 @@
     @stack('scripts-reports')
     @stack('scripts-sanctions')
     @stack('scripts-appeals')
+    @stack('scripts-user-show')
+    @stack('scripts-school')
+
+
 
 
 </body>

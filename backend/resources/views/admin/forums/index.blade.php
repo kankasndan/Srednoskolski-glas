@@ -77,14 +77,14 @@
                         <th class="px-4 py-3">Slug</th>
                         <th class="px-4 py-3 text-right">Threads</th>
                         <th class="px-4 py-3 text-right">Followers</th>
-                        <th class="px-4 py-3 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
 
                     {{-- Single forum row (repeat per forum) --}}
                     @foreach ($forums as $forum)
-                        <tr class="hover:cursor-pointer" onclick="window.location='{{ route('forum.show', $forum->id) }}'">
+                        <tr class="hover:cursor-pointer hover:bg-gray-100"
+                            onclick="window.location='{{ route('forum.show', $forum->id) }}'">
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
                                     {{-- Forum icon --}}
@@ -107,10 +107,7 @@
                             <td class="px-4 py-3 text-gray-500 font-mono text-xs">{{ $forum->slug }}</td>
                             <td class="px-4 py-3 text-right">{{ $forum->threads_count }}</td>
                             <td class="px-4 py-3 text-right">{{ $forum->members_count }}</td>
-                            <td class="px-4 py-3 text-right space-x-2 flex justify-between items-center">
-                                <a class="inline text-indigo-600 hover:underline text-xs">Edit</a>
-                                <a class="inline text-red-600 hover:underline text-xs">Delete</a>
-                            </td>
+
                         </tr>
                     @endforeach
                     {{-- End single forum row --}}
@@ -122,7 +119,7 @@
     </div>
 
     {{-- Pagination --}}
-    <div class="flex justify-center">
+    <div class="flex justify-center mb-10">
         <nav class="flex gap-1 text-sm">
             @if ($forums->onFirstPage())
                 <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
@@ -156,19 +153,19 @@
                 <button type="button" onclick="closeForumModal()" class="text-gray-400 hover:text-gray-600">✕</button>
             </div>
 
-            <form class="space-y-3" method="POST" action="{{ route('forum.store') }}"
-                enctype="multipart/form-data">
+            <form class="space-y-3" method="POST" action="{{ route('forum.store') }}" enctype="multipart/form-data">
                 @csrf
+
                 <div>
                     <label class="text-sm text-gray-600">Name</label>
                     <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="name"
-                        required>
+                        id="schoolName" required>
                 </div>
 
                 <div>
                     <label class="text-sm text-gray-600">Slug</label>
                     <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="slug"
-                        placeholder="Optional — generated from name if empty">
+                        placeholder="Optional — generated from name if empty" id="shcoolSlug">
                     <p class="text-xs text-gray-400 mt-1">Leave blank to auto-generate from the name. Must match frontend
                         slug rules.</p>
                 </div>
@@ -179,13 +176,7 @@
                         required></textarea>
                 </div>
 
-                <div>
-                    <label class="text-sm text-gray-600">Forum Type</label>
-                    <select class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="type">
-                        <option value="general">Topic Forum</option>
-                        <option value="school">School Forum</option>
-                    </select>
-                </div>
+
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -215,29 +206,39 @@
         </div>
     </div>
 
-
-    {{-- Delete Thread + Ban Author Modal --}}
-    <div class="fixed inset-0 bg-black/40 hidden items-center justify-center" id="deleteThreadModal">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-            <h2 class="text-lg font-semibold text-gray-900">Delete Thread</h2>
-            <p class="text-sm text-gray-600">This will permanently delete the thread. You may also sanction the author in
-                the same action.</p>
-
-            <label class="flex items-center gap-2 text-sm text-gray-700">
-                <input type="checkbox">
-                Also ban the author of this thread
-            </label>
-
-            <div class="flex justify-end gap-2 pt-2">
-                <button
-                    class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
-                <button class="px-4 py-2 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700">Delete
-                    Thread</button>
-            </div>
-        </div>
-    </div>
     @push('scripts-forums')
         <script>
+            const forumTypeSelect = document.getElementById("forumTypeSelect");
+            const schoolModal = document.getElementById("schoolModal");
+
+            const schoolSelect = document.getElementById("schoolModalSelect");
+
+            const schoolName = document.getElementById("schoolName");
+            const schoolSlug = document.getElementById("schoolSlug");
+
+
+
+            if (forumTypeSelect && schoolModal) {
+                forumTypeSelect.addEventListener("change", () => {
+                    if (forumTypeSelect.value === "school") {
+                        schoolModal.classList.remove("hidden");
+                    } else {
+                        schoolModal.classList.add("hidden");
+                        schoolName.value = "";
+                        schoolName.readOnly = false;
+                    }
+                });
+            }
+
+            if (schoolSelect) {
+                schoolSelect.addEventListener("change", () => {
+                    const selectedOption = schoolSelect.options[schoolSelect.selectedIndex];
+                    schoolName.value = selectedOption.text;
+                    schoolName.readOnly = true;
+                })
+            }
+
+
             function openForumModal() {
                 const modal = document.getElementById('forumModal');
                 modal.classList.remove('hidden');

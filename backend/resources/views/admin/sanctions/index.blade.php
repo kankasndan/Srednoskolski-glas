@@ -169,7 +169,7 @@
                                 <td class="px-4 py-3"><span
                                         class="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">{{ $sanction->type }}</span>
                                 </td>
-                                <td class="px-4 py-3 text-green-600">Истечена</td>
+                                <td class="px-4 py-3 text-green-600">{{ $sanction->issued_by ? "Избришана" : "Истечена" }}</td>
                                 <td class="px-4 py-3 text-gray-500">{{ $sanction->deleted_at?->format('d.m.Y') }}</td>
                             </tr>
                         @endforeach

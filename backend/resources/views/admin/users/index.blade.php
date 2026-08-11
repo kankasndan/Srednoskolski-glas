@@ -73,7 +73,6 @@
                     <th class="px-4 py-3">Sign-in</th>
                     <th class="px-4 py-3">Karma</th>
                     <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3 text-right">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -101,12 +100,6 @@
                                 <span
                                     class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
                             @endif
-                        </td>
-                        <td class="px-4 py-3 text-right" onclick="event.stopPropagation()">
-                            <a href="{{ route('user.show', $user->id) }}"
-                                class="text-my-purple text-xs font-medium hover:underline">
-                                View Profile
-                            </a>
                         </td>
                     </tr>
                 @empty

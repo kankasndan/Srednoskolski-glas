@@ -16,6 +16,7 @@ class UserController extends Controller
             ->with([
                 'studentData.school.city',
                 'sanctions',
+                'threads.forum'
             ])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->get('search');
@@ -73,6 +74,10 @@ class UserController extends Controller
 
     public function show(User $user)
     {
+        if (!$user->hasRole('user')) {
+            abort(403);
+        }
+
         $user->whereHas("studentData")->with(["studentData.school.city", "sanctions", "forums", "threads, topics"]);
 
         return view("admin.users.show", compact("user"));
@@ -82,6 +87,10 @@ class UserController extends Controller
 
     public function export(User $user)
     {
+        if (! $user->hasRole('user')) {
+            abort(403);
+        }
+
         $user->load([
             'studentData.school.city',
             'studentData.vocation',

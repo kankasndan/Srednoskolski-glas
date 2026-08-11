@@ -180,21 +180,11 @@
             <div>
                 <label class="text-sm text-gray-600">Slug</label>
                 <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="slug" value="{{ $forum->slug }}">
-                <p class="text-xs text-gray-400 mt-1">Renaming re-links all threads, comments, saves, and follows
-                    automatically.</p>
             </div>
 
             <div>
                 <label class="text-sm text-gray-600">Description</label>
                 <textarea rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="description">{{ $forum->description }}</textarea>
-            </div>
-
-            <div>
-                <label class="text-sm text-gray-600">Forum Type</label>
-                <select class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="type">
-                    <option value="general" {{ $forum->type == 'general' ? 'selected' : '' }}>Topic Forum</option>
-                    <option value="school" {{ $forum->type == 'school' ? 'selected' : '' }}>School Forum</option>
-                </select>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
