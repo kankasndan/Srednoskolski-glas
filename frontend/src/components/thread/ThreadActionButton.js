@@ -6,7 +6,7 @@ import { formatCount } from "@/lib/formatCount";
 // diskusijata), inaku e obichno kopche.
 export default function ThreadActionButton({ icon, label, count, href, onClick }) {
   const className =
-    "group flex cursor-pointer items-center justify-center gap-4 rounded-2xl border border-[#CCCCCC] px-4 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-black opacity-80 transition-colors hover:border-[var(--color-primary-100)] hover:bg-[var(--color-primary-100)] hover:text-white hover:opacity-100";
+    "group flex h-10 w-24 cursor-pointer items-center justify-center gap-4 rounded-2xl border border-[#CCCCCC] font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-black opacity-80 transition-colors hover:border-[var(--color-primary-100)] hover:bg-[var(--color-primary-100)] hover:text-white hover:opacity-100";
   const inner = (
     <>
       {/* Ikonite se ednobojni purpurni SVG-a, pa na purpurna podloga se gubat.

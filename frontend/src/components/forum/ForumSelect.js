@@ -88,7 +88,7 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
   const isLoading = loading || userLoading;
 
   return (
-    <div className="flex w-[310px] max-w-full flex-col gap-2">
+    <div className="mb-12 flex w-[310px] max-w-full flex-col gap-2">
       <FieldLabel htmlFor="forum-select" required>
         Каде сакаш да започнеш дискусија?
       </FieldLabel>

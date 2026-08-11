@@ -17,7 +17,7 @@ function LegalLink({ href, children }) {
 export default function TermsCheckbox({ checked, onChange }) {
   return (
     <Checkbox checked={checked} onChange={onChange} required>
-      <span className="font-(family-name:--font-manrope) text-[12px] font-normal leading-[19.4px] text-[#595959] 2xl:text-[14px]">
+      <span className="max-w-full font-(family-name:--font-manrope) text-[12px] font-normal leading-[19.4px] text-[#595959] 2xl:text-[14px]">
         Се согласувам со <LegalLink href="/terms">Условите за користење</LegalLink>{" "}
         и <LegalLink href="/privacy">Политиката на приватност</LegalLink>
       </span>

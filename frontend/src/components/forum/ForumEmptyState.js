@@ -6,16 +6,16 @@ export default function ForumEmptyState() {
     <section className="flex w-[990px] max-w-full flex-col items-center justify-center gap-6 rounded-3xl bg-[#CFE9ED] px-6 py-10">
       <div className="flex w-[388px] max-w-full flex-col items-center justify-center gap-6 text-center">
         <Image
-          src="/logo.svg"
+          src="/gray-logo.svg"
           alt=""
-          width={96}
-          height={64}
+          width={115}
+          height={77}
           priority
-          className="h-16 w-24 object-contain"
+          className="object-contain"
         />
         <div className="flex flex-col items-center gap-4">
           <h1 className="font-[family-name:var(--font-oswald)] text-[20px] font-bold uppercase leading-[27px] text-black">
-            Се уште нема дискусии
+            Сè уште нема дискусии
           </h1>
           <p className="w-[388px] max-w-full font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
             Креирај ја првата дискусија - сподели тема за која вреди да се зборува.

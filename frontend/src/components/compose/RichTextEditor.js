@@ -245,7 +245,7 @@ export default function RichTextEditor({
   onBlur,
   // Postoechka sodrzhina (pri ureduvanje na diskusija).
   initialContent = "",
-  widthClassName = "w-[632px]",
+  widthClassName = "w-[779px]",
   // Kopche vo lentata so alatki (na primer "Објави" vo pop-upot za ureduvanje).
   action,
 }) {

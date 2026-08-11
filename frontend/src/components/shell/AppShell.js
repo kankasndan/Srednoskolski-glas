@@ -14,7 +14,10 @@ let sidebarCollapsed = false;
 
 function getSelectedKey(pathname) {
   if (pathname === "/feed") return "nav:home";
-  if (pathname === "/search" || pathname?.startsWith("/search?")) return "nav:explore";
+  if (pathname === "/newest") return "nav:latest";
+  if (pathname === "/explore" || pathname === "/search" || pathname?.startsWith("/search?")) {
+    return "nav:explore";
+  }
   if (pathname?.startsWith("/p/")) {
     const slug = pathname.split("/")[2];
     if (slug) return `forum:${slug}`;
@@ -55,7 +58,7 @@ export default function AppShell({ children, contentClassName = "" }) {
     <div className="flex h-screen flex-col overflow-hidden bg-white">
       <Header />
       <div className="flex min-h-0 flex-1 px-6">
-        <aside className="box-border flex shrink-0 flex-col border-r border-[#CCCCCC] pr-6 pt-1">
+        <aside className="box-border flex shrink-0 flex-col border-r border-[#CCCCCC] pr-6 pt-1 pl-8">
           <button
             type="button"
             onClick={toggleCollapsed}
@@ -63,7 +66,7 @@ export default function AppShell({ children, contentClassName = "" }) {
             className="mb-1 flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
           >
             <Image
-              src="/collapsed icons/menu-collapse.png"
+              src="/collapsed icons/menu-collapse.svg"
               alt=""
               width={24}
               height={24}
