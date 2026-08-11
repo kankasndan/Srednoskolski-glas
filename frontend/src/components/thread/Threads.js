@@ -9,9 +9,9 @@ import { API_BASE_URL } from "@/lib/api";
 
 const SORT_OPTIONS = [
   { value: "trending", label: "Трендинг" },
-  { value: "top", label: "Топ" },
-  { value: "newest", label: "Најнови" },
-  { value: "discussed", label: "Дискутирани" },
+  { value: "top", label: "Популарно" },
+  { value: "newest", label: "Ново" },
+  { value: "discussed", label: "Истакнато" },
 ];
 
 const TIME_FILTER_OPTIONS = [
@@ -19,8 +19,7 @@ const TIME_FILTER_OPTIONS = [
   { value: "day", label: "Денес" },
   { value: "week", label: "Оваа недела" },
   { value: "month", label: "Овој месец" },
-  { value: "six-months", label: "6 месеци" },
-  { value: "year", label: "1 година" },
+  { value: "year", label: "Оваа година" },
 ];
 
 const PAGE_SIZE = 5;
@@ -46,10 +45,13 @@ function FeedSelect({
   options,
   selected,
   isOpen,
+  isSelected,
   listboxId,
   onToggle,
   onSelect,
 }) {
+  const shownOptions = options.filter((option) => option.value !== selected.value);
+
   return (
     <div className="relative h-10 w-36 shrink-0">
       <input type="hidden" name={name} value={selected.value} />
@@ -60,7 +62,9 @@ function FeedSelect({
         aria-expanded={isOpen}
         aria-controls={listboxId}
         onClick={onToggle}
-        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#CCCCCC] bg-white px-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#DCEBED]"
+        className={`flex h-10 w-36 cursor-pointer items-center justify-center gap-2 px-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors ${
+          isOpen ? "rounded-t-xl" : "rounded-xl"
+        } ${isSelected ? "bg-[#CFE9ED] hover:bg-[#DCEBED]" : "bg-white hover:bg-[#E5E5E5]"}`}
       >
         <span className="flex h-[19px] items-center">{selected.label}</span>
         <Image
@@ -77,16 +81,16 @@ function FeedSelect({
           id={listboxId}
           role="listbox"
           aria-label={label}
-          className="absolute left-0 top-12 z-20 flex w-36 flex-col overflow-hidden rounded-[12px] bg-white py-2 shadow-[0_12px_24px_rgba(88,47,245,0.14)]"
+          className="absolute left-0 top-10 z-20 flex w-36 flex-col overflow-hidden rounded-b-xl bg-white shadow-[0_12px_24px_rgba(0,0,0,0.12)]"
         >
-          {options.map((option) => (
+          {shownOptions.map((option) => (
             <button
               key={option.value}
               type="button"
               role="option"
               aria-selected={selected.value === option.value}
               onClick={() => onSelect(option)}
-              className="flex h-10 w-full cursor-pointer items-center px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#E5E5E5]"
+              className="flex h-10 w-full cursor-pointer items-center justify-center border-t border-[#CCCCCC] px-4 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-black transition-colors hover:bg-[#E5E5E5]"
             >
               {option.label}
             </button>
@@ -110,6 +114,10 @@ export default function Threads({
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
   const filterContainerRef = useRef(null);
+  const [selectedFilters, setSelectedFilters] = useState({
+    sort: false,
+    time: false,
+  });
   const [selectedSort, setSelectedSort] = useState(
     SORT_OPTIONS.find((option) => option.value === defaultSort) ?? SORT_OPTIONS[0],
   );
@@ -200,6 +208,7 @@ export default function Threads({
 
   const selectSortOption = (option) => {
     setSelectedSort(option);
+    setSelectedFilters((current) => ({ ...current, sort: true }));
     setOpenSelect(null);
     if (!hasStaticThreads) {
       setHasLoaded(false);
@@ -209,6 +218,7 @@ export default function Threads({
 
   const selectTimeFilterOption = (option) => {
     setSelectedTimeFilter(option);
+    setSelectedFilters((current) => ({ ...current, time: true }));
     setOpenSelect(null);
     if (!hasStaticThreads) {
       setHasLoaded(false);
@@ -237,6 +247,7 @@ export default function Threads({
 
     void Promise.resolve().then(() => {
       setSelectedSort(initialSort);
+      setSelectedFilters({ sort: false, time: false });
       setHasLoaded(false);
       fetchThreads({ append: false, sort: initialSort, page: 1 });
     });
@@ -288,7 +299,7 @@ export default function Threads({
     forum !== null &&
     hasLoaded &&
     threads.length === 0 &&
-    selectedTimeFilter.value === "all";
+    selectedTimeFilter.value === TIME_FILTER_OPTIONS[0].value;
 
   if (isTrulyEmptyForum) {
     return (
@@ -308,6 +319,7 @@ export default function Threads({
             options={SORT_OPTIONS}
             selected={selectedSort}
             isOpen={openSelect === "sort"}
+            isSelected={selectedFilters.sort}
             listboxId={sortListboxId}
             onToggle={() =>
               setOpenSelect((current) => (current === "sort" ? null : "sort"))
@@ -322,6 +334,7 @@ export default function Threads({
           options={TIME_FILTER_OPTIONS}
           selected={selectedTimeFilter}
           isOpen={openSelect === "time"}
+          isSelected={selectedFilters.time}
           listboxId={timeListboxId}
           onToggle={() =>
             setOpenSelect((current) => (current === "time" ? null : "time"))
