@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { CITIES } from "@/lib/schools";
 import TextField from "@/components/ui/TextField";
 import SelectField from "@/components/ui/SelectField";
-import SchoolSelect from "@/components/ui/SchoolSelect";
 import TermsCheckbox from "@/components/auth/TermsCheckbox";
+import Checkbox from "@/components/ui/Checkbox";
 import SubmitButton from "@/components/ui/SubmitButton";
 
 const AREAS = [
@@ -45,8 +45,12 @@ function formatApiError(data) {
   return data?.message || "Неуспешно зачувување. Обиди се повторно.";
 }
 
+const USERNAME_MIN_LENGTH = 3;
+
 export default function OnboardingForm() {
   const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState("");
   const [school, setSchool] = useState("");
   const [area, setArea] = useState("");
   const [year, setYear] = useState("");
@@ -76,11 +80,21 @@ export default function OnboardingForm() {
     e.preventDefault();
     setError("");
 
-    const formData = new FormData(e.currentTarget);
-    const username = String(formData.get("pseudonym") || "").trim();
+    const trimmedUsername = username.trim();
+
+    if (trimmedUsername.length < USERNAME_MIN_LENGTH) {
+      setUsernameError(
+        trimmedUsername
+          ? `Псевдонимот мора да има најмалку ${USERNAME_MIN_LENGTH} карактери.`
+          : "Внеси псевдоним.",
+      );
+      return;
+    }
+
+    setUsernameError("");
 
     const payload = {
-      username,
+      username: trimmedUsername,
       is_student: !notStudent,
     };
 
@@ -113,10 +127,6 @@ export default function OnboardingForm() {
     }
   }
 
-  useEffect(() => {
-    console.log(schoolGroups);
-  }, []);
-
   return (
     <form
       onSubmit={handleSubmit}
@@ -127,27 +137,40 @@ export default function OnboardingForm() {
         label="Псевдоним (3-20 карактери)"
         required
         placeholder="пр. марко_2026"
-        minLength={3}
         maxLength={20}
+        value={username}
+        onChange={(event) => {
+          setUsername(event.target.value);
+          if (usernameError) setUsernameError("");
+        }}
+        error={usernameError}
       />
 
       <div className="flex flex-col gap-0">
+        <Checkbox
+          checked={notStudent}
+          onChange={(event) => handleNotStudentChange(event.target.checked)}
+          className="mb-2"
+        >
+          <span className="font-(family-name:--font-manrope) text-[12px] font-normal leading-[19.4px] text-[#000000] 2xl:text-[14px]">
+            Не сум средношколец
+          </span>
+        </Checkbox>
+
         <p className="-mt-1 mb-3 font-(family-name:--font-manrope) text-[12px] text-[#595959] 2xl:text-[14px]">
           Доколку не си средношколец, можеш да ја користиш платформата само за
           читање и коментирање на дискусии.
         </p>
       </div>
 
-      <SchoolSelect
+      <SelectField
         id="school"
         label="Училиште"
-        required={!notStudent}
+        required
         value={school}
         onChange={setSchool}
         placeholder="Избери училиште"
         groups={schoolGroups}
-        notStudent={notStudent}
-        onNotStudentChange={handleNotStudentChange}
         disabled={notStudent}
       />
 
@@ -156,7 +179,7 @@ export default function OnboardingForm() {
         label="Подрачје на образование"
         required
         value={area}
-        onChange={(e) => setArea(e.target.value)}
+        onChange={setArea}
         placeholder="Избери струка"
         options={AREAS}
         disabled={notStudent}
@@ -166,7 +189,7 @@ export default function OnboardingForm() {
         id="year"
         label="Година (опционално)"
         value={year}
-        onChange={(e) => setYear(e.target.value)}
+        onChange={setYear}
         placeholder="Избери година"
         options={YEARS}
         disabled={notStudent}

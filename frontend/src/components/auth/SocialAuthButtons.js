@@ -10,8 +10,8 @@ import { API_BASE_URL } from "@/lib/api";
 config.autoAddCss = false;
 
 const socialProviders = [
-  { id: "google", label: "Најави се со Google", icon: faGoogle },
-  { id: "facebook", label: "Најави се со Facebook", icon: faFacebookF },
+  { id: "google", name: "Google", icon: faGoogle },
+  { id: "facebook", name: "Facebook", icon: faFacebookF },
 ];
 
 const errorMessages = {
@@ -19,7 +19,12 @@ const errorMessages = {
   missing_token: "Најавата не успеа. Обиди се повторно.",
 };
 
-export default function SocialAuthButtons({ successRedirect }) {
+// actionLabel prefixes each provider name — "Најави се со" on the login page,
+// "Регистрирај се со" on the register page.
+export default function SocialAuthButtons({
+  successRedirect,
+  actionLabel = "Најави се со",
+}) {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -54,7 +59,7 @@ export default function SocialAuthButtons({ successRedirect }) {
             className="flex h-12 cursor-pointer items-center justify-center gap-3 rounded-2xl bg-[#582FF5] px-6 font-(family-name:--font-manrope) text-[15px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0] 2xl:h-14 2xl:text-[17px]"
           >
             <FontAwesomeIcon icon={provider.icon} className="text-[22px] 2xl:text-[26px]" />
-            {provider.label}
+            {`${actionLabel} ${provider.name}`}
           </a>
         ))}
 

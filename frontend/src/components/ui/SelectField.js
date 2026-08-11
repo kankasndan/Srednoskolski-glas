@@ -1,4 +1,61 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { labelClass, fieldClass } from "@/lib/fieldStyles";
+
+const rowClass =
+  "flex h-10 w-full cursor-pointer items-center justify-between gap-3 px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-normal leading-none transition-colors duration-300 ease-out hover:bg-[#E5E5E5]";
+
+const summaryClass = "cursor-pointer list-none [&::-webkit-details-marker]:hidden";
+
+function Chevron({ className = "" }) {
+  return (
+    <img
+      src="/chevron-down.svg"
+      alt=""
+      aria-hidden="true"
+      className={`size-4 shrink-0 transition-transform duration-300 ease-out ${className}`}
+    />
+  );
+}
+
+function Tooltip({ text }) {
+  return (
+    <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-max max-w-60 -translate-x-1/2 rounded-lg bg-[#0A0A0A] px-3 py-2 text-center font-(family-name:--font-manrope) text-[12px] leading-snug text-white opacity-0 transition-opacity group-hover:opacity-100">
+      {text}
+      <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#0A0A0A]" />
+    </div>
+  );
+}
+
+function CityGroup({ groupName, city, schools, value, onSelect }) {
+  return (
+    <details name={groupName} className="group/city shrink-0">
+      <summary
+        className={`${rowClass} ${summaryClass} text-black group-open/city:bg-[#CFE9ED] group-open/city:hover:bg-[#CFE9ED]`}
+      >
+        <span className="truncate">{city}</span>
+        <Chevron className="group-open/city:rotate-180" />
+      </summary>
+
+      <ul className="divide-y divide-[#CCCCCC] border-t border-[#CCCCCC]">
+        {schools.map((school) => (
+          <li key={school}>
+            <button
+              type="button"
+              onClick={() => onSelect(`${school}|${city}`)}
+              className={`${rowClass} cursor-pointer text-black ${
+                value === `${school}|${city}` ? "bg-[#E5E5E5]" : ""
+              }`}
+            >
+              <span className="truncate">{school}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
 
 export default function SelectField({
   id,
@@ -9,76 +66,110 @@ export default function SelectField({
   placeholder,
   options,
   groups,
-  standaloneOption,
   disabled = false,
   tooltip,
 }) {
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+
+    function handleEscape(event) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  function select(nextValue) {
+    onChange(nextValue);
+    setOpen(false);
+  }
+
+  // Grupiranite vrednosti se čuvaat kako "učilište|grad".
+  const selectedLabel = groups && value ? value.split("|")[0] : value;
+
+  let triggerTone = "bg-white text-[#595959]";
+  if (disabled) triggerTone = "cursor-not-allowed bg-[#F5F5F5] text-[#B3B3B3]";
+  else if (value) triggerTone = "bg-white text-black";
+
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className={labelClass}>
+      <span className={labelClass}>
         {required && <span className="text-red-500">*</span>}
         {label}
-      </label>
-      <div className="group relative">
-        {tooltip && (
-          <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-max max-w-[240px] -translate-x-1/2 rounded-lg bg-[#0A0A0A] px-3 py-2 text-center font-(family-name:--font-manrope) text-[12px] leading-snug text-white opacity-0 transition-opacity group-hover:opacity-100">
-            {tooltip}
-            <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#0A0A0A]" />
-          </div>
-        )}
-        <select
-          id={id}
+      </span>
+
+      {/* Otvorenata lista mora da e nad polinjata pod nea. */}
+      <div
+        ref={wrapperRef}
+        className={`group relative h-14 ${open ? "z-30" : ""}`}
+      >
+        {tooltip && <Tooltip text={tooltip} />}
+
+        <input
+          type="text"
           name={id}
-          required={required && !disabled}
-          disabled={disabled}
           value={value}
-          onChange={onChange}
-          className={`${fieldClass} cursor-pointer appearance-none pr-11 disabled:cursor-not-allowed disabled:bg-[#F5F5F5] disabled:text-[#B3B3B3] ${
-            value ? "text-[#000000]" : "text-[#595959]"
-          }`}
-        >
-          /* Default unselected placeholder */
-          {placeholder && (
-            <option value="" disabled hidden>
-              {placeholder}
-            </option>
-          )}
-
-          {standaloneOption && (
-            <option value={standaloneOption.value} className="text-[#000000]">
-              {standaloneOption.label}
-            </option>
-          )}
-
-          /* Grouped Options */
-          {groups
-            ? groups.map(({ city, schools }) => (
-                <optgroup key={city} label={city.toUpperCase()}>
-                  {schools.map((school) => (
-                    <option
-                      key={`${city}-${school}`}
-                      value={`${school}|${city}`}
-                      className="text-[#000000]"
-                    >
-                      {school}
-                    </option>
-                  ))}
-                </optgroup>
-              ))
-            : options?.map((name) => (
-                <option key={name} value={name} className="text-[#000000]">
-                  {name}
-                </option>
-              ))}
-        </select>
-        <img
-          src="/chevron-down.svg"
-          alt=""
+          onChange={() => {}}
+          required={required && !disabled}
+          tabIndex={-1}
           aria-hidden="true"
-          className={`pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 2xl:h-6 2xl:w-6 ${
-            disabled ? "brightness-0 invert" : ""
-          }`}
+          className="absolute h-0 w-0 opacity-0"
         />
+
+        <details
+          open={open}
+          onToggle={(event) => setOpen(event.currentTarget.open)}
+          className="group/field absolute inset-x-0 top-0 z-10"
+        >
+          <summary
+            id={id}
+            aria-expanded={open}
+            onClick={(event) => disabled && event.preventDefault()}
+            className={`${fieldClass} ${summaryClass} ${triggerTone} flex items-center justify-between gap-3 transition-colors duration-300 ease-out group-open/field:rounded-b-none group-open/field:bg-[#CFE9ED]`}
+          >
+            <span className="truncate">{selectedLabel || placeholder}</span>
+            <Chevron className="group-open/field:rotate-180" />
+          </summary>
+
+          <div className="flex max-h-70 flex-col divide-y divide-[#CCCCCC] overflow-y-auto rounded-b-2xl border-x border-b border-[#CCCCCC] bg-white">
+            {groups
+              ? groups.map(({ city, schools }) => (
+                  <CityGroup
+                    key={city}
+                    groupName={`${id}-group`}
+                    city={city}
+                    schools={schools}
+                    value={value}
+                    onSelect={select}
+                  />
+                ))
+              : options?.map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => select(name)}
+                    className={`${rowClass} shrink-0 cursor-pointer text-black ${
+                      value === name ? "bg-[#CFE9ED] hover:bg-[#CFE9ED]" : ""
+                    }`}
+                  >
+                    <span className="truncate">{name}</span>
+                  </button>
+                ))}
+          </div>
+        </details>
       </div>
     </div>
   );

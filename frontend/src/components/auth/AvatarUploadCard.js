@@ -42,8 +42,8 @@ export default function AvatarUploadCard() {
 
   return (
     <div
-      className="mx-auto flex w-full flex-col rounded-2xl bg-[#E5E5E5] p-6"
-      style={{ boxShadow: "7px 7px 9.4px 0px #00000026" }}
+      className="flex w-full max-w-[850px] flex-col items-center gap-6 rounded-2xl bg-[#E5E5E5] px-6 pt-10 pb-5 sm:px-20"
+      style={{ boxShadow: "7px 7px 4.7px 0px rgba(0, 0, 0, 0.15)" }}
     >
       <input
         ref={fileInputRef}
@@ -53,57 +53,58 @@ export default function AvatarUploadCard() {
         className="hidden"
       />
 
-      <button
-        type="button"
-        onClick={openFilePicker}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsDragging(true);
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-        className={`flex w-full min-h-[280px] cursor-pointer flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed px-4 py-8 transition-colors ${
-          isDragging ? "border-[#582FF5] bg-[#582FF5]/5" : "border-[#B5B5B5]"
-        }`}
-      >
-        {previewUrl ? (
-          <span className="flex size-[166px] items-center justify-center overflow-hidden rounded-full">
-            <img
-              src={previewUrl}
-              alt="Преглед на фотографијата"
-              className="size-full object-cover"
+      <div className="flex w-full flex-col items-center gap-8">
+        <button
+          type="button"
+          onClick={openFilePicker}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          className={`flex w-full cursor-pointer flex-col items-center gap-8 rounded-2xl border border-dashed p-10 transition-colors ${
+            isDragging ? "border-[#582FF5] bg-[#582FF5]/5" : "border-black"
+          }`}
+        >
+          {previewUrl ? (
+            <span className="flex size-[166px] items-center justify-center overflow-hidden rounded-full">
+              <img
+                src={previewUrl}
+                alt="Преглед на фотографијата"
+                className="size-full object-cover"
+              />
+            </span>
+          ) : (
+            <Image
+              src="/Generic_avatar_onboarding.svg"
+              alt=""
+              width={166}
+              height={166}
+              className="size-[166px]"
+              priority
             />
-          </span>
-        ) : (
-          <Image
-            src="/Generic_avatar_onboarding.svg"
-            alt=""
-            width={166}
-            height={166}
-            className="size-[166px]"
-            priority
-          />
-        )}
+          )}
 
-        <p className="text-center font-(family-name:--font-manrope) text-[20px] font-normal leading-[22.59px] text-[#333333]">
-          Прикачи своја фотографија,
-          <br />а ние ќе ја претвориме во{" "}
-          <span className="text-[#582FF5]">твој личен аватар.</span>
-        </p>
-      </button>
+          <p className="max-w-[502px] text-center font-(family-name:--font-manrope) text-[20px] font-normal leading-[22.595px] text-black">
+            Прикачи своја фотографија за дополнителна персонализација на твојот
+            профил.
+          </p>
+        </button>
 
-      <button
-        type="button"
-        onClick={previewUrl ? () => finishOnboarding(router) : openFilePicker}
-        className="mx-auto mt-6 h-12 w-full max-w-[400px] cursor-pointer rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[15px] font-bold text-white transition-colors hover:bg-[#4B25E0]"
-      >
-        {previewUrl ? "Продолжи" : "Прикачи фотографија"}
-      </button>
+        <button
+          type="button"
+          onClick={previewUrl ? () => finishOnboarding(router) : openFilePicker}
+          className="h-14 w-full max-w-[400px] cursor-pointer rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[16px] font-bold text-white transition-colors hover:bg-[#4B25E0]"
+        >
+          {previewUrl ? "Продолжи" : "Прикачи фотографија"}
+        </button>
+      </div>
 
       <button
         type="button"
         onClick={() => finishOnboarding(router)}
-        className="mx-auto mt-4 block cursor-pointer text-center font-(family-name:--font-manrope) text-[16px] font-normal leading-none text-[#737373] transition-colors hover:text-[#333333]"
+        className="cursor-pointer text-center font-(family-name:--font-manrope) text-[16px] font-normal leading-none text-[#595959] transition-colors hover:text-[#333333]"
       >
         Можеби подоцна
       </button>
