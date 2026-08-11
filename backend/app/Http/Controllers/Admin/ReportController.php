@@ -13,6 +13,8 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('view reports');
+
         $reports = Report::query()
             ->with([
                 'reporter',
@@ -81,19 +83,23 @@ class ReportController extends Controller
 
     public function approve(Report $report)
     {
+        $this->authorize('approve reports');
+
         $report->update([
             'status' => 'approved',
         ]);
 
-        return back()->with(['success' => 'Successfully approved report!']);
+        return back()->with(['success' => 'Пријавата е успешно одобрена!']);
     }
 
     public function reject(Report $report)
     {
+        $this->authorize('reject reports');
+
         $report->update([
             'status' => 'rejected',
         ]);
 
-        return back()->with(['success' => 'Successfully rejected report!']);
+        return back()->with(['success' => 'Пријавата е успешно одбиена!']);
     }
 }

@@ -6,6 +6,7 @@ use App\Facades\Media;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Forum;
+use App\Models\School;
 use App\Support\Slug;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -15,6 +16,8 @@ class ForumController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('view forums');
+
         $forums = Forum::query()
             ->with('school', 'forumUser')
             ->when($request->filled('search'), function ($query) use ($request) {
@@ -35,11 +38,16 @@ class ForumController extends Controller
 
         $cities = City::all();
 
-        return view('admin.forums.index', compact('forums', 'cities'));
+        $schools = School::all();
+
+
+        return view('admin.forums.index', compact('forums', 'cities', 'schools'));
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create forums');
+
         if ($request->input('slug') === '') {
             $request->merge(['slug' => null]);
         }
@@ -48,7 +56,6 @@ class ForumController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:forums,slug'],
-            'type' => ['required', Rule::in(['general', 'school'])],
             'icon' => ['nullable', 'image', 'max:5120'],
             'banner' => ['nullable', 'image', 'max:10240'],
         ]);
@@ -72,19 +79,20 @@ class ForumController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'],
             'slug' => $slug,
-            'type' => $validated['type'],
             'imageUrl' => $imageUrl,
             'bannerUrl' => $bannerUrl,
         ]);
 
-        return back()->with('success', 'Forum created!');
+        return back()->with('success', 'Форумот е креиран!');
     }
 
     public function liveSearch(Request $request)
     {
+        $this->authorize('search forums');
+
         $query = $request->q;
 
-        $forums = Forum::where('slug', 'like', "%{$query}%")
+        $forums = Forum::where('name', 'like', "%{$query}%")
             ->limit(10)
             ->get();
 
@@ -93,6 +101,8 @@ class ForumController extends Controller
 
     public function show(Forum $forum)
     {
+        $this->authorize('view forum details');
+
         $forum->load(['school.city', 'moderator']);
 
         $threads = $forum->threads()->with('user')->withCount('comments')->latest()->paginate(10);
@@ -102,11 +112,12 @@ class ForumController extends Controller
 
     public function edit(Forum $forum, Request $request)
     {
+        $this->authorize('update forums');
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'slug' => ['required', 'string', 'max:255', Rule::unique('forums', 'slug')->ignore($forum->id)],
-            'type' => ['required', Rule::in(['general', 'school'])],
             'icon' => ['nullable', 'image', 'max:5120'],
             'banner' => ['nullable', 'image', 'max:10240'],
         ]);
@@ -126,19 +137,20 @@ class ForumController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'],
             'slug' => $validated['slug'],
-            'type' => $validated['type'],
             'imageUrl' => $imageUrl,
             'bannerUrl' => $bannerUrl,
         ]);
 
-        return back()->with('success', 'Forum updated!');
+        return back()->with('success', 'Форумот е ажуриран!');
     }
 
     public function destroy(Forum $forum)
     {
+        $this->authorize('delete forums');
+
         $forum->delete();
 
-        return redirect()->route('forum.index')->with('success', 'Forum successfully deleted!');
+        return redirect()->route('forum.index')->with('success', 'Форумот е успешно избришан!');
     }
 
     private function defaultIconUrl(string $slug, string $type): string

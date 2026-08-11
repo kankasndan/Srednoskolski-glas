@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { toggleThreadVote } from "@/api/threads";
+import FollowThreadButton from "@/components/thread/FollowThreadButton";
 import { formatCount } from "@/lib/formatCount";
 import { nextVoteState } from "@/lib/votes";
 
@@ -85,10 +86,12 @@ export default function ThreadStats({
   comments,
   votes,
   hasVoted = false,
+  isFollowing = false,
   onVoted,
+  onFollowingChange,
 }) {
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap items-start gap-2">
       <Stat icon="/eye-line.svg" label="Прегледи" count={views} />
       <Stat icon="/chat-1-line.svg" label="Коментари" count={comments} />
       <VoteStat
@@ -96,6 +99,11 @@ export default function ThreadStats({
         votes={votes}
         hasVoted={hasVoted}
         onVoted={onVoted}
+      />
+      <FollowThreadButton
+        threadId={threadId}
+        initialFollowing={isFollowing}
+        onFollowingChange={onFollowingChange}
       />
     </div>
   );

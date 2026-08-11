@@ -15,6 +15,8 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('view dashboard');
+
         $range = $request->get('range', 30);
 
         $totalUsers = User::count();
@@ -104,6 +106,8 @@ class DashboardController extends Controller
 
     public function exportPdf(Request $request)
     {
+        $this->authorize('export dashboard');
+
         $range = (int) $request->get('range', 30);
 
         $pdf = Pdf::loadView('admin.dashboard.export', $this->getDashboardData($range));

@@ -16,6 +16,7 @@ use App\Support\HtmlSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -261,6 +262,7 @@ class ThreadController extends Controller
 
         $threadQuery = Thread::query()->whereKey($thread->id);
         $this->applyHasVoted($threadQuery, $user);
+        $this->applyIsFollowing($threadQuery, $user);
         $thread = $threadQuery
             ->with($this->threadListWith($user))
             ->withCount('comments')
@@ -375,10 +377,15 @@ class ThreadController extends Controller
 
     private function loadThreadResource(Thread $thread): Thread
     {
-        $user = auth('web')->user() ?? auth()->user();
+        $user = auth('web')->user() ?? Auth::user();
 
-        $thread->load($this->threadListWith($user))->loadCount('comments');
+        $query = Thread::query()->whereKey($thread->id);
+        $this->applyHasVoted($query, $user);
+        $this->applyIsFollowing($query, $user);
 
-        return $thread;
+        return $query
+            ->with($this->threadListWith($user))
+            ->withCount('comments')
+            ->firstOrFail();
     }
 }
