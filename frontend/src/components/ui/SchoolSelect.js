@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { labelClass, fieldClass } from "@/lib/fieldStyles";
 
 const rowClass =
-  "flex h-10 w-full items-center justify-between gap-3 px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-normal leading-none transition-colors duration-300 ease-out hover:bg-[#E5E5E5]";
+  "flex h-10 w-full cursor-pointer items-center justify-between gap-3 px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-normal leading-none transition-colors duration-300 ease-out hover:bg-[#E5E5E5]";
 
 const summaryClass = "cursor-pointer list-none [&::-webkit-details-marker]:hidden";
 
@@ -44,7 +44,7 @@ function CityGroup({ city, schools, value, onSelect }) {
             <button
               type="button"
               onClick={() => onSelect(school, city)}
-              className={`${rowClass} text-black ${
+              className={`${rowClass} cursor-pointer text-black ${
                 value === `${school}|${city}` ? "bg-[#E5E5E5]" : ""
               }`}
             >
@@ -138,7 +138,9 @@ export default function SchoolSelect({
             onClick={(e) => disabled && e.preventDefault()}
             className={`${fieldClass} ${summaryClass} ${triggerTone} flex items-center justify-between gap-3 transition-colors duration-300 ease-out group-open/field:rounded-b-none group-open/field:bg-[#CFE9ED]`}
           >
-            <span className="truncate">{selectedSchool || placeholder}</span>
+            <span className="truncate">
+              {notStudent ? "Не сум средношколец" : selectedSchool || placeholder}
+            </span>
             <Chevron className="group-open/field:rotate-180" />
           </summary>
 
@@ -146,7 +148,7 @@ export default function SchoolSelect({
             <button
               type="button"
               onClick={toggleNotStudent}
-              className={`${rowClass} shrink-0 text-[#595959] ${
+              className={`${rowClass} cursor-pointer shrink-0 text-[#595959] ${
                 notStudent ? "bg-[#E5E5E5]" : ""
               }`}
             >

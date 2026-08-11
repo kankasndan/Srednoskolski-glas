@@ -7,17 +7,17 @@ export default function TitleInput({
   onChange,
   onBlur,
   errorMessage,
-  widthClassName = "w-[632px]",
+  widthClassName = "w-[779px]",
 }) {
   const counterTextColor =
     value.length >= MAX_LENGTH ? "text-[var(--color-error)]" : "text-[#595959]";
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={`flex max-w-full flex-col gap-2 ${widthClassName}`}>
       <FieldLabel htmlFor="title" required>
         Наслов
       </FieldLabel>
-      <div className={`flex max-w-full flex-col gap-1 ${widthClassName}`}>
+      <div className="flex w-full flex-col gap-1">
         <input
           id="title"
           name="title"

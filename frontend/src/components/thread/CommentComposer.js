@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createComment } from "@/api/comments";
+import { useProfile } from "@/hooks/useProfile";
+import { canCreateComments } from "@/lib/capabilities";
 
 const MAX_COMMENT_LENGTH = 1000;
 
@@ -14,14 +16,16 @@ export default function CommentComposer({
   onClose,
   onCreated,
 }) {
+  const { user, loading: profileLoading } = useProfile();
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const isEmpty = comment.trim() === "";
+  const allowed = canCreateComments(user);
 
   async function handleSubmit(event) {
     event.preventDefault();
-    if (isEmpty || busy || !threadId) return;
+    if (isEmpty || busy || !threadId || !allowed) return;
 
     setBusy(true);
     setError("");
@@ -36,10 +40,43 @@ export default function CommentComposer({
       onCreated?.(created);
       onClose?.();
     } catch (err) {
-      setError(err.message || "Неуспешно објавување. Обиди се повторно.");
+      if (err.status === 403) {
+        setError(err.message || "Немаш дозвола да коментираш.");
+      } else if (err.status === 401) {
+        setError("Мора да си најавен за да коментираш.");
+      } else {
+        setError(err.message || "Неуспешно објавување. Обиди се повторно.");
+      }
     } finally {
       setBusy(false);
     }
+  }
+
+  if (profileLoading) {
+    return null;
+  }
+
+  if (!allowed) {
+    return (
+      <div
+        className={
+          compact
+            ? "rounded-xl border border-[#CCCCCC] bg-[#F7F7F7] px-4 py-3 text-[13px] text-[#595959]"
+            : "rounded-3xl border border-[#CCCCCC] bg-[#F7F7F7] p-6 text-[14px] text-[#595959]"
+        }
+      >
+        {user == null ? (
+          <>
+            <Link href="/login" className="font-bold text-[#582FF5] hover:underline">
+              Најави се
+            </Link>{" "}
+            за да коментираш.
+          </>
+        ) : (
+          "Заврши го onboarding процесот за да можеш да коментираш."
+        )}
+      </div>
+    );
   }
 
   return (
@@ -95,7 +132,7 @@ export default function CommentComposer({
         ) : (
           <Link
             href={`/p/${forumSlug}`}
-            className="text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px]"
+            className="cursor-pointer text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px] transition-colors hover:text-black"
           >
             Внимавај на правилата на заедницата.
           </Link>

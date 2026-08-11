@@ -142,6 +142,7 @@ For school forums, `type` is `"school"` and `school` looks like:
   "description": "<p>Текст на постот…</p>",
   "upvotes": 8,
   "has_voted": false,
+  "is_owner": false,
   "views": 120,
   "is_anonymous": false,
   "comments_count": 4,
@@ -179,6 +180,7 @@ Notes:
 - `edited_at` is set when the post was edited; otherwise `null`.
 - `attachments[].type` comes from the attachment slug (e.g. image/file/link/video).
 - `has_voted` is `true` when the current authenticated user has upvoted this item; guests always get `false`.
+- `is_owner` is `true` when the current authenticated user created the thread (including anonymous posts); guests always get `false`.
 
 ### Comment (nested tree)
 
@@ -224,6 +226,7 @@ Used by:
 
 - `GET /api/feed`
 - `GET /api/p/{slug}/threads`
+- `GET /api/search` (plus `q`, `forum`, `per_page` — see [Search](#search))
 
 | Query | Values | Default | Meaning |
 |-------|--------|---------|---------|
@@ -288,15 +291,41 @@ GET /api/feed?sort=trending&time=week&page=1
 3. Scroll: `GET /api/feed?page=2&sort=…&time=…` → **append** `data`  
 4. Stop when `meta.current_page >= meta.last_page` (or `links.next` is `null`)
 
-**Behavior**
+**Behavior (`sort=trending`, default)**
+
+The trending feed uses a **short-TTL ranked-ID cache** (45s) and a **tighter candidate window**:
+
+1. Look up cached ordered thread IDs for `(user|guest, sort, time)`  
+2. On miss: load up to **250 lean candidates from the last 30 days** (or tighter if `time=day|week|month`), score in PHP, mix, diversify, store only the ID list  
+3. Slice the 5 IDs for the requested page and **hydrate only those rows** with full relations  
+4. Hide/report busts that user’s feed cache immediately  
+
+Scoring still uses:
+
+1. **Hot score** — Hacker-News style time decay using upvotes + comments + last-24h vote/comment velocity  
+2. **Affinity** — boosts for followed forums, school forum (cold start), recently engaged forums, followed authors, preferred authors  
+3. **Seen demotion** — threads in `thread_views` are strongly downranked (not boosted)  
+4. **Negative filters** — threads the user hid (`feed_hides`) or reported are excluded  
+5. **Mix** — ~60% home (followed + school), ~20% discovery, ~20% fresh (&lt;24h)  
+6. **Diversity** — avoid 3+ consecutive threads from the same forum  
+7. **Paginate** — 5 per page from the cached ID list  
 
 | Who | What you get |
 |-----|----------------|
-| Guest | Site-wide threads (same sort/time filters as forum lists) |
-| Logged in, **no** followed forums | Same as guest — site-wide trending |
-| Logged in, **≥1** followed forums | Still the **full site-wide** pool (so 1–2 follows don’t hide everything else). Threads from followed forums get a soft boost (+30), and threads the user previously opened get a smaller boost (+15), then normal sort metrics apply |
+| Guest | Hot score + diversity (no affinity / mix buckets) |
+| Logged in, no follows | Hot + school-forum cold start (if onboarded) + discovery mix |
+| Logged in, follows forums | Full personalized pipeline above |
+
+`sort=newest|top|discussed` stay simple DB sorts, but still exclude hidden/reported threads for the session user.
 
 Opening a thread via `GET /api/p/{slug}/comments/{id}` while logged in records a row in `thread_views` (and increments the public `views` counter).
+
+Related write endpoints:
+
+- `POST /api/threads/{id}/hide` — hide from feed  
+- `DELETE /api/threads/{id}/hide` — unhide  
+- `POST /api/threads/{id}/report` — create report + auto-hide from reporter feed  
+- `POST /api/comments/{id}/report` — create comment report
 
 ```json
 {
@@ -307,6 +336,7 @@ Opening a thread via `GET /api/p/{slug}/comments/{id}` while logged in records a
       "description": "…",
       "upvotes": 8,
       "has_voted": false,
+      "is_owner": false,
       "views": 120,
       "is_anonymous": false,
       "comments_count": 4,
@@ -333,6 +363,92 @@ Opening a thread via `GET /api/p/{slug}/comments/{id}` while logged in records a
     "last_page": 3,
     "per_page": 5,
     "total": 12
+  }
+}
+```
+
+---
+
+## Search
+
+### Search threads and forums
+
+```
+GET /api/search
+```
+
+**Public** (works for guests). Same thread card shape as the feed.
+
+Used by the header live-search dropdown (`per_page=5`) and the **Истражи** page (`/search`).
+
+| Query | Values | Default | Meaning |
+|-------|--------|---------|---------|
+| `q` | string, max 200 | empty | Match thread title, body, or comments (`LIKE`). Empty `q` is explore: trending threads |
+| `forum` | forum slug | — | Limit threads to that forum. Unknown slug → `404`. Hides forum suggestions |
+| `page` | integer ≥ 1 | `1` | Page number |
+| `per_page` | 1–20 | `5` | Page size (dropdown uses 5) |
+| `sort` | `relevance`, `trending`, `top`, `newest`, `discussed` | `relevance` when `q` is set, else `trending` | Order. `trending` with a query is treated as `relevance` |
+| `time` | `day`, `week`, `month`, `six-months`, `year`, `all` | `all` | Only threads created in this window |
+
+**Relevance:** title matches first, then body, then comment hits; then upvotes ↓, then newest.
+
+Response is a normal paginated thread list (`data`, `links`, `meta`) plus a `forums` array of up to 3 sidebar-style forum cards whose name or description matches `q`. `forums` is `[]` when `q` is empty or `forum` is set.
+
+```
+GET /api/search?q=матура
+GET /api/search?q=матура&forum=drzhavna_matura
+GET /api/search?q=матура&per_page=5
+GET /api/search?page=2&sort=newest&time=week
+```
+
+```json
+{
+  "data": [
+    {
+      "id": 15,
+      "title": "Како да се подготвам за матура?",
+      "description": "…",
+      "upvotes": 8,
+      "has_voted": false,
+      "views": 120,
+      "is_anonymous": false,
+      "comments_count": 4,
+      "created_at": "2026-07-18T10:22:00.000000Z",
+      "edited_at": null,
+      "forum": {
+        "id": 3,
+        "name": "Државна матура",
+        "slug": "drzhavna_matura",
+        "type": "general",
+        "imageUrl": "https://…/forum.png"
+      },
+      "author": { "id": 1, "username": "ana_mk", "imageUrl": "…", "school": null },
+      "attachments": []
+    }
+  ],
+  "forums": [
+    {
+      "id": 3,
+      "name": "Државна матура",
+      "slug": "drzhavna_matura",
+      "type": "general",
+      "school_id": null,
+      "imageUrl": "https://…/forum.png",
+      "threads_count": 12,
+      "members_count": 40
+    }
+  ],
+  "links": {
+    "first": "http://localhost:8000/api/search?q=%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%B0&page=1",
+    "last": "http://localhost:8000/api/search?q=%D0%BC%D0%B0%D1%82%D1%83%D1%80%D0%B0&page=1",
+    "prev": null,
+    "next": null
+  },
+  "meta": {
+    "current_page": 1,
+    "last_page": 1,
+    "per_page": 5,
+    "total": 1
   }
 }
 ```
@@ -427,11 +543,47 @@ GET /api/me
         "name": "Гимназиско"
       }
     }
+  },
+  "permissions": ["create comments", "create threads"],
+  "capabilities": {
+    "can_create_comments": true,
+    "can_create_threads": true,
+    "school_forum_id": 40
   }
 }
 ```
 
 `student_data` may be `null` for non-students. `onboarding_completed_at` is `null` until onboarding is finished. `school.forum` is included so the profile can link to that school’s forum (`/p/{slug}`).
+
+**Content permissions (Spatie)**
+
+| Who | Comment | Create thread |
+|-----|---------|---------------|
+| Guest | no | no |
+| Logged in, onboarding incomplete | no | no |
+| Onboarded, no school | yes (any thread) | no |
+| Onboarded, has school | yes (any thread, including other schools) | yes in **general** forums + **own school** forum only |
+
+`POST /api/threads` and `POST /api/threads/{id}/comments` enforce this (`403` when denied). Forum payloads also include `can_create_thread` for the current user.
+
+### Update current user
+
+```
+PUT /api/me
+```
+
+**Auth required.** Username cannot be changed. Send only the fields you want to update.
+
+| Field | Type | Rules |
+|-------|------|--------|
+| `image_url` | string \| null | optional; default avatar path (`/avatars/default-1.svg` … `default-4.svg`), `https?` URL from media upload, or `""` to reset to the first default |
+| `school` | string | with `area` + `year`: `"School Name\|City Name"` (same as onboarding) |
+| `area` | string | vocation name |
+| `year` | string | `1`–`4` or `Прва`/`Втора`/`Трета`/`Четврта` |
+
+Changing school moves the user to that school’s forum (unfollows the previous school forum).
+
+**Success** — same envelope as `GET /api/me` (`{ user }`).
 
 ---
 
@@ -448,10 +600,77 @@ GET /api/me/counts
   "data": {
     "threads": 12,
     "comments": 34,
-    "followed_forums": 5
+    "followed_forums": 5,
+    "following_users": 3
   }
 }
 ```
+
+```
+GET /api/me/following-users
+```
+
+**Auth required.** Users the current user follows (newest username order, max 100). Same public user shape as `/api/u/{username}`.
+
+---
+
+### Public user profile
+
+```
+GET /api/u/{username}
+```
+
+**Public.** Profile header for a completed-onboarding user. When the request is authenticated (session cookie), includes whether the viewer follows them.
+
+```json
+{
+  "data": {
+    "user": {
+      "id": 1,
+      "username": "ana_mk",
+      "imageUrl": "…",
+      "created_at": "…",
+      "student_data": {
+        "grade": 3,
+        "school": {
+          "id": 12,
+          "name": "СУГС Јосип Броз Тито",
+          "city": { "id": 1, "name": "Скопје" },
+          "forum": { "id": 40, "slug": "sugs_josip_broz_tito_skopje", "name": "…" }
+        },
+        "vocation": { "id": 3, "name": "Гимназиско" }
+      }
+    },
+    "counts": {
+      "threads": 12,
+      "comments": 34,
+      "followed_forums": 5,
+      "followers": 8
+    },
+    "is_following": false,
+    "is_own_profile": false
+  }
+}
+```
+
+Related list endpoints (same shapes as `/api/me/*`):
+
+- `GET /api/u/{username}/threads`
+- `GET /api/u/{username}/comments`
+- `GET /api/u/{username}/followed-forums`
+
+Follow / unfollow (**auth required**):
+
+```
+POST   /api/u/{username}/follow
+DELETE /api/u/{username}/follow
+```
+
+```json
+{ "data": { "is_following": true, "followers": 9 } }
+```
+
+Self-follow returns `422`.
 
 ---
 
@@ -472,6 +691,7 @@ GET /api/me/threads
       "description": "…",
       "upvotes": 8,
       "has_voted": false,
+      "is_owner": false,
       "views": 120,
       "is_anonymous": false,
       "comments_count": 4,
@@ -756,16 +976,18 @@ GET /api/p/{slug}
 
 ---
 
-### Follow / unfollow a general forum
+### Follow / unfollow a forum
 
 ```
 POST   /api/p/{slug}/follow
 DELETE /api/p/{slug}/follow
 ```
 
-**Auth required.** Only `type: "general"` forums can be followed or unfollowed.
+**Auth required.** Works for both `general` and `school` forums.
 
-School forums (`type: "school"`) are attached automatically when a student completes onboarding and **cannot** be followed or unfollowed via this API (422). Users can only belong to their own school forum that way.
+Following school forums adds them to the user’s home-feed affinity (same as general follows). The user’s **own** school forum is still attached at onboarding and **cannot** be unfollowed (`422`). Other school forums can be followed and unfollowed freely.
+
+Forum detail may include `is_own_school_forum: true` for the caller’s school.
 
 | Path | Example |
 |------|---------|
@@ -964,8 +1186,13 @@ PUT|POST /api/threads/{id}
 | `files[]` | file | optional; same mime/size rules as create |
 | `link` | url | optional; adds a new link attachment |
 | `remove_attachment_ids[]` | int[] | optional; attachment ids on **this** thread to delete |
+| `poll[question]` | string | optional; create or update the thread poll |
+| `poll[options][]` | string[] | required with poll; 2–4 options |
+| `poll[option_ids][]` | int[] | optional; existing option ids in the same order as `poll[options]` (omit for new options) |
+| `poll[duration_days]` | int | required with poll; **1–30**. Sets `ends_at` from now |
+| `remove_poll` | bool | optional; deletes the thread poll (cannot combine with `poll`) |
 
-Same exclusivity as create for the **resulting** attachment set after removals + additions (link vs image/video; max 10 images / 1 video / 1 file / 1 link; file cannot combine with an existing poll). Polls and anonymity are not editable here.
+Same exclusivity as create for the **resulting** attachment set after removals + additions (link vs image/video; max 10 images / 1 video / 1 file / 1 link; file cannot combine with a poll). Omitting `poll` leaves an existing poll unchanged. Anonymity is not editable here.
 
 Sets `edited_at` to now. Attachment objects in responses include `id`, `url`, and `type`.
 
@@ -1223,15 +1450,24 @@ DELETE /api/media
 | `GET` | `/api/auth/{provider}/redirect` | — | Browser redirect |
 | `GET` | `/api/auth/{provider}/callback` | — | Browser redirect + session cookie |
 | `GET` | `/api/me` | yes | Current user |
+| `PUT` | `/api/me` | yes | Update avatar / school info |
 | `GET` | `/api/me/counts` | yes | Profile tab badge counts |
 | `GET` | `/api/me/threads` | yes | Current user’s threads |
 | `GET` | `/api/me/comments` | yes | Current user’s comments (+ thread context) |
 | `GET` | `/api/me/followed-forums` | yes | Forums the user follows |
+| `GET` | `/api/me/following-users` | yes | Users the current user follows |
+| `GET` | `/api/u/{username}` | no | Public user profile + counts |
+| `GET` | `/api/u/{username}/threads` | no | User’s threads |
+| `GET` | `/api/u/{username}/comments` | no | User’s comments |
+| `GET` | `/api/u/{username}/followed-forums` | no | Forums the user follows |
+| `POST` | `/api/u/{username}/follow` | yes | Follow user |
+| `DELETE` | `/api/u/{username}/follow` | yes | Unfollow user |
 | `POST` | `/api/logout` | yes | End session |
 | `PUT` | `/api/onboarding` | yes | Save profile |
 | `GET` | `/api/cities` | — | Cities + schools |
 | `GET` | `/api/forums` | — | Sidebar forums |
 | `GET` | `/api/feed` | optional | Paginated personalized / site-wide feed (5/page) |
+| `GET` | `/api/search` | — | Search threads (+ matching forums); empty `q` = explore |
 | `GET` | `/api/p/{slug}` | optional | Forum metadata only (`is_following` when auth) |
 | `GET` | `/api/p/{slug}/threads` | — | Paginated threads (page 1, filters, scroll) |
 | `GET` | `/api/p/{slug}/comments/{id}` | — | Thread + comment tree (`sort=best\|newest\|oldest`) |
@@ -1240,6 +1476,10 @@ DELETE /api/media
 | `POST` | `/api/threads` | yes | Create thread (+ files / link / poll) |
 | `PUT` | `/api/threads/{id}` | yes | Update thread (author) |
 | `DELETE` | `/api/threads/{id}` | yes | Soft-delete thread (author) |
+| `POST` | `/api/threads/{id}/hide` | yes | Hide thread from personalized feed |
+| `DELETE` | `/api/threads/{id}/hide` | yes | Unhide thread |
+| `POST` | `/api/threads/{id}/report` | yes | Report thread (+ auto-hide from reporter feed) |
+| `POST` | `/api/comments/{id}/report` | yes | Report comment |
 | `POST` | `/api/threads/{id}/comments` | yes | Create comment or nested reply |
 | `PUT` | `/api/comments/{id}` | yes | Update comment (author) |
 | `DELETE` | `/api/comments/{id}` | yes | Soft-delete comment (author) |
@@ -1255,6 +1495,6 @@ DELETE /api/media
 
 These are planned but **not** in routes today — do not call them:
 
-- Reports, search, admin JSON APIs
+- Admin JSON APIs (admin panel currently uses web routes)
 
 When they ship, this file should be updated.

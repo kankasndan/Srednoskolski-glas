@@ -11,7 +11,23 @@ class StoreCommentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        $user = $this->user();
+        if ($user === null) {
+            return false;
+        }
+
+        /** @var Thread|null $thread */
+        $thread = $this->route('thread');
+        if (! $thread instanceof Thread) {
+            return false;
+        }
+
+        return $user->can('create', [Comment::class, $thread]);
+    }
+
+    protected function failedAuthorization(): void
+    {
+        abort(403, 'Немаш дозвола да коментираш. Заврши го onboarding процесот.');
     }
 
     /**

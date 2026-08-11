@@ -13,7 +13,7 @@ export default function ThreadPost({ forum, thread, onThreadUpdated }) {
     <article className="flex flex-col gap-6 rounded-3xl border border-[#CCCCCC] bg-white p-6">
       <div className="flex items-start justify-between gap-4">
         <ThreadMetaTags
-          tags={buildThreadMetaTags(forum, thread)}
+          tags={buildThreadMetaTags(thread.forum ?? forum, thread)}
           postedAgo={formatPostedAgo(thread.created_at)}
         />
 

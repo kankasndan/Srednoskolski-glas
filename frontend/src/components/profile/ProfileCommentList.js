@@ -10,9 +10,9 @@ import EditCommentDialog from "@/components/thread/EditCommentDialog";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ProfileForumTag from "@/components/profile/ProfileForumTag";
 import ThreadActionButton from "@/components/thread/ThreadActionButton";
-import { getMyComments } from "@/api/profile";
+import { getMyComments, getUserComments } from "@/api/profile";
 
-function ProfileCommentItem({ comment: initialComment, onDeleted }) {
+function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = true }) {
   const [comment, setComment] = useState(initialComment);
   const [editing, setEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -53,7 +53,7 @@ function ProfileCommentItem({ comment: initialComment, onDeleted }) {
   }
 
   return (
-    <article className="relative flex cursor-pointer items-center justify-between gap-8 rounded-3xl border-b border-b-[#CFE9ED] p-6 transition-colors hover:bg-[#DCEBED]">
+    <article className="relative flex cursor-pointer items-center justify-between gap-8 rounded-3xl border-b border-b-[#CFE9ED] px-4 py-5 transition-colors hover:bg-[#DCEBED]">
       <Link
         href={threadHref}
         aria-label={thread.title}
@@ -80,34 +80,36 @@ function ProfileCommentItem({ comment: initialComment, onDeleted }) {
           <span className="truncate">{thread.title}</span>
         </div>
 
-        <div className="relative z-10 flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => setEditing(true)}
-              className="cursor-pointer rounded-xl border border-(--color-primary-200) bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-(--color-primary-200) transition-colors hover:bg-[#EDE9FE] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Измени
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => {
-                setActionError("");
-                setConfirmingDelete(true);
-              }}
-              className="cursor-pointer rounded-xl border border-[#DC2626] bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Избриши
-            </button>
+        {canManage ? (
+          <div className="relative z-10 flex flex-col gap-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setEditing(true)}
+                className="cursor-pointer rounded-xl border border-(--color-primary-200) bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-(--color-primary-200) transition-colors hover:bg-[#EDE9FE] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Измени
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  setActionError("");
+                  setConfirmingDelete(true);
+                }}
+                className="cursor-pointer rounded-xl border border-[#DC2626] bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Избриши
+              </button>
+            </div>
+            {actionError ? (
+              <p className="font-(family-name:--font-manrope) text-[13px] text-[#DC2626]">
+                {actionError}
+              </p>
+            ) : null}
           </div>
-          {actionError ? (
-            <p className="font-(family-name:--font-manrope) text-[13px] text-[#DC2626]">
-              {actionError}
-            </p>
-          ) : null}
-        </div>
+        ) : null}
       </div>
 
       <div className="relative z-10 flex shrink-0">
@@ -119,7 +121,7 @@ function ProfileCommentItem({ comment: initialComment, onDeleted }) {
         />
       </div>
 
-      {editing && (
+      {canManage && editing && (
         <EditCommentDialog
           open
           comment={comment}
@@ -129,7 +131,7 @@ function ProfileCommentItem({ comment: initialComment, onDeleted }) {
       )}
 
       <ConfirmDialog
-        open={confirmingDelete}
+        open={canManage && confirmingDelete}
         title="Дали си сигурен дека сакаш да го избришеш овој коментар?"
         confirmLabel={busy ? "Се брише…" : "Избриши"}
         onCancel={() => {
@@ -150,13 +152,18 @@ function ProfileCommentItem({ comment: initialComment, onDeleted }) {
   );
 }
 
-export default function ProfileCommentList() {
+export default function ProfileCommentList({
+  username = null,
+  isOwnProfile = true,
+}) {
   const [comments, setComments] = useState(null);
 
   useEffect(() => {
     let active = true;
 
-    getMyComments()
+    const loader = username ? getUserComments(username) : getMyComments();
+
+    loader
       .then((data) => {
         if (active) setComments(data);
       })
@@ -167,7 +174,7 @@ export default function ProfileCommentList() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [username]);
 
   function handleDeleted(commentId) {
     setComments((prev) => (prev ?? []).filter((comment) => comment.id !== commentId));
@@ -179,17 +186,22 @@ export default function ProfileCommentList() {
 
   if (comments.length === 0) {
     return (
-      <p className="text-[16px] text-[#595959]">Сè уште немаш напишано коментари.</p>
+      <p className="text-[16px] text-[#595959]">
+        {isOwnProfile
+          ? "Сè уште немаш напишано коментари."
+          : "Овој корисник сè уште нема напишано коментари."}
+      </p>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       {comments.map((comment) => (
         <ProfileCommentItem
           key={comment.id}
           comment={comment}
           onDeleted={handleDeleted}
+          canManage={isOwnProfile}
         />
       ))}
     </div>

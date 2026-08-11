@@ -12,7 +12,7 @@ import { useThread } from "@/hooks/useThread";
 
 function StatusMessage({ children }) {
   return (
-    <p className="font-(family-name:--font-manrope) text-[16px] text-[#595959]">
+    <p className="font-(family-name:--font-manrope) text-[16px] text-[#999999]">
       {children}
     </p>
   );
@@ -46,7 +46,7 @@ export default function ThreadPage() {
 
   return (
     <AppShell>
-      <div className="flex w-[990px] max-w-full flex-col gap-12 font-(family-name:--font-manrope)">
+      <div className="flex w-[990px] max-w-full flex-col gap-8 font-(family-name:--font-manrope)">
         <div className="self-start">
           <BackButton
             href={`/p/${forum.slug}`}

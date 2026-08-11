@@ -89,7 +89,7 @@ function ToolbarButton({ editor, button, active, onClick }) {
       aria-label={button.label}
       aria-pressed={active}
       onClick={() => (onClick ?? button.onClick)(editor)}
-      className={`flex size-9 items-center justify-center rounded-lg text-[16px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] ${
+      className={`flex size-9 cursor-pointer items-center justify-center rounded-lg text-[16px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] ${
         active
           ? "bg-[#CFE9ED] text-black"
           : "text-[#595959] hover:bg-[#DCEBED] hover:text-black"
@@ -245,7 +245,7 @@ export default function RichTextEditor({
   onBlur,
   // Postoechka sodrzhina (pri ureduvanje na diskusija).
   initialContent = "",
-  widthClassName = "w-[632px]",
+  widthClassName = "w-[779px]",
   // Kopche vo lentata so alatki (na primer "Објави" vo pop-upot za ureduvanje).
   action,
 }) {
@@ -350,8 +350,9 @@ export default function RichTextEditor({
     characterCount >= MAX_DESCRIPTION_LENGTH ? "text-[var(--color-error)]" : "text-[#595959]";
 
   return (
-    <section
+    <div
       className={`relative flex max-w-full flex-col ${widthClassName}`}
+      role="group"
       aria-label="Уредник за содржина"
     >
       <input type="hidden" name={name} value={html} />
@@ -450,6 +451,6 @@ export default function RichTextEditor({
       >
         {errorMessage || "Нема грешка"}
       </p>
-    </section>
+    </div>
   );
 }

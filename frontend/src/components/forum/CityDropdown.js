@@ -64,7 +64,7 @@ export default function CityDropdown({ city, forums, selectedKey, onSelect }) {
                 scroll={false}
                 aria-current={isCurrentPage ? "page" : undefined}
                 onClick={() => onSelect(key)}
-                className={`flex h-10 w-[268px] items-center gap-4 bg-white px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none tracking-normal text-black transition-colors duration-300 ease-out hover:bg-[#E5E5E5] ${
+                className={`flex h-10 w-[268px] cursor-pointer items-center gap-4 bg-white px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none tracking-normal text-black transition-colors duration-300 ease-out hover:bg-[#E5E5E5] ${
                   hasDivider ? "border-b border-[#CCCCCC]" : ""
                 } ${
                   isActive ? "!bg-[var(--color-primary-200)] !text-white" : ""

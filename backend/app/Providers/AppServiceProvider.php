@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Comment;
+use App\Models\Thread;
+use App\Policies\CommentPolicy;
+use App\Policies\ThreadPolicy;
 use App\View\Composers\AdminLayoutComposer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +29,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Thread::class, ThreadPolicy::class);
+        Gate::policy(Comment::class, CommentPolicy::class);
+
         View::composer('layouts.master', AdminLayoutComposer::class);
 
         RateLimiter::for('admin-login', function (Request $request) {

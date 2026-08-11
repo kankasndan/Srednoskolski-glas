@@ -122,7 +122,7 @@ export default function AuthButtons() {
               href="/profile"
               role="menuitem"
               onClick={() => setMenuOpen(false)}
-              className="flex w-full items-center gap-3 px-5 py-3 text-left font-(family-name:--font-manrope) text-[15px] font-medium leading-none text-[#0A0A0A] transition-colors hover:bg-[#F5F5F5]"
+              className="flex w-full cursor-pointer items-center gap-3 px-5 py-3 text-left font-(family-name:--font-manrope) text-[15px] font-medium leading-none text-[#0A0A0A] transition-colors hover:bg-[#F5F5F5]"
             >
               Профил
             </Link>
@@ -132,7 +132,7 @@ export default function AuthButtons() {
               role="menuitem"
               onClick={handleLogout}
               disabled={loggingOut}
-              className="flex w-full items-center gap-3 px-5 py-3 text-left font-(family-name:--font-manrope) text-[15px] font-medium leading-none text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full cursor-pointer items-center gap-3 px-5 py-3 text-left font-(family-name:--font-manrope) text-[15px] font-medium leading-none text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loggingOut ? "Се одјавува…" : "Одјави се"}
             </button>
@@ -146,13 +146,13 @@ export default function AuthButtons() {
     <div className="ml-auto flex h-10 w-75 shrink-0 items-center gap-3">
       <Link
         href="/login"
-        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900)"
+        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900)"
       >
         Најави се
       </Link>
       <Link
         href="/register"
-        className="flex h-10 w-36 items-center justify-center gap-4 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-white transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900)"
+        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-white transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900)"
       >
         Регистрација
       </Link>

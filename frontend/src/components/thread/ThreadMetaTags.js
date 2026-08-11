@@ -1,13 +1,26 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
 import { isRemoteAssetUrl } from "@/lib/banners";
+import { authorProfileHref, forumHref, schoolForumHref } from "@/lib/profileLinks";
 
 const SCHOOL_ICON = "/icons/uchilishte.svg";
 const DEFAULT_AVATAR = "/Generic avatar.svg";
 
 export function buildThreadMetaTags(forum, thread) {
+  const forumData = thread?.forum ?? forum;
+
   const tags = [
-    { label: forum?.name ?? "Форум", icon: forum?.imageUrl, zoom: true },
     {
+      key: "forum",
+      label: forumData?.name ?? "Форум",
+      icon: forumData?.imageUrl,
+      zoom: true,
+      href: forumHref(forumData),
+    },
+    {
+      key: "author",
       label: thread.is_anonymous
         ? "Анонимен"
         : (thread.author?.username ?? "Корисник"),
@@ -15,11 +28,17 @@ export function buildThreadMetaTags(forum, thread) {
         ? DEFAULT_AVATAR
         : (thread.author?.imageUrl ?? DEFAULT_AVATAR),
       avatar: true,
+      href: thread.is_anonymous ? null : authorProfileHref(thread.author),
     },
   ];
 
   if (!thread.is_anonymous && thread.author?.school?.name) {
-    tags.push({ label: thread.author.school.name, icon: SCHOOL_ICON });
+    tags.push({
+      key: "school",
+      label: thread.author.school.name,
+      icon: SCHOOL_ICON,
+      href: schoolForumHref(thread.author.school),
+    });
   }
 
   return tags;
@@ -37,8 +56,11 @@ function MetaTag({ tag }) {
       : "size-5";
   const iconSize = tag.avatar ? 24 : tag.zoom ? 44 : 20;
 
-  return (
-    <span className="flex h-7 shrink-0 items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 text-[12px] font-bold leading-none text-black">
+  const className =
+    "relative z-10 flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 text-[12px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB]";
+
+  const content = (
+    <>
       {tag.icon ? (
         <span className={iconBoxClass}>
           {remoteIcon ? (
@@ -59,15 +81,29 @@ function MetaTag({ tag }) {
         </span>
       ) : null}
       {tag.label}
-    </span>
+    </>
   );
+
+  if (tag.href) {
+    return (
+      <Link
+        href={tag.href}
+        className={className}
+        onClick={(event) => event.stopPropagation()}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return <span className={className.replace("cursor-pointer ", "")}>{content}</span>;
 }
 
 export default function ThreadMetaTags({ tags, postedAgo }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       {tags.map((tag) => (
-        <MetaTag key={tag.label} tag={tag} />
+        <MetaTag key={tag.key ?? tag.label} tag={tag} />
       ))}
       {postedAgo ? (
         <span className="text-[12px] leading-none text-[#595959]">

@@ -7,7 +7,7 @@ export default function Checkbox({
   children,
 }) {
   return (
-    <label className={`flex cursor-pointer items-center gap-2 ${className}`}>
+    <label className={`flex h-[20px] w-[400px] max-w-full cursor-pointer items-center gap-2 ${className}`}>
       <input
         type="checkbox"
         checked={checked}

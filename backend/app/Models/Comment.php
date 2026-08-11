@@ -62,7 +62,7 @@ class Comment extends Model
         // Nested replies stay chronological so a conversation reads top-to-bottom.
         $relation = $this->replies()
             ->oldest()
-            ->with(['user.studentData.school.city', 'allReplies']);
+            ->with(['user.studentData.school.city', 'user.studentData.school.forum', 'allReplies']);
 
         $userId = auth('web')->id() ?? auth()->id();
 

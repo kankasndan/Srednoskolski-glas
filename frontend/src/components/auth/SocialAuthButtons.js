@@ -51,7 +51,7 @@ export default function SocialAuthButtons({ successRedirect }) {
             key={provider.id}
             href={`${API_BASE_URL}/api/auth/${provider.id}/redirect`}
             onClick={handleClick}
-            className="flex h-12 items-center justify-center gap-3 rounded-2xl bg-[#582FF5] px-6 font-(family-name:--font-manrope) text-[15px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0] 2xl:h-14 2xl:text-[17px]"
+            className="flex h-12 cursor-pointer items-center justify-center gap-3 rounded-2xl bg-[#582FF5] px-6 font-(family-name:--font-manrope) text-[15px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0] 2xl:h-14 2xl:text-[17px]"
           >
             <FontAwesomeIcon icon={provider.icon} className="text-[22px] 2xl:text-[26px]" />
             {provider.label}

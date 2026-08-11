@@ -6,6 +6,7 @@ import CommentActions from "@/components/thread/CommentActions";
 import CommentAuthor from "@/components/thread/CommentAuthor";
 import CommentBody from "@/components/thread/CommentBody";
 import CommentComposer from "@/components/thread/CommentComposer";
+import { reportComment, reportErrorMessage } from "@/api/moderation";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ReportDialog from "@/components/ui/ReportDialog";
 
@@ -18,6 +19,19 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
   const hasReplies = replies.length > 0;
   const showThread = !collapsed && hasReplies;
   const showLine = hasReplies || depth > 0;
+
+  async function handleReport({ reason, details }) {
+    try {
+      await reportComment(comment.id, { reason, details });
+      setReporting(false);
+      setReported(true);
+    } catch (error) {
+      const next = new Error(reportErrorMessage(error));
+      next.status = error?.status;
+      next.body = error?.body;
+      throw next;
+    }
+  }
 
   return (
     <div className="flex gap-2">
@@ -42,15 +56,11 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
           onReport={() => setReporting(true)}
         />
 
-        {/* Se renderira samo dodeka e otvoren, za da se resetira formata. */}
         {reporting && (
           <ReportDialog
             open
             onClose={() => setReporting(false)}
-            onSubmit={() => {
-              setReporting(false);
-              setReported(true);
-            }}
+            onSubmit={handleReport}
           />
         )}
 

@@ -21,7 +21,7 @@ class CommentController extends Controller
             'content' => $request->string('content')->toString(),
         ]);
 
-        $comment->load('user.studentData.school.city');
+        $comment->load(['user.studentData.school.city', 'user.studentData.school.forum']);
         $comment->setRelation('allReplies', collect());
         $comment->setAttribute('has_voted', false);
 
@@ -41,7 +41,7 @@ class CommentController extends Controller
         $comment->edited_at = now();
         $comment->save();
 
-        $comment->load('user.studentData.school.city');
+        $comment->load(['user.studentData.school.city', 'user.studentData.school.forum']);
         $comment->setRelation('allReplies', collect());
 
         $userId = $request->user()->id;

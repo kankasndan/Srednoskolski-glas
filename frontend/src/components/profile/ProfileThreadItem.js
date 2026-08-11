@@ -19,7 +19,11 @@ const EditThreadDialog = dynamic(
   { ssr: false },
 );
 
-export default function ProfileThreadItem({ thread: initialThread, onDeleted }) {
+export default function ProfileThreadItem({
+  thread: initialThread,
+  onDeleted,
+  canManage = true,
+}) {
   const [thread, setThread] = useState(initialThread);
   const [editing, setEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -69,7 +73,7 @@ export default function ProfileThreadItem({ thread: initialThread, onDeleted }) 
   }
 
   return (
-    <article className="relative flex cursor-pointer flex-col gap-4 rounded-3xl border-b border-b-[#CFE9ED] p-6 transition-colors hover:bg-[#DCEBED]">
+    <article className="relative flex cursor-pointer flex-col gap-4 rounded-3xl border-b border-b-[#CFE9ED] px-4 py-5 transition-colors hover:bg-[#DCEBED]">
       <Link href={href} aria-label={thread.title} className="absolute inset-0 rounded-3xl" />
 
       <div className="flex items-center justify-between gap-8">
@@ -109,36 +113,38 @@ export default function ProfileThreadItem({ thread: initialThread, onDeleted }) 
         </div>
       ) : null}
 
-      <div className="relative z-10 flex flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => setEditing(true)}
-            className="cursor-pointer rounded-xl border border-(--color-primary-200) bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-(--color-primary-200) transition-colors hover:bg-[#EDE9FE] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Измени
-          </button>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              setActionError("");
-              setConfirmingDelete(true);
-            }}
-            className="cursor-pointer rounded-xl border border-[#DC2626] bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Избриши
-          </button>
+      {canManage ? (
+        <div className="relative z-10 flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setEditing(true)}
+              className="cursor-pointer rounded-xl border border-(--color-primary-200) bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-(--color-primary-200) transition-colors hover:bg-[#EDE9FE] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Измени
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setActionError("");
+                setConfirmingDelete(true);
+              }}
+              className="cursor-pointer rounded-xl border border-[#DC2626] bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Избриши
+            </button>
+          </div>
+          {actionError ? (
+            <p className="font-(family-name:--font-manrope) text-[13px] text-[#DC2626]">
+              {actionError}
+            </p>
+          ) : null}
         </div>
-        {actionError ? (
-          <p className="font-(family-name:--font-manrope) text-[13px] text-[#DC2626]">
-            {actionError}
-          </p>
-        ) : null}
-      </div>
+      ) : null}
 
-      {editing && (
+      {canManage && editing && (
         <EditThreadDialog
           open
           thread={thread}
@@ -148,7 +154,7 @@ export default function ProfileThreadItem({ thread: initialThread, onDeleted }) 
       )}
 
       <ConfirmDialog
-        open={confirmingDelete}
+        open={canManage && confirmingDelete}
         title="Дали си сигурен дека сакаш да ја избришеш оваа дискусија?"
         confirmLabel={busy ? "Се брише…" : "Избриши"}
         onCancel={() => {

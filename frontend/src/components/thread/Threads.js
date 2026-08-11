@@ -2,17 +2,10 @@
 
 import Image from "next/image";
 import { useId, useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { toggleThreadVote } from "@/api/threads";
 import ForumEmptyState from "@/components/forum/ForumEmptyState";
-import ThreadAttachments from "@/components/thread/ThreadAttachments";
-import ThreadMetaTags, { buildThreadMetaTags } from "@/components/thread/ThreadMetaTags";
-import ThreadPoll from "@/components/thread/ThreadPoll";
+import NoMoreThreads from "@/components/thread/NoMoreThreads";
+import ThreadCard from "@/components/thread/ThreadCard";
 import { API_BASE_URL } from "@/lib/api";
-import { formatCount } from "@/lib/formatCount";
-import { stripHtml } from "@/lib/html";
-import { formatPostedAgo } from "@/lib/time";
-import { nextVoteState } from "@/lib/votes";
 
 const SORT_OPTIONS = [
   { value: "trending", label: "Трендинг" },
@@ -47,131 +40,6 @@ function LoadingLogo() {
   );
 }
 
-function ActionButton({ icon, label, count, onclick, active = false }) {
-  const baseClassName =
-    "group flex cursor-pointer items-center justify-center gap-4 rounded-2xl border px-4 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors";
-
-  return (
-    <button
-      onClick={onclick}
-      type="button"
-      aria-label={label}
-      className={
-        active
-          ? `${baseClassName} border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white hover:border-[var(--color-primary-200)] hover:bg-[var(--color-primary-200)]`
-          : `${baseClassName} border-[#CCCCCC] text-black opacity-80 hover:border-[var(--color-primary-100)] hover:bg-[var(--color-primary-100)] hover:text-white hover:opacity-100`
-      }
-    >
-      <Image
-        src={icon}
-        alt=""
-        width={24}
-        height={24}
-        className={
-          active
-            ? "size-6 -scale-y-100 white-icon"
-            : "size-6 transition group-hover:brightness-0 group-hover:invert"
-        }
-      />
-      {formatCount(count ?? 0)}
-    </button>
-  );
-}
-
-function ThreadItem({ thread }) {
-  const [upvotes, setUpvotes] = useState(thread.upvotes ?? 0);
-  const [hasVoted, setHasVoted] = useState(Boolean(thread.has_voted));
-  const [voting, setVoting] = useState(false);
-  const router = useRouter();
-  const threadHref = `/p/${thread.forum.slug}/${thread.id}`;
-  const hasAttachments = (thread.attachments?.length ?? 0) > 0;
-  const hasPoll = Boolean(thread.poll);
-
-  async function upvote() {
-    if (voting) return;
-
-    const { previousVotes, previousHasVoted, nextVotes, nextHasVoted } =
-      nextVoteState(upvotes, hasVoted);
-
-    setVoting(true);
-    setUpvotes(nextVotes);
-    setHasVoted(nextHasVoted);
-
-    try {
-      const data = await toggleThreadVote(thread.id);
-      setUpvotes(data.upvotes ?? nextVotes);
-      setHasVoted(Boolean(data.has_voted));
-    } catch {
-      setUpvotes(previousVotes);
-      setHasVoted(previousHasVoted);
-    } finally {
-      setVoting(false);
-    }
-  }
-
-  return (
-    <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] p-4 pt-6 rounded-3xl transition-colors hover:bg-[#DCEBED]">
-      <div className="flex w-full items-start justify-between gap-8">
-        <div
-          className="flex min-w-0 flex-1 cursor-pointer flex-col gap-4"
-          onClick={() => router.push(threadHref)}
-        >
-          <ThreadMetaTags
-            tags={buildThreadMetaTags(thread.forum, thread)}
-            postedAgo={formatPostedAgo(thread.created_at)}
-          />
-
-          <div className="flex min-h-[57px] w-[681px] max-w-full flex-col gap-2">
-            <h3 className="w-fit max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[family-name:var(--font-manrope)] text-[20px] font-bold leading-[27px] text-black">
-              {thread.title}
-            </h3>
-            {thread.description ? (
-              <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
-                {stripHtml(thread.description)}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="text-xs flex items-center gap-0.5">
-            <img src="/eye-line.svg" alt="" />
-            <span className="text-primary-300 font-bold">
-              {formatCount(thread.views ?? 0)}
-            </span>
-          </div>
-        </div>
-
-        <div className="relative z-10 flex shrink-0 flex-col gap-2">
-          <ActionButton
-            icon="/Chevrons up.svg"
-            label="Гласај нагоре"
-            count={upvotes}
-            onclick={upvote}
-            active={hasVoted}
-          />
-          <ActionButton
-            icon="/chat-1-line.svg"
-            label="Коментари"
-            count={thread.comments_count}
-            onclick={() => router.push(threadHref)}
-          />
-        </div>
-      </div>
-
-      {hasAttachments || hasPoll ? (
-        <div
-          className="relative z-10 flex w-full flex-col gap-4"
-          onClick={(event) => event.stopPropagation()}
-        >
-          {hasAttachments ? (
-            <ThreadAttachments attachments={thread.attachments} />
-          ) : null}
-          {hasPoll ? <ThreadPoll poll={thread.poll} /> : null}
-        </div>
-      ) : null}
-    </article>
-  );
-}
-
 function FeedSelect({
   name,
   label,
@@ -183,7 +51,7 @@ function FeedSelect({
   onSelect,
 }) {
   return (
-    <div className="relative">
+    <div className="relative h-10 w-36 shrink-0">
       <input type="hidden" name={name} value={selected.value} />
 
       <button
@@ -192,9 +60,9 @@ function FeedSelect({
         aria-expanded={isOpen}
         aria-controls={listboxId}
         onClick={onToggle}
-        className="w-40 flex py-2 px-3 rounded-xl cursor-pointer items-center justify-center gap-1 bg-gray-100 font-bold hover:bg-gray-200 transition"
+        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#CCCCCC] bg-white px-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#DCEBED]"
       >
-        <span className={`text-nowrap`}>{selected.label}</span>
+        <span className="flex h-[19px] items-center">{selected.label}</span>
         <Image
           src="/chevron-down.svg"
           alt=""
@@ -209,7 +77,7 @@ function FeedSelect({
           id={listboxId}
           role="listbox"
           aria-label={label}
-          className="box-border absolute left-0 top-12 z-20 flex w-full flex-col overflow-hidden rounded-xl bg-white py-2 shadow-xl"
+          className="absolute left-0 top-12 z-20 flex w-36 flex-col overflow-hidden rounded-[12px] bg-white py-2 shadow-[0_12px_24px_rgba(88,47,245,0.14)]"
         >
           {options.map((option) => (
             <button
@@ -218,7 +86,7 @@ function FeedSelect({
               role="option"
               aria-selected={selected.value === option.value}
               onClick={() => onSelect(option)}
-              className="flex w-full p-2 items-center px-4 leading-none transition-colors hover:bg-gray-100 cursor-pointer"
+              className="flex h-10 w-full cursor-pointer items-center px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#E5E5E5]"
             >
               {option.label}
             </button>
@@ -229,28 +97,53 @@ function FeedSelect({
   );
 }
 
-export default function Threads({ forum = null }) {
+export default function Threads({
+  forum = null,
+  searchQuery = null,
+  defaultSort = "trending",
+  showSort = true,
+  staticThreads = null,
+}) {
+  const isSearch = searchQuery !== null;
+  const hasStaticThreads = Array.isArray(staticThreads);
   const sortListboxId = useId();
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
-  const [selectedSort, setSelectedSort] = useState(SORT_OPTIONS[0]);
+  const filterContainerRef = useRef(null);
+  const [selectedSort, setSelectedSort] = useState(
+    SORT_OPTIONS.find((option) => option.value === defaultSort) ?? SORT_OPTIONS[0],
+  );
   const [selectedTimeFilter, setSelectedTimeFilter] = useState(
     TIME_FILTER_OPTIONS[0],
   );
   const [paginationPage, setPaginationPage] = useState(1);
 
-  const [threads, setThreads] = useState([]);
+  const [threads, setThreads] = useState(hasStaticThreads ? staticThreads : []);
   const [moreThreadsLoading, setMoreThreadsLoading] = useState(false);
-  const [noMoreThreads, setNoMoreThreads] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [noMoreThreads, setNoMoreThreads] = useState(hasStaticThreads);
+  const [hasLoaded, setHasLoaded] = useState(hasStaticThreads);
   const sentinelRef = useRef(null);
   const loadingRef = useRef(false);
   const noMoreRef = useRef(false);
   const pageRef = useRef(1);
   const hasLoadedRef = useRef(false);
-  const BASE_URL =
-    API_BASE_URL +
-    (forum === null ? "/api/feed" : "/api/p/" + forum + "/threads");
+
+  function buildListUrl({ page, sort, time }) {
+    const params = new URLSearchParams({
+      page: String(page),
+      time: time.value,
+      sort: sort.value,
+    });
+
+    if (isSearch) {
+      if (searchQuery) params.set("q", searchQuery);
+      if (forum) params.set("forum", forum);
+      return `${API_BASE_URL}/api/search?${params}`;
+    }
+
+    const path = forum === null ? "/api/feed" : `/api/p/${forum}/threads`;
+    return `${API_BASE_URL}${path}?${params}`;
+  }
 
   async function fetchThreads({
     append = false,
@@ -258,6 +151,8 @@ export default function Threads({ forum = null }) {
     time = selectedTimeFilter,
     page = paginationPage,
   } = {}) {
+    if (hasStaticThreads) return;
+
     if (append) {
       if (loadingRef.current) return;
       loadingRef.current = true;
@@ -272,10 +167,9 @@ export default function Threads({ forum = null }) {
     }
 
     try {
-      const response = await fetch(
-        `${BASE_URL}?page=${page}&time=${time.value}&sort=${sort.value}`,
-        { credentials: "include" },
-      );
+      const response = await fetch(buildListUrl({ page, sort, time }), {
+        credentials: "include",
+      });
 
       if (!response.ok) {
         if (!append) setThreads([]);
@@ -307,24 +201,47 @@ export default function Threads({ forum = null }) {
   const selectSortOption = (option) => {
     setSelectedSort(option);
     setOpenSelect(null);
-    setHasLoaded(false);
-    fetchThreads({ append: false, sort: option, page: 1 });
+    if (!hasStaticThreads) {
+      setHasLoaded(false);
+      fetchThreads({ append: false, sort: option, page: 1 });
+    }
   };
 
   const selectTimeFilterOption = (option) => {
     setSelectedTimeFilter(option);
     setOpenSelect(null);
-    setHasLoaded(false);
-    fetchThreads({ append: false, time: option, page: 1 });
+    if (!hasStaticThreads) {
+      setHasLoaded(false);
+      fetchThreads({ append: false, time: option, page: 1 });
+    }
   };
 
   useEffect(() => {
-    // Reset + load when the forum route changes. Filter changes call fetchThreads directly.
+    if (!openSelect) return;
+
+    const handleClickOutside = (event) => {
+      if (filterContainerRef.current && !filterContainerRef.current.contains(event.target)) {
+        setOpenSelect(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openSelect]);
+
+  useEffect(() => {
+    if (hasStaticThreads) return;
+
+    const initialSort =
+      SORT_OPTIONS.find((option) => option.value === defaultSort) ?? SORT_OPTIONS[0];
+
     void Promise.resolve().then(() => {
-      fetchThreads({ append: false, page: 1 });
+      setSelectedSort(initialSort);
+      setHasLoaded(false);
+      fetchThreads({ append: false, sort: initialSort, page: 1 });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forum]);
+  }, [forum, searchQuery, defaultSort, hasStaticThreads, staticThreads]);
 
   useEffect(() => {
     loadingRef.current = moreThreadsLoading;
@@ -344,7 +261,7 @@ export default function Threads({ forum = null }) {
 
   useEffect(() => {
     const node = sentinelRef.current;
-    if (!node || !hasLoaded || noMoreThreads) return;
+    if (!node || !hasLoaded || noMoreThreads || hasStaticThreads) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -363,10 +280,11 @@ export default function Threads({ forum = null }) {
     observer.observe(node);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasLoaded, noMoreThreads, threads.length, forum, selectedSort, selectedTimeFilter]);
+  }, [hasLoaded, noMoreThreads, threads.length, forum, searchQuery, selectedSort, selectedTimeFilter, hasStaticThreads]);
 
   // Sort only reorders; an empty list with time=all means the forum truly has no threads.
   const isTrulyEmptyForum =
+    !isSearch &&
     forum !== null &&
     hasLoaded &&
     threads.length === 0 &&
@@ -382,19 +300,22 @@ export default function Threads({ forum = null }) {
 
   return (
     <section className="flex w-full max-w-[990px] flex-col items-center gap-8">
-      <div className="flex self-end gap-2">
-        <FeedSelect
-          name="sort"
-          label="Сортирај дискусии"
-          options={SORT_OPTIONS}
-          selected={selectedSort}
-          isOpen={openSelect === "sort"}
-          listboxId={sortListboxId}
-          onToggle={() =>
-            setOpenSelect((current) => (current === "sort" ? null : "sort"))
-          }
-          onSelect={selectSortOption}
-        />
+      <div ref={filterContainerRef} className="flex self-end gap-2">
+        {showSort ? (
+          <FeedSelect
+            name="sort"
+            label="Сортирај дискусии"
+            options={SORT_OPTIONS}
+            selected={selectedSort}
+            isOpen={openSelect === "sort"}
+            listboxId={sortListboxId}
+            onToggle={() =>
+              setOpenSelect((current) => (current === "sort" ? null : "sort"))
+            }
+            onSelect={selectSortOption}
+          />
+        ) : null}
+
         <FeedSelect
           name="timeFilter"
           label="Филтрирај по време"
@@ -414,24 +335,24 @@ export default function Threads({ forum = null }) {
           <LoadingLogo />
         ) : threads.length === 0 ? (
           <p className="py-8 text-center font-[family-name:var(--font-manrope)] text-[16px] text-[#595959]">
-            Нема дискусии за избраните филтри.
+            {isSearch && searchQuery.trim()
+              ? "Нема резултати за ова пребарување."
+              : "Нема дискусии за избраните филтри."}
           </p>
         ) : (
           threads.map((thread) => (
-            <ThreadItem key={thread.id} thread={thread} />
+            <ThreadCard key={thread.id} thread={thread} />
           ))
         )}
       </div>
 
-      {hasLoaded && threads.length > 0 ? (
+      {!hasStaticThreads && hasLoaded && threads.length > 0 ? (
         <>
           {!noMoreThreads ? (
             <div ref={sentinelRef} className="h-1 w-full shrink-0" aria-hidden />
           ) : null}
           {moreThreadsLoading ? <LoadingLogo /> : null}
-          {noMoreThreads && !moreThreadsLoading ? (
-            <span className="font-bold text-primary-300 text-xl">Нема веќе :/</span>
-          ) : null}
+          {noMoreThreads && !moreThreadsLoading ? <NoMoreThreads /> : null}
         </>
       ) : null}
     </section>

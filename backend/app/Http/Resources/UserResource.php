@@ -18,6 +18,7 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         $school = $this->studentData?->school;
+        $schoolForum = $school?->forum;
 
         return [
             'id' => $this->id,
@@ -27,6 +28,11 @@ class UserResource extends JsonResource
                 'id' => $school->id,
                 'name' => $school->name,
                 'city' => $school->city?->name,
+                'forum' => $schoolForum === null ? null : [
+                    'id' => $schoolForum->id,
+                    'slug' => $schoolForum->slug,
+                    'name' => $schoolForum->name,
+                ],
             ],
         ];
     }

@@ -17,6 +17,7 @@ export function useProfileCounts() {
           threads: data.threads ?? 0,
           comments: data.comments ?? 0,
           follows: data.followed_forums ?? 0,
+          followingUsers: data.following_users ?? 0,
         });
       })
       .catch(() => {

@@ -4,15 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { unfollowForum } from "@/api/forums";
-import { getMyFollowedForums } from "@/api/profile";
+import { getMyFollowedForums, getUserFollowedForums } from "@/api/profile";
 
-function FollowCard({ forum, onUnfollowed }) {
+function FollowCard({ forum, canUnfollow, onUnfollowed }) {
   const [busy, setBusy] = useState(false);
 
   async function handleUnfollow(event) {
     event.preventDefault();
     event.stopPropagation();
-    if (busy) return;
+    if (!canUnfollow || busy) return;
 
     setBusy(true);
 
@@ -29,7 +29,7 @@ function FollowCard({ forum, onUnfollowed }) {
       <Link
         href={`/p/${forum.slug}`}
         aria-label={forum.name}
-        className="absolute inset-0 rounded-2xl"
+        className="absolute inset-0 cursor-pointer rounded-2xl"
       />
 
       <div className="flex min-w-0 items-center gap-5">
@@ -66,25 +66,34 @@ function FollowCard({ forum, onUnfollowed }) {
         </div>
       </div>
 
-      <button
-        type="button"
-        disabled={busy}
-        onClick={handleUnfollow}
-        className="relative z-10 flex h-10 w-36 shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-(--color-primary-200) px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-grays-100) transition-colors hover:bg-[#4B25E0] disabled:opacity-60"
-      >
-        {busy ? "…" : "Отследи"}
-      </button>
+      {canUnfollow ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={handleUnfollow}
+          className="relative z-10 flex h-10 w-36 shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-(--color-primary-200) px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-grays-100) transition-colors hover:bg-[#4B25E0] disabled:opacity-60"
+        >
+          {busy ? "…" : "Отследи"}
+        </button>
+      ) : null}
     </article>
   );
 }
 
-export default function ProfileFollowedForums() {
+export default function ProfileFollowedForums({
+  username = null,
+  isOwnProfile = true,
+}) {
   const [forums, setForums] = useState(null);
 
   useEffect(() => {
     let active = true;
 
-    getMyFollowedForums()
+    const loader = username
+      ? getUserFollowedForums(username)
+      : getMyFollowedForums();
+
+    loader
       .then((data) => {
         if (active) setForums(data);
       })
@@ -95,14 +104,20 @@ export default function ProfileFollowedForums() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [username]);
 
   if (forums === null) {
     return <p className="text-[16px] text-[#595959]">Се вчитува…</p>;
   }
 
   if (forums.length === 0) {
-    return <p className="text-[16px] text-[#595959]">Сè уште не следиш форуми.</p>;
+    return (
+      <p className="text-[16px] text-[#595959]">
+        {isOwnProfile
+          ? "Сè уште не следиш форуми."
+          : "Овој корисник сè уште не следи форуми."}
+      </p>
+    );
   }
 
   return (
@@ -111,6 +126,7 @@ export default function ProfileFollowedForums() {
         <FollowCard
           key={forum.id}
           forum={forum}
+          canUnfollow={isOwnProfile}
           onUnfollowed={(id) => {
             setForums((prev) => prev.filter((item) => item.id !== id));
           }}
