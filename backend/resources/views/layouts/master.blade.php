@@ -69,18 +69,21 @@
                             $isUnread = is_null($notification->read_at);
                         @endphp
 
-                        <a href="{{ $data['url'] ?? '#' }}"
+                        <a href="{{ route('admin.notifications.read', $notification->id) }}"
                             class="block rounded-[8px] px-3 py-2 text-[13px] hover:bg-[#F4F2FF] {{ $isUnread ? 'bg-[#F9F5FF]' : '' }}">
-                            <div class="flex items-center justify-between">
+                            <div class="flex items-center justify-between gap-2">
                                 <span class="font-bold text-[#1F2333]">
                                     {{ $data['title'] ?? 'Нотификација' }}
                                 </span>
                                 @if ($isUnread)
-                                    <span class="ml-2 h-2 w-2 rounded-full bg-[#582FF5]"></span>
+                                    <span class="ml-2 h-2 w-2 shrink-0 rounded-full bg-[#582FF5]"></span>
                                 @endif
                             </div>
                             <div class="text-[12px] text-[#595959]">
                                 {{ $data['message'] ?? '' }}
+                            </div>
+                            <div class="mt-1 text-[11px] text-[#9598A6]">
+                                {{ $notification->created_at?->diffForHumans() }}
                             </div>
                         </a>
                     @empty
@@ -148,7 +151,7 @@
                 Модерација
             </div>
 
-            <a href="{{ route('report.index') }}" data-nav-key="nav:reports" data-badge="18">
+            <a href="{{ route('report.index') }}" data-nav-key="nav:reports" @if ($pendingReportsCount > 0) data-badge="{{ $pendingReportsCount }}" @endif>
                 Пријави
             </a>
 
@@ -156,7 +159,7 @@
                 Санкции
             </a>
 
-            <a href="{{ route('appeal.index') }}" data-nav-key="nav:appeals" data-badge="3">
+            <a href="{{ route('appeal.index') }}" data-nav-key="nav:appeals" @if ($pendingAppealsCount > 0) data-badge="{{ $pendingAppealsCount }}" @endif>
                 Жалби
             </a>
 

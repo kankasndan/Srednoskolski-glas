@@ -53,4 +53,14 @@ class AdminController extends Controller
 
         return back();
     }
+
+    public function readNotification(string $id)
+    {
+        $notification = Auth::user()?->notifications()->where('id', $id)->firstOrFail();
+        $notification->markAsRead();
+
+        $url = $notification->data['url'] ?? route('report.index');
+
+        return redirect($url);
+    }
 }
