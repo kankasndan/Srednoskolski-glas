@@ -350,8 +350,9 @@ export default function RichTextEditor({
     characterCount >= MAX_DESCRIPTION_LENGTH ? "text-[var(--color-error)]" : "text-[#595959]";
 
   return (
-    <section
+    <div
       className={`relative flex max-w-full flex-col ${widthClassName}`}
+      role="group"
       aria-label="Уредник за содржина"
     >
       <input type="hidden" name={name} value={html} />
@@ -450,6 +451,6 @@ export default function RichTextEditor({
       >
         {errorMessage || "Нема грешка"}
       </p>
-    </section>
+    </div>
   );
 }

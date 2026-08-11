@@ -56,7 +56,6 @@ export default function ThreadPage() {
         </div>
         <ThreadPost forum={forum} thread={thread} onThreadUpdated={patchThread} />
         <CommentComposer
-          forumSlug={forum.slug}
           threadId={thread.id}
           onCreated={() => reload()}
         />

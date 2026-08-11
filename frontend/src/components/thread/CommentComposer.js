@@ -7,7 +7,6 @@ import { createComment } from "@/api/comments";
 const MAX_COMMENT_LENGTH = 1000;
 
 export default function CommentComposer({
-  forumSlug,
   threadId,
   parentId = null,
   compact = false,
@@ -94,7 +93,7 @@ export default function CommentComposer({
           </button>
         ) : (
           <Link
-            href={`/p/${forumSlug}`}
+            href="/rules"
             className="text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px]"
           >
             Внимавај на правилата на заедницата.
