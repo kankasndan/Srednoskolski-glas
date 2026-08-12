@@ -80,7 +80,7 @@ export default function AppShell({ children, contentClassName = "" }) {
             onScroll={(event) => {
               sidebarScrollTop = event.currentTarget.scrollTop;
             }}
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mask-fade-out pb-4"
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-4"
           >
             <SidebarNav
               selectedKey={selectedKey}

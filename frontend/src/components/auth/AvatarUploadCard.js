@@ -42,8 +42,7 @@ export default function AvatarUploadCard() {
 
   return (
     <div
-      className="flex w-full max-w-[850px] flex-col items-center gap-6 rounded-2xl bg-[#E5E5E5] px-6 pt-10 pb-5 sm:px-20"
-      style={{ boxShadow: "7px 7px 4.7px 0px rgba(0, 0, 0, 0.15)" }}
+      className="flex w-full max-w-[850px] flex-col items-center gap-6 rounded-2xl bg-[#E5E5E5] px-6 pt-10 pb-5 shadow-[7px_7px_4.7px_rgba(0,0,0,0.15)] sm:px-20"
     >
       <input
         ref={fileInputRef}

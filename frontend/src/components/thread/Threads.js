@@ -45,7 +45,6 @@ function FeedSelect({
   options,
   selected,
   isOpen,
-  isSelected,
   listboxId,
   onToggle,
   onSelect,
@@ -64,7 +63,7 @@ function FeedSelect({
         onClick={onToggle}
         className={`flex h-10 w-36 cursor-pointer items-center justify-center gap-2 px-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors ${
           isOpen ? "rounded-t-xl" : "rounded-xl"
-        } ${isSelected ? "bg-[#CFE9ED] hover:bg-[#DCEBED]" : "bg-white hover:bg-[#E5E5E5]"}`}
+        } ${isOpen ? "bg-[#CFE9ED]" : "bg-white hover:bg-[#CFE9ED]"}`}
       >
         <span className="flex h-[19px] items-center">{selected.label}</span>
         <Image
@@ -114,10 +113,6 @@ export default function Threads({
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
   const filterContainerRef = useRef(null);
-  const [selectedFilters, setSelectedFilters] = useState({
-    sort: false,
-    time: false,
-  });
   const [selectedSort, setSelectedSort] = useState(
     SORT_OPTIONS.find((option) => option.value === defaultSort) ?? SORT_OPTIONS[0],
   );
@@ -208,7 +203,6 @@ export default function Threads({
 
   const selectSortOption = (option) => {
     setSelectedSort(option);
-    setSelectedFilters((current) => ({ ...current, sort: true }));
     setOpenSelect(null);
     if (!hasStaticThreads) {
       setHasLoaded(false);
@@ -218,7 +212,6 @@ export default function Threads({
 
   const selectTimeFilterOption = (option) => {
     setSelectedTimeFilter(option);
-    setSelectedFilters((current) => ({ ...current, time: true }));
     setOpenSelect(null);
     if (!hasStaticThreads) {
       setHasLoaded(false);
@@ -247,7 +240,6 @@ export default function Threads({
 
     void Promise.resolve().then(() => {
       setSelectedSort(initialSort);
-      setSelectedFilters({ sort: false, time: false });
       setHasLoaded(false);
       fetchThreads({ append: false, sort: initialSort, page: 1 });
     });
@@ -319,7 +311,6 @@ export default function Threads({
             options={SORT_OPTIONS}
             selected={selectedSort}
             isOpen={openSelect === "sort"}
-            isSelected={selectedFilters.sort}
             listboxId={sortListboxId}
             onToggle={() =>
               setOpenSelect((current) => (current === "sort" ? null : "sort"))
@@ -334,7 +325,6 @@ export default function Threads({
           options={TIME_FILTER_OPTIONS}
           selected={selectedTimeFilter}
           isOpen={openSelect === "time"}
-          isSelected={selectedFilters.time}
           listboxId={timeListboxId}
           onToggle={() =>
             setOpenSelect((current) => (current === "time" ? null : "time"))
