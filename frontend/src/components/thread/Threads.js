@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useState, useEffect, useRef } from "react";
+import { useCallback, useId, useState, useEffect, useRef } from "react";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import ForumEmptyState from "@/components/forum/ForumEmptyState";
+import FeedFilterSheet from "@/components/thread/FeedFilterSheet";
 import NoMoreThreads from "@/components/thread/NoMoreThreads";
 import ThreadCard from "@/components/thread/ThreadCard";
 import { API_BASE_URL } from "@/lib/api";
@@ -112,6 +114,7 @@ export default function Threads({
   const sortListboxId = useId();
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const filterContainerRef = useRef(null);
   const [selectedSort, setSelectedSort] = useState(
     SORT_OPTIONS.find((option) => option.value === defaultSort) ?? SORT_OPTIONS[0],
@@ -219,18 +222,11 @@ export default function Threads({
     }
   };
 
-  useEffect(() => {
-    if (!openSelect) return;
-
-    const handleClickOutside = (event) => {
-      if (filterContainerRef.current && !filterContainerRef.current.contains(event.target)) {
-        setOpenSelect(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [openSelect]);
+  useClickOutside(
+    filterContainerRef,
+    useCallback(() => setOpenSelect(null), []),
+    Boolean(openSelect),
+  );
 
   useEffect(() => {
     if (hasStaticThreads) return;
@@ -303,7 +299,34 @@ export default function Threads({
 
   return (
     <section className="flex w-full max-w-[990px] flex-col items-center gap-8">
-      <div ref={filterContainerRef} className="flex self-end gap-2">
+      {/* Na mobilen mesto dvata dropdown-a stoi kopce Филтери. */}
+      <button
+        type="button"
+        onClick={() => setFiltersOpen(true)}
+        className="flex h-10 cursor-pointer items-center gap-2 self-start rounded-xl p-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black lg:hidden"
+      >
+        <Image src="/filter.svg" alt="" width={24} height={24} className="size-6" />
+        Филтери
+      </button>
+
+      <FeedFilterSheet
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        sortOptions={SORT_OPTIONS}
+        selectedSort={selectedSort}
+        onSelectSort={(option) => {
+          selectSortOption(option);
+          setFiltersOpen(false);
+        }}
+        timeOptions={TIME_FILTER_OPTIONS}
+        selectedTime={selectedTimeFilter}
+        onSelectTime={(option) => {
+          selectTimeFilterOption(option);
+          setFiltersOpen(false);
+        }}
+      />
+
+      <div ref={filterContainerRef} className="hidden self-end gap-2 lg:flex">
         {showSort ? (
           <FeedSelect
             name="sort"

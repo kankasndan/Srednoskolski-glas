@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Avatar from "@/components/ui/Avatar";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import { apiFetch } from "@/lib/api";
 
 export default function AuthButtons() {
@@ -46,27 +47,7 @@ export default function AuthButtons() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!menuOpen) return;
-
-    function handlePointerDown(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuOpen(false);
-      }
-    }
-
-    function handleKeyDown(event) {
-      if (event.key === "Escape") setMenuOpen(false);
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [menuOpen]);
+  useClickOutside(menuRef, useCallback(() => setMenuOpen(false), []), menuOpen);
 
   async function handleLogout() {
     setLoggingOut(true);

@@ -44,7 +44,7 @@ export function buildThreadMetaTags(forum, thread) {
   return tags;
 }
 
-function MetaTag({ tag }) {
+function MetaTag({ tag, hiddenOnMobile = false }) {
   const remoteIcon = isRemoteAssetUrl(tag.icon);
   const iconBoxClass = tag.avatar
     ? "relative size-6 shrink-0 overflow-hidden rounded-full"
@@ -56,8 +56,9 @@ function MetaTag({ tag }) {
       : "size-5";
   const iconSize = tag.avatar ? 24 : tag.zoom ? 44 : 20;
 
-  const className =
-    "relative z-10 flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 text-[12px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB]";
+  const className = `relative z-10 ${
+    hiddenOnMobile ? "hidden lg:flex" : "flex"
+  } h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 text-[12px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB]`;
 
   const content = (
     <>
@@ -99,11 +100,16 @@ function MetaTag({ tag }) {
   return <span className={className.replace("cursor-pointer ", "")}>{content}</span>;
 }
 
-export default function ThreadMetaTags({ tags, postedAgo }) {
+// Na mobilen karticata gi prikazuva samo forumot i vremeto.
+export default function ThreadMetaTags({ tags, postedAgo, forumOnlyOnMobile = false }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       {tags.map((tag) => (
-        <MetaTag key={tag.key ?? tag.label} tag={tag} />
+        <MetaTag
+          key={tag.key ?? tag.label}
+          tag={tag}
+          hiddenOnMobile={forumOnlyOnMobile && tag.key !== "forum"}
+        />
       ))}
       {postedAgo ? (
         <span className="text-[12px] leading-none text-[#595959]">

@@ -1,6 +1,7 @@
 "use client";
 
 import AppShell from "@/components/shell/AppShell";
+import MobileFooter from "@/components/shell/MobileFooter";
 import Threads from "@/components/thread/Threads";
 import ForumBanner from "@/components/forum/ForumBanner";
 import { useParams } from "next/navigation";
@@ -50,7 +51,7 @@ export default function ForumPage() {
 
   return (
     <AppShell>
-      <div className="flex w-[990px] max-w-full flex-col gap-8">
+      <div className="flex w-[990px] max-w-full flex-col gap-8 md:max-w-[680px] lg:max-w-full">
         {forumError ? (
           <p className="font-(family-name:--font-manrope) text-[16px] text-[#595959]">
             Форумот не може да се вчита.
@@ -80,6 +81,8 @@ export default function ForumPage() {
 
         {/* Threads wait for forum metadata so /api/p/{slug} finishes before /threads. */}
         {forum ? <Threads forum={forum.slug} /> : null}
+
+        <MobileFooter />
       </div>
     </AppShell>
   );
