@@ -3,17 +3,22 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import Avatar from "@/components/ui/Avatar";
+import LogoutDialogs from "@/components/shell/LogoutDialogs";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useLogout } from "@/hooks/useLogout";
 import { apiFetch } from "@/lib/api";
 
 export default function AuthButtons() {
-  const router = useRouter();
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
   const menuRef = useRef(null);
+  const logout = useLogout({
+    onLoggedOut: () => {
+      setUser(null);
+      setMenuOpen(false);
+    },
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -49,23 +54,8 @@ export default function AuthButtons() {
 
   useClickOutside(menuRef, useCallback(() => setMenuOpen(false), []), menuOpen);
 
-  async function handleLogout() {
-    setLoggingOut(true);
-
-    try {
-      await apiFetch("/api/logout", { method: "POST" });
-    } catch {
-      // Even if the request fails, clear local state so the UI reflects a
-      // signed-out session; the cookie will expire regardless.
-    } finally {
-      localStorage.removeItem("onboarding_pending");
-      setUser(null);
-      setMenuOpen(false);
-      setLoggingOut(false);
-      router.replace("/feed");
-    }
-  }
-
+  // Dijalozite se nadvor od granata za najaven korisnik, za da ostanat i otkako
+  // `user` kje stane null po odjavata.
   if (user) {
     const displayName = user.username || "Профил";
     const avatarUrl = user.imageUrl;
@@ -111,14 +101,16 @@ export default function AuthButtons() {
             <button
               type="button"
               role="menuitem"
-              onClick={handleLogout}
-              disabled={loggingOut}
+              onClick={logout.ask}
+              disabled={logout.loggingOut}
               className="flex w-full cursor-pointer items-center gap-3 px-5 py-3 text-left font-(family-name:--font-manrope) text-[15px] font-medium leading-none text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loggingOut ? "Се одјавува…" : "Одјави се"}
+              {logout.loggingOut ? "Се одјавува…" : "Одјави се"}
             </button>
           </div>
         )}
+
+        <LogoutDialogs logout={logout} />
       </div>
     );
   }
@@ -137,6 +129,8 @@ export default function AuthButtons() {
       >
         Регистрација
       </Link>
+
+      <LogoutDialogs logout={logout} />
     </div>
   );
 }

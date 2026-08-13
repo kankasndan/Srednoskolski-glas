@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { mk } from "date-fns/locale";
 import Image from "next/image";
 import Link from "next/link";
 import { followUser, unfollowUser } from "@/api/profile";
-import { apiFetch } from "@/lib/api";
+import LogoutDialogs from "@/components/shell/LogoutDialogs";
+import { useLogout } from "@/hooks/useLogout";
 import { useProfile } from "@/hooks/useProfile";
 
 const GUEST_FOLLOW_ERROR = "Мора да си најавен за да следиш корисник.";
@@ -55,9 +55,8 @@ export default function ProfileBanner({
   isFollowing = false,
   onFollowChange,
 }) {
-  const router = useRouter();
   const { user: viewer, loading: viewerLoading } = useProfile();
-  const [loggingOut, setLoggingOut] = useState(false);
+  const logout = useLogout();
   const [following, setFollowing] = useState(Boolean(isFollowing));
   const [followBusy, setFollowBusy] = useState(false);
   const [followError, setFollowError] = useState("");
@@ -76,17 +75,6 @@ export default function ProfileBanner({
   useEffect(() => {
     setFollowing(Boolean(isFollowing));
   }, [isFollowing]);
-
-  async function handleLogout() {
-    setLoggingOut(true);
-
-    try {
-      await apiFetch("/api/logout", { method: "POST" });
-    } finally {
-      localStorage.removeItem("onboarding_pending");
-      router.replace("/feed");
-    }
-  }
 
   async function handleFollowToggle() {
     if (!user?.username || followBusy) return;
@@ -171,12 +159,14 @@ export default function ProfileBanner({
             </Link>
             <button
               type="button"
-              onClick={handleLogout}
-              disabled={loggingOut}
+              onClick={logout.ask}
+              disabled={logout.loggingOut}
               className="flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-primary-200) transition-colors hover:bg-[#F1EEFE] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loggingOut ? "Се одјавува…" : "Одјави се"}
+              {logout.loggingOut ? "Се одјавува…" : "Одјави се"}
             </button>
+
+            <LogoutDialogs logout={logout} />
           </>
         ) : (
           <div className="flex w-36 flex-col gap-1">

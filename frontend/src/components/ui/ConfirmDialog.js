@@ -1,4 +1,5 @@
 import DialogShell from "@/components/ui/DialogShell";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 
 export default function ConfirmDialog({
   open,
@@ -9,27 +10,29 @@ export default function ConfirmDialog({
   onCancel,
 }) {
   return (
-    <DialogShell open={open} label={title} onClose={onCancel}>
-      <p className="text-center font-[family-name:var(--font-manrope)] text-[16px] font-bold leading-6 text-black">
-        {title}
-      </p>
+    <DialogShell open={open} label={title} onClose={onCancel} widthClassName="max-w-[400px]">
+      <div className="flex flex-col items-center justify-center gap-6">
+        <p className="max-w-[285px] text-center font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-snug text-black">
+          {title}
+        </p>
 
-      <div className="flex w-full gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex-1 cursor-pointer rounded-xl border-[0.5px] border-[var(--color-primary-200)] bg-white px-4 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#DCEBED]"
-        >
-          {cancelLabel}
-        </button>
-        <button
-          type="button"
-          autoFocus
-          onClick={onConfirm}
-          className="flex-1 cursor-pointer rounded-xl bg-[var(--color-primary-200)] px-4 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0]"
-        >
-          {confirmLabel}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="h-10 w-36 cursor-pointer rounded-xl border border-[var(--color-primary-200)] bg-white font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#F1EEFE]"
+          >
+            {cancelLabel}
+          </button>
+          <PrimaryButton
+            type="button"
+            autoFocus
+            onClick={onConfirm}
+            className="h-10 w-36 font-[family-name:var(--font-manrope)] text-[14px] leading-none"
+          >
+            {confirmLabel}
+          </PrimaryButton>
+        </div>
       </div>
     </DialogShell>
   );

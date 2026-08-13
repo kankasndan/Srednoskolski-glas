@@ -46,7 +46,7 @@ export default function MobileMenu({
             alt=""
             width={24}
             height={22}
-            className="h-[22px] w-6"
+            className="h-auto w-6"
           />
         </button>
 

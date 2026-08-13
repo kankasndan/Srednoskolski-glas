@@ -1,14 +1,23 @@
 import DialogShell from "@/components/ui/DialogShell";
 
-export default function InfoDialog({ open, title, message, onClose }) {
+// Porakata se prekrshuva na razlichno mesto vo sekoj dizajn, pa shirinata doagja odnadvor.
+export default function InfoDialog({
+  open,
+  title,
+  message,
+  messageWidthClassName = "max-w-[330px]",
+  onClose,
+}) {
   return (
-    <DialogShell open={open} label={title} onClose={onClose}>
+    <DialogShell open={open} label={title} onClose={onClose} widthClassName="max-w-[400px]">
       <div className="flex flex-col items-center gap-3 text-center">
-        <p className="font-[family-name:var(--font-manrope)] text-[16px] font-bold leading-6 text-[var(--color-primary-200)]">
+        <p className="max-w-[288px] font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-snug text-[var(--color-primary-200)]">
           {title}
         </p>
         {message && (
-          <p className="font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 text-black">
+          <p
+            className={`font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-snug text-black ${messageWidthClassName}`}
+          >
             {message}
           </p>
         )}

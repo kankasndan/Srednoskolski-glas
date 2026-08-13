@@ -14,12 +14,11 @@ export default function CommunityBanner() {
           priority
         />
 
-        {/* Na desktop line-height-ot e od Figma (30px / 22px) za da dishaat naslovot i opisot. */}
         <div className="flex flex-col items-center gap-2 lg:w-[447px] lg:shrink-0 lg:items-start">
-          <h2 className="max-w-[289px] text-center md:max-w-[520px] font-[family-name:var(--font-oswald)] text-[20px] font-bold leading-6 text-black lg:w-[447px] lg:max-w-none lg:text-left lg:leading-[30px]">
+          <h2 className="max-w-72 text-center md:max-w-lg font-[family-name:var(--font-oswald)] text-[20px] font-bold leading-6 text-black lg:w-full lg:max-w-none lg:text-left lg:leading-normal">
             МЕСТО КАДЕ СЕКОЈ СРЕДНОШКОЛЕЦ ИМА ГЛАС
           </h2>
-          <p className="max-w-[290px] text-center md:max-w-[520px] font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-[17px] text-[#595959] lg:w-[447px] lg:max-w-none lg:whitespace-nowrap lg:text-left lg:text-[16px] lg:leading-[22px]">
+          <p className="max-w-72 text-center md:max-w-lg font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-tight text-[#595959] lg:w-full lg:max-w-none lg:whitespace-nowrap lg:text-left lg:text-[16px] lg:leading-snug">
             Прашувај, споделувај и откриј што мислат твоите врсници.
           </p>
         </div>
