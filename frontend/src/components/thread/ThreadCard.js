@@ -150,26 +150,23 @@ export default function ThreadCard({ thread }) {
         </div>
       ) : null}
 
-      <div className="relative z-10 flex flex-col gap-4 lg:hidden">
-        <ThreadViewCount views={thread.views} />
-
-        <div className="flex items-center gap-2">
-          <ActionButton
-            compact
-            icon="/Chevrons up.svg"
-            label="Гласај нагоре"
-            count={upvotes}
-            onClick={upvote}
-            active={hasVoted}
-          />
-          <ActionButton
-            compact
-            icon="/chat-1-line.svg"
-            label="Коментари"
-            count={thread.comments_count}
-            onClick={openThread}
-          />
-        </div>
+      <div className="relative z-10 flex items-center gap-2 lg:hidden">
+        <ActionButton
+          compact
+          icon="/Chevrons up.svg"
+          label="Гласај нагоре"
+          count={upvotes}
+          onClick={upvote}
+          active={hasVoted}
+        />
+        <ActionButton
+          compact
+          icon="/chat-1-line.svg"
+          label="Коментари"
+          count={thread.comments_count}
+          onClick={openThread}
+        />
+        <ThreadViewCount views={thread.views} className="w-auto" />
       </div>
     </article>
   );

@@ -1,9 +1,12 @@
 import Image from "next/image";
 import { formatCount } from "@/lib/formatCount";
 
-export default function ThreadViewCount({ views }) {
+// className ja menuva sirinata koga brojacot stoi vo red so kopcinjata.
+export default function ThreadViewCount({ views, className = "w-24" }) {
   return (
-    <div className="flex h-4 w-24 items-center gap-1 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-4 text-[var(--color-primary-200)]">
+    <div
+      className={`flex h-4 items-center gap-1 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-4 text-[var(--color-primary-200)] ${className}`}
+    >
       <Image
         src="/eye-line.svg"
         alt=""
