@@ -101,7 +101,7 @@ export default function SelectField({
   const selectedLabel = groups && value ? value.split("|")[0] : value;
 
   let triggerTone = "bg-white text-[#595959]";
-  if (disabled) triggerTone = "cursor-not-allowed bg-[#F5F5F5] text-[#B3B3B3]";
+  if (disabled) triggerTone = "cursor-not-allowed bg-[#CCCCCC] text-white";
   else if (value) triggerTone = "bg-white text-black";
 
   return (
