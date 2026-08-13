@@ -67,7 +67,8 @@ export default function ThreadPage() {
         />
         <CommentList comments={comments} threadId={thread.id} onCommentCreated={reload} />
 
-        <MobileFooter />
+        {/* Kontejnerot ovde ima gap-8, pa treba pomala margina od feed-ot. */}
+        <MobileFooter className="mt-3" />
       </div>
     </AppShell>
   );

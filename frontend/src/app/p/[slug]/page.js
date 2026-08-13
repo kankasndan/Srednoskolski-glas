@@ -82,7 +82,8 @@ export default function ForumPage() {
         {/* Threads wait for forum metadata so /api/p/{slug} finishes before /threads. */}
         {forum ? <Threads forum={forum.slug} /> : null}
 
-        <MobileFooter />
+        {/* Kontejnerot ovde ima gap-8, pa treba pomala margina od feed-ot. */}
+        <MobileFooter className="mt-3" />
       </div>
     </AppShell>
   );

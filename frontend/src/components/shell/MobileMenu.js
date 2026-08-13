@@ -42,11 +42,11 @@ export default function MobileMenu({
           className="ml-6 flex size-8 shrink-0 cursor-pointer items-center justify-center"
         >
           <Image
-            src="/collapsed icons/menu-collapse.svg"
+            src="/mobile version/collabsing menu.svg"
             alt=""
-            width={32}
-            height={32}
-            className="size-8 rotate-180"
+            width={24}
+            height={22}
+            className="h-[22px] w-6"
           />
         </button>
 

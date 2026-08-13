@@ -29,7 +29,13 @@ export default function Header({ onMenuOpen }) {
           aria-label="Отвори мени"
           className="flex size-8 shrink-0 cursor-pointer items-center justify-center"
         >
-          <Image src="/menu-2-line.svg" alt="" width={32} height={32} className="size-8" />
+          <Image
+            src="/mobile version/opening menu.svg"
+            alt=""
+            width={32}
+            height={32}
+            className="size-8"
+          />
         </button>
 
         <Link href="/feed" className="flex h-12 w-[71px] shrink-0 items-center justify-center">
@@ -51,7 +57,13 @@ export default function Header({ onMenuOpen }) {
             leavingToLogin ? "scale-90 opacity-40" : "active:scale-90"
           }`}
         >
-          <Image src="/login-rounded.svg" alt="" width={32} height={32} className="size-8" />
+          <Image
+            src="/mobile version/login icon.svg"
+            alt=""
+            width={32}
+            height={32}
+            className="size-8"
+          />
         </Link>
       </div>
 

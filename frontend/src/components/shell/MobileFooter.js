@@ -6,9 +6,10 @@ const links = [
   { href: "/rules", label: "Правила" },
 ];
 
-export default function MobileFooter() {
+// Sekoja stranica ima drug gap vo kontejnerot, pa marginata se dopolnuva do ~44px vkupno.
+export default function MobileFooter({ className = "mt-8" }) {
   return (
-    <footer className="flex flex-col items-center gap-3 pb-6 lg:hidden">
+    <footer className={`flex flex-col items-center gap-3 pb-6 lg:hidden ${className}`}>
       <div className="flex items-center gap-2">
         {links.map((link, index) => (
           <div key={link.href} className="flex items-center gap-2">
