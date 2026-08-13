@@ -79,8 +79,8 @@ export default function ForumPage() {
           />
         ) : null}
 
-        {/* Threads wait for forum metadata so /api/p/{slug} finishes before /threads. */}
-        {forum ? <Threads forum={forum.slug} /> : null}
+        {/* Threads use the URL slug so they load in parallel with forum metadata. */}
+        {slug && !forumError ? <Threads forum={slug} /> : null}
 
         {/* Kontejnerot ovde ima gap-8, pa treba pomala margina od feed-ot. */}
         <MobileFooter className="mt-3" />

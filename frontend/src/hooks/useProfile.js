@@ -22,7 +22,13 @@ export function useProfile() {
 
     let active = true;
 
-    loadSessionUser()
+    // Refetch when the cached user is missing capability flags (stale session).
+    const needsCapabilities =
+      cached != null &&
+      (cached.capabilities == null ||
+        typeof cached.capabilities?.can_create_threads !== "boolean");
+
+    loadSessionUser({ force: Boolean(needsCapabilities) })
       .then((data) => {
         if (!active) return;
         setUser(data);

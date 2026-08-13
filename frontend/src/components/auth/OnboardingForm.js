@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { CITIES } from "@/lib/schools";
-import { loadSessionUser } from "@/lib/sessionUser";
+import { loadSessionUser, setSessionUser } from "@/lib/sessionUser";
 import TextField from "@/components/ui/TextField";
 import SelectField from "@/components/ui/SelectField";
 import TermsCheckbox from "@/components/auth/TermsCheckbox";
@@ -120,6 +120,15 @@ export default function OnboardingForm() {
         return;
       }
 
+      const nextUser = data.user ?? null;
+      if (nextUser && typeof nextUser === "object") {
+        nextUser.capabilities = data.capabilities ?? nextUser.capabilities ?? null;
+        nextUser.permissions = data.permissions ?? nextUser.permissions ?? [];
+      }
+
+      if (nextUser) {
+        setSessionUser(nextUser);
+      }
       await loadSessionUser({ force: true });
       router.push("/register/onboarding_2");
     } catch {

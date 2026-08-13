@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Avatar from "@/components/ui/Avatar";
 import LogoutDialogs from "@/components/shell/LogoutDialogs";
-import { useClickOutside } from "@/hooks/useClickOutside";
 import { useLogout } from "@/hooks/useLogout";
-import { apiFetch } from "@/lib/api";
 import { needsOnboarding } from "@/lib/capabilities";
 import {
   clearSessionUser,
@@ -29,7 +27,6 @@ function AuthButtonsSkeleton() {
 }
 
 export default function AuthButtons() {
-  const router = useRouter();
   const cached = getCachedSessionUser();
   const [user, setUser] = useState(() => (cached === undefined ? null : cached));
   const [resolved, setResolved] = useState(() => cached !== undefined);
@@ -37,6 +34,7 @@ export default function AuthButtons() {
   const menuRef = useRef(null);
   const logout = useLogout({
     onLoggedOut: () => {
+      clearSessionUser();
       setUser(null);
       setMenuOpen(false);
     },
@@ -88,24 +86,6 @@ export default function AuthButtons() {
     };
   }, [menuOpen]);
 
-  async function handleLogout() {
-    setLoggingOut(true);
-
-    try {
-      await apiFetch("/api/logout", { method: "POST" });
-    } catch {
-      // Even if the request fails, clear local state so the UI reflects a
-      // signed-out session; the cookie will expire regardless.
-    } finally {
-      localStorage.removeItem("onboarding_pending");
-      clearSessionUser();
-      setUser(null);
-      setMenuOpen(false);
-      setLoggingOut(false);
-      router.replace("/feed");
-    }
-  }
-
   if (!resolved && !user) {
     return <AuthButtonsSkeleton />;
   }
@@ -122,12 +102,13 @@ export default function AuthButtons() {
           </Link>
           <button
             type="button"
-            onClick={handleLogout}
-            disabled={loggingOut}
+            onClick={logout.ask}
+            disabled={logout.loggingOut}
             className="flex h-10 cursor-pointer items-center justify-center rounded-xl border border-[#CCCCCC] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:bg-[#E5E5E5] disabled:opacity-60"
           >
-            {loggingOut ? "…" : "Одјави се"}
+            {logout.loggingOut ? "…" : "Одјави се"}
           </button>
+          <LogoutDialogs logout={logout} />
         </div>
       );
     }

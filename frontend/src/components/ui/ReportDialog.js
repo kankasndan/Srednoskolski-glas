@@ -69,7 +69,6 @@ export default function ReportDialog({ open, onClose, onSubmit }) {
                 disabled={submitting}
                 onChange={() => {
                   setReason(option);
-                  if (option !== "Друго") setDetails("");
                   setError("");
                 }}
               />

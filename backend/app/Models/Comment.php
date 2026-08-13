@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -57,22 +58,36 @@ class Comment extends Model
         return $this->hasMany(Comment::class, 'parent_id')->withTrashed();
     }
 
-    public function allReplies(): HasMany
+    /**
+     * Live comments, plus tombstones that still have a live direct reply.
+     */
+    public function scopeVisibleInThread(Builder $query): void
     {
-        // Nested replies stay chronological so a conversation reads top-to-bottom.
-        $relation = $this->replies()
-            ->oldest()
-            ->with(['user.studentData.school.city', 'user.studentData.school.forum', 'allReplies']);
+        $query->where(function (Builder $inner): void {
+            $inner->whereNull('deleted_at')
+                ->orWhereHas('replies', fn (Builder $replies) => $replies->withoutTrashed());
+        });
+    }
 
-        $userId = auth('web')->id() ?? Auth::id();
+    /**
+     * How many direct replies would appear if this comment is expanded.
+     */
+    public function scopeWithVisibleRepliesCount(Builder $query): void
+    {
+        $query->withCount([
+            'replies as replies_count' => fn (Builder $replies) => $replies->visibleInThread(),
+        ]);
+    }
 
-        if ($userId !== null) {
-            $relation->withExists([
-                'votes as has_voted' => fn ($query) => $query->where('user_id', $userId),
-            ]);
-        }
-
-        return $relation;
+    /**
+     * @return list<string>
+     */
+    public static function authorWith(): array
+    {
+        return [
+            'user.studentData.school.city',
+            'user.studentData.school.forum',
+        ];
     }
 
     public function user()

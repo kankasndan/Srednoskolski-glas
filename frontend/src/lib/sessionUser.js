@@ -46,7 +46,14 @@ export function invalidateSessionUser() {
  */
 export async function loadSessionUser({ force = false } = {}) {
   if (!force && cachedUser !== undefined) {
-    return cachedUser;
+    // Stale cache from before capabilities were attached — refetch.
+    const caps = cachedUser?.capabilities;
+    const missingCaps =
+      cachedUser != null &&
+      (caps == null || typeof caps.can_create_threads !== "boolean");
+    if (!missingCaps) {
+      return cachedUser;
+    }
   }
 
   if (inflight) {

@@ -9,6 +9,7 @@ use App\Http\Resources\ProfileCommentResource;
 use App\Http\Resources\PublicUserResource;
 use App\Http\Resources\ThreadResource;
 use App\Models\City;
+use App\Models\Forum;
 use App\Models\School;
 use App\Models\StudentData;
 use App\Models\User;
@@ -157,6 +158,8 @@ class ProfileController extends Controller
             ->orderBy('name')
             ->limit(100)
             ->get();
+
+        $forums->each(fn (Forum $forum) => $forum->setAttribute('is_following', true));
 
         return ForumResource::collection($forums)->response();
     }

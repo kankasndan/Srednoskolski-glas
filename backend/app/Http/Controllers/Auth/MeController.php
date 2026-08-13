@@ -16,8 +16,14 @@ class MeController extends Controller
             'studentData.vocation',
         ]);
 
-        // Self-heal Spatie permissions for older accounts created before this feature.
         $syncPermissions->ensureFresh($user);
+
+        $canManageThreads = $user->can('manage threads')
+            || $user->hasAnyRole(['super_admin', 'admin', 'moderator']);
+
+        // Prefer school membership for the UI flag; Spatie permission is kept in sync above.
+        $canCreateThreads = $user->hasCompletedOnboarding()
+            && ($canManageThreads || $user->belongsToSchool());
 
         return response()->json([
             'user' => $user,
@@ -25,9 +31,7 @@ class MeController extends Controller
             'capabilities' => [
                 'has_completed_onboarding' => $user->hasCompletedOnboarding(),
                 'can_create_comments' => $user->canCreateComments(),
-                // Coarse flag: may start threads somewhere (own school + general forums).
-                'can_create_threads' => $user->hasCompletedOnboarding()
-                    && ($user->can('create threads') || $user->can('manage threads')),
+                'can_create_threads' => $canCreateThreads,
                 'school_forum_id' => $user->schoolForumId(),
             ],
         ]);

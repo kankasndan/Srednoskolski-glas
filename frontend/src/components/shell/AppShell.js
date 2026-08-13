@@ -57,12 +57,12 @@ export default function AppShell({ children, contentClassName = "" }) {
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-white">
+    <div className="flex h-full max-h-full flex-col overflow-hidden bg-white">
       <Header
         onMenuToggle={() => setMobileMenuOpen((open) => !open)}
         menuOpen={mobileMenuOpen}
       />
-      <div className="flex min-h-0 flex-1 px-4 lg:px-6">
+      <div className="flex min-h-0 min-w-0 flex-1 px-4 lg:px-6">
         {mobileMenuOpen && (
           <div
             onClick={() => setMobileMenuOpen(false)}
@@ -71,7 +71,7 @@ export default function AppShell({ children, contentClassName = "" }) {
           />
         )}
         <aside
-          className={`box-border flex-col border-r border-[#CCCCCC] bg-white pr-6 pt-1 pl-8 lg:static lg:z-auto lg:flex lg:shrink-0 ${
+          className={`box-border min-h-0 flex-col border-r border-[#CCCCCC] bg-white pr-6 pt-1 pl-8 lg:static lg:z-auto lg:flex lg:shrink-0 ${
             mobileMenuOpen ? "fixed inset-y-0 left-0 z-40 flex" : "hidden"
           }`}
         >
@@ -123,7 +123,7 @@ export default function AppShell({ children, contentClassName = "" }) {
           </div>
         </aside>
         <main
-          className={`flex flex-1 items-start justify-center overflow-y-auto px-2 pb-8 pt-4 [scrollbar-width:none] lg:px-0 lg:pb-12 lg:pt-12 [&::-webkit-scrollbar]:hidden ${contentClassName}`}
+          className={`flex min-h-0 min-w-0 flex-1 items-start justify-center overflow-x-hidden overflow-y-auto px-2 pb-8 pt-4 [scrollbar-width:none] [-ms-overflow-style:none] lg:px-0 lg:pb-12 lg:pt-12 [&::-webkit-scrollbar]:hidden ${contentClassName}`}
         >
           {children}
         </main>

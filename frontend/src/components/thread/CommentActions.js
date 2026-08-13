@@ -29,8 +29,9 @@ export default function CommentActions({
   commentId,
   votes: initialVotes = 0,
   hasVoted: initialHasVoted = false,
-  hasReplies,
-  collapsed,
+  repliesCount = 0,
+  expanded,
+  loadingReplies = false,
   onToggle,
   onReply,
   onReport,
@@ -100,11 +101,17 @@ export default function CommentActions({
           onClick={onReport}
         />
 
-        {hasReplies ? (
+        {repliesCount > 0 ? (
           <ActionButton
             icon="/comments icon/show less arroew.svg"
-            iconClassName={collapsed ? "rotate-180" : ""}
-            label={collapsed ? "Прикажи повеќе" : "Прикажи помалку"}
+            iconClassName={expanded ? "" : "rotate-180"}
+            label={
+              loadingReplies
+                ? "Се вчитува…"
+                : expanded
+                  ? "Сокриј одговори"
+                  : `Прикажи одговори (${repliesCount})`
+            }
             onClick={onToggle}
           />
         ) : null}

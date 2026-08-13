@@ -3,10 +3,12 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { loadSessionUser } from "@/lib/sessionUser";
 
 function finishOnboarding(router) {
   localStorage.removeItem("onboarding_pending");
-  router.push("/feed");
+  // Ensure /api/me capabilities (create threads, etc.) are fresh on the feed.
+  loadSessionUser({ force: true }).finally(() => router.push("/feed"));
 }
 
 export default function AvatarUploadCard() {

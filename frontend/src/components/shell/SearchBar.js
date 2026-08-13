@@ -78,7 +78,9 @@ export default function SearchBar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const activeForumSlug = filterDismissed ? null : routeForumSlug;
-  const showForumChip = Boolean(activeForumSlug) && (focused || query.length > 0 || pathname === "/search");
+  const showForumChip =
+    Boolean(activeForumSlug) &&
+    (focused || query.length > 0 || pathname === "/search");
 
   useEffect(() => {
     setQuery(qFromUrl);
@@ -89,8 +91,8 @@ export default function SearchBar() {
   }, [routeForumSlug]);
 
   useEffect(() => {
-    if (!activeForumSlug) {
-      setForumMeta(null);
+    if (!showForumChip || !activeForumSlug) {
+      if (!showForumChip) setForumMeta(null);
       return;
     }
 
@@ -106,7 +108,7 @@ export default function SearchBar() {
     return () => {
       cancelled = true;
     };
-  }, [activeForumSlug]);
+  }, [showForumChip, activeForumSlug]);
 
   const runSearch = useCallback(async (value, forumSlug) => {
     const q = value.trim();
@@ -197,7 +199,7 @@ export default function SearchBar() {
   const showDropdown = focused && dropdownOpen && query.trim().length > 0;
 
   return (
-    <div ref={rootRef} className="relative w-full">
+    <div ref={rootRef} className="relative w-[632px] max-w-full">
       <form
         role="search"
         onSubmit={handleSubmit}
@@ -329,7 +331,7 @@ export default function SearchBar() {
 
 export function SearchBarFallback() {
   return (
-    <div className="flex h-10 w-full items-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2">
+    <div className="flex h-10 w-[632px] max-w-full items-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2">
       <Image
         src="/search.svg"
         alt=""

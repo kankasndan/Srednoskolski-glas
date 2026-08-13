@@ -2,9 +2,14 @@ import Cookies from "js-cookie";
 import { API_BASE_URL, apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { normalizeEmbedLink } from "@/lib/embeds";
 
-export async function getThread(forumSlug, threadId, { sort = "best" } = {}) {
+export async function getThread(
+  forumSlug,
+  threadId,
+  { sort = "best", trackView = false } = {},
+) {
   const params = new URLSearchParams();
   if (sort) params.set("sort", sort);
+  params.set("track_view", trackView ? "1" : "0");
   const query = params.toString();
   const res = await apiFetch(
     `/api/p/${forumSlug}/comments/${threadId}${query ? `?${query}` : ""}`,

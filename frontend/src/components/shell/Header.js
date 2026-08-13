@@ -6,8 +6,8 @@ import AuthButtons from "@/components/shell/AuthButtons";
 
 export default function Header({ onMenuToggle, menuOpen = false }) {
   return (
-    <header className="sticky top-0 z-50 w-full bg-white lg:shadow-sm">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-10 px-6 py-3 lg:flex-nowrap lg:gap-x-6 lg:px-14 lg:py-4">
+    <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-4 px-6 py-3 lg:flex-nowrap lg:justify-between lg:gap-6 lg:px-14 lg:py-4">
         <button
           type="button"
           onClick={onMenuToggle}
@@ -40,14 +40,14 @@ export default function Header({ onMenuToggle, menuOpen = false }) {
           />
         </Link>
 
-        <div className="order-3 shrink-0 lg:order-4">
-          <AuthButtons />
-        </div>
-
-        <div className="order-4 w-full lg:order-3 lg:w-[632px] lg:max-w-full lg:flex-1">
+        <div className="order-4 w-full lg:order-3 lg:w-[632px] lg:shrink-0">
           <Suspense fallback={<SearchBarFallback />}>
             <SearchBar />
           </Suspense>
+        </div>
+
+        <div className="order-3 shrink-0 lg:order-4">
+          <AuthButtons />
         </div>
       </div>
     </header>

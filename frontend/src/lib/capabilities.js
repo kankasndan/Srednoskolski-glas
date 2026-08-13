@@ -17,12 +17,43 @@ export function needsOnboarding(user) {
   return Boolean(user) && !hasCompletedOnboarding(user);
 }
 
+function schoolIdOf(user) {
+  return (
+    getCapabilities(user)?.school_forum_id ??
+    user?.student_data?.school_id ??
+    user?.studentData?.school_id ??
+    null
+  );
+}
+
 export function canCreateComments(user) {
-  return Boolean(getCapabilities(user)?.can_create_comments);
+  if (!user || !hasCompletedOnboarding(user)) return false;
+
+  const fromCapabilities = getCapabilities(user)?.can_create_comments;
+  if (typeof fromCapabilities === "boolean") {
+    return fromCapabilities;
+  }
+
+  return hasPermission(user, "create comments") || hasPermission(user, "manage comments");
 }
 
 export function canCreateThreads(user) {
-  return Boolean(getCapabilities(user)?.can_create_threads);
+  if (!user || !hasCompletedOnboarding(user)) return false;
+
+  if (getCapabilities(user)?.can_create_threads === true) {
+    return true;
+  }
+
+  // School members can start discussions even if a stale capability flag said otherwise.
+  if (schoolIdOf(user) != null) {
+    return true;
+  }
+
+  return hasPermission(user, "create threads") || hasPermission(user, "manage threads");
+}
+
+function hasPermission(user, name) {
+  return Array.isArray(user?.permissions) && user.permissions.includes(name);
 }
 
 /** Shared copy when an incomplete account tries a community action. */

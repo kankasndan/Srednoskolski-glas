@@ -21,13 +21,38 @@ class CommentController extends Controller
             'content' => $request->string('content')->toString(),
         ]);
 
-        $comment->load(['user.studentData.school.city', 'user.studentData.school.forum']);
-        $comment->setRelation('allReplies', collect());
+        $comment->load(Comment::authorWith());
         $comment->setAttribute('has_voted', false);
+        $comment->setAttribute('replies_count', 0);
 
         return (new CommentResource($comment))
             ->response()
             ->setStatusCode(201);
+    }
+
+    /**
+     * Direct replies for a comment (lazy-loaded from "view replies").
+     *
+     * GET /api/comments/{comment}/replies
+     */
+    public function replies(Request $request, Comment $comment): JsonResponse
+    {
+        $user = $request->user('web') ?? $request->user();
+
+        $query = $comment->replies()
+            ->visibleInThread()
+            ->with(Comment::authorWith())
+            ->withVisibleRepliesCount()
+            ->oldest()
+            ->orderBy('id');
+
+        if ($user !== null) {
+            $query->withExists([
+                'votes as has_voted' => fn ($votes) => $votes->where('user_id', $user->id),
+            ]);
+        }
+
+        return CommentResource::collection($query->get())->response();
     }
 
     /**
@@ -41,8 +66,10 @@ class CommentController extends Controller
         $comment->edited_at = now();
         $comment->save();
 
-        $comment->load(['user.studentData.school.city', 'user.studentData.school.forum']);
-        $comment->setRelation('allReplies', collect());
+        $comment->load(Comment::authorWith());
+        $comment->loadCount([
+            'replies as replies_count' => fn ($replies) => $replies->visibleInThread(),
+        ]);
 
         $userId = $request->user()->id;
         $comment->setAttribute(

@@ -6,17 +6,17 @@ use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ExploreController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\FeedHideController;
 use App\Http\Controllers\FollowForumController;
 use App\Http\Controllers\FollowThreadController;
-use App\Http\Controllers\NewestController;
-use App\Http\Controllers\ExploreController;
-use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\NewestController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\UserProfileController;
@@ -81,8 +81,12 @@ Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 Route::get('/p/{forum:slug}', [ForumController::class, 'show'])->name('forums.show');
 // Paginated threads for a forum.
 Route::get('/p/{forum:slug}/threads', [ThreadController::class, 'index'])->name('forums.threads.index');
-// Thread detail with nested comments (increments views; sort=best|newest|oldest).
+// Thread detail with top-level comments (increments views; sort=best|newest|oldest).
 Route::get('/p/{forum:slug}/comments/{thread:id}', [ThreadController::class, 'show'])->name('forums.threads.show');
+// Direct replies for a comment (lazy-loaded from the thread page).
+Route::get('/comments/{comment}/replies', [CommentController::class, 'replies'])
+    ->withTrashed()
+    ->name('comments.replies');
 
 Route::middleware(['auth:sanctum', 'not_banned', 'onboarding'])->group(function () {
     // Follow / unfollow another user.

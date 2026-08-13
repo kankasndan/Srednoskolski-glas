@@ -38,7 +38,7 @@ export default function BackButton({
       type="button"
       onClick={handleBack}
       aria-label={label ? undefined : "Назад"}
-      className={`h-stack h-10 cursor-pointer items-center rounded-full font-[family-name:var(--font-manrope)] text-[14px] leading-none font-medium transition-colors hover:text-black ${
+      className={`inline-flex h-10 shrink-0 cursor-pointer items-center self-start rounded-full font-[family-name:var(--font-manrope)] text-[14px] leading-none font-medium transition-colors hover:text-black ${
         label ? "gap-2" : "w-10 justify-center"
       } ${LABEL_TONES[tone]}`}
     >
