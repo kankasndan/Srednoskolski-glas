@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Avatar from "@/components/ui/Avatar";
+import LogoutDialogs from "@/components/shell/LogoutDialogs";
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { useLogout } from "@/hooks/useLogout";
 import { apiFetch } from "@/lib/api";
 import { needsOnboarding } from "@/lib/capabilities";
 import {
@@ -32,8 +34,13 @@ export default function AuthButtons() {
   const [user, setUser] = useState(() => (cached === undefined ? null : cached));
   const [resolved, setResolved] = useState(() => cached !== undefined);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
   const menuRef = useRef(null);
+  const logout = useLogout({
+    onLoggedOut: () => {
+      setUser(null);
+      setMenuOpen(false);
+    },
+  });
 
   useEffect(() => {
     const unsubscribe = subscribeSessionUser((next) => {
@@ -169,14 +176,16 @@ export default function AuthButtons() {
             <button
               type="button"
               role="menuitem"
-              onClick={handleLogout}
-              disabled={loggingOut}
+              onClick={logout.ask}
+              disabled={logout.loggingOut}
               className="flex w-full cursor-pointer items-center gap-3 px-5 py-3 text-left font-(family-name:--font-manrope) text-[15px] font-medium leading-none text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loggingOut ? "Се одјавува…" : "Одјави се"}
+              {logout.loggingOut ? "Се одјавува…" : "Одјави се"}
             </button>
           </div>
         )}
+
+        <LogoutDialogs logout={logout} />
       </div>
     );
   }
@@ -195,6 +204,8 @@ export default function AuthButtons() {
       >
         Регистрација
       </Link>
+
+      <LogoutDialogs logout={logout} />
     </div>
   );
 }

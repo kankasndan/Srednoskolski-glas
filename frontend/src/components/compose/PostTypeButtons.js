@@ -376,7 +376,7 @@ export default function PostTypeButtons({
         />
       )}
 
-      <div className="flex gap-3">
+      <div className="grid grid-cols-2 gap-2 md:flex md:gap-3">
         {visibleTypes.map((type) => {
           const disabled = isTypeDisabled(type.label);
 

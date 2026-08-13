@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useState, useEffect, useRef } from "react";
+import { useCallback, useId, useState, useEffect, useRef } from "react";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import ForumEmptyState from "@/components/forum/ForumEmptyState";
+import FeedFilterSheet from "@/components/thread/FeedFilterSheet";
 import NoMoreThreads from "@/components/thread/NoMoreThreads";
 import ThreadCard from "@/components/thread/ThreadCard";
 import { API_BASE_URL } from "@/lib/api";
@@ -45,7 +47,6 @@ function FeedSelect({
   options,
   selected,
   isOpen,
-  isSelected,
   listboxId,
   onToggle,
   onSelect,
@@ -64,7 +65,7 @@ function FeedSelect({
         onClick={onToggle}
         className={`flex h-10 w-36 cursor-pointer items-center justify-center gap-2 px-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors ${
           isOpen ? "rounded-t-xl" : "rounded-xl"
-        } ${isSelected ? "bg-[#CFE9ED] hover:bg-[#DCEBED]" : "bg-white hover:bg-[#E5E5E5]"}`}
+        } ${isOpen ? "bg-[#CFE9ED]" : "bg-white hover:bg-[#CFE9ED]"}`}
       >
         <span className="flex h-[19px] items-center">{selected.label}</span>
         <Image
@@ -114,11 +115,8 @@ export default function Threads({
   const sortListboxId = useId();
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const filterContainerRef = useRef(null);
-  const [selectedFilters, setSelectedFilters] = useState({
-    sort: false,
-    time: false,
-  });
   const [selectedSort, setSelectedSort] = useState(
     SORT_OPTIONS.find((option) => option.value === defaultSort) ?? SORT_OPTIONS[0],
   );
@@ -213,7 +211,6 @@ export default function Threads({
 
   const selectSortOption = (option) => {
     setSelectedSort(option);
-    setSelectedFilters((current) => ({ ...current, sort: true }));
     setOpenSelect(null);
     if (!hasStaticThreads) {
       setHasLoaded(false);
@@ -223,7 +220,6 @@ export default function Threads({
 
   const selectTimeFilterOption = (option) => {
     setSelectedTimeFilter(option);
-    setSelectedFilters((current) => ({ ...current, time: true }));
     setOpenSelect(null);
     if (!hasStaticThreads) {
       setHasLoaded(false);
@@ -231,18 +227,11 @@ export default function Threads({
     }
   };
 
-  useEffect(() => {
-    if (!openSelect) return;
-
-    const handleClickOutside = (event) => {
-      if (filterContainerRef.current && !filterContainerRef.current.contains(event.target)) {
-        setOpenSelect(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [openSelect]);
+  useClickOutside(
+    filterContainerRef,
+    useCallback(() => setOpenSelect(null), []),
+    Boolean(openSelect),
+  );
 
   useEffect(() => {
     if (hasStaticThreads) return;
@@ -252,7 +241,6 @@ export default function Threads({
 
     void Promise.resolve().then(() => {
       setSelectedSort(initialSort);
-      setSelectedFilters({ sort: false, time: false });
       setHasLoaded(false);
       fetchThreads({ append: false, sort: initialSort, page: 1 });
     });
@@ -316,7 +304,34 @@ export default function Threads({
 
   return (
     <section className="flex w-full max-w-[990px] flex-col items-center gap-8">
-      <div ref={filterContainerRef} className="flex self-end gap-2">
+      {/* Na mobilen mesto dvata dropdown-a stoi kopce Филтери. */}
+      <button
+        type="button"
+        onClick={() => setFiltersOpen(true)}
+        className="flex h-10 cursor-pointer items-center gap-2 self-start rounded-xl p-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black lg:hidden"
+      >
+        <Image src="/mobile version/filter.svg" alt="" width={24} height={24} className="size-6" />
+        Филтери
+      </button>
+
+      <FeedFilterSheet
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        sortOptions={SORT_OPTIONS}
+        selectedSort={selectedSort}
+        onSelectSort={(option) => {
+          selectSortOption(option);
+          setFiltersOpen(false);
+        }}
+        timeOptions={TIME_FILTER_OPTIONS}
+        selectedTime={selectedTimeFilter}
+        onSelectTime={(option) => {
+          selectTimeFilterOption(option);
+          setFiltersOpen(false);
+        }}
+      />
+
+      <div ref={filterContainerRef} className="hidden self-end gap-2 lg:flex">
         {showSort ? (
           <FeedSelect
             name="sort"
@@ -324,7 +339,6 @@ export default function Threads({
             options={SORT_OPTIONS}
             selected={selectedSort}
             isOpen={openSelect === "sort"}
-            isSelected={selectedFilters.sort}
             listboxId={sortListboxId}
             onToggle={() =>
               setOpenSelect((current) => (current === "sort" ? null : "sort"))
@@ -339,7 +353,6 @@ export default function Threads({
           options={TIME_FILTER_OPTIONS}
           selected={selectedTimeFilter}
           isOpen={openSelect === "time"}
-          isSelected={selectedFilters.time}
           listboxId={timeListboxId}
           onToggle={() =>
             setOpenSelect((current) => (current === "time" ? null : "time"))

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createComment } from "@/api/comments";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import { useProfile } from "@/hooks/useProfile";
 import { canCreateComments, needsOnboarding } from "@/lib/capabilities";
 
@@ -144,15 +145,15 @@ export default function CommentComposer({
           </Link>
         )}
 
-        <button
+        <PrimaryButton
           type="submit"
           disabled={isEmpty || busy}
-          className={`shrink-0 cursor-pointer rounded-xl bg-[#582FF5] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0] disabled:cursor-not-allowed disabled:bg-[#CCCCCC] ${
+          className={`shrink-0 leading-none disabled:bg-[#CCCCCC] ${
             compact ? "h-9 px-5 text-[12px]" : "h-10 w-36 text-[14px]"
           }`}
         >
           {busy ? "…" : "Објави"}
-        </button>
+        </PrimaryButton>
       </div>
     </form>
   );

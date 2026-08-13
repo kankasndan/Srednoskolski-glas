@@ -8,6 +8,7 @@ import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import { getForum } from "@/api/forums";
 import { searchContent } from "@/api/search";
 import ForumIcon from "@/components/forum/ForumIcon";
@@ -155,17 +156,13 @@ export default function SearchBar() {
     };
   }, [query, activeForumSlug, runSearch]);
 
-  useEffect(() => {
-    function handlePointerDown(event) {
-      if (!rootRef.current?.contains(event.target)) {
-        setFocused(false);
-        setDropdownOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, []);
+  useClickOutside(
+    rootRef,
+    useCallback(() => {
+      setFocused(false);
+      setDropdownOpen(false);
+    }, []),
+  );
 
   function goToResults(nextQuery = query, forumSlug = activeForumSlug) {
     const params = new URLSearchParams();

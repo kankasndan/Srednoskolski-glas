@@ -22,6 +22,7 @@ export default function ThreadActionsMenu({ thread, isOwner, onUpdated }) {
   const showOwnerActions = isOwner ?? Boolean(thread?.is_owner);
 
   const [editing, setEditing] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleted, setDeleted] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -54,6 +55,7 @@ export default function ThreadActionsMenu({ thread, isOwner, onUpdated }) {
 
     onUpdated?.(updated);
     setEditing(false);
+    setSaved(true);
   }
 
   async function handleConfirmDelete() {
@@ -122,6 +124,12 @@ export default function ThreadActionsMenu({ thread, isOwner, onUpdated }) {
           onSubmit={handleReport}
         />
       )}
+
+      <InfoDialog
+        open={saved}
+        title="Промените беа успешно зачувани."
+        onClose={() => setSaved(false)}
+      />
 
       <ConfirmDialog
         open={confirmingDelete}

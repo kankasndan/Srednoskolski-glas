@@ -49,15 +49,6 @@
   }
 }
 
-.mask-fade-out{
-  mask-image: linear-gradient(
-    to bottom,
-    black,
-    black 90%,
-    transparent
-  );
-}
-
 .white-icon {
   filter: brightness(0) invert(1);
 }

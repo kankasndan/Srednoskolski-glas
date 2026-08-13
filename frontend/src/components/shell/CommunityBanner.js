@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import StartDiscussionButton from "@/components/forum/StartDiscussionButton";
@@ -19,7 +17,7 @@ export default function CommunityBanner() {
           alt=""
           width={119}
           height={80}
-          className="h-20 w-[119px] shrink-0 object-contain"
+          className="hidden h-20 w-[119px] shrink-0 object-contain lg:block"
           priority
         />
 

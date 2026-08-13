@@ -8,6 +8,8 @@ import ForumSelect from "@/components/forum/ForumSelect";
 import PostTypeButtons from "@/components/compose/PostTypeButtons";
 import RichTextEditor from "@/components/compose/RichTextEditor";
 import TitleInput from "@/components/compose/TitleInput";
+import InfoDialog from "@/components/ui/InfoDialog";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import { createThread } from "@/api/threads";
 import { useProfile } from "@/hooks/useProfile";
 import {
@@ -21,6 +23,9 @@ function getPlainTextFromHtml(html) {
   container.innerHTML = html;
   return container.textContent?.trim() ?? "";
 }
+
+const POSTED_TITLE = "Дискусијата беше успешно објавена.";
+const POSTED_MESSAGE = "Можеш да ја следиш на форумот или на твојот профил.";
 
 const REQUIRED_FIELD_MESSAGES = {
   forum: "Избери форум за дискусијата.",
@@ -37,6 +42,7 @@ export default function NewDiscussionForm() {
   const [attachments, setAttachments] = useState({ files: [], link: "", poll: null });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [postedThread, setPostedThread] = useState(null);
   const handleAttachmentsChange = useCallback((next) => {
     setAttachments(next);
   }, []);
@@ -76,7 +82,8 @@ export default function NewDiscussionForm() {
         poll: attachments.poll,
       });
 
-      router.push(`/p/${thread.forum.slug}/${thread.id}`);
+      // Odenjeto kon novata diskusija cheka da se zatvori potvrdata.
+      setPostedThread(thread);
     } catch (error) {
       const validation = error.body?.errors;
       if (validation) {
@@ -158,13 +165,13 @@ export default function NewDiscussionForm() {
         checked={isAnonymous}
         onChange={setIsAnonymous}
         action={
-          <button
+          <PrimaryButton
             type="submit"
             disabled={submitting}
-            className="h-10 w-36 cursor-pointer rounded-xl bg-[#582FF5] font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-10 w-36 font-[family-name:var(--font-manrope)] text-[14px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:opacity-60"
           >
             {submitting ? "Се објавува…" : "Објави"}
-          </button>
+          </PrimaryButton>
         }
       />
       {submitError ? (
@@ -172,6 +179,16 @@ export default function NewDiscussionForm() {
           {submitError}
         </p>
       ) : null}
+
+      <InfoDialog
+        open={Boolean(postedThread)}
+        title={POSTED_TITLE}
+        message={POSTED_MESSAGE}
+        messageWidthClassName="max-w-[246px]"
+        onClose={() =>
+          router.push(`/p/${postedThread.forum.slug}/${postedThread.id}`)
+        }
+      />
     </form>
   );
 }
