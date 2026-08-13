@@ -7,6 +7,7 @@ import BackButton from "@/components/shell/BackButton";
 import CommentComposer from "@/components/thread/CommentComposer";
 import CommentList from "@/components/thread/CommentList";
 import CommentsHeader from "@/components/thread/CommentsHeader";
+import MobileFooter from "@/components/shell/MobileFooter";
 import ThreadPost from "@/components/thread/ThreadPost";
 import { useThread } from "@/hooks/useThread";
 
@@ -46,7 +47,7 @@ export default function ThreadPage() {
 
   return (
     <AppShell>
-      <div className="flex w-[990px] max-w-full flex-col gap-8 font-(family-name:--font-manrope)">
+      <div className="flex w-[990px] max-w-full flex-col gap-8 font-(family-name:--font-manrope) md:max-w-[680px] lg:max-w-full">
         <div className="self-start">
           <BackButton
             href={`/p/${forum.slug}`}
@@ -65,6 +66,9 @@ export default function ThreadPage() {
           onSortChange={setSort}
         />
         <CommentList comments={comments} threadId={thread.id} onCommentCreated={reload} />
+
+        {/* Kontejnerot ovde ima gap-8, pa treba pomala margina od feed-ot. */}
+        <MobileFooter className="mt-3" />
       </div>
     </AppShell>
   );

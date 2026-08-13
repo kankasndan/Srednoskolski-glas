@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useModalDismiss } from "@/hooks/useModalDismiss";
 
 // Zaednichka obvivka za site pop-up prozorci.
 export default function DialogShell({
@@ -11,22 +11,7 @@ export default function DialogShell({
   widthClassName = "max-w-md",
   children,
 }) {
-  useEffect(() => {
-    if (!open) return;
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") onClose?.();
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [open, onClose]);
+  useModalDismiss(open, onClose);
 
   // `open` se vklucuva samo po klik, pa document sekogas postoi tuka.
   if (!open || typeof document === "undefined") return null;

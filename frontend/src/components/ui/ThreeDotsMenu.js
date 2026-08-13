@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 // items: [{ label, onSelect }]
 export default function ThreeDotsMenu({ items }) {
@@ -8,24 +9,7 @@ export default function ThreeDotsMenu({ items }) {
   const menuId = useId();
   const wrapperRef = useRef(null);
 
-  // Zatvori na klik nadvor ili na Escape.
-  useEffect(() => {
-    if (!open) return;
-
-    const handlePointerDown = (event) => {
-      if (!wrapperRef.current?.contains(event.target)) setOpen(false);
-    };
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open]);
+  useClickOutside(wrapperRef, useCallback(() => setOpen(false), []), open);
 
   return (
     <div ref={wrapperRef} className="relative">

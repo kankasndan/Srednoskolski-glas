@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import Header from "@/components/shell/Header";
+import MobileMenu from "@/components/shell/MobileMenu";
 import SchoolForums from "@/components/forum/SchoolForums";
 import SidebarNav from "@/components/shell/SidebarNav";
 import ThematicForums from "@/components/forum/ThematicForums";
@@ -31,6 +32,7 @@ export default function AppShell({ children, contentClassName = "" }) {
   const { general, schoolsByCity, loading, error } = useForums();
   const [collapsed, setCollapsed] = useState(sidebarCollapsed);
   const [navOverride, setNavOverride] = useState({ key: null, pathname: null });
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     sidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
@@ -52,13 +54,26 @@ export default function AppShell({ children, contentClassName = "" }) {
       key,
       pathname,
     });
+    setMenuOpen(false);
   }
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-white">
-      <Header />
-      <div className="flex min-h-0 flex-1 px-6">
-        <aside className="box-border flex shrink-0 flex-col border-r border-[#CCCCCC] pr-6 pt-1 pl-8">
+      <Header onMenuOpen={() => setMenuOpen(true)} />
+
+      <MobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        general={general}
+        schoolsByCity={schoolsByCity}
+        loading={loading}
+        error={error}
+        selectedKey={selectedKey}
+        onSelect={handleSelect}
+      />
+
+      <div className="flex min-h-0 flex-1 lg:px-6">
+        <aside className="box-border hidden shrink-0 flex-col border-r border-[#CCCCCC] pr-6 pt-1 pl-8 lg:flex">
           <button
             type="button"
             onClick={toggleCollapsed}
@@ -80,7 +95,7 @@ export default function AppShell({ children, contentClassName = "" }) {
             onScroll={(event) => {
               sidebarScrollTop = event.currentTarget.scrollTop;
             }}
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mask-fade-out pb-4"
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-4"
           >
             <SidebarNav
               selectedKey={selectedKey}
@@ -107,7 +122,7 @@ export default function AppShell({ children, contentClassName = "" }) {
           </div>
         </aside>
         <main
-          className={`flex flex-1 items-start justify-center overflow-y-auto pb-12 pt-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${contentClassName}`}
+          className={`flex flex-1 items-start justify-center overflow-y-auto px-6 pb-8 pt-4 [scrollbar-width:none] lg:px-0 lg:pb-12 lg:pt-12 [&::-webkit-scrollbar]:hidden ${contentClassName}`}
         >
           {children}
         </main>

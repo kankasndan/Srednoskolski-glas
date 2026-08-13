@@ -62,7 +62,7 @@ function MediaGallery({ items }) {
         {items.map((item) => (
           <div
             key={`${item.type}-${item.url}`}
-            className="relative aspect-[990/421] w-full shrink-0 snap-center overflow-hidden rounded-2xl bg-black"
+            className="relative h-[191px] w-full shrink-0 snap-center overflow-hidden rounded-2xl bg-black lg:aspect-[990/421] lg:h-auto"
           >
             {item.type === "video" ? (
               <video

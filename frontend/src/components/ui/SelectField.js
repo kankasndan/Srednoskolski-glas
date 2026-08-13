@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { labelClass, fieldClass } from "@/lib/fieldStyles";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 const rowClass =
   "flex h-10 w-full cursor-pointer items-center justify-between gap-3 px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-normal leading-none transition-colors duration-300 ease-out hover:bg-[#E5E5E5]";
@@ -16,15 +17,6 @@ function Chevron({ className = "" }) {
       aria-hidden="true"
       className={`size-4 shrink-0 transition-transform duration-300 ease-out ${className}`}
     />
-  );
-}
-
-function Tooltip({ text }) {
-  return (
-    <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-max max-w-60 -translate-x-1/2 rounded-lg bg-[#0A0A0A] px-3 py-2 text-center font-(family-name:--font-manrope) text-[12px] leading-snug text-white opacity-0 transition-opacity group-hover:opacity-100">
-      {text}
-      <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#0A0A0A]" />
-    </div>
   );
 }
 
@@ -67,30 +59,11 @@ export default function SelectField({
   options,
   groups,
   disabled = false,
-  tooltip,
 }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setOpen(false);
-      }
-    }
-
-    function handleEscape(event) {
-      if (event.key === "Escape") setOpen(false);
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, []);
+  useClickOutside(wrapperRef, useCallback(() => setOpen(false), []), open);
 
   function select(nextValue) {
     onChange(nextValue);
@@ -116,8 +89,6 @@ export default function SelectField({
         ref={wrapperRef}
         className={`group relative h-14 ${open ? "z-30" : ""}`}
       >
-        {tooltip && <Tooltip text={tooltip} />}
-
         <input
           type="text"
           name={id}
