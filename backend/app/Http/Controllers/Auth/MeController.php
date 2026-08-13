@@ -23,6 +23,7 @@ class MeController extends Controller
             'user' => $user,
             'permissions' => $user->getAllPermissions()->pluck('name')->values(),
             'capabilities' => [
+                'has_completed_onboarding' => $user->hasCompletedOnboarding(),
                 'can_create_comments' => $user->canCreateComments(),
                 // Coarse flag: may start threads somewhere (own school + general forums).
                 'can_create_threads' => $user->hasCompletedOnboarding()

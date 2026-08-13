@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { followForum, unfollowForum } from "@/api/forums";
 import { useProfile } from "@/hooks/useProfile";
+import { needsOnboarding, ONBOARDING_REQUIRED_MESSAGE } from "@/lib/capabilities";
 
 const GUEST_ERROR = "Мора да си најавен за да следиш форум.";
 
@@ -32,6 +33,11 @@ export default function FollowForumButton({
       return;
     }
 
+    if (!profileLoading && needsOnboarding(user)) {
+      setError(ONBOARDING_REQUIRED_MESSAGE);
+      return;
+    }
+
     const nextFollowing = !following;
     setFollowing(nextFollowing);
     setPending(true);
@@ -55,6 +61,8 @@ export default function FollowForumButton({
       setFollowing(!nextFollowing);
       if (err?.status === 401) {
         setError(GUEST_ERROR);
+      } else if (err?.status === 403) {
+        setError(err.message || ONBOARDING_REQUIRED_MESSAGE);
       }
     } finally {
       setPending(false);

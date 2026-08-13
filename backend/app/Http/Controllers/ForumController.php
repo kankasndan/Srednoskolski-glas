@@ -6,6 +6,7 @@ use App\Http\Resources\ForumResource;
 use App\Models\Forum;
 use App\Models\School;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ForumController extends Controller
 {
@@ -56,9 +57,15 @@ class ForumController extends Controller
      * Show a single forum by slug (banner / metadata only).
      *
      * Threads always come from GET /api/p/{slug}/threads (filters, page 1, scroll).
+     * Pass track_view=1 when opening the forum page so visits count toward explore ranking.
      */
-    public function show(Forum $forum): JsonResponse
+    public function show(Request $request, Forum $forum): JsonResponse
     {
+        if ($request->boolean('track_view')) {
+            $forum->increment('views');
+            $forum->refresh();
+        }
+
         $forum->load('school.city');
 
         return response()->json([

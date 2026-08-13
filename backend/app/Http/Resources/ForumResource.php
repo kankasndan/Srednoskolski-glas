@@ -40,6 +40,7 @@ class ForumResource extends JsonResource
             'imageUrl' => $this->imageUrl,
             'threads_count' => $this->threads_count,
             'members_count' => $this->members_count,
+            'views' => (int) ($this->views ?? 0),
             'is_following' => $this->when(
                 $this->withDetails && $user !== null,
                 fn () => $user->forums()->where('forums.id', $this->id)->exists(),

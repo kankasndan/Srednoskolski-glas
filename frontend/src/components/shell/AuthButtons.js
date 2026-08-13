@@ -6,43 +6,56 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Avatar from "@/components/ui/Avatar";
 import { apiFetch } from "@/lib/api";
+import { needsOnboarding } from "@/lib/capabilities";
+import {
+  clearSessionUser,
+  getCachedSessionUser,
+  loadSessionUser,
+  subscribeSessionUser,
+} from "@/lib/sessionUser";
+
+function AuthButtonsSkeleton() {
+  return (
+    <div
+      className="ml-auto flex h-10 w-75 shrink-0 items-center justify-end gap-3"
+      aria-hidden="true"
+    >
+      <div className="h-10 w-36 animate-pulse rounded-xl bg-[#E5E5E5]" />
+      <div className="h-10 w-36 animate-pulse rounded-xl bg-[#E5E5E5]" />
+    </div>
+  );
+}
 
 export default function AuthButtons() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const cached = getCachedSessionUser();
+  const [user, setUser] = useState(() => (cached === undefined ? null : cached));
+  const [resolved, setResolved] = useState(() => cached !== undefined);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
+    const unsubscribe = subscribeSessionUser((next) => {
+      if (next === undefined) return;
+      setUser(next);
+      setResolved(true);
+    });
+
     let isMounted = true;
 
-    // The session cookie is httpOnly, so we can't inspect it directly; we ask
-    // the backend who we are. A 401 simply means "signed out".
-    async function loadUser() {
-      try {
-        const response = await apiFetch("/api/me");
-
-        if (!response.ok) {
-          throw new Error("Unable to load user");
-        }
-
-        const data = await response.json();
-
-        if (isMounted) {
-          setUser(data.user);
-        }
-      } catch {
-        if (isMounted) {
-          setUser(null);
-        }
-      }
-    }
-
-    loadUser();
+    loadSessionUser()
+      .then((nextUser) => {
+        if (!isMounted) return;
+        setUser(nextUser);
+      })
+      .finally(() => {
+        if (isMounted) setResolved(true);
+      });
 
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 
@@ -78,6 +91,7 @@ export default function AuthButtons() {
       // signed-out session; the cookie will expire regardless.
     } finally {
       localStorage.removeItem("onboarding_pending");
+      clearSessionUser();
       setUser(null);
       setMenuOpen(false);
       setLoggingOut(false);
@@ -85,7 +99,32 @@ export default function AuthButtons() {
     }
   }
 
+  if (!resolved && !user) {
+    return <AuthButtonsSkeleton />;
+  }
+
   if (user) {
+    if (needsOnboarding(user)) {
+      return (
+        <div className="ml-auto flex h-10 shrink-0 items-center gap-3">
+          <Link
+            href="/register/onboarding"
+            className="flex h-10 w-auto min-w-36 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0]"
+          >
+            Заврши регистрација
+          </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="flex h-10 cursor-pointer items-center justify-center rounded-xl border border-[#CCCCCC] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:bg-[#E5E5E5] disabled:opacity-60"
+          >
+            {loggingOut ? "…" : "Одјави се"}
+          </button>
+        </div>
+      );
+    }
+
     const displayName = user.username || "Профил";
     const avatarUrl = user.imageUrl;
 

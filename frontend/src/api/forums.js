@@ -3,12 +3,25 @@ import { apiFetch } from "@/lib/api";
 /**
  * Single forum banner/metadata.
  * GET /api/p/{slug} → { data: { forum } }
+ * Pass trackView on the forum page so visits count toward explore ranking.
  */
-export async function getForum(slug) {
-  const res = await apiFetch(`/api/p/${slug}`);
+export async function getForum(slug, { trackView = false } = {}) {
+  const query = trackView ? "?track_view=1" : "";
+  const res = await apiFetch(`/api/p/${slug}${query}`);
   if (!res.ok) throw new Error(`Failed to load forum: ${res.status}`);
   const payload = await res.json();
   return payload.data?.forum ?? payload.data ?? payload;
+}
+
+/**
+ * Explore page: top visited general forums + weekly popular threads.
+ * GET /api/explore → { data: { forums, threads } }
+ */
+export async function getExplore() {
+  const res = await apiFetch("/api/explore");
+  if (!res.ok) throw new Error(`Failed to load explore: ${res.status}`);
+  const payload = await res.json();
+  return payload.data ?? payload;
 }
 
 /**
@@ -28,8 +41,13 @@ export async function getForums() {
  */
 export async function followForum(slug) {
   const res = await apiFetch(`/api/p/${slug}/follow`, { method: "POST" });
-  if (!res.ok) throw new Error(`Failed to follow forum: ${res.status}`);
-  const payload = await res.json();
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const error = new Error(payload.message || `Failed to follow forum: ${res.status}`);
+    error.status = res.status;
+    error.body = payload;
+    throw error;
+  }
   return payload.data;
 }
 
@@ -39,7 +57,12 @@ export async function followForum(slug) {
  */
 export async function unfollowForum(slug) {
   const res = await apiFetch(`/api/p/${slug}/follow`, { method: "DELETE" });
-  if (!res.ok) throw new Error(`Failed to unfollow forum: ${res.status}`);
-  const payload = await res.json();
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const error = new Error(payload.message || `Failed to unfollow forum: ${res.status}`);
+    error.status = res.status;
+    error.body = payload;
+    throw error;
+  }
   return payload.data;
 }

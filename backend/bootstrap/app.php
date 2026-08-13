@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureOnboardingCompleted;
 use App\Http\Middleware\EnsureUserNotBanned;
 use App\Http\Middleware\UpdateLastActive;
 use Illuminate\Auth\AuthenticationException;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'not_banned' => EnsureUserNotBanned::class,
+            'onboarding' => EnsureOnboardingCompleted::class,
         ]);
 
         // SPA/API has no named "login" route. Unauthenticated /api/* must return 401 JSON

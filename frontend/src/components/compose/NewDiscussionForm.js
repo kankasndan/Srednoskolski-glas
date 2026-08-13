@@ -10,7 +10,11 @@ import RichTextEditor from "@/components/compose/RichTextEditor";
 import TitleInput from "@/components/compose/TitleInput";
 import { createThread } from "@/api/threads";
 import { useProfile } from "@/hooks/useProfile";
-import { canCreateThreadInForum, canCreateThreads } from "@/lib/capabilities";
+import {
+  canCreateThreadInForum,
+  canCreateThreads,
+  needsOnboarding,
+} from "@/lib/capabilities";
 
 function getPlainTextFromHtml(html) {
   const container = document.createElement("div");
@@ -106,6 +110,13 @@ export default function NewDiscussionForm() {
               Најави се
             </Link>{" "}
             и заврши го onboarding процесот со училиште за да започнеш дискусија.
+          </>
+        ) : needsOnboarding(user) ? (
+          <>
+            <Link href="/register/onboarding" className="font-bold text-[#582FF5] hover:underline">
+              Заврши ја регистрацијата
+            </Link>{" "}
+            за да можеш да започнеш дискусија.
           </>
         ) : (
           "Само корисници кои се дел од училиште можат да започнат дискусија. Сè уште можеш да коментираш на постоечки дискусии."

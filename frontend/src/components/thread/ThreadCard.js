@@ -8,6 +8,7 @@ import ThreadAttachments from "@/components/thread/ThreadAttachments";
 import ThreadMetaTags, { buildThreadMetaTags } from "@/components/thread/ThreadMetaTags";
 import ThreadPoll from "@/components/thread/ThreadPoll";
 import ThreadViewCount from "@/components/thread/ThreadViewCount";
+import { ONBOARDING_REQUIRED_MESSAGE } from "@/lib/capabilities";
 import { formatCount } from "@/lib/formatCount";
 import { stripHtml } from "@/lib/html";
 import { formatPostedAgo } from "@/lib/time";
@@ -48,6 +49,7 @@ export default function ThreadCard({ thread }) {
   const [upvotes, setUpvotes] = useState(thread.upvotes ?? 0);
   const [hasVoted, setHasVoted] = useState(Boolean(thread.has_voted));
   const [voting, setVoting] = useState(false);
+  const [voteError, setVoteError] = useState("");
   const router = useRouter();
   const threadHref = `/p/${thread.forum.slug}/${thread.id}`;
   const hasAttachments = (thread.attachments?.length ?? 0) > 0;
@@ -60,6 +62,7 @@ export default function ThreadCard({ thread }) {
       nextVoteState(upvotes, hasVoted);
 
     setVoting(true);
+    setVoteError("");
     setUpvotes(nextVotes);
     setHasVoted(nextHasVoted);
 
@@ -67,9 +70,12 @@ export default function ThreadCard({ thread }) {
       const data = await toggleThreadVote(thread.id);
       setUpvotes(data.upvotes ?? nextVotes);
       setHasVoted(Boolean(data.has_voted));
-    } catch {
+    } catch (err) {
       setUpvotes(previousVotes);
       setHasVoted(previousHasVoted);
+      if (err?.status === 403) {
+        setVoteError(err.message || ONBOARDING_REQUIRED_MESSAGE);
+      }
     } finally {
       setVoting(false);
     }
@@ -118,6 +124,11 @@ export default function ThreadCard({ thread }) {
             count={thread.comments_count}
             onClick={openThread}
           />
+          {voteError ? (
+            <p className="max-w-[120px] font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[#DC2626]">
+              {voteError}
+            </p>
+          ) : null}
         </div>
       </div>
 

@@ -20,7 +20,7 @@ export default function ForumPage() {
       setForumError(null);
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/p/${slug}`, {
+        const response = await fetch(`${API_BASE_URL}/api/p/${slug}?track_view=1`, {
           credentials: "include",
         });
 

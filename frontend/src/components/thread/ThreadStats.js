@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { toggleThreadVote } from "@/api/threads";
 import FollowThreadButton from "@/components/thread/FollowThreadButton";
+import { ONBOARDING_REQUIRED_MESSAGE } from "@/lib/capabilities";
 import { formatCount } from "@/lib/formatCount";
 import { nextVoteState } from "@/lib/votes";
 
@@ -23,6 +24,7 @@ function VoteStat({ threadId, votes: initialVotes = 0, hasVoted: initialHasVoted
   const [votes, setVotes] = useState(initialVotes);
   const [hasVoted, setHasVoted] = useState(Boolean(initialHasVoted));
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleVote() {
     if (!threadId || busy) return;
@@ -31,6 +33,7 @@ function VoteStat({ threadId, votes: initialVotes = 0, hasVoted: initialHasVoted
       nextVoteState(votes, hasVoted);
 
     setBusy(true);
+    setError("");
     setVotes(nextVotes);
     setHasVoted(nextHasVoted);
     onVoted?.({ upvotes: nextVotes, has_voted: nextHasVoted });
@@ -43,40 +46,50 @@ function VoteStat({ threadId, votes: initialVotes = 0, hasVoted: initialHasVoted
       setVotes(serverVotes);
       setHasVoted(serverHasVoted);
       onVoted?.({ upvotes: serverVotes, has_voted: serverHasVoted });
-    } catch {
+    } catch (err) {
       setVotes(previousVotes);
       setHasVoted(previousHasVoted);
       onVoted?.({ upvotes: previousVotes, has_voted: previousHasVoted });
+      if (err?.status === 403) {
+        setError(err.message || ONBOARDING_REQUIRED_MESSAGE);
+      }
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <button
-      type="button"
-      disabled={busy}
-      aria-pressed={hasVoted}
-      aria-label="Гласај нагоре"
-      onClick={handleVote}
-      className={`flex h-10 w-24 cursor-pointer items-center justify-center gap-4 rounded-2xl border font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors disabled:opacity-70 ${
-        hasVoted
-          ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white"
-          : "border-[#CCCCCC] text-black opacity-80 hover:border-[var(--color-primary-100)] hover:bg-[var(--color-primary-100)] hover:text-white hover:opacity-100"
-      }`}
-    >
-      <Image
-        src="/Chevrons up.svg"
-        alt=""
-        width={24}
-        height={24}
-        className={`size-6 ${hasVoted ? "-scale-y-100 brightness-0 invert" : ""}`}
-      />
-      <span>
-        <span className="sr-only">Гласови: </span>
-        {formatCount(votes)}
-      </span>
-    </button>
+    <div className="flex flex-col gap-1">
+      <button
+        type="button"
+        disabled={busy}
+        aria-pressed={hasVoted}
+        aria-label="Гласај нагоре"
+        onClick={handleVote}
+        className={`flex h-10 w-24 cursor-pointer items-center justify-center gap-4 rounded-2xl border font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors disabled:opacity-70 ${
+          hasVoted
+            ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white"
+            : "border-[#CCCCCC] text-black opacity-80 hover:border-[var(--color-primary-100)] hover:bg-[var(--color-primary-100)] hover:text-white hover:opacity-100"
+        }`}
+      >
+        <Image
+          src="/Chevrons up.svg"
+          alt=""
+          width={24}
+          height={24}
+          className={`size-6 ${hasVoted ? "-scale-y-100 brightness-0 invert" : ""}`}
+        />
+        <span>
+          <span className="sr-only">Гласови: </span>
+          {formatCount(votes)}
+        </span>
+      </button>
+      {error ? (
+        <p className="max-w-[220px] font-[family-name:var(--font-manrope)] text-[12px] leading-4 text-[#DC2626]">
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
