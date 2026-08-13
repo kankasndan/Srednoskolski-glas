@@ -20,9 +20,15 @@ function ActionButton({ icon, label, count, onClick, active = false, compact = f
   const baseClassName = `group flex cursor-pointer items-center justify-center border font-[family-name:var(--font-manrope)] font-normal leading-none transition-colors ${sizeClassName}`;
   const iconSize = compact ? "size-4" : "size-6";
 
+  // Celata kartica e klikabilna, pa klikot na kopce zapira ovde za da ne ja otvori diskusijata.
+  function handleClick(event) {
+    event.stopPropagation();
+    onClick?.(event);
+  }
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       type="button"
       aria-label={label}
       className={
@@ -87,15 +93,13 @@ export default function ThreadCard({ thread }) {
 
   return (
     <article
-      className={`relative flex flex-col items-start justify-center gap-4 rounded-3xl border-b border-b-[#CFE9ED] px-2 pb-6 pt-4 transition-colors active:bg-[#DCEBED] md:px-4 lg:p-4 lg:pt-6 lg:hover:bg-[#DCEBED] ${
+      onClick={openThread}
+      className={`relative flex cursor-pointer flex-col items-start justify-center gap-4 rounded-3xl border-b border-b-[#CFE9ED] px-2 pb-6 pt-4 transition-colors active:bg-[#DCEBED] md:px-4 lg:p-4 lg:pt-6 lg:hover:bg-[#DCEBED] ${
         opening ? "bg-[#DCEBED]" : "bg-transparent"
       }`}
     >
       <div className="flex w-full items-start justify-between gap-8">
-        <div
-          className="flex min-w-0 flex-1 cursor-pointer flex-col gap-4"
-          onClick={openThread}
-        >
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
           <ThreadMetaTags
             tags={buildThreadMetaTags(thread.forum, thread)}
             postedAgo={formatPostedAgo(thread.created_at)}
