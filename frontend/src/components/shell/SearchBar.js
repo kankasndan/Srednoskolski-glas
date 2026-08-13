@@ -197,7 +197,7 @@ export default function SearchBar() {
   const showDropdown = focused && dropdownOpen && query.trim().length > 0;
 
   return (
-    <div ref={rootRef} className="relative w-[632px] max-w-full">
+    <div ref={rootRef} className="relative w-full">
       <form
         role="search"
         onSubmit={handleSubmit}
@@ -210,26 +210,6 @@ export default function SearchBar() {
           height={16}
           className="shrink-0"
         />
-        {showForumChip ? (
-          <button
-            type="button"
-            onClick={removeForumFilter}
-            aria-label="Отстрани филтер"
-            title={forumMeta?.name ?? "Отстрани филтер"}
-            className="group relative flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-[#F5F5F5] p-1 transition-colors hover:bg-[#E53935]"
-          >
-            <span className="size-full group-hover:opacity-0">
-              <ForumIcon
-                src={forumMeta?.imageUrl}
-                wrapperClassName="block size-full"
-                imageClassName="size-full max-h-none max-w-none object-contain"
-              />
-            </span>
-            <span className="pointer-events-none absolute inset-0 hidden items-center justify-center text-white group-hover:flex">
-              <FontAwesomeIcon icon={faXmark} className="h-4 w-4" />
-            </span>
-          </button>
-        ) : null}
         <input
           type="search"
           value={query}
@@ -250,6 +230,18 @@ export default function SearchBar() {
           aria-expanded={showDropdown}
           className="min-w-0 flex-1 bg-transparent font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[#595959] placeholder:text-[#595959] outline-none [&::-webkit-search-cancel-button]:hidden"
         />
+        {showForumChip ? (
+          <button
+            type="button"
+            onClick={removeForumFilter}
+            aria-label="Отстрани филтер"
+            title={forumMeta?.name ?? "Отстрани филтер"}
+            className="flex h-[18px] shrink-0 cursor-pointer items-center gap-1 rounded-xl bg-[#F5F5F5] px-2 py-0.5 font-[family-name:var(--font-manrope)] text-[10px] font-normal leading-none text-black transition-colors hover:bg-[#EBEBEB]"
+          >
+            <span>{forumMeta?.name ?? "Форум"}</span>
+            <FontAwesomeIcon icon={faXmark} className="size-2 shrink-0" />
+          </button>
+        ) : null}
       </form>
 
       {showDropdown ? (
@@ -337,7 +329,7 @@ export default function SearchBar() {
 
 export function SearchBarFallback() {
   return (
-    <div className="flex h-10 w-[632px] max-w-full items-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2">
+    <div className="flex h-10 w-full items-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2">
       <Image
         src="/search.svg"
         alt=""
