@@ -44,6 +44,29 @@ function ActionButton({ icon, label, count, onClick, active = false }) {
   );
 }
 
+function StatPill({ icon, count, onClick, active = false }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group flex h-8 w-[72px] shrink-0 cursor-pointer items-center gap-2 rounded-xl border px-4 py-2 opacity-80 font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-none transition-colors hover:opacity-100 ${
+        active
+          ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white"
+          : "border-[#CCCCCC] text-black"
+      }`}
+    >
+      <Image
+        src={icon}
+        alt=""
+        width={16}
+        height={16}
+        className={active ? "size-4 -scale-y-100 white-icon" : "size-4"}
+      />
+      {formatCount(count ?? 0)}
+    </button>
+  );
+}
+
 export default function ThreadCard({ thread }) {
   const [upvotes, setUpvotes] = useState(thread.upvotes ?? 0);
   const [hasVoted, setHasVoted] = useState(Boolean(thread.has_voted));
@@ -52,6 +75,8 @@ export default function ThreadCard({ thread }) {
   const threadHref = `/p/${thread.forum.slug}/${thread.id}`;
   const hasAttachments = (thread.attachments?.length ?? 0) > 0;
   const hasPoll = Boolean(thread.poll);
+  const metaTags = buildThreadMetaTags(thread.forum, thread);
+  const authorTag = metaTags.find((tag) => tag.key === "author");
 
   async function upvote() {
     if (voting) return;
@@ -80,14 +105,14 @@ export default function ThreadCard({ thread }) {
   }
 
   return (
-    <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] p-4 pt-6 rounded-3xl transition-colors hover:bg-[#DCEBED]">
-      <div className="flex w-full items-start justify-between gap-8">
+    <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] p-4 lg:pt-6 rounded-3xl transition-colors hover:bg-[#DCEBED]">
+      <div className="hidden w-full items-start justify-between gap-8 lg:flex">
         <div
           className="flex min-w-0 flex-1 cursor-pointer flex-col gap-4"
           onClick={openThread}
         >
           <ThreadMetaTags
-            tags={buildThreadMetaTags(thread.forum, thread)}
+            tags={metaTags}
             postedAgo={formatPostedAgo(thread.created_at)}
           />
 
@@ -118,6 +143,31 @@ export default function ThreadCard({ thread }) {
             count={thread.comments_count}
             onClick={openThread}
           />
+        </div>
+      </div>
+
+      <div className="flex w-full flex-col gap-3 lg:hidden">
+        <div className="flex min-w-0 cursor-pointer flex-col gap-3" onClick={openThread}>
+          <ThreadMetaTags
+            tags={authorTag ? [authorTag] : []}
+            postedAgo={formatPostedAgo(thread.created_at)}
+          />
+
+          <h3 className="font-[family-name:var(--font-manrope)] text-[18px] font-bold leading-snug text-black">
+            {thread.title}
+          </h3>
+
+          {thread.description ? (
+            <p className="line-clamp-3 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-[20px] text-[#595959]">
+              {stripHtml(thread.description)}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="relative z-10 flex flex-wrap items-center gap-2">
+          <StatPill icon="/Chevrons up.svg" count={upvotes} onClick={upvote} active={hasVoted} />
+          <StatPill icon="/chat-1-line.svg" count={thread.comments_count} onClick={openThread} />
+          <StatPill icon="/eye-line.svg" count={thread.views} onClick={openThread} />
         </div>
       </div>
 

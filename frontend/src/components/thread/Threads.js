@@ -311,36 +311,45 @@ export default function Threads({
 
   return (
     <section className="flex w-full max-w-[990px] flex-col items-center gap-8">
-      <div ref={filterContainerRef} className="flex self-end gap-2">
-        {showSort ? (
-          <FeedSelect
-            name="sort"
-            label="Сортирај дискусии"
-            options={SORT_OPTIONS}
-            selected={selectedSort}
-            isOpen={openSelect === "sort"}
-            isSelected={selectedFilters.sort}
-            listboxId={sortListboxId}
-            onToggle={() =>
-              setOpenSelect((current) => (current === "sort" ? null : "sort"))
-            }
-            onSelect={selectSortOption}
-          />
-        ) : null}
+      <div ref={filterContainerRef} className="flex w-full self-start gap-2 pl-4 lg:w-auto lg:self-end lg:pl-0">
+        <div className="hidden gap-2 lg:flex">
+          {showSort ? (
+            <FeedSelect
+              name="sort"
+              label="Сортирај дискусии"
+              options={SORT_OPTIONS}
+              selected={selectedSort}
+              isOpen={openSelect === "sort"}
+              isSelected={selectedFilters.sort}
+              listboxId={sortListboxId}
+              onToggle={() =>
+                setOpenSelect((current) => (current === "sort" ? null : "sort"))
+              }
+              onSelect={selectSortOption}
+            />
+          ) : null}
 
-        <FeedSelect
-          name="timeFilter"
-          label="Филтрирај по време"
-          options={TIME_FILTER_OPTIONS}
-          selected={selectedTimeFilter}
-          isOpen={openSelect === "time"}
-          isSelected={selectedFilters.time}
-          listboxId={timeListboxId}
-          onToggle={() =>
-            setOpenSelect((current) => (current === "time" ? null : "time"))
-          }
-          onSelect={selectTimeFilterOption}
-        />
+          <FeedSelect
+            name="timeFilter"
+            label="Филтрирај по време"
+            options={TIME_FILTER_OPTIONS}
+            selected={selectedTimeFilter}
+            isOpen={openSelect === "time"}
+            isSelected={selectedFilters.time}
+            listboxId={timeListboxId}
+            onToggle={() =>
+              setOpenSelect((current) => (current === "time" ? null : "time"))
+            }
+            onSelect={selectTimeFilterOption}
+          />
+        </div>
+
+        <button type="button" className="flex cursor-pointer items-center gap-2 lg:hidden">
+          <Image src="/filter-line.svg" alt="" width={24} height={24} className="size-6" />
+          <span className="font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black">
+            Филтери
+          </span>
+        </button>
       </div>
 
       <div className="flex w-full flex-col" aria-label="Дискусии">

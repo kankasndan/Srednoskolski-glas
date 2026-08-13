@@ -100,7 +100,7 @@ export default function AuthButtons() {
         >
           <Avatar src={avatarUrl} size="xl" alt={displayName} />
 
-          <span className="font-(family-name:--font-manrope) text-[18px] font-medium leading-none text-[#0A0A0A] group-hover:text-[#582FF5] transition">
+          <span className="hidden font-(family-name:--font-manrope) text-[18px] font-medium leading-none text-[#0A0A0A] group-hover:text-[#582FF5] transition lg:inline">
             {displayName}
           </span>
 
@@ -109,7 +109,7 @@ export default function AuthButtons() {
             alt=""
             width={16}
             height={16}
-            className={`size-4`}
+            className="hidden size-4 lg:block"
           />
         </button>
 
@@ -143,16 +143,16 @@ export default function AuthButtons() {
   }
 
   return (
-    <div className="ml-auto flex h-10 w-75 shrink-0 items-center gap-3">
+    <div className="flex h-10 shrink-0 items-center gap-3 lg:w-75">
       <Link
         href="/login"
-        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900)"
+        className="flex h-10 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900) lg:w-36"
       >
         Најави се
       </Link>
       <Link
         href="/register"
-        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-white transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900)"
+        className="hidden h-10 w-36 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-white transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900) lg:flex"
       >
         Регистрација
       </Link>

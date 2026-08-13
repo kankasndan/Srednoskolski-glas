@@ -50,7 +50,7 @@ export default function ForumPage() {
 
   return (
     <AppShell>
-      <div className="flex w-[990px] max-w-full flex-col gap-8">
+      <div className="flex w-[990px] max-w-full flex-col gap-3 lg:gap-8">
         {forumError ? (
           <p className="font-(family-name:--font-manrope) text-[16px] text-[#595959]">
             Форумот не може да се вчита.
