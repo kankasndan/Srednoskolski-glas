@@ -12,7 +12,7 @@ export default function AuthHero() {
         width={712}
         height={1024}
         priority
-        className="absolute bottom-0 left-0 h-[104%] w-[93%]"
+        className="absolute bottom-0 left-0 h-[1024px] w-[712px] max-w-none"
       />
     </div>
   );

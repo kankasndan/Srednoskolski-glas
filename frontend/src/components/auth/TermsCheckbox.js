@@ -16,10 +16,17 @@ function LegalLink({ href, children }) {
 
 export default function TermsCheckbox({ checked, onChange }) {
   return (
-    <Checkbox checked={checked} onChange={onChange} required>
-      <span className="max-w-full font-(family-name:--font-manrope) text-[12px] font-normal leading-[19.4px] text-[#595959] 2xl:text-[14px]">
+    <Checkbox
+      checked={checked}
+      onChange={onChange}
+      required
+      className="h-8 w-[295px] items-center gap-2"
+      boxClassName="size-6 rounded-lg"
+      checkClassName="w-3"
+    >
+      <span className="h-8 w-[263px] font-(family-name:--font-manrope) text-[12px] font-normal leading-4 text-[#595959]">
         Се согласувам со <LegalLink href="/terms">Условите за користење</LegalLink>{" "}
-        и <LegalLink href="/privacy">Политиката на приватност</LegalLink>
+        и <LegalLink href="/privacy">Политиката на приватност</LegalLink><span className="text-red-500">*</span>
       </span>
     </Checkbox>
   );
