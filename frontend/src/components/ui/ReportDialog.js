@@ -100,7 +100,7 @@ export default function ReportDialog({ open, onClose, onSubmit }) {
           <button
             type="submit"
             disabled={submitting}
-            className="cursor-pointer rounded-xl bg-[var(--color-primary-200)] px-6 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="cursor-pointer rounded-xl bg-[var(--color-primary-200)] px-6 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#3300F5] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? "Се пријавува…" : "Пријави"}
           </button>

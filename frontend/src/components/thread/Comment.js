@@ -9,6 +9,7 @@ import CommentComposer from "@/components/thread/CommentComposer";
 import { reportComment, reportErrorMessage } from "@/api/moderation";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ReportDialog from "@/components/ui/ReportDialog";
+import { formatPostedAgo } from "@/lib/time";
 
 export default function Comment({ comment, threadId, onCommentCreated, depth = 0 }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -34,7 +35,7 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
   }
 
   return (
-    <div className="flex gap-2">
+    <div id={`comment-${comment.id}`} className="flex min-w-0 gap-2 scroll-mt-24">
       <div className="flex shrink-0 flex-col items-center">
         <Avatar src={comment.author.imageUrl} size="md" />
         {showLine ? (
@@ -42,8 +43,8 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3">
-        <CommentAuthor author={comment.author} createdAt={comment.created_at} />
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <CommentAuthor author={comment.author} />
         <CommentBody text={comment.content} muted={depth === 0} />
         <CommentActions
           commentId={comment.id}
@@ -54,6 +55,7 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
           onToggle={() => setCollapsed(!collapsed)}
           onReply={() => setReplying(!replying)}
           onReport={() => setReporting(true)}
+          createdAtLabel={formatPostedAgo(comment.created_at)}
         />
 
         {reporting && (
@@ -81,7 +83,7 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
         ) : null}
 
         {showThread ? (
-          <div className="flex flex-col gap-4 pt-1">
+          <div className="flex min-w-0 flex-col gap-4 pt-1">
             {replies.map((reply) => (
               <Comment
                 key={reply.id}

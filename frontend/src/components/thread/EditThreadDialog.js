@@ -83,7 +83,7 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
               <button
                 type="submit"
                 disabled={saving}
-                className="cursor-pointer rounded-xl bg-[var(--color-primary-200)] px-6 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:cursor-not-allowed disabled:bg-[#CCCCCC]"
+                className="cursor-pointer rounded-xl bg-[var(--color-primary-200)] px-6 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#3300F5] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:cursor-not-allowed disabled:bg-[#CCCCCC]"
               >
                 {saving ? "Се зачувува…" : "Објави"}
               </button>

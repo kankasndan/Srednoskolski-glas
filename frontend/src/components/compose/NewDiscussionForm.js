@@ -150,7 +150,7 @@ export default function NewDiscussionForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="h-10 w-36 cursor-pointer rounded-xl bg-[#582FF5] font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-10 w-36 cursor-pointer rounded-xl bg-[#582FF5] font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#3300F5] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? "Се објавува…" : "Објави"}
           </button>

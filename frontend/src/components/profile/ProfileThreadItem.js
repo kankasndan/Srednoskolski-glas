@@ -48,6 +48,8 @@ export default function ProfileThreadItem({
     setThread((prev) => ({
       ...prev,
       ...updated,
+      is_edited: true,
+      edited_at: updated.edited_at ?? updated.updated_at,
       forum: updated.forum ?? prev.forum,
       attachments: updated.attachments ?? [],
       poll: updated.poll ?? prev.poll,

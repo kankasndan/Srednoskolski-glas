@@ -28,7 +28,7 @@ export default function DialogShell({
           aria-modal="true"
           aria-label={label}
           onClick={(event) => event.stopPropagation()}
-          className={`relative flex w-full flex-col items-center gap-8 overflow-hidden rounded-xl bg-white p-10 shadow-[0_12px_24px_rgba(0,0,0,0.12)] ${widthClassName}`}
+          className={`relative flex w-full flex-col items-center gap-6 overflow-hidden rounded-xl bg-white p-5 shadow-[0_12px_24px_rgba(0,0,0,0.12)] sm:p-6 md:gap-8 md:p-10 ${widthClassName}`}
         >
           {/* Grayscale go vadi violetovoto od sharata za da ostane siva. */}
           <div
@@ -46,7 +46,7 @@ export default function DialogShell({
           </button>
 
           {/* relative za da stoi nad sharata */}
-          <div className="relative flex w-full flex-col items-center gap-8">
+          <div className="relative flex w-full flex-col items-center gap-6 md:gap-8">
             {children}
           </div>
         </div>

@@ -203,7 +203,7 @@ function LinkPopover({ initialText, initialUrl, onSubmit, onClose }) {
         <button
           type="button"
           onClick={() => onSubmit(text, url)}
-          className="shrink-0 cursor-pointer rounded-lg bg-[#582FF5] px-3 py-1 font-[family-name:var(--font-manrope)] text-[12px] font-bold text-white transition-colors hover:bg-[#4B25E0]"
+          className="shrink-0 cursor-pointer rounded-lg bg-[#582FF5] px-3 py-1 font-[family-name:var(--font-manrope)] text-[12px] font-bold text-white transition-colors hover:bg-[#3300F5]"
         >
           Додади
         </button>
@@ -374,7 +374,7 @@ export default function RichTextEditor({
           />
         </div>
 
-        <div className="flex min-h-16 items-center justify-between border-t border-[#D9D9D9] px-4 py-3">
+        <div className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-t border-[#D9D9D9] px-3 py-3 sm:px-4">
           <div className="flex flex-wrap items-center gap-1.5">
             {editor &&
               TOOLBAR_BUTTONS.map((button) => {
@@ -433,7 +433,7 @@ export default function RichTextEditor({
                 );
               })}
           </div>
-          <div className="flex shrink-0 items-center gap-4">
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
             <span
               className={`font-[family-name:var(--font-manrope)] text-[12px] leading-none ${counterTextColor}`}
             >

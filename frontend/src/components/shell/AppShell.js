@@ -122,7 +122,7 @@ export default function AppShell({ children, contentClassName = "" }) {
           </div>
         </aside>
         <main
-          className={`flex flex-1 items-start justify-center overflow-y-auto px-6 pb-8 pt-4 [scrollbar-width:none] lg:px-0 lg:pb-12 lg:pt-12 [&::-webkit-scrollbar]:hidden ${contentClassName}`}
+          className={`flex flex-1 items-start justify-center overflow-y-auto px-6 pb-8 pt-4 [scrollbar-width:none] lg:px-8 lg:pb-12 lg:pt-12 xl:px-12 [&::-webkit-scrollbar]:hidden ${contentClassName}`}
         >
           {children}
         </main>

@@ -26,7 +26,7 @@ export default function ConfirmDialog({
           type="button"
           autoFocus
           onClick={onConfirm}
-          className="flex-1 cursor-pointer rounded-xl bg-[var(--color-primary-200)] px-4 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0]"
+          className="flex-1 cursor-pointer rounded-xl bg-[var(--color-primary-200)] px-4 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#3300F5]"
         >
           {confirmLabel}
         </button>

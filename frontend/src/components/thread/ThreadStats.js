@@ -4,13 +4,14 @@ import Image from "next/image";
 import { useState } from "react";
 import { toggleThreadVote } from "@/api/threads";
 import FollowThreadButton from "@/components/thread/FollowThreadButton";
+import ThreadViewCount from "@/components/thread/ThreadViewCount";
 import { formatCount } from "@/lib/formatCount";
 import { nextVoteState } from "@/lib/votes";
 
 function Stat({ icon, label, count }) {
   return (
-    <div className="flex h-10 w-24 items-center justify-center gap-4 rounded-2xl border border-[#CCCCCC] font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-black opacity-80">
-      <Image src={icon} alt="" width={24} height={24} className="size-6" />
+    <div className="flex h-8 w-[72px] items-center justify-center gap-2 rounded-xl border border-[#CCCCCC] font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-none text-black opacity-80 md:h-10 md:w-24 md:gap-4 md:rounded-2xl md:text-[14px]">
+      <Image src={icon} alt="" width={24} height={24} className="size-4 md:size-6" />
       <span>
         <span className="sr-only">{label}: </span>
         {formatCount(count)}
@@ -59,7 +60,7 @@ function VoteStat({ threadId, votes: initialVotes = 0, hasVoted: initialHasVoted
       aria-pressed={hasVoted}
       aria-label="Гласај нагоре"
       onClick={handleVote}
-      className={`flex h-10 w-24 cursor-pointer items-center justify-center gap-4 rounded-2xl border font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors disabled:opacity-70 ${
+      className={`flex h-8 w-[72px] cursor-pointer items-center justify-center gap-2 rounded-xl border font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-none transition-colors disabled:opacity-70 md:h-10 md:w-24 md:gap-4 md:rounded-2xl md:text-[14px] ${
         hasVoted
           ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white"
           : "border-[#CCCCCC] text-black opacity-80 hover:border-[var(--color-primary-100)] hover:bg-[var(--color-primary-100)] hover:text-white hover:opacity-100"
@@ -70,7 +71,7 @@ function VoteStat({ threadId, votes: initialVotes = 0, hasVoted: initialHasVoted
         alt=""
         width={24}
         height={24}
-        className={`size-6 ${hasVoted ? "-scale-y-100 brightness-0 invert" : ""}`}
+        className={`size-4 md:size-6 ${hasVoted ? "-scale-y-100 brightness-0 invert" : ""}`}
       />
       <span>
         <span className="sr-only">Гласови: </span>
@@ -83,25 +84,40 @@ function VoteStat({ threadId, votes: initialVotes = 0, hasVoted: initialHasVoted
 export default function ThreadStats({
   threadId,
   comments,
+  views,
   votes,
   hasVoted = false,
   isFollowing = false,
   onVoted,
   onFollowingChange,
+  children,
 }) {
   return (
-    <div className="flex flex-wrap items-start gap-2">
-      <VoteStat
-        threadId={threadId}
-        votes={votes}
-        hasVoted={hasVoted}
-        onVoted={onVoted}
-      />
-      <Stat icon="/chat-1-line.svg" label="Коментари" count={comments} />
+    <div className="flex w-full flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div className="flex w-full items-center md:flex-wrap md:gap-2">
+        <div className="flex items-center gap-2">
+          <VoteStat
+            threadId={threadId}
+            votes={votes}
+            hasVoted={hasVoted}
+            onVoted={onVoted}
+          />
+          <Stat icon="/chat-1-line.svg" label="Коментари" count={comments} />
+          <ThreadViewCount views={views} className="w-auto md:hidden" />
+        </div>
+        {children ? (
+          <div className="ml-auto flex items-center gap-2 md:ml-0">
+            {children}
+          </div>
+        ) : null}
+      </div>
+
       <FollowThreadButton
         threadId={threadId}
         initialFollowing={isFollowing}
         onFollowingChange={onFollowingChange}
+        wrapperClassName="w-full self-center md:w-[268px] md:self-start"
+        className="w-full"
       />
     </div>
   );

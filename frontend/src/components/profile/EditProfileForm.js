@@ -195,7 +195,7 @@ export default function EditProfileForm({ user: initialUser }) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex h-10 cursor-pointer items-center justify-center rounded-xl bg-[#582FF5] px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0]"
+                className="flex h-10 cursor-pointer items-center justify-center rounded-xl bg-[#582FF5] px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#3300F5]"
               >
                 Прикачи слика
               </button>
@@ -320,7 +320,7 @@ export default function EditProfileForm({ user: initialUser }) {
         <button
           type="submit"
           disabled={saving}
-          className="flex h-10 cursor-pointer items-center justify-center rounded-xl bg-[#582FF5] px-5 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex h-10 cursor-pointer items-center justify-center rounded-xl bg-[#582FF5] px-5 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#3300F5] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saving ? "Се зачувува…" : "Зачувај промени"}
         </button>

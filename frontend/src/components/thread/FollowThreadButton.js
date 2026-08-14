@@ -15,6 +15,7 @@ export default function FollowThreadButton({
   initialFollowing = false,
   onFollowingChange,
   className = "",
+  wrapperClassName = "",
 }) {
   const { user, loading: profileLoading } = useProfile();
   const [following, setFollowing] = useState(Boolean(initialFollowing));
@@ -58,16 +59,16 @@ export default function FollowThreadButton({
 
   const stateClasses = following
     ? "bg-[var(--color-primary-300)] text-white"
-    : "bg-[#582FF5] text-white hover:bg-[#DCEBED] hover:text-[#0A0A0A]";
+    : "bg-[#582FF5] text-white hover:bg-[#3300F5]";
 
   return (
-    <div className="flex shrink-0 flex-col gap-1">
+    <div className={`flex shrink-0 flex-col gap-1 ${wrapperClassName}`}>
       <button
         type="button"
         aria-pressed={following}
         disabled={pending}
         onClick={toggleFollow}
-        className={`flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-80 ${stateClasses} ${className}`}
+        className={`flex h-10 cursor-pointer items-center justify-center gap-3 rounded-xl px-4 py-2 font-[family-name:var(--font-manrope)] text-[12px] font-bold leading-none whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-80 md:text-[14px] ${stateClasses} ${className}`}
       >
         {following && <CheckIcon />}
         <span className="flex h-[19px] items-center leading-none">

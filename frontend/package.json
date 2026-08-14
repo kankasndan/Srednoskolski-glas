@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "tailwind": "npx @tailwindcss/cli -i ./src/app/globals.css -o ./public/tailwind.css --watch",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

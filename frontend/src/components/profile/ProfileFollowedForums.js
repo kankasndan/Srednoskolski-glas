@@ -71,7 +71,7 @@ function FollowCard({ forum, canUnfollow, onUnfollowed }) {
           type="button"
           disabled={busy}
           onClick={handleUnfollow}
-          className="relative z-10 flex h-10 w-36 shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-(--color-primary-200) px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-grays-100) transition-colors hover:bg-[#4B25E0] disabled:opacity-60"
+          className="relative z-10 flex h-10 w-36 shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-(--color-primary-200) px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-grays-100) transition-colors hover:bg-[#3300F5] disabled:opacity-60"
         >
           {busy ? "…" : "Отследи"}
         </button>

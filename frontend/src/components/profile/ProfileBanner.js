@@ -186,7 +186,7 @@ export default function ProfileBanner({
               disabled={followBusy}
               className={`flex h-10 w-full cursor-pointer items-center justify-center rounded-xl px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none transition-colors disabled:opacity-60 ${
                 following
-                  ? "bg-(--color-primary-200) text-white hover:bg-[#4B25E0]"
+                  ? "bg-(--color-primary-200) text-white hover:bg-[#3300F5]"
                   : "border border-(--color-primary-200) text-(--color-primary-200) hover:bg-[#F1EEFE]"
               }`}
             >

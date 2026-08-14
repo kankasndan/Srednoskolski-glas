@@ -77,7 +77,7 @@ export default function EditCommentDialog({
           <button
             type="submit"
             disabled={isEmpty || saving}
-            className="cursor-pointer rounded-xl bg-(--color-primary-200) px-6 py-3 font-(family-name:--font-manrope) text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] disabled:cursor-not-allowed disabled:bg-[#CCCCCC]"
+            className="cursor-pointer rounded-xl bg-(--color-primary-200) px-6 py-3 font-(family-name:--font-manrope) text-[14px] font-bold text-white transition-colors hover:bg-[#3300F5] disabled:cursor-not-allowed disabled:bg-[#CCCCCC]"
           >
             {saving ? "Се зачувува…" : "Зачувај"}
           </button>
