@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { FORUM_THREADS } from "@/lib/threads";
+import { getUserThreadsForForum } from "@/lib/userThreads";
 
 function ForumTag({ tag }) {
   return (
@@ -30,11 +33,12 @@ function ForumTag({ tag }) {
   );
 }
 
-function ForumActionButton({ icon, label, count, noHover = false }) {
+function ForumActionButton({ icon, label, count, onClick, noHover = false }) {
   return (
     <button
       type="button"
       aria-label={label}
+      onClick={onClick}
       className={`flex h-10 w-24 items-center justify-center gap-4 rounded-[12px] border border-[#CCCCCC] bg-white px-4 py-2 opacity-80 transition-all ${
         noHover
           ? ""
@@ -49,9 +53,13 @@ function ForumActionButton({ icon, label, count, noHover = false }) {
   );
 }
 
-
-
 function ForumThread({ thread }) {
+  const router = useRouter();
+
+  function openComments() {
+    router.push(`/feed/thread/${thread.id}#comments`);
+  }
+
   const metadataRow = (
     <div className="flex max-w-full flex-wrap items-center gap-2 overflow-hidden">
       {thread.tags.map((tag) => (
@@ -85,18 +93,31 @@ function ForumThread({ thread }) {
           {textContent}
         </div>
         <Link href={`/feed/thread/${thread.id}`} className="block">
-          <Image
-            src={thread.image}
-            alt=""
-            width={990}
-            height={421}
-            className="h-[421px] w-full rounded-[24px] object-cover transition-opacity hover:opacity-90"
-            priority
-          />
+          {thread.image.startsWith("data:") ? (
+            <img
+              src={thread.image}
+              alt=""
+              className="h-[421px] w-full rounded-[24px] object-cover transition-opacity hover:opacity-90"
+            />
+          ) : (
+            <Image
+              src={thread.image}
+              alt=""
+              width={990}
+              height={421}
+              className="h-[421px] w-full rounded-[24px] object-cover transition-opacity hover:opacity-90"
+              priority
+            />
+          )}
         </Link>
         <div className="flex flex-row items-center justify-end gap-2">
           <ForumActionButton icon="/eye.svg" label="Прегледи" count={thread.views} noHover={true} />
-          <ForumActionButton icon="/chat-1-line.svg" label="Коментари" count={thread.comments} />
+          <ForumActionButton
+            icon="/chat-1-line.svg"
+            label="Коментари"
+            count={thread.comments}
+            onClick={openComments}
+          />
           <ForumActionButton icon="/Chevrons up.svg" label="Гласај нагоре" count={thread.votes} />
         </div>
       </article>
@@ -111,20 +132,40 @@ function ForumThread({ thread }) {
       </div>
       <div className="flex shrink-0 flex-col gap-2">
         <ForumActionButton icon="/eye.svg" label="Прегледи" count={thread.views} noHover={true} />
-        <ForumActionButton icon="/chat-1-line.svg" label="Коментари" count={thread.comments} />
+        <ForumActionButton
+          icon="/chat-1-line.svg"
+          label="Коментари"
+          count={thread.comments}
+          onClick={openComments}
+        />
         <ForumActionButton icon="/Chevrons up.svg" label="Гласај нагоре" count={thread.votes} />
       </div>
     </article>
   );
 }
 
-export default function ForumThreadList() {
+export default function ForumThreadList({
+  forumSlug = "drzhavna_matura",
+  forumName = "Државна матура",
+  includeMockThreads,
+}) {
+  const [threads, setThreads] = useState([]);
+  const showMockThreads = includeMockThreads ?? forumSlug === "drzhavna_matura";
+
+  useEffect(() => {
+    const userThreads = getUserThreadsForForum(forumSlug);
+    const mockThreads = showMockThreads ? FORUM_THREADS : [];
+    setThreads([...userThreads, ...mockThreads]);
+  }, [forumSlug, showMockThreads]);
+
   return (
-    <div className="flex w-[990px] max-w-full flex-col gap-6" aria-label="Дискусии за државна матура">
-      {FORUM_THREADS.map((thread) => (
+    <div
+      className="flex w-[990px] max-w-full flex-col gap-6"
+      aria-label={`Дискусии за ${forumName}`}
+    >
+      {threads.map((thread) => (
         <ForumThread key={thread.id} thread={thread} />
       ))}
     </div>
   );
 }
-

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import AppShell from "@/components/AppShell";
-import ForumEmptyState from "@/components/ForumEmptyState";
+import ForumTopicContent from "@/components/ForumTopicContent";
 import { FORUMS } from "@/lib/forums";
 
 const DRZHAVNA_MATURA_SLUG = "drzhavna_matura";
@@ -21,7 +21,7 @@ export default async function TopicForumPage({ params }) {
 
   return (
     <AppShell>
-      <ForumEmptyState />
+      <ForumTopicContent forumSlug={forum.slug} forumName={forum.name} />
     </AppShell>
   );
 }

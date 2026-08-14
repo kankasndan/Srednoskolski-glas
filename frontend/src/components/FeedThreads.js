@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useId, useState } from "react";
 import { FEED_THREAD_LIST } from "@/lib/threads";
+import { getUserThreads } from "@/lib/userThreads";
 
 const SORT_OPTIONS = [
   { value: "trending", label: "Трендинг" },
@@ -79,6 +81,12 @@ function ActionButton({ icon, label, count, onClick, noHover = false }) {
 
 
 function ThreadItem({ thread }) {
+  const router = useRouter();
+
+  function openComments() {
+    router.push(`/feed/thread/${thread.id}#comments`);
+  }
+
   const metadataRow = (
     <div className="flex max-w-full flex-wrap items-center gap-2">
       {thread.tags.map((tag) => (
@@ -105,7 +113,12 @@ function ThreadItem({ thread }) {
   const actionButtons = (
     <>
       <ActionButton icon="/eye.svg" label="Прегледи" count={thread.views} noHover={true} />
-      <ActionButton icon="/chat-1-line.svg" label="Коментари" count={thread.comments} />
+      <ActionButton
+        icon="/chat-1-line.svg"
+        label="Коментари"
+        count={thread.comments}
+        onClick={openComments}
+      />
       <ActionButton icon="/Chevrons up.svg" label="Гласај нагоре" count={thread.votes} />
     </>
   );
@@ -204,7 +217,12 @@ export default function FeedThreads() {
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
   const [selectedSort, setSelectedSort] = useState(SORT_OPTIONS[0]);
-  const [selectedTimeFilter, setSelectedTimeFilter] = useState(TIME_FILTER_OPTIONS[1]); // Default to "Оваа недела"
+  const [selectedTimeFilter, setSelectedTimeFilter] = useState(TIME_FILTER_OPTIONS[1]);
+  const [userThreads, setUserThreads] = useState([]);
+
+  useEffect(() => {
+    setUserThreads(getUserThreads());
+  }, []);
 
   const selectSortOption = (option) => {
     setSelectedSort(option);
@@ -216,9 +234,8 @@ export default function FeedThreads() {
     setOpenSelect(null);
   };
 
-  // Perform dynamic filtering and sorting
-  const filteredAndSortedThreads = FEED_THREAD_LIST.filter((thread) => {
-    const age = thread.ageInDays;
+  const filteredAndSortedThreads = [...userThreads, ...FEED_THREAD_LIST].filter((thread) => {
+    const age = thread.ageInDays ?? 0;
     if (selectedTimeFilter.value === "today") {
       return age === 0;
     }
@@ -237,8 +254,10 @@ export default function FeedThreads() {
       return b.votes - a.votes;
     }
     if (selectedSort.value === "new") {
-      if (a.ageInDays !== b.ageInDays) {
-        return a.ageInDays - b.ageInDays;
+      const ageA = a.ageInDays ?? 0;
+      const ageB = b.ageInDays ?? 0;
+      if (ageA !== ageB) {
+        return ageA - ageB;
       }
       return b.id - a.id;
     }
