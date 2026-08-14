@@ -165,6 +165,10 @@ class HtmlSanitizer
             return false;
         }
 
-        return (bool) preg_match('/^(https?:\/\/|mailto:|\/)/i', $href);
+        if (str_starts_with($href, '//')) {
+            return false;
+        }
+
+        return (bool) preg_match('/^(https?:\/\/|mailto:|\/[^\/])/i', $href);
     }
 }

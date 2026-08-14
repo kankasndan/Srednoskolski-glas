@@ -4,6 +4,7 @@ use App\Models\Comment;
 use App\Models\Forum;
 use App\Models\Thread;
 use App\Models\User;
+use App\Support\SyncUserContentPermissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -21,6 +22,17 @@ function commentForum(): Forum
         'members_count' => 0,
         'threads_count' => 0,
     ]);
+}
+
+function onboardedCommenter(): User
+{
+    $user = User::factory()->create([
+        'onboarding_completed_at' => now(),
+    ]);
+    app(SyncUserContentPermissions::class)->handle($user);
+    $user->givePermissionTo(SyncUserContentPermissions::CREATE_COMMENTS);
+
+    return $user->fresh();
 }
 
 function commentThread(Forum $forum, User $author): Thread
@@ -46,7 +58,7 @@ it('requires authentication to create a comment', function () {
 });
 
 it('creates a top-level comment on a thread', function () {
-    $user = User::factory()->create();
+    $user = onboardedCommenter();
     $thread = commentThread(commentForum(), $user);
 
     $response = $this->actingAs($user)->postJson("/api/threads/{$thread->id}/comments", [
@@ -56,10 +68,11 @@ it('creates a top-level comment on a thread', function () {
     $response->assertCreated()
         ->assertJsonPath('data.content', 'Се согласувам со темата.')
         ->assertJsonPath('data.parent_id', null)
-        ->assertJsonPath('data.upvotes', 0)
         ->assertJsonPath('data.has_voted', false)
         ->assertJsonPath('data.author.id', $user->id)
         ->assertJsonPath('data.replies_count', 0);
+
+    expect((int) $response->json('data.upvotes'))->toBe(0);
 
     expect(Comment::query()->where([
         'thread_id' => $thread->id,
@@ -69,7 +82,7 @@ it('creates a top-level comment on a thread', function () {
 });
 
 it('creates a child comment under a parent on the same thread', function () {
-    $user = User::factory()->create();
+    $user = onboardedCommenter();
     $thread = commentThread(commentForum(), $user);
 
     $parent = Comment::query()->create([
@@ -96,7 +109,7 @@ it('creates a child comment under a parent on the same thread', function () {
 });
 
 it('creates a nested reply under another reply', function () {
-    $user = User::factory()->create();
+    $user = onboardedCommenter();
     $thread = commentThread(commentForum(), $user);
 
     $parent = Comment::query()->create([
@@ -121,7 +134,7 @@ it('creates a nested reply under another reply', function () {
 });
 
 it('rejects a parent_id from another thread', function () {
-    $user = User::factory()->create();
+    $user = onboardedCommenter();
     $forum = commentForum();
     $thread = commentThread($forum, $user);
     $otherThread = commentThread($forum, $user);
@@ -141,11 +154,32 @@ it('rejects a parent_id from another thread', function () {
 });
 
 it('requires content', function () {
-    $user = User::factory()->create();
+    $user = onboardedCommenter();
     $thread = commentThread(commentForum(), $user);
 
     $this->actingAs($user)->postJson("/api/threads/{$thread->id}/comments", [
         'content' => '',
     ])->assertUnprocessable()
         ->assertJsonValidationErrors(['content']);
+});
+
+it('hides the author when the anonymous thread owner comments', function () {
+    $author = onboardedCommenter();
+    $other = onboardedCommenter();
+    $thread = commentThread(commentForum(), $author);
+    $thread->forceFill(['is_anonymous' => true])->save();
+
+    $this->actingAs($author)
+        ->postJson("/api/threads/{$thread->id}/comments", [
+            'content' => 'Јас сум авторот.',
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.author', null);
+
+    $this->actingAs($other)
+        ->postJson("/api/threads/{$thread->id}/comments", [
+            'content' => 'Јас не сум.',
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.author.id', $other->id);
 });

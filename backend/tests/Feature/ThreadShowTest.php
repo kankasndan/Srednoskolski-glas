@@ -125,6 +125,26 @@ it('does not increment views when track_view is disabled', function () {
     expect($thread->fresh()->views)->toBe(0);
 });
 
+it('does not increment views twice from the same visitor', function () {
+    ['forum' => $forum, 'thread' => $thread] = makeThreadWithComments();
+    $url = "/api/p/{$forum->slug}/comments/{$thread->id}";
+
+    $this->getJson($url)->assertSuccessful();
+    $this->getJson($url)->assertSuccessful();
+
+    expect($thread->fresh()->views)->toBe(1);
+});
+
+it('hides the anonymous thread author on their own comments', function () {
+    ['forum' => $forum, 'thread' => $thread] = makeThreadWithComments();
+    $thread->forceFill(['is_anonymous' => true])->save();
+
+    $this->getJson("/api/p/{$forum->slug}/comments/{$thread->id}?track_view=0")
+        ->assertSuccessful()
+        ->assertJsonPath('data.comments.0.author', null)
+        ->assertJsonMissingPath('data.comments.0.deleted_by');
+});
+
 it('omits deleted leaves and keeps tombstones that still have replies', function () {
     ['forum' => $forum, 'thread' => $thread, 'best' => $best] = makeThreadWithComments();
 
@@ -165,7 +185,7 @@ it('omits deleted leaves and keeps tombstones that still have replies', function
     expect($roots->pluck('id'))->toContain($deletedRoot->id)
         ->and($roots->pluck('id'))->not->toContain($lonelyDeleted->id);
 
-            $bestRow = $roots->firstWhere('id', $best->id);
+    $bestRow = $roots->firstWhere('id', $best->id);
     // Live "Reply under best" counts; the deleted leaf does not.
     expect($bestRow['replies_count'])->toBe(1);
 

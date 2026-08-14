@@ -16,12 +16,8 @@ use Spatie\Permission\Traits\HasRoles;
 #[Fillable([
     'username',
     'email',
-    'email_verified_at',
     'password',
     'imageUrl',
-    'provider',
-    'provider_id',
-    'role',
     'onboarding_completed_at',
     'last_active_at',
 ])]

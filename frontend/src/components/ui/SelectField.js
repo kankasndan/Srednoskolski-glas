@@ -108,6 +108,7 @@ export default function SelectField({
           <summary
             id={id}
             aria-expanded={open}
+            aria-disabled={disabled}
             onClick={(event) => disabled && event.preventDefault()}
             className={`${fieldClass} ${summaryClass} ${triggerTone} flex items-center justify-between gap-3 transition-colors duration-300 ease-out group-open/field:rounded-b-none group-open/field:bg-[#CFE9ED]`}
           >

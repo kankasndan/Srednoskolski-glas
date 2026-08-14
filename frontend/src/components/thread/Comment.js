@@ -11,7 +11,14 @@ import { reportComment, reportErrorMessage } from "@/api/moderation";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ReportDialog from "@/components/ui/ReportDialog";
 
-export default function Comment({ comment, threadId, onCommentCreated, depth = 0 }) {
+export default function Comment({
+  comment,
+  threadId,
+  isAnonymousThread = false,
+  isThreadOwner = false,
+  onCommentCreated,
+  depth = 0,
+}) {
   const [expanded, setExpanded] = useState(false);
   const [replies, setReplies] = useState([]);
   const [repliesCount, setRepliesCount] = useState(comment.replies_count ?? 0);
@@ -74,7 +81,7 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
   return (
     <div className="flex gap-2">
       <div className="flex shrink-0 flex-col items-center">
-        <Avatar src={comment.author.imageUrl} size="md" />
+        <Avatar src={comment.author?.imageUrl} size="md" />
         {showLine ? (
           <div className="mt-1 w-0.5 flex-1 rounded-xs bg-[#CFE9ED]" />
         ) : null}
@@ -114,6 +121,8 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
             compact
             threadId={threadId}
             parentId={comment.id}
+            isAnonymousThread={isAnonymousThread}
+            isThreadOwner={isThreadOwner}
             onClose={() => setReplying(false)}
             onCreated={handleReplyCreated}
           />
@@ -129,6 +138,8 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
                   key={reply.id}
                   comment={reply}
                   threadId={threadId}
+                  isAnonymousThread={isAnonymousThread}
+                  isThreadOwner={isThreadOwner}
                   onCommentCreated={onCommentCreated}
                   depth={depth + 1}
                 />

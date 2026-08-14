@@ -26,7 +26,8 @@ export function useProfile() {
     const needsCapabilities =
       cached != null &&
       (cached.capabilities == null ||
-        typeof cached.capabilities?.can_create_threads !== "boolean");
+        typeof cached.capabilities?.can_create_threads !== "boolean" ||
+        typeof cached.capabilities?.can_change_school !== "boolean");
 
     loadSessionUser({ force: Boolean(needsCapabilities) })
       .then((data) => {

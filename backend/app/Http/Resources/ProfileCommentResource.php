@@ -26,7 +26,6 @@ class ProfileCommentResource extends JsonResource
             'has_voted' => (bool) ($this->has_voted ?? false),
             'created_at' => $this->created_at,
             'edited_at' => $this->edited_at,
-            'deleted_by' => $this->deleted_by,
             'author' => new UserResource($this->whenLoaded('user')),
             'thread' => $this->whenLoaded('thread', fn () => $this->thread === null ? null : [
                 'id' => $this->thread->id,

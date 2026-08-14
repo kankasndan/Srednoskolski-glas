@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureOnboardingCompleted;
 use App\Models\City;
 use App\Models\Forum;
 use App\Models\School;
@@ -127,14 +128,14 @@ it('forbids incomplete onboarding from creating threads and comments', function 
             'description' => 'Nope',
         ])
         ->assertForbidden()
-        ->assertJsonPath('message', \App\Http\Middleware\EnsureOnboardingCompleted::MESSAGE);
+        ->assertJsonPath('message', EnsureOnboardingCompleted::MESSAGE);
 
     $this->actingAs($user)
         ->postJson("/api/threads/{$thread->id}/comments", [
             'content' => 'Incomplete comment',
         ])
         ->assertForbidden()
-        ->assertJsonPath('message', \App\Http\Middleware\EnsureOnboardingCompleted::MESSAGE);
+        ->assertJsonPath('message', EnsureOnboardingCompleted::MESSAGE);
 });
 
 it('forbids incomplete onboarding from follow and vote actions', function () {
@@ -154,7 +155,7 @@ it('forbids incomplete onboarding from follow and vote actions', function () {
         'is_anonymous' => false,
     ]);
 
-    $message = \App\Http\Middleware\EnsureOnboardingCompleted::MESSAGE;
+    $message = EnsureOnboardingCompleted::MESSAGE;
 
     $this->actingAs($user)
         ->postJson("/api/u/{$other->username}/follow")
@@ -253,5 +254,6 @@ it('exposes capabilities on /api/me', function () {
         ->assertSuccessful()
         ->assertJsonPath('capabilities.can_create_comments', true)
         ->assertJsonPath('capabilities.can_create_threads', true)
+        ->assertJsonPath('capabilities.can_change_school', true)
         ->assertJsonPath('capabilities.school_forum_id', $forum->id);
 });

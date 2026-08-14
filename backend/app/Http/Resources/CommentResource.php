@@ -25,9 +25,22 @@ class CommentResource extends JsonResource
             'has_voted' => (bool) ($this->has_voted ?? false),
             'created_at' => $this->created_at,
             'edited_at' => $this->edited_at,
-            'deleted_by' => $this->deleted_by,
-            'author' => new UserResource($this->whenLoaded('user')),
+            'author' => $this->shouldHideAuthor()
+                ? null
+                : new UserResource($this->whenLoaded('user')),
             'replies_count' => (int) ($this->replies_count ?? 0),
         ];
+    }
+
+    private function shouldHideAuthor(): bool
+    {
+        $this->resource->loadMissing('thread');
+        $thread = $this->thread;
+
+        if ($thread === null || ! $thread->is_anonymous) {
+            return false;
+        }
+
+        return (int) $this->user_id === (int) $thread->user_id;
     }
 }

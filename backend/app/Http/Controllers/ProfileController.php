@@ -8,35 +8,18 @@ use App\Http\Resources\ForumResource;
 use App\Http\Resources\ProfileCommentResource;
 use App\Http\Resources\PublicUserResource;
 use App\Http\Resources\ThreadResource;
-use App\Models\City;
+use App\Models\Comment;
 use App\Models\Forum;
-use App\Models\School;
-use App\Models\StudentData;
 use App\Models\User;
-use App\Models\Vocation;
+use App\Services\StudentEnrollment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
 {
     use FiltersThreads;
 
-    /**
-     * @var array<string, int>
-     */
-    private const GRADE_MAP = [
-        'Прва' => 1,
-        'Втора' => 2,
-        'Трета' => 3,
-        'Четврта' => 4,
-        '1' => 1,
-        '2' => 2,
-        '3' => 3,
-        '4' => 4,
-    ];
-
-    private const SCHOOL_SEPARATOR = '|';
+    public function __construct(private readonly StudentEnrollment $enrollment) {}
 
     /**
      * Update the authenticated user's avatar and/or school information.
@@ -69,15 +52,18 @@ class ProfileController extends Controller
             && filled($validated['area'])
             && filled($validated['year'])
         ) {
-            $this->updateStudentData($user, $validated);
+            $this->enrollment->updateFromProfile($user, $validated);
         }
 
+        $user = $user->fresh([
+            'studentData.school.city',
+            'studentData.school.forum',
+            'studentData.vocation',
+        ]);
+
         return response()->json([
-            'user' => $user->fresh([
-                'studentData.school.city',
-                'studentData.school.forum',
-                'studentData.vocation',
-            ]),
+            'user' => $user,
+            'capabilities' => $this->enrollment->allCapabilities($user),
         ]);
     }
 
@@ -135,6 +121,7 @@ class ProfileController extends Controller
         $comments = $user->comments()
             ->with([
                 'thread.forum',
+                ...Comment::authorWith(),
             ])
             ->withExists([
                 'votes as has_voted' => fn ($votes) => $votes->where('user_id', $user->id),
@@ -208,120 +195,5 @@ class ProfileController extends Controller
             ->get();
 
         return PublicUserResource::collection($users)->response();
-    }
-
-    /**
-     * @param  array{school: string, area: string, year: string}  $validated
-     */
-    private function updateStudentData(User $user, array $validated): void
-    {
-        $user->loadMissing(['studentData.school.forum']);
-
-        ['school' => $schoolName, 'city' => $cityName] = $this->parseSchoolSelection($validated['school']);
-        $school = $this->resolveSchool($cityName, $schoolName);
-        $vocation = Vocation::query()->where('name', $validated['area'])->first();
-
-        if ($vocation === null) {
-            throw ValidationException::withMessages([
-                'area' => ['Избраното подрачје не е валидно.'],
-            ]);
-        }
-
-        $grade = self::GRADE_MAP[$validated['year']] ?? null;
-
-        if ($grade === null) {
-            throw ValidationException::withMessages([
-                'year' => ['Избраната година не е валидна.'],
-            ]);
-        }
-
-        $previousSchool = $user->studentData?->school;
-
-        StudentData::query()->updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'school_id' => $school->id,
-                'vocation_id' => $vocation->id,
-                'grade' => $grade,
-            ],
-        );
-
-        $this->syncSchoolForum($user, $previousSchool, $school);
-    }
-
-    /**
-     * @return array{school: string, city: string}
-     */
-    private function parseSchoolSelection(string $value): array
-    {
-        $separatorPosition = mb_strrpos($value, self::SCHOOL_SEPARATOR);
-
-        if ($separatorPosition === false) {
-            return ['school' => trim($value), 'city' => ''];
-        }
-
-        return [
-            'school' => trim(mb_substr($value, 0, $separatorPosition)),
-            'city' => trim(mb_substr($value, $separatorPosition + mb_strlen(self::SCHOOL_SEPARATOR))),
-        ];
-    }
-
-    private function resolveSchool(string $cityName, string $schoolName): School
-    {
-        $city = City::query()->where('name', $cityName)->first();
-
-        if ($city === null) {
-            throw ValidationException::withMessages([
-                'school' => ['Избраното училиште не е валидно.'],
-            ]);
-        }
-
-        $school = School::query()
-            ->where('city_id', $city->id)
-            ->where('name', $schoolName)
-            ->first();
-
-        if ($school === null) {
-            throw ValidationException::withMessages([
-                'school' => ['Избраното училиште не е валидно.'],
-            ]);
-        }
-
-        return $school;
-    }
-
-    private function syncSchoolForum(User $user, ?School $previous, School $next): void
-    {
-        if ($previous !== null && (int) $previous->id === (int) $next->id) {
-            $this->followSchoolForum($user, $next);
-
-            return;
-        }
-
-        if ($previous?->forum !== null) {
-            $forum = $previous->forum;
-            $detached = $user->forums()->detach($forum->id);
-
-            if ($detached > 0 && $forum->members_count > 0) {
-                $forum->decrement('members_count');
-            }
-        }
-
-        $this->followSchoolForum($user, $next);
-    }
-
-    private function followSchoolForum(User $user, School $school): void
-    {
-        $forum = $school->forum;
-
-        if ($forum === null) {
-            return;
-        }
-
-        $sync = $user->forums()->syncWithoutDetaching([$forum->id]);
-
-        if ($sync['attached'] !== []) {
-            $forum->increment('members_count');
-        }
     }
 }

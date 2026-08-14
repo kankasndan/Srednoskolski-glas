@@ -44,7 +44,7 @@ class RoleController extends Controller
             ]);
         }
 
-        $user->update(['role' => $validated['role']]);
+        $user->forceFill(['role' => $validated['role']])->save();
         $user->syncRoles([$validated['role']]);
 
         return back()->with(['success' => 'Корисникот е успешно ажуриран.']);
@@ -61,7 +61,7 @@ class RoleController extends Controller
             'user_id' => null,
         ]);
 
-        $user->update(['role' => 'user']);
+        $user->forceFill(['role' => 'user'])->save();
         $user->syncRoles(['user']);
 
         return back()->with(['success' => 'Улогата е одземена. Корисникот е вратен на обичен корисник.']);
@@ -122,7 +122,7 @@ class RoleController extends Controller
 
         abort_unless(StaffRoleHierarchy::canManage($actor, $user), 403);
 
-        $user->update(['role' => $validated['role']]);
+        $user->forceFill(['role' => $validated['role']])->save();
         $user->syncRoles([$validated['role']]);
 
         return back()->with(['success' => "Улогата е успешно доделена на {$user->username}."]);

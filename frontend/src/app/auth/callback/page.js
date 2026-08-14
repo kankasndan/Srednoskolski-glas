@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { invalidateSessionUser } from "@/lib/sessionUser";
+import { safeInternalPath } from "@/lib/paths";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -11,8 +12,10 @@ export default function AuthCallbackPage() {
     const params = new URLSearchParams(window.location.search);
     const onboarding = params.get("onboarding");
 
-    const successRedirect =
-      localStorage.getItem("post_login_redirect") || "/register/onboarding";
+    const successRedirect = safeInternalPath(
+      localStorage.getItem("post_login_redirect"),
+      "/register/onboarding",
+    );
     localStorage.removeItem("post_login_redirect");
     localStorage.removeItem("post_login_error_redirect");
 

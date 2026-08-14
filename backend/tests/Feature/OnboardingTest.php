@@ -40,7 +40,10 @@ it('follows the school forum when a student completes onboarding', function () {
             'area' => 'Електротехничка струка',
             'year' => 'Трета',
         ])
-        ->assertSuccessful();
+        ->assertSuccessful()
+        ->assertJsonPath('capabilities.can_create_threads', true)
+        ->assertJsonPath('capabilities.can_change_school', true)
+        ->assertJsonPath('capabilities.school_forum_id', $forum->id);
 
     expect($user->fresh()->forums()->pluck('forums.id')->all())
         ->toContain($forum->id);
@@ -48,7 +51,7 @@ it('follows the school forum when a student completes onboarding', function () {
     expect($forum->fresh()->members_count)->toBe(1);
 });
 
-it('does not duplicate membership when onboarding is submitted again', function () {
+it('rejects a second onboarding submit', function () {
     $user = User::factory()->create([
         'username' => 'existing_user',
         'onboarding_completed_at' => null,
@@ -80,8 +83,34 @@ it('does not duplicate membership when onboarding is submitted again', function 
     ];
 
     $this->actingAs($user)->putJson('/api/onboarding', $payload)->assertSuccessful();
-    $this->actingAs($user)->putJson('/api/onboarding', $payload)->assertSuccessful();
+    $this->actingAs($user)
+        ->putJson('/api/onboarding', $payload)
+        ->assertForbidden()
+        ->assertJsonPath('message', 'Онбордингот е веќе завршен.');
 
     expect($user->fresh()->forums()->where('forums.id', $forum->id)->count())->toBe(1);
     expect($forum->fresh()->members_count)->toBe(1);
+});
+
+it('rejects reserved and invalid usernames', function () {
+    $user = User::factory()->create([
+        'username' => null,
+        'onboarding_completed_at' => null,
+    ]);
+
+    $this->actingAs($user)
+        ->putJson('/api/onboarding', [
+            'username' => 'admin',
+            'is_student' => false,
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['username']);
+
+    $this->actingAs($user)
+        ->putJson('/api/onboarding', [
+            'username' => 'лош име',
+            'is_student' => false,
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['username']);
 });

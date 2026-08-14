@@ -7,6 +7,7 @@ use App\Http\Resources\ForumResource;
 use App\Http\Resources\ProfileCommentResource;
 use App\Http\Resources\PublicUserResource;
 use App\Http\Resources\ThreadResource;
+use App\Models\Comment;
 use App\Models\Forum;
 use App\Models\User;
 use App\Services\Feed\FeedCache;
@@ -31,8 +32,8 @@ class UserProfileController extends Controller
             'data' => [
                 'user' => new PublicUserResource($profileUser),
                 'counts' => [
-                    'threads' => $profileUser->threads()->count(),
-                    'comments' => $profileUser->comments()->count(),
+                    'threads' => $profileUser->threads()->publiclyAttributed()->count(),
+                    'comments' => $profileUser->comments()->withoutOwnAnonymousThreads($profileUser)->count(),
                     'followed_forums' => $profileUser->forums()->count(),
                     'followers' => $profileUser->followers()->count(),
                 ],
@@ -47,6 +48,8 @@ class UserProfileController extends Controller
 
     /**
      * GET /api/u/{username}/threads
+     *
+     * Public list only — anonymous threads stay off this profile (see /api/me/threads).
      */
     public function threads(Request $request, string $username): JsonResponse
     {
@@ -54,6 +57,7 @@ class UserProfileController extends Controller
         $viewer = $request->user('web') ?? $request->user();
 
         $query = $profileUser->threads()
+            ->publiclyAttributed()
             ->with($this->threadListWith($viewer))
             ->withCount('comments')
             ->latest()
@@ -66,6 +70,9 @@ class UserProfileController extends Controller
 
     /**
      * GET /api/u/{username}/comments
+     *
+     * Omits comments on the owner's own anonymous threads so those posts
+     * cannot be re-identified from the comments tab.
      */
     public function comments(Request $request, string $username): JsonResponse
     {
@@ -73,7 +80,8 @@ class UserProfileController extends Controller
         $viewer = $request->user('web') ?? $request->user();
 
         $query = $profileUser->comments()
-            ->with(['thread.forum'])
+            ->withoutOwnAnonymousThreads($profileUser)
+            ->with(['thread.forum', ...Comment::authorWith()])
             ->latest()
             ->limit(50);
 

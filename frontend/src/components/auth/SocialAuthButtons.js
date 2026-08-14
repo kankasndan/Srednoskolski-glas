@@ -5,6 +5,7 @@ import { faFacebookF, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
+import { safeInternalPath } from "@/lib/paths";
 
 const socialProviders = [
   { id: "google", name: "Google", icon: faGoogle },
@@ -14,6 +15,8 @@ const socialProviders = [
 const errorMessages = {
   auth_failed: "Најавата не успеа. Обиди се повторно.",
   missing_token: "Најавата не успеа. Обиди се повторно.",
+  email_in_use:
+    "Оваа е-пошта е веќе поврзана со друг профил. Најави се со истиот начин како при регистрација.",
 };
 
 export default function SocialAuthButtons({
@@ -34,7 +37,7 @@ export default function SocialAuthButtons({
   }, []);
 
   function handleClick() {
-    localStorage.setItem("post_login_redirect", successRedirect);
+    localStorage.setItem("post_login_redirect", safeInternalPath(successRedirect));
     localStorage.setItem("post_login_error_redirect", window.location.pathname);
   }
 

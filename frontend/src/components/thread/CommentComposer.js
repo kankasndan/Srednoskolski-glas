@@ -13,6 +13,8 @@ export default function CommentComposer({
   threadId,
   parentId = null,
   compact = false,
+  isAnonymousThread = false,
+  isThreadOwner = false,
   onClose,
   onCreated,
 }) {
@@ -100,6 +102,13 @@ export default function CommentComposer({
           Остави коментар
         </h2>
       )}
+
+      {isAnonymousThread && isThreadOwner && !compact ? (
+        <p className="text-[12px] leading-5 text-[#595959]">
+          Како автор на анонимната дискусија, твоите коментари овде се прикажуваат
+          како анонимни.
+        </p>
+      ) : null}
 
       <textarea
         value={comment}

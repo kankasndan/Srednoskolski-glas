@@ -27,8 +27,12 @@ class SearchController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        if (! filled($request->input('q'))) {
+            $request->merge(['q' => null]);
+        }
+
         $validated = $request->validate([
-            'q' => ['nullable', 'string', 'max:200'],
+            'q' => ['nullable', 'string', 'min:2', 'max:200'],
             'forum' => ['nullable', 'string', 'max:255'],
             'sort' => ['nullable', 'in:relevance,trending,top,newest,discussed'],
             'time' => ['nullable', 'in:day,week,month,six-months,year,all'],

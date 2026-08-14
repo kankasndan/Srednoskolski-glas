@@ -58,6 +58,8 @@ export default function ThreadPage() {
         <ThreadPost forum={forum} thread={thread} onThreadUpdated={patchThread} />
         <CommentComposer
           threadId={thread.id}
+          isAnonymousThread={thread.is_anonymous}
+          isThreadOwner={thread.is_owner}
           onCreated={addComment}
         />
         <CommentsHeader
@@ -65,7 +67,13 @@ export default function ThreadPage() {
           sort={sort}
           onSortChange={setSort}
         />
-        <CommentList comments={comments} threadId={thread.id} onCommentCreated={addComment} />
+        <CommentList
+          comments={comments}
+          threadId={thread.id}
+          isAnonymousThread={thread.is_anonymous}
+          isThreadOwner={thread.is_owner}
+          onCommentCreated={addComment}
+        />
 
         {/* Kontejnerot ovde ima gap-8, pa treba pomala margina od feed-ot. */}
         <MobileFooter className="mt-3" />

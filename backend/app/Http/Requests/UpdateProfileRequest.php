@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\AvatarUrl;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -38,21 +39,9 @@ class UpdateProfileRequest extends FormRequest
                 return;
             }
 
-            if (! $this->isAllowedImageUrl((string) $imageUrl)) {
+            if (! AvatarUrl::isAllowed((string) $imageUrl, $this->user())) {
                 $validator->errors()->add('image_url', 'Избраната слика не е валидна.');
             }
         });
-    }
-
-    private function isAllowedImageUrl(string $url): bool
-    {
-        $defaults = config('avatars.defaults', []);
-
-        if (in_array($url, $defaults, true)) {
-            return true;
-        }
-
-        return filter_var($url, FILTER_VALIDATE_URL) !== false
-            && preg_match('/^https?:\/\//i', $url) === 1;
     }
 }

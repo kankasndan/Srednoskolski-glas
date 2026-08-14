@@ -109,6 +109,9 @@ it('returns 404 for an unknown forum slug', function () {
 it('validates the query length', function () {
     $this->getJson('/api/search?q='.str_repeat('a', 201))
         ->assertUnprocessable();
+
+    $this->getJson('/api/search?q=a')
+        ->assertUnprocessable();
 });
 
 it('honours per_page for the live dropdown', function () {

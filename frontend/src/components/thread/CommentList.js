@@ -1,6 +1,12 @@
 import Comment from "@/components/thread/Comment";
 
-export default function CommentList({ comments, threadId, onCommentCreated }) {
+export default function CommentList({
+  comments,
+  threadId,
+  isAnonymousThread = false,
+  isThreadOwner = false,
+  onCommentCreated,
+}) {
   return (
     <div className="flex flex-col">
       {comments.map((comment) => (
@@ -11,6 +17,8 @@ export default function CommentList({ comments, threadId, onCommentCreated }) {
           <Comment
             comment={comment}
             threadId={threadId}
+            isAnonymousThread={isAnonymousThread}
+            isThreadOwner={isThreadOwner}
             onCommentCreated={onCommentCreated}
           />
         </article>

@@ -126,3 +126,123 @@ it('returns forums the authenticated user follows', function () {
     $slugs = collect($response->json('data'))->pluck('slug');
     expect($slugs)->not->toContain($other->slug);
 });
+
+function publicProfileUser(array $overrides = []): User
+{
+    return User::factory()->create(array_merge([
+        'username' => 'anon_author',
+        'onboarding_completed_at' => now(),
+    ], $overrides));
+}
+
+it('keeps anonymous threads on the owner activity list and counts', function () {
+    $user = publicProfileUser();
+    $forum = profileForum();
+    profileThread($forum, $user, ['title' => 'Signed post']);
+    profileThread($forum, $user, [
+        'title' => 'Secret post',
+        'is_anonymous' => true,
+    ]);
+
+    $response = $this->actingAs($user)
+        ->getJson('/api/me/threads')
+        ->assertOk()
+        ->assertJsonCount(2, 'data');
+
+    $payload = collect($response->json('data'));
+
+    expect($payload->pluck('title')->all())
+        ->toContain('Signed post')
+        ->toContain('Secret post');
+
+    expect($payload->firstWhere('title', 'Secret post')['is_anonymous'])->toBeTrue();
+    expect($payload->firstWhere('title', 'Signed post')['is_anonymous'])->toBeFalse();
+
+    $this->actingAs($user)
+        ->getJson('/api/me/counts')
+        ->assertOk()
+        ->assertJsonPath('data.threads', 2);
+});
+
+it('hides anonymous threads from a public profile list and tab count', function () {
+    $author = publicProfileUser(['username' => 'jane']);
+    $forum = profileForum();
+    $visible = profileThread($forum, $author, ['title' => 'Signed post']);
+    profileThread($forum, $author, [
+        'title' => 'Secret post',
+        'is_anonymous' => true,
+    ]);
+
+    $this->getJson("/api/u/{$author->username}/threads")
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $visible->id)
+        ->assertJsonPath('data.0.is_anonymous', false)
+        ->assertJsonPath('data.0.author.username', 'jane');
+
+    $this->getJson("/api/u/{$author->username}")
+        ->assertOk()
+        ->assertJsonPath('data.counts.threads', 1)
+        ->assertJsonPath('data.counts.comments', 0);
+
+    $this->actingAs($author)
+        ->getJson("/api/u/{$author->username}/threads")
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $visible->id);
+});
+
+it('does not list comments on the owners anonymous threads on the public profile', function () {
+    $author = publicProfileUser(['username' => 'marko']);
+    $other = publicProfileUser(['username' => 'other_user']);
+    $forum = profileForum();
+
+    $anonymous = profileThread($forum, $author, [
+        'title' => 'Secret post',
+        'is_anonymous' => true,
+    ]);
+    $signed = profileThread($forum, $author, ['title' => 'Signed post']);
+    $someoneElsesAnonymous = profileThread($forum, $other, [
+        'title' => 'Someone elses secret',
+        'is_anonymous' => true,
+    ]);
+
+    $ownAnonymousComment = Comment::query()->create([
+        'thread_id' => $anonymous->id,
+        'parent_id' => null,
+        'user_id' => $author->id,
+        'content' => 'I wrote this thread',
+    ]);
+    $signedComment = Comment::query()->create([
+        'thread_id' => $signed->id,
+        'parent_id' => null,
+        'user_id' => $author->id,
+        'content' => 'Normal comment',
+    ]);
+    $onOthersAnonymous = Comment::query()->create([
+        'thread_id' => $someoneElsesAnonymous->id,
+        'parent_id' => null,
+        'user_id' => $author->id,
+        'content' => 'Replying anonymously authored thread',
+    ]);
+
+    $response = $this->getJson("/api/u/{$author->username}/comments")
+        ->assertOk()
+        ->assertJsonCount(2, 'data');
+
+    $ids = collect($response->json('data'))->pluck('id')->all();
+
+    expect($ids)
+        ->toContain($signedComment->id)
+        ->toContain($onOthersAnonymous->id)
+        ->not->toContain($ownAnonymousComment->id);
+
+    $this->getJson("/api/u/{$author->username}")
+        ->assertOk()
+        ->assertJsonPath('data.counts.comments', 2);
+
+    $this->actingAs($author)
+        ->getJson('/api/me/comments')
+        ->assertOk()
+        ->assertJsonCount(3, 'data');
+});

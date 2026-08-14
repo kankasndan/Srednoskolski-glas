@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Thread;
+use App\Support\MediaLimits;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Validator;
@@ -21,8 +22,8 @@ class UpdateThreadRequest extends FormRequest
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
 
-    /** Laravel file max rule uses kilobytes (100 MB). */
-    private const MAX_FILE_KILOBYTES = 102400;
+    /** Laravel file max rule uses kilobytes. */
+    private const MAX_FILE_KILOBYTES = 51200;
 
     public function authorize(): bool
     {
@@ -93,6 +94,7 @@ class UpdateThreadRequest extends FormRequest
             $videoCount = $remaining->where('slug', 'video')->count();
             $docCount = $remaining->where('slug', 'file')->count();
             $linkCount = $remaining->where('slug', 'link')->count();
+            $newFileCount = 0;
             $removingPoll = filter_var($this->input('remove_poll'), FILTER_VALIDATE_BOOLEAN);
             $hasPoll = (! $removingPoll && $thread->poll()->exists())
                 || filled($this->input('poll.question'));
@@ -127,12 +129,33 @@ class UpdateThreadRequest extends FormRequest
                     continue;
                 }
 
+                if (MediaLimits::exceedsSize($file)) {
+                    $validator->errors()->add(
+                        "files.{$index}",
+                        MediaLimits::sizeError($mime),
+                    );
+
+                    continue;
+                }
+
                 if (str_starts_with($mime, 'image/')) {
                     $imageCount++;
                 } elseif (str_starts_with($mime, 'video/')) {
                     $videoCount++;
                 } else {
                     $docCount++;
+                }
+
+                $newFileCount++;
+            }
+
+            if ($newFileCount > 0 && $this->user() !== null) {
+                $limit = (int) config('media.limits.daily_uploads', 30);
+                if (MediaLimits::uploadsToday((int) $this->user()->id) + $newFileCount > $limit) {
+                    $validator->errors()->add(
+                        'files',
+                        "Достигнат е дневниот лимит од {$limit} прикачувања.",
+                    );
                 }
             }
 

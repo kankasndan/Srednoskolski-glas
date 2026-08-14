@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ForumResource;
 use App\Models\Forum;
 use App\Models\School;
+use App\Support\ViewThrottle;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -61,7 +62,7 @@ class ForumController extends Controller
      */
     public function show(Request $request, Forum $forum): JsonResponse
     {
-        if ($request->boolean('track_view')) {
+        if ($request->boolean('track_view') && ViewThrottle::shouldIncrement($request, 'forum', $forum->id)) {
             $forum->increment('views');
             $forum->refresh();
         }

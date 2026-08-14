@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +20,7 @@ class SocialLoginController extends Controller
     {
         $this->assertAllowedProvider($provider);
 
-        return Socialite::driver($provider)->stateless()->redirect();
+        return Socialite::driver($provider)->redirect();
     }
 
     public function callback(string $provider): RedirectResponse
@@ -29,26 +30,15 @@ class SocialLoginController extends Controller
         $frontendUrl = rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'), '/');
 
         try {
-            $socialUser = Socialite::driver($provider)->stateless()->user();
+            $socialUser = Socialite::driver($provider)->user();
             $providerId = (string) $socialUser->getId();
-            $email = $socialUser->getEmail() ?: sprintf('%s-%s@social.local', $provider, $providerId);
+            $email = $socialUser->getEmail();
 
-            // Prefer stable provider identity over email alone (avoids takeover via email clash).
-            $user = User::query()
-                ->where('provider', $provider)
-                ->where('provider_id', $providerId)
-                ->first();
+            [$user, $error] = $this->resolveSocialUser($provider, $providerId, $email);
 
-            if ($user === null) {
-                $user = User::query()->firstOrNew(['email' => $email]);
+            if ($error !== null || $user === null) {
+                return redirect()->to("{$frontendUrl}/login?error=".($error ?? 'auth_failed'));
             }
-
-            $user->fill([
-                'email' => $user->email ?: $email,
-                'provider' => $provider,
-                'provider_id' => $providerId,
-            ]);
-            $user->save();
 
             // Log the user into the session so Sanctum's SPA (cookie) auth takes
             // over. No token is exposed to the frontend; the browser holds an
@@ -69,6 +59,71 @@ class SocialLoginController extends Controller
 
             return redirect()->to("{$frontendUrl}/login?error=auth_failed");
         }
+    }
+
+    /**
+     * Resolve the local user for this social identity.
+     *
+     * Lookup is only by provider + provider_id. A colliding email is refused
+     * rather than attached to (or overwriting) an existing account.
+     *
+     * @return array{0: User|null, 1: string|null}
+     */
+    private function resolveSocialUser(string $provider, string $providerId, ?string $email): array
+    {
+        $user = User::query()
+            ->where('provider', $provider)
+            ->where('provider_id', $providerId)
+            ->first();
+
+        if ($user !== null) {
+            return [$user, null];
+        }
+
+        $email = $this->normalizedSocialEmail($provider, $providerId, $email);
+
+        if (User::query()->where('email', $email)->exists()) {
+            return [null, 'email_in_use'];
+        }
+
+        try {
+            $user = (new User)->forceFill([
+                'email' => $email,
+                'provider' => $provider,
+                'provider_id' => $providerId,
+                'email_verified_at' => $this->isSyntheticSocialEmail($email) ? null : now(),
+            ]);
+            $user->save();
+        } catch (UniqueConstraintViolationException) {
+            $user = User::query()
+                ->where('provider', $provider)
+                ->where('provider_id', $providerId)
+                ->first();
+
+            if ($user !== null) {
+                return [$user, null];
+            }
+
+            return [null, 'email_in_use'];
+        }
+
+        return [$user, null];
+    }
+
+    private function normalizedSocialEmail(string $provider, string $providerId, ?string $email): string
+    {
+        $email = strtolower(trim((string) $email));
+
+        if ($email !== '') {
+            return $email;
+        }
+
+        return sprintf('%s-%s@social.local', $provider, $providerId);
+    }
+
+    private function isSyntheticSocialEmail(string $email): bool
+    {
+        return str_ends_with($email, '@social.local');
     }
 
     private function assertAllowedProvider(string $provider): void

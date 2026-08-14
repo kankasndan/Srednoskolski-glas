@@ -50,6 +50,30 @@ const AREAS = [
 
 const YEARS = ["1", "2", "3", "4"];
 
+function yearOptionsFromUser(user) {
+  const min = user?.capabilities?.min_grade;
+  const max = user?.capabilities?.max_grade;
+  if (min == null || max == null) return YEARS;
+
+  const options = [];
+  for (let grade = Number(min); grade <= Number(max); grade += 1) {
+    options.push(String(grade));
+  }
+
+  return options.length > 0 ? options : YEARS;
+}
+
+function schoolLockedMessage(user) {
+  if (user?.capabilities?.can_change_school !== false) return null;
+
+  const unlocksAt = user.capabilities?.school_change_unlocks_at;
+  const year = unlocksAt ? Number(String(unlocksAt).slice(0, 4)) : null;
+
+  return year
+    ? `Не можеш да го промениш училиштето до септември ${year}.`
+    : "Не можеш да го промениш училиштето до следен септември.";
+}
+
 function schoolValueFromUser(user) {
   const school = user?.student_data?.school ?? user?.studentData?.school;
   const city = school?.city?.name ?? school?.city;
@@ -86,6 +110,9 @@ export default function EditProfileForm({ user: initialUser }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const canChangeSchool = initialUser.capabilities?.can_change_school !== false;
+  const schoolLockMessage = schoolLockedMessage(initialUser);
+  const yearOptions = yearOptionsFromUser(initialUser);
 
   useEffect(() => {
     let active = true;
@@ -283,14 +310,28 @@ export default function EditProfileForm({ user: initialUser }) {
           Информации за училиште
         </h2>
 
-        <SelectField
-          id="school"
-          label="Училиште"
-          value={school}
-          onChange={setSchool}
-          placeholder="Избери училиште"
-          groups={schoolGroups}
-        />
+        <div className="flex flex-col gap-2">
+          {!canChangeSchool ? (
+            <span className="flex w-fit items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 py-1 font-[family-name:var(--font-manrope)] text-[12px] leading-none text-[#595959]">
+              <FontAwesomeIcon icon={faLock} className="text-[10px]" />
+              Заклучено до септември
+            </span>
+          ) : null}
+          <SelectField
+            id="school"
+            label="Училиште"
+            value={school}
+            onChange={setSchool}
+            placeholder="Избери училиште"
+            groups={schoolGroups}
+            disabled={!canChangeSchool}
+          />
+          {schoolLockMessage ? (
+            <p className="font-[family-name:var(--font-manrope)] text-[12px] leading-5 text-[#595959]">
+              {schoolLockMessage}
+            </p>
+          ) : null}
+        </div>
         <SelectField
           id="area"
           label="Подрачје на образование"
@@ -305,7 +346,7 @@ export default function EditProfileForm({ user: initialUser }) {
           value={year}
           onChange={setYear}
           placeholder="Избери година"
-          options={YEARS}
+          options={yearOptions}
         />
       </section>
 

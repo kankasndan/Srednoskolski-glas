@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Contracts\MediaStorage;
 use App\Models\MediaUpload;
 use App\Models\ThreadAttachment;
+use App\Support\MediaLimits;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class MediaController extends Controller
 {
@@ -27,7 +29,7 @@ class MediaController extends Controller
             'file' => [
                 'required',
                 'file',
-                'max:102400',
+                'max:'.MediaLimits::maxKilobytes(),
                 'mimetypes:image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             ],
             'directory' => [
@@ -37,6 +39,15 @@ class MediaController extends Controller
                 Rule::in(self::ALLOWED_DIRECTORIES),
             ],
         ]);
+
+        $file = $request->file('file');
+        if (MediaLimits::exceedsSize($file)) {
+            throw ValidationException::withMessages([
+                'file' => [MediaLimits::sizeError((string) $file->getMimeType())],
+            ]);
+        }
+
+        MediaLimits::assertDailyQuota((int) $request->user()->id);
 
         $directory = $validated['directory'] ?? config('media.directory');
 

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Forum;
 use App\Models\Thread;
+use App\Support\MediaLimits;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Validator;
@@ -22,8 +23,8 @@ class StoreThreadRequest extends FormRequest
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
 
-    /** Laravel file max rule uses kilobytes (100 MB). */
-    private const MAX_FILE_KILOBYTES = 102400;
+    /** Laravel file max rule uses kilobytes. */
+    private const MAX_FILE_KILOBYTES = 51200;
 
     public function authorize(): bool
     {
@@ -91,6 +92,7 @@ class StoreThreadRequest extends FormRequest
             $imageCount = 0;
             $videoCount = 0;
             $docCount = 0;
+            $newFileCount = 0;
 
             foreach ($files as $index => $file) {
                 if ($file === null) {
@@ -117,12 +119,33 @@ class StoreThreadRequest extends FormRequest
                     continue;
                 }
 
+                if (MediaLimits::exceedsSize($file)) {
+                    $validator->errors()->add(
+                        "files.{$index}",
+                        MediaLimits::sizeError($mime),
+                    );
+
+                    continue;
+                }
+
                 if (str_starts_with($mime, 'image/')) {
                     $imageCount++;
                 } elseif (str_starts_with($mime, 'video/')) {
                     $videoCount++;
                 } else {
                     $docCount++;
+                }
+
+                $newFileCount++;
+            }
+
+            if ($newFileCount > 0 && $this->user() !== null) {
+                $limit = (int) config('media.limits.daily_uploads', 30);
+                if (MediaLimits::uploadsToday((int) $this->user()->id) + $newFileCount > $limit) {
+                    $validator->errors()->add(
+                        'files',
+                        "Достигнат е дневниот лимит од {$limit} прикачувања.",
+                    );
                 }
             }
 

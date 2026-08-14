@@ -14,6 +14,7 @@ use App\Models\Poll;
 use App\Models\Thread;
 use App\Models\ThreadView;
 use App\Support\HtmlSanitizer;
+use App\Support\ViewThrottle;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -248,7 +249,7 @@ class ThreadController extends Controller
 
         $user = $request->user('web') ?? $request->user();
 
-        if ($this->shouldTrackThreadView($request)) {
+        if ($this->shouldTrackThreadView($request) && ViewThrottle::shouldIncrement($request, 'thread', $thread->id)) {
             $thread->increment('views');
 
             if ($user !== null) {

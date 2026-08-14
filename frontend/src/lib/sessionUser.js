@@ -50,7 +50,9 @@ export async function loadSessionUser({ force = false } = {}) {
     const caps = cachedUser?.capabilities;
     const missingCaps =
       cachedUser != null &&
-      (caps == null || typeof caps.can_create_threads !== "boolean");
+      (caps == null ||
+        typeof caps.can_create_threads !== "boolean" ||
+        typeof caps.can_change_school !== "boolean");
     if (!missingCaps) {
       return cachedUser;
     }

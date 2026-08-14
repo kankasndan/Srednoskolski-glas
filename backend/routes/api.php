@@ -51,42 +51,36 @@ Route::middleware('auth:sanctum')->get('/me/following-users', [ProfileController
 Route::middleware(['auth:sanctum', 'throttle:api-writes'])->post('/logout', LogoutController::class)->name('auth.logout');
 
 // Public user profiles (by username).
-Route::get('/u/{username}', [UserProfileController::class, 'show'])
-    ->where('username', '[A-Za-z0-9_.-]+')
-    ->name('users.profile.show');
-Route::get('/u/{username}/threads', [UserProfileController::class, 'threads'])
-    ->where('username', '[A-Za-z0-9_.-]+')
-    ->name('users.profile.threads');
-Route::get('/u/{username}/comments', [UserProfileController::class, 'comments'])
-    ->where('username', '[A-Za-z0-9_.-]+')
-    ->name('users.profile.comments');
-Route::get('/u/{username}/followed-forums', [UserProfileController::class, 'followedForums'])
-    ->where('username', '[A-Za-z0-9_.-]+')
-    ->name('users.profile.followed-forums');
+Route::middleware('throttle:api-reads')->group(function () {
+    Route::get('/u/{username}', [UserProfileController::class, 'show'])
+        ->where('username', '[A-Za-z0-9_.-]+')
+        ->name('users.profile.show');
+    Route::get('/u/{username}/threads', [UserProfileController::class, 'threads'])
+        ->where('username', '[A-Za-z0-9_.-]+')
+        ->name('users.profile.threads');
+    Route::get('/u/{username}/comments', [UserProfileController::class, 'comments'])
+        ->where('username', '[A-Za-z0-9_.-]+')
+        ->name('users.profile.comments');
+    Route::get('/u/{username}/followed-forums', [UserProfileController::class, 'followedForums'])
+        ->where('username', '[A-Za-z0-9_.-]+')
+        ->name('users.profile.followed-forums');
 
-// List thematic + school forums for the sidebar.
-Route::get('/forums', [ForumController::class, 'index'])->name('forums.index');
-// List cities and schools (onboarding / filters).
-Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
-// Paginated cross-forum home feed.
-Route::get('/feed', [FeedController::class, 'index'])->name('feed.index');
-// Newest discussions (/newest): general + followed schools, focus mix on follows.
-Route::get('/newest', [NewestController::class, 'index'])->name('newest.index');
-// Explore page: top visited general forums + most interacted threads this week.
-Route::get('/explore', [ExploreController::class, 'index'])->name('explore.index');
-// Live search + explore page (threads + matching forums).
-Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+    Route::get('/forums', [ForumController::class, 'index'])->name('forums.index');
+    Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
+    Route::get('/feed', [FeedController::class, 'index'])->name('feed.index');
+    Route::get('/newest', [NewestController::class, 'index'])->name('newest.index');
+    Route::get('/explore', [ExploreController::class, 'index'])->name('explore.index');
+    Route::get('/p/{forum:slug}', [ForumController::class, 'show'])->name('forums.show');
+    Route::get('/p/{forum:slug}/threads', [ThreadController::class, 'index'])->name('forums.threads.index');
+    Route::get('/p/{forum:slug}/comments/{thread:id}', [ThreadController::class, 'show'])->name('forums.threads.show');
+    Route::get('/comments/{comment}/replies', [CommentController::class, 'replies'])
+        ->withTrashed()
+        ->name('comments.replies');
+});
 
-// Forum banner/metadata only (no threads).
-Route::get('/p/{forum:slug}', [ForumController::class, 'show'])->name('forums.show');
-// Paginated threads for a forum.
-Route::get('/p/{forum:slug}/threads', [ThreadController::class, 'index'])->name('forums.threads.index');
-// Thread detail with top-level comments (increments views; sort=best|newest|oldest).
-Route::get('/p/{forum:slug}/comments/{thread:id}', [ThreadController::class, 'show'])->name('forums.threads.show');
-// Direct replies for a comment (lazy-loaded from the thread page).
-Route::get('/comments/{comment}/replies', [CommentController::class, 'replies'])
-    ->withTrashed()
-    ->name('comments.replies');
+Route::get('/search', [SearchController::class, 'index'])
+    ->middleware('throttle:api-search')
+    ->name('search.index');
 
 Route::middleware(['auth:sanctum', 'not_banned', 'onboarding'])->group(function () {
     // Follow / unfollow another user.

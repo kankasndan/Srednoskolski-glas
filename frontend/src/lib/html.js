@@ -23,6 +23,15 @@ const ALLOWED_TAGS = [
 
 const ALLOWED_ATTR = ["href", "target", "rel"];
 
+DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+  if (node.tagName !== "A" || !node.hasAttribute("href")) return;
+
+  const href = node.getAttribute("href") || "";
+  if (href.startsWith("//") || /^\s*(javascript|data|vbscript):/i.test(href)) {
+    node.removeAttribute("href");
+  }
+});
+
 /**
  * TipTap stores description as HTML. Use stripHtml for list/card previews
  * and renderHtmlProps for the full thread body.

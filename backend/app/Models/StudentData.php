@@ -12,6 +12,13 @@ class StudentData extends Model
         'school_id',
         'vocation_id',
         'grade',
+        'school_changed_at',
+        'grade_promoted_at',
+    ];
+
+    protected $hidden = [
+        'school_changed_at',
+        'grade_promoted_at',
     ];
 
     /**
@@ -21,6 +28,8 @@ class StudentData extends Model
     {
         return [
             'grade' => 'integer',
+            'school_changed_at' => 'datetime',
+            'grade_promoted_at' => 'datetime',
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -63,6 +64,15 @@ class Thread extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Threads that publicly identify their author. Anonymous posts stay in
+     * the feed with a hidden author, but must not appear on /u/{username}.
+     */
+    public function scopePubliclyAttributed(Builder $query): void
+    {
+        $query->where('is_anonymous', false);
     }
 
     public function forum()

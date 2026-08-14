@@ -70,6 +70,18 @@ class Comment extends Model
     }
 
     /**
+     * Drop comments on the profile owner's own anonymous threads so the
+     * public comments tab cannot be used to deanonymize those posts.
+     */
+    public function scopeWithoutOwnAnonymousThreads(Builder $query, User $profileUser): void
+    {
+        $query->whereDoesntHave('thread', function (Builder $thread) use ($profileUser): void {
+            $thread->where('user_id', $profileUser->id)
+                ->where('is_anonymous', true);
+        });
+    }
+
+    /**
      * How many direct replies would appear if this comment is expanded.
      */
     public function scopeWithVisibleRepliesCount(Builder $query): void
@@ -87,6 +99,7 @@ class Comment extends Model
         return [
             'user.studentData.school.city',
             'user.studentData.school.forum',
+            'thread',
         ];
     }
 

@@ -29,6 +29,13 @@ return [
 
     'directory' => env('MEDIA_DIRECTORY', 'uploads'),
 
+    'limits' => [
+        'image_kb' => 5120,
+        'video_kb' => 51200,
+        'document_kb' => 10240,
+        'daily_uploads' => 30,
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Driver Configuration

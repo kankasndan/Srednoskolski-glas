@@ -29,3 +29,10 @@ it('converts tip tap html to plain text without tags', function () {
 
     expect(HtmlSanitizer::plainText($html))->toBe('Hello world bold');
 });
+
+it('rejects protocol-relative hrefs', function () {
+    $clean = HtmlSanitizer::clean('<a href="//evil.example/phish">x</a>');
+
+    expect($clean)->not->toContain('href="//evil.example/phish"')
+        ->and($clean)->not->toContain('href="//');
+});
