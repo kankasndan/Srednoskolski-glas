@@ -61,7 +61,7 @@ export default function SocialAuthButtons({
                 key={provider.id}
                 href={`${API_BASE_URL}/api/auth/${provider.id}/redirect`}
                 onClick={handleClick}
-                className="h-stack h-14 w-full items-center justify-center gap-4 rounded-[16px] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-base leading-none font-bold text-white transition-colors hover:bg-[#4B25E0]"
+                className="h-stack h-14 w-full items-center justify-center gap-4 rounded-[16px] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-base leading-none font-bold text-white transition-colors hover:bg-[#3300F5]"
               >
                 <FontAwesomeIcon icon={provider.icon} className="w-9 text-[22px]" />
                 <span className="min-w-0">{`${actionLabel} ${provider.name}`}</span>
@@ -153,7 +153,7 @@ function DefaultSocialAuthButtons({
             key={provider.id}
             href={`${API_BASE_URL}/api/auth/${provider.id}/redirect`}
             onClick={onProviderClick}
-            className="flex h-12 cursor-pointer items-center justify-center gap-3 rounded-2xl bg-[#582FF5] px-6 font-(family-name:--font-manrope) text-[15px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0] 2xl:h-14 2xl:text-[17px]"
+            className="flex h-12 cursor-pointer items-center justify-center gap-3 rounded-2xl bg-[#582FF5] px-6 font-(family-name:--font-manrope) text-[15px] font-bold leading-none text-white transition-colors hover:bg-[#3300F5] 2xl:h-14 2xl:text-[17px]"
           >
             <FontAwesomeIcon icon={provider.icon} className="text-[22px] 2xl:text-[26px]" />
             {`${actionLabel} ${provider.name}`}

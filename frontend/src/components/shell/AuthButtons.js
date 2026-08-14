@@ -2,117 +2,71 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Avatar from "@/components/ui/Avatar";
-import LogoutDialogs from "@/components/shell/LogoutDialogs";
-import { useLogout } from "@/hooks/useLogout";
-import { needsOnboarding } from "@/lib/capabilities";
-import {
-  clearSessionUser,
-  getCachedSessionUser,
-  loadSessionUser,
-  subscribeSessionUser,
-} from "@/lib/sessionUser";
-
-function AuthButtonsSkeleton() {
-  return (
-    <div
-      className="ml-auto flex h-10 w-75 shrink-0 items-center justify-end gap-3"
-      aria-hidden="true"
-    >
-      <div className="h-10 w-36 animate-pulse rounded-xl bg-[#E5E5E5]" />
-      <div className="h-10 w-36 animate-pulse rounded-xl bg-[#E5E5E5]" />
-    </div>
-  );
-}
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { apiFetch } from "@/lib/api";
 
 export default function AuthButtons() {
-  const cached = getCachedSessionUser();
-  const [user, setUser] = useState(() => (cached === undefined ? null : cached));
-  const [resolved, setResolved] = useState(() => cached !== undefined);
+  const router = useRouter();
+  const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const menuRef = useRef(null);
-  const logout = useLogout({
-    onLoggedOut: () => {
-      clearSessionUser();
-      setUser(null);
-      setMenuOpen(false);
-    },
-  });
 
   useEffect(() => {
-    const unsubscribe = subscribeSessionUser((next) => {
-      if (next === undefined) return;
-      setUser(next);
-      setResolved(true);
-    });
-
     let isMounted = true;
 
-    loadSessionUser()
-      .then((nextUser) => {
-        if (!isMounted) return;
-        setUser(nextUser);
-      })
-      .finally(() => {
-        if (isMounted) setResolved(true);
-      });
+    // The session cookie is httpOnly, so we can't inspect it directly; we ask
+    // the backend who we are. A 401 simply means "signed out".
+    async function loadUser() {
+      try {
+        const response = await apiFetch("/api/me");
 
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, []);
+        if (!response.ok) {
+          throw new Error("Unable to load user");
+        }
 
-  useEffect(() => {
-    if (!menuOpen) return;
+        const data = await response.json();
 
-    function handlePointerDown(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuOpen(false);
+        if (isMounted) {
+          setUser(data.user);
+        }
+      } catch {
+        if (isMounted) {
+          setUser(null);
+        }
       }
     }
 
-    function handleKeyDown(event) {
-      if (event.key === "Escape") setMenuOpen(false);
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
+    loadUser();
 
     return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
+      isMounted = false;
     };
-  }, [menuOpen]);
+  }, []);
 
-  if (!resolved && !user) {
-    return <AuthButtonsSkeleton />;
+  useClickOutside(menuRef, useCallback(() => setMenuOpen(false), []), menuOpen);
+
+  async function handleLogout() {
+    setLoggingOut(true);
+
+    try {
+      await apiFetch("/api/logout", { method: "POST" });
+    } catch {
+      // Even if the request fails, clear local state so the UI reflects a
+      // signed-out session; the cookie will expire regardless.
+    } finally {
+      localStorage.removeItem("onboarding_pending");
+      setUser(null);
+      setMenuOpen(false);
+      setLoggingOut(false);
+      router.replace("/feed");
+    }
   }
 
   if (user) {
-    if (needsOnboarding(user)) {
-      return (
-        <div className="ml-auto flex h-10 shrink-0 items-center gap-3">
-          <Link
-            href="/register/onboarding"
-            className="flex h-10 w-auto min-w-36 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0]"
-          >
-            Заврши регистрација
-          </Link>
-          <button
-            type="button"
-            onClick={logout.ask}
-            disabled={logout.loggingOut}
-            className="flex h-10 cursor-pointer items-center justify-center rounded-xl border border-[#CCCCCC] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:bg-[#E5E5E5] disabled:opacity-60"
-          >
-            {logout.loggingOut ? "…" : "Одјави се"}
-          </button>
-          <LogoutDialogs logout={logout} />
-        </div>
-      );
-    }
-
     const displayName = user.username || "Профил";
     const avatarUrl = user.imageUrl;
 
@@ -127,7 +81,7 @@ export default function AuthButtons() {
         >
           <Avatar src={avatarUrl} size="xl" alt={displayName} />
 
-          <span className="hidden font-(family-name:--font-manrope) text-[18px] font-medium leading-none text-[#0A0A0A] group-hover:text-[#582FF5] transition lg:inline">
+          <span className="font-(family-name:--font-manrope) text-[18px] font-medium leading-none text-[#0A0A0A] group-hover:text-[#582FF5] transition">
             {displayName}
           </span>
 
@@ -136,7 +90,7 @@ export default function AuthButtons() {
             alt=""
             width={16}
             height={16}
-            className="hidden size-4 lg:block"
+            className={`size-4`}
           />
         </button>
 
@@ -157,36 +111,32 @@ export default function AuthButtons() {
             <button
               type="button"
               role="menuitem"
-              onClick={logout.ask}
-              disabled={logout.loggingOut}
+              onClick={handleLogout}
+              disabled={loggingOut}
               className="flex w-full cursor-pointer items-center gap-3 px-5 py-3 text-left font-(family-name:--font-manrope) text-[15px] font-medium leading-none text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {logout.loggingOut ? "Се одјавува…" : "Одјави се"}
+              {loggingOut ? "Се одјавува…" : "Одјави се"}
             </button>
           </div>
         )}
-
-        <LogoutDialogs logout={logout} />
       </div>
     );
   }
 
   return (
-    <div className="flex h-10 shrink-0 items-center gap-3 lg:w-75">
+    <div className="ml-auto flex h-10 w-75 shrink-0 items-center gap-3">
       <Link
         href="/login"
-        className="flex h-10 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900) lg:w-36"
+        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900)"
       >
         Најави се
       </Link>
       <Link
         href="/register"
-        className="hidden h-10 w-36 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-white transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900) lg:flex"
+        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#582FF5] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-white transition-colors hover:border-[#3300F5] hover:bg-[#3300F5]"
       >
         Регистрација
       </Link>
-
-      <LogoutDialogs logout={logout} />
     </div>
   );
 }

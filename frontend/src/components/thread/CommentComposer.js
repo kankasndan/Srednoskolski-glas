@@ -92,11 +92,11 @@ export default function CommentComposer({
       className={
         compact
           ? "flex flex-col gap-2"
-          : "flex flex-col gap-4 rounded-3xl border border-[#CCCCCC] bg-white p-6"
+          : "flex w-full max-w-[342px] flex-col gap-2 rounded-3xl border border-[#CFE9ED] bg-white p-6 sm:max-w-full md:gap-4"
       }
     >
       {compact ? null : (
-        <h2 className="text-[16px] font-bold leading-none text-black">
+        <h2 className="h-5 text-[16px] font-bold leading-[19.5px] text-black">
           Остави коментар
         </h2>
       )}
@@ -108,13 +108,13 @@ export default function CommentComposer({
         placeholder={
           compact
             ? "Напиши одговор..."
-            : "Сподели го своето мислење... Употреби @ за да означиш некого..."
+            : "Употреби @ за да означиш некого..."
         }
         aria-label={compact ? "Одговор" : "Коментар"}
         autoFocus={compact}
         disabled={busy}
-        className={`resize-none rounded-xl border border-[#CCCCCC] p-4 text-[14px] leading-6 text-black outline-none transition-colors placeholder:text-[#595959] focus:border-[#582FF5] disabled:opacity-60 ${
-          compact ? "h-20" : "h-32"
+        className={`resize-none rounded-[14px] border border-[#CCCCCC] p-3 text-[14px] leading-6 text-black outline-none transition-colors placeholder:text-[#595959] focus:border-[#582FF5] disabled:opacity-60 ${
+          compact ? "h-20" : "h-20 md:h-32"
         }`}
       />
 
@@ -123,8 +123,10 @@ export default function CommentComposer({
       ) : null}
 
       <div
-        className={`flex items-center gap-4 ${
-          compact ? "justify-end" : "justify-between"
+        className={`flex gap-4 ${
+          compact
+            ? "items-center justify-end"
+            : "flex-col items-start justify-between sm:flex-row sm:items-center"
         }`}
       >
         {compact ? (
@@ -139,7 +141,7 @@ export default function CommentComposer({
         ) : (
           <Link
             href="/rules"
-            className="cursor-pointer text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px] transition-colors hover:text-black"
+            className="h-[18px] cursor-pointer text-[12px] leading-[18px] text-[#595959] underline underline-offset-[4px] transition-colors hover:text-black"
           >
             Внимавај на правилата на заедницата.
           </Link>
@@ -148,11 +150,11 @@ export default function CommentComposer({
         <PrimaryButton
           type="submit"
           disabled={isEmpty || busy}
-          className={`shrink-0 leading-none disabled:bg-[#CCCCCC] ${
-            compact ? "h-9 px-5 text-[12px]" : "h-10 w-36 text-[14px]"
+          className={`flex shrink-0 items-center justify-center gap-4 leading-none disabled:bg-[#CCCCCC] ${
+            compact ? "h-9 px-5 text-[12px]" : "h-10 w-full px-4 text-[14px] sm:w-36"
           }`}
         >
-          {busy ? "…" : "Објави"}
+          {busy ? "…" : compact ? "Објави" : "Објави коментар"}
         </PrimaryButton>
       </div>
     </form>

@@ -16,7 +16,13 @@ const EditThreadDialog = dynamic(
   { ssr: false },
 );
 
-export default function ThreadActionsMenu({ thread, isOwner, onUpdated }) {
+export default function ThreadActionsMenu({
+  thread,
+  isOwner,
+  onUpdated,
+  className = "",
+  ownerAction = "menu",
+}) {
   const router = useRouter();
   // Prefer API `is_owner` (covers anonymous threads). Optional prop overrides.
   const showOwnerActions = isOwner ?? Boolean(thread?.is_owner);
@@ -53,7 +59,11 @@ export default function ThreadActionsMenu({ thread, isOwner, onUpdated }) {
       removePoll,
     });
 
-    onUpdated?.(updated);
+    onUpdated?.({
+      ...updated,
+      is_edited: true,
+      edited_at: updated.edited_at ?? updated.updated_at,
+    });
     setEditing(false);
     setSaved(true);
   }
@@ -90,22 +100,43 @@ export default function ThreadActionsMenu({ thread, isOwner, onUpdated }) {
   return (
     <>
       {showOwnerActions ? (
-        <ThreeDotsMenu items={ownerItems} />
+        <div className={className}>
+          {ownerAction === "delete" ? (
+            <button
+              type="button"
+              aria-label="Избриши дискусија"
+              onClick={() => setConfirmingDelete(true)}
+              className="thread-actions-trigger grid size-9 cursor-pointer place-items-center rounded-lg transition-colors hover:bg-[#E5E5E5]"
+            >
+              <Image
+                src="/more-2-fill.svg"
+                alt=""
+                width={20}
+                height={20}
+                className="size-5"
+              />
+            </button>
+          ) : (
+            <ThreeDotsMenu items={ownerItems} />
+          )}
+        </div>
       ) : (
-        <button
-          type="button"
-          aria-label="Пријави"
-          onClick={() => setReporting(true)}
-          className="grid size-9 cursor-pointer place-items-center rounded-lg text-[#333333] transition-colors hover:bg-[#E5E5E5]"
-        >
-          <Image
-            src="/comments icon/report.svg"
-            alt=""
-            width={18}
-            height={18}
-            className="size-[18px]"
-          />
-        </button>
+        <div className={className}>
+          <button
+            type="button"
+            aria-label="Пријави"
+            onClick={() => setReporting(true)}
+            className="thread-actions-trigger grid size-9 cursor-pointer place-items-center rounded-lg text-[#333333] transition-colors hover:bg-[#E5E5E5]"
+          >
+            <Image
+              src="/comments icon/report.svg"
+              alt=""
+              width={18}
+              height={18}
+              className="size-[18px]"
+            />
+          </button>
+        </div>
       )}
 
       {editing && (
