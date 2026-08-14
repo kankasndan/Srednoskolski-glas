@@ -8,6 +8,27 @@ import { authorProfileHref, forumHref, schoolForumHref } from "@/lib/profileLink
 const SCHOOL_ICON = "/icons/uchilishte.svg";
 const DEFAULT_AVATAR = "/Generic avatar.svg";
 
+function timestampsDiffer(first, second) {
+  if (!first || !second) return false;
+
+  const firstTime = new Date(first).getTime();
+  const secondTime = new Date(second).getTime();
+
+  if (Number.isNaN(firstTime) || Number.isNaN(secondTime)) {
+    return first !== second;
+  }
+
+  return Math.abs(firstTime - secondTime) > 1000;
+}
+
+function wasThreadEdited(thread) {
+  if (!thread) return false;
+  if (Boolean(thread.is_edited)) return true;
+  if (thread.edited_at) return true;
+
+  return timestampsDiffer(thread.updated_at, thread.created_at);
+}
+
 export function buildThreadMetaTags(forum, thread) {
   const forumData = thread?.forum ?? forum;
 
@@ -41,24 +62,34 @@ export function buildThreadMetaTags(forum, thread) {
     });
   }
 
+  if (wasThreadEdited(thread)) {
+    tags.push({
+      key: "edited",
+      label: "изменето",
+    });
+  }
+
   return tags;
 }
 
-function MetaTag({ tag, hiddenOnMobile = false }) {
+function MetaTag({ tag, hiddenOnMobile = false, hiddenOnPhone = false }) {
   const remoteIcon = isRemoteAssetUrl(tag.icon);
   const iconBoxClass = tag.avatar
-    ? "relative size-4 shrink-0 overflow-hidden rounded-full lg:size-6"
-    : "relative size-5 shrink-0 overflow-hidden";
+    ? "relative size-5 shrink-0 overflow-hidden rounded-full md:size-6"
+    : "relative size-4 shrink-0 overflow-hidden md:size-5";
   const iconClass = tag.avatar
-    ? "size-4 object-cover lg:size-6"
+    ? "size-5 object-cover md:size-6"
     : tag.zoom
-      ? "size-11"
-      : "size-5";
+      ? "size-9 md:size-11"
+      : "size-4 md:size-5";
   const iconSize = tag.avatar ? 24 : tag.zoom ? 44 : 20;
+  const displayClass = hiddenOnMobile
+    ? "hidden lg:flex"
+    : hiddenOnPhone
+      ? "hidden md:flex"
+      : "flex";
 
-  const className = `relative z-10 ${
-    hiddenOnMobile ? "hidden lg:flex" : "flex"
-  } shrink-0 cursor-pointer items-center gap-2 rounded-md border-[0.5px] border-[#CCCCCC] bg-[#E5E5E5] px-2 py-1 font-[family-name:var(--font-roboto)] text-[12px] font-normal leading-[16px] text-black transition-colors hover:bg-[#EBEBEB] lg:h-7 lg:gap-1.5 lg:border-0 lg:bg-[#F5F5F5] lg:py-0 lg:font-sans lg:font-bold lg:leading-none`;
+  const className = `relative z-10 ${displayClass} h-6 max-w-[150px] shrink-0 cursor-pointer items-center gap-1 rounded-md bg-[#F5F5F5] px-1.5 text-[11px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB] md:h-7 md:max-w-none md:gap-1.5 md:px-2 md:text-[12px]`;
 
   const content = (
     <>
@@ -81,7 +112,7 @@ function MetaTag({ tag, hiddenOnMobile = false }) {
           )}
         </span>
       ) : null}
-      {tag.label}
+      <span className="truncate">{tag.label}</span>
     </>
   );
 
@@ -101,18 +132,24 @@ function MetaTag({ tag, hiddenOnMobile = false }) {
 }
 
 // Na mobilen karticata gi prikazuva samo forumot i vremeto.
-export default function ThreadMetaTags({ tags, postedAgo, forumOnlyOnMobile = false }) {
+export default function ThreadMetaTags({
+  tags,
+  postedAgo,
+  forumOnlyOnMobile = false,
+  hideForumOnPhone = false,
+}) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex min-w-0 flex-wrap items-center gap-1.5 md:gap-2">
       {tags.map((tag) => (
         <MetaTag
           key={tag.key ?? tag.label}
           tag={tag}
           hiddenOnMobile={forumOnlyOnMobile && tag.key !== "forum"}
+          hiddenOnPhone={hideForumOnPhone && tag.key === "forum"}
         />
       ))}
       {postedAgo ? (
-        <span className="font-[family-name:var(--font-roboto)] text-[12px] font-normal leading-[16px] text-[#595959] lg:font-sans lg:leading-none">
+        <span className="shrink-0 text-[11px] leading-none text-[#595959] md:text-[12px]">
           {postedAgo}
         </span>
       ) : null}

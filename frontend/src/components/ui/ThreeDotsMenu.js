@@ -20,8 +20,8 @@ export default function ThreeDotsMenu({ items }) {
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((current) => !current)}
-        className={`grid size-9 cursor-pointer place-items-center rounded-lg transition-colors hover:bg-[#E5E5E5] ${
-          open ? "text-[var(--color-primary-200)]" : "text-[#333333]"
+        className={`thread-actions-trigger grid size-9 cursor-pointer place-items-center rounded-lg transition-colors hover:bg-[#E5E5E5] ${
+          open ? "text-[#582FF5]" : "text-[#333333]"
         }`}
       >
         <MoreIcon />
@@ -56,14 +56,6 @@ export default function ThreeDotsMenu({ items }) {
   );
 }
 
-function cornerClassName(index, total) {
-  if (total === 1) return "rounded-[6px]";
-  if (index === 0) return "rounded-t-[6px]";
-  if (index === total - 1) return "-mt-px rounded-b-[6px]";
-  return "-mt-px";
-}
-
-
 function MoreIcon() {
   return (
     <svg
@@ -80,4 +72,11 @@ function MoreIcon() {
       />
     </svg>
   );
+}
+
+function cornerClassName(index, total) {
+  if (total === 1) return "rounded-[6px]";
+  if (index === 0) return "rounded-t-[6px]";
+  if (index === total - 1) return "-mt-px rounded-b-[6px]";
+  return "-mt-px";
 }

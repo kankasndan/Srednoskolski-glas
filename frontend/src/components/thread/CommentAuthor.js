@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { authorProfileHref, schoolForumHref } from "@/lib/profileLinks";
-import { formatPostedAgo } from "@/lib/time";
 
 function MetaLink({ href, className, children }) {
   if (!href) {
@@ -20,20 +19,17 @@ function MetaLink({ href, className, children }) {
   );
 }
 
-export default function CommentAuthor({ author, createdAt }) {
+export default function CommentAuthor({ author }) {
   if (!author) {
     return (
-      <div className="flex min-h-8 items-center gap-3">
+      <div className="flex min-h-8 flex-wrap items-center gap-2 md:gap-3">
         <span className="text-[14px] font-bold leading-none text-black">Анонимен</span>
-        <span className="text-[12px] leading-none text-black">
-          {formatPostedAgo(createdAt)}
-        </span>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-8 items-center gap-3">
+    <div className="flex min-h-8 flex-wrap items-center gap-2 md:gap-3">
       <MetaLink
         href={authorProfileHref(author)}
         className="text-[14px] font-bold leading-none text-black"
@@ -43,14 +39,11 @@ export default function CommentAuthor({ author, createdAt }) {
       {author.school?.name ? (
         <MetaLink
           href={schoolForumHref(author.school)}
-          className="text-[12px] leading-none text-black"
+          className="text-[12px] leading-none text-[#999999]"
         >
           {author.school.name}
         </MetaLink>
       ) : null}
-      <span className="text-[12px] leading-none text-black">
-        {formatPostedAgo(createdAt)}
-      </span>
     </div>
   );
 }

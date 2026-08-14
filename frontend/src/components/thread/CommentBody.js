@@ -2,7 +2,7 @@
 export default function CommentBody({ text, muted }) {
   return (
     <p
-      className={`text-[14px] leading-[22px] ${
+      className={`break-words text-[14px] leading-[22px] ${
         muted ? "text-[#595959]" : "text-black"
       }`}
     >

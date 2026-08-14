@@ -3,6 +3,8 @@
 import { useModalDismiss } from "@/hooks/useModalDismiss";
 
 function FilterGroup({ title, options, selected, onSelect }) {
+  if (!options?.length || !selected) return null;
+
   return (
     <div className="flex flex-col gap-4">
       <p className="text-center font-[family-name:var(--font-manrope)] text-[16px] font-bold leading-none text-black">
@@ -38,11 +40,13 @@ export default function FeedFilterSheet({
   onSelectTime,
 }) {
   useModalDismiss(open, onClose);
+  const hasSortOptions = Boolean(sortOptions?.length && selectedSort);
+  const hasTimeOptions = Boolean(timeOptions?.length && selectedTime);
 
   return (
     <div
       aria-hidden={!open}
-      className={`fixed inset-0 z-[70] lg:hidden ${open ? "" : "pointer-events-none"}`}
+      className={`fixed inset-0 z-[70] md:hidden ${open ? "" : "pointer-events-none"}`}
     >
       <div
         onClick={onClose}
@@ -59,18 +63,22 @@ export default function FeedFilterSheet({
           open ? "translate-y-0" : "translate-y-full"
         }`}
       >
-        <FilterGroup
-          title="Филтрирај според"
-          options={sortOptions}
-          selected={selectedSort}
-          onSelect={onSelectSort}
-        />
-        <FilterGroup
-          title="Временски период"
-          options={timeOptions}
-          selected={selectedTime}
-          onSelect={onSelectTime}
-        />
+        {hasSortOptions ? (
+          <FilterGroup
+            title="Филтрирај според"
+            options={sortOptions}
+            selected={selectedSort}
+            onSelect={onSelectSort}
+          />
+        ) : null}
+        {hasTimeOptions ? (
+          <FilterGroup
+            title="Временски период"
+            options={timeOptions}
+            selected={selectedTime}
+            onSelect={onSelectTime}
+          />
+        ) : null}
       </div>
     </div>
   );

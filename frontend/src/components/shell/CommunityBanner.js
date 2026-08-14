@@ -18,11 +18,11 @@ export default function CommunityBanner() {
           alt=""
           width={119}
           height={80}
-          className="hidden h-20 w-[119px] shrink-0 object-contain lg:block"
+          className="hidden h-20 w-[119px] shrink-0 object-contain md:block"
           priority
         />
 
-        <div className="flex min-w-0 flex-1 flex-col gap-2 text-center lg:text-left">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 text-center md:text-left">
           <h2 className="font-[family-name:var(--font-oswald)] text-[20px] font-bold leading-none text-black">
             МЕСТО КАДЕ СЕКОЈ СРЕДНОШКОЛЕЦ ИМА ГЛАС
           </h2>

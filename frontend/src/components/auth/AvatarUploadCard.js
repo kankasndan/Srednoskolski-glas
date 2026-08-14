@@ -126,7 +126,7 @@ export default function AvatarUploadCard() {
         <button
           type="button"
           onClick={previewUrl ? () => finishOnboarding(router) : openFilePicker}
-          className="h-10 w-full cursor-pointer rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[16px] font-bold text-white transition-colors hover:bg-[#4B25E0] lg:h-14 lg:max-w-[400px]"
+          className="h-10 w-full cursor-pointer rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[16px] font-bold text-white transition-colors hover:bg-[#3300F5] lg:h-14 lg:max-w-[400px]"
         >
           {previewUrl ? "Продолжи" : "Прикачи фотографија"}
         </button>

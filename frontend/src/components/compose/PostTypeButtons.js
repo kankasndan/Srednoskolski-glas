@@ -137,11 +137,8 @@ export default function PostTypeButtons({
   initialPoll = null,
   allowPoll = true,
 }) {
-  const seedRef = useRef(null);
-  if (seedRef.current === null) {
-    seedRef.current = seedFromAttachments(initialAttachments);
-  }
-  const seed = seedRef.current;
+  // Presmetano ednash, na prviot render.
+  const [seed] = useState(() => seedFromAttachments(initialAttachments));
   const hadInitialPoll = Boolean(initialPoll?.id ?? initialPoll?.question);
 
   const [selected, setSelected] = useState(null);
