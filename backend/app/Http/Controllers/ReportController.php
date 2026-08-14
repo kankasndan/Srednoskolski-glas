@@ -68,8 +68,10 @@ class ReportController extends Controller
         }
 
         $otherReason = $validated['other_reason'] ?? null;
+        $details = isset($validated['details']) ? trim((string) $validated['details']) : '';
+
         if ($reasonKey === 'other') {
-            $otherReason = $otherReason ?: ($validated['details'] ?? null);
+            $otherReason = $otherReason ?: ($details !== '' ? $details : null);
             if ($otherReason === null || trim($otherReason) === '') {
                 return response()->json([
                     'message' => 'За „Друго“ внеси детали.',
@@ -78,6 +80,9 @@ class ReportController extends Controller
                     ],
                 ], 422);
             }
+        } elseif ($details !== '') {
+            // Optional extra info for any predefined reason.
+            $otherReason = $otherReason ?: $details;
         }
 
         $report = Report::query()->create([

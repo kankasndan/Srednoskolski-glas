@@ -40,12 +40,15 @@ class ForumResource extends JsonResource
             'imageUrl' => $this->imageUrl,
             'threads_count' => $this->threads_count,
             'members_count' => $this->members_count,
+            'views' => (int) ($this->views ?? 0),
             'is_following' => $this->when(
                 $this->withDetails && $user !== null,
-                fn () => $user->forums()->where('forums.id', $this->id)->exists(),
+                fn () => (bool) ($this->is_following ?? $user->forums()->where('forums.id', $this->id)->exists()),
             ),
-            'can_create_thread' => $user !== null
-                && $user->can('create', [Thread::class, $this->resource]),
+            'can_create_thread' => $this->when(
+                $this->withDetails,
+                fn () => $user !== null && $user->can('create', [Thread::class, $this->resource]),
+            ),
             // Own school forum stays followed from onboarding; others may follow/unfollow.
             'is_own_school_forum' => $this->when(
                 $this->withDetails && $user !== null && $this->type === 'school',

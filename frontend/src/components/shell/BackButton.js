@@ -38,7 +38,9 @@ export default function BackButton({
       type="button"
       onClick={handleBack}
       aria-label={label ? undefined : "Назад"}
-      className={`flex h-10 cursor-pointer items-center gap-2 rounded-full font-[family-name:var(--font-manrope)] text-[14px] font-medium leading-none transition-colors hover:text-black ${LABEL_TONES[tone]}`}
+      className={`inline-flex h-10 shrink-0 cursor-pointer items-center self-start rounded-full font-[family-name:var(--font-manrope)] text-[14px] leading-none font-medium transition-colors hover:text-black ${
+        label ? "gap-2" : "w-10 justify-center"
+      } ${LABEL_TONES[tone]}`}
     >
       <FontAwesomeIcon icon={faChevronLeft} className="h-4" />
       {label}

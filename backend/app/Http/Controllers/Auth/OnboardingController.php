@@ -73,15 +73,20 @@ class OnboardingController extends Controller
 
         $user = $user->fresh(['studentData.school.city', 'studentData.school.forum', 'studentData.vocation']);
         $syncPermissions->handle($user);
+        $user->forgetCachedPermissions();
+
+        $canManageThreads = $user->can('manage threads')
+            || $user->hasAnyRole(['super_admin', 'admin', 'moderator']);
 
         return response()->json([
             'message' => 'Onboarding saved',
             'user' => $user,
             'permissions' => $user->getAllPermissions()->pluck('name')->values(),
             'capabilities' => [
+                'has_completed_onboarding' => true,
                 'can_create_comments' => $user->canCreateComments(),
                 'can_create_threads' => $user->hasCompletedOnboarding()
-                    && ($user->can('create threads') || $user->can('manage threads')),
+                    && ($canManageThreads || $user->belongsToSchool()),
                 'school_forum_id' => $user->schoolForumId(),
             ],
         ]);

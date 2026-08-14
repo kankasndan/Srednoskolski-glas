@@ -1,6 +1,21 @@
 import { apiFetch } from "@/lib/api";
 
 /** @param {number} commentId */
+export async function getCommentReplies(commentId) {
+  const response = await apiFetch(`/api/comments/${commentId}/replies`);
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Failed to load replies (${response.status})`);
+    error.status = response.status;
+    error.body = body;
+    throw error;
+  }
+
+  return Array.isArray(body.data) ? body.data : [];
+}
+
+/** @param {number} commentId */
 export async function toggleCommentVote(commentId) {
   const response = await apiFetch(`/api/comments/${commentId}/upvote`, {
     method: "POST",

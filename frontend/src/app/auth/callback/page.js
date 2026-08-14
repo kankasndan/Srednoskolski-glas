@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { invalidateSessionUser } from "@/lib/sessionUser";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -24,6 +25,9 @@ export default function AuthCallbackPage() {
     } else {
       localStorage.removeItem("onboarding_pending");
     }
+
+    // Drop any prior guest/user cache so the next page loads a fresh /api/me.
+    invalidateSessionUser();
 
     const nextPath = onboardingRequired
       ? "/register/onboarding"

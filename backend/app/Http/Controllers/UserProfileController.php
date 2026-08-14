@@ -7,6 +7,7 @@ use App\Http\Resources\ForumResource;
 use App\Http\Resources\ProfileCommentResource;
 use App\Http\Resources\PublicUserResource;
 use App\Http\Resources\ThreadResource;
+use App\Models\Forum;
 use App\Models\User;
 use App\Services\Feed\FeedCache;
 use Illuminate\Http\JsonResponse;
@@ -96,6 +97,8 @@ class UserProfileController extends Controller
             ->orderBy('name')
             ->limit(100)
             ->get();
+
+        $forums->each(fn (Forum $forum) => $forum->setAttribute('is_following', true));
 
         return ForumResource::collection($forums)->response();
     }

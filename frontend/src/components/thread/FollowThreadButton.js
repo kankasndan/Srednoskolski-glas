@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { followThread, unfollowThread } from "@/api/threads";
 import { useProfile } from "@/hooks/useProfile";
+import { needsOnboarding, ONBOARDING_REQUIRED_MESSAGE } from "@/lib/capabilities";
 
 const GUEST_ERROR = "Мора да си најавен за да следиш дискусија.";
 
@@ -31,6 +32,11 @@ export default function FollowThreadButton({
       return;
     }
 
+    if (!profileLoading && needsOnboarding(user)) {
+      setError(ONBOARDING_REQUIRED_MESSAGE);
+      return;
+    }
+
     const nextFollowing = !following;
     setFollowing(nextFollowing);
     setPending(true);
@@ -50,6 +56,8 @@ export default function FollowThreadButton({
       onFollowingChange?.(!nextFollowing);
       if (err?.status === 401) {
         setError(GUEST_ERROR);
+      } else if (err?.status === 403) {
+        setError(err.message || ONBOARDING_REQUIRED_MESSAGE);
       }
     } finally {
       setPending(false);
@@ -61,13 +69,13 @@ export default function FollowThreadButton({
     : "bg-[#582FF5] text-white hover:bg-[#DCEBED] hover:text-[#0A0A0A]";
 
   return (
-    <div className="flex shrink-0 flex-col gap-1">
+    <div className="flex w-fit max-w-full shrink-0 items-center gap-3">
       <button
         type="button"
         aria-pressed={following}
         disabled={pending}
         onClick={toggleFollow}
-        className={`flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-80 ${stateClasses} ${className}`}
+        className={`flex h-10 w-fit shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-80 ${stateClasses} ${className}`}
       >
         {following && <CheckIcon />}
         <span className="flex h-[19px] items-center leading-none">
@@ -75,7 +83,7 @@ export default function FollowThreadButton({
         </span>
       </button>
       {error ? (
-        <p className="font-[family-name:var(--font-manrope)] text-[12px] leading-4 text-[#DC2626]">
+        <p className="max-w-[220px] font-[family-name:var(--font-manrope)] text-[12px] leading-4 text-[#DC2626]">
           {error}
         </p>
       ) : null}

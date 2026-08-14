@@ -4,6 +4,8 @@ export default function Checkbox({
   onChange,
   required,
   className = "",
+  boxClassName = "size-4 rounded-[4px] 2xl:size-5",
+  checkClassName = "w-2",
   children,
 }) {
   return (
@@ -16,13 +18,13 @@ export default function Checkbox({
         className="peer sr-only"
       />
       <span
-        className={`flex size-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-primary-200)] 2xl:size-5 ${
+        className={`flex shrink-0 items-center justify-center border transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-primary-200)] ${boxClassName} ${
           checked
             ? "border-[var(--color-primary-200)] bg-[var(--color-primary-200)]"
             : "border-[#595959]"
         }`}
       >
-        {checked && <CheckIcon />}
+        {checked && <CheckIcon className={checkClassName} />}
       </span>
       {children}
     </label>
@@ -30,13 +32,13 @@ export default function Checkbox({
 }
 
                                                                                                                               
-function CheckIcon() {
+function CheckIcon({ className }) {
   return (
     <svg
       viewBox="0 0 6.95997 5.33333"
       fill="none"
       aria-hidden="true"
-      className="w-2 text-white"
+      className={`${className} text-white`}
     >
       <path
         d="M6.95997 0.560775L2.18742 5.33333L0 3.14591L0.560775 2.58513L2.18742 4.2078L6.3992 0L6.95997 0.560775Z"

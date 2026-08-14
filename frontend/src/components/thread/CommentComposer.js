@@ -5,7 +5,7 @@ import { useState } from "react";
 import { createComment } from "@/api/comments";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { useProfile } from "@/hooks/useProfile";
-import { canCreateComments } from "@/lib/capabilities";
+import { canCreateComments, needsOnboarding } from "@/lib/capabilities";
 
 const MAX_COMMENT_LENGTH = 1000;
 
@@ -72,8 +72,15 @@ export default function CommentComposer({
             </Link>{" "}
             за да коментираш.
           </>
+        ) : needsOnboarding(user) ? (
+          <>
+            <Link href="/register/onboarding" className="font-bold text-[#582FF5] hover:underline">
+              Заврши ја регистрацијата
+            </Link>{" "}
+            за да можеш да коментираш.
+          </>
         ) : (
-          "Заврши го onboarding процесот за да можеш да коментираш."
+          "Немаш дозвола да коментираш."
         )}
       </div>
     );

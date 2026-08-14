@@ -6,15 +6,17 @@ use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ExploreController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\FeedHideController;
 use App\Http\Controllers\FollowForumController;
 use App\Http\Controllers\FollowThreadController;
-use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\NewestController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\UserProfileController;
@@ -37,7 +39,7 @@ Route::middleware(['web', 'throttle:social-auth'])->group(function () {
 Route::middleware(['auth:sanctum', 'not_banned', 'throttle:api-writes'])->put('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
 // Return the current authenticated user.
 Route::middleware('auth:sanctum')->get('/me', MeController::class)->name('me.show');
-Route::middleware(['auth:sanctum', 'not_banned', 'throttle:api-writes'])->put('/me', [ProfileController::class, 'update'])->name('me.update');
+Route::middleware(['auth:sanctum', 'not_banned', 'onboarding', 'throttle:api-writes'])->put('/me', [ProfileController::class, 'update'])->name('me.update');
 // Profile activity lists for the authenticated user.
 Route::middleware('auth:sanctum')->get('/me/counts', [ProfileController::class, 'counts'])->name('me.counts');
 Route::middleware('auth:sanctum')->get('/me/threads', [ProfileController::class, 'threads'])->name('me.threads');
@@ -68,6 +70,10 @@ Route::get('/forums', [ForumController::class, 'index'])->name('forums.index');
 Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
 // Paginated cross-forum home feed.
 Route::get('/feed', [FeedController::class, 'index'])->name('feed.index');
+// Newest discussions (/newest): general + followed schools, focus mix on follows.
+Route::get('/newest', [NewestController::class, 'index'])->name('newest.index');
+// Explore page: top visited general forums + most interacted threads this week.
+Route::get('/explore', [ExploreController::class, 'index'])->name('explore.index');
 // Live search + explore page (threads + matching forums).
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 
@@ -75,10 +81,14 @@ Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 Route::get('/p/{forum:slug}', [ForumController::class, 'show'])->name('forums.show');
 // Paginated threads for a forum.
 Route::get('/p/{forum:slug}/threads', [ThreadController::class, 'index'])->name('forums.threads.index');
-// Thread detail with nested comments (increments views; sort=best|newest|oldest).
+// Thread detail with top-level comments (increments views; sort=best|newest|oldest).
 Route::get('/p/{forum:slug}/comments/{thread:id}', [ThreadController::class, 'show'])->name('forums.threads.show');
+// Direct replies for a comment (lazy-loaded from the thread page).
+Route::get('/comments/{comment}/replies', [CommentController::class, 'replies'])
+    ->withTrashed()
+    ->name('comments.replies');
 
-Route::middleware(['auth:sanctum', 'not_banned'])->group(function () {
+Route::middleware(['auth:sanctum', 'not_banned', 'onboarding'])->group(function () {
     // Follow / unfollow another user.
     Route::post('/u/{username}/follow', [UserProfileController::class, 'follow'])
         ->middleware('throttle:api-writes')

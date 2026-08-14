@@ -22,7 +22,7 @@ function StatusMessage({ children }) {
 export default function ThreadPage() {
   const { slug, threadId } = useParams();
   const [sort, setSort] = useState("best");
-  const { forum, thread, comments, loading, error, missing, reload, patchThread } =
+  const { forum, thread, comments, loading, error, missing, patchThread, addComment } =
     useThread(slug, threadId, sort);
 
   if (loading && !thread) {
@@ -58,14 +58,14 @@ export default function ThreadPage() {
         <ThreadPost forum={forum} thread={thread} onThreadUpdated={patchThread} />
         <CommentComposer
           threadId={thread.id}
-          onCreated={() => reload()}
+          onCreated={addComment}
         />
         <CommentsHeader
           count={thread.comments_count}
           sort={sort}
           onSortChange={setSort}
         />
-        <CommentList comments={comments} threadId={thread.id} onCommentCreated={reload} />
+        <CommentList comments={comments} threadId={thread.id} onCommentCreated={addComment} />
 
         {/* Kontejnerot ovde ima gap-8, pa treba pomala margina od feed-ot. */}
         <MobileFooter className="mt-3" />

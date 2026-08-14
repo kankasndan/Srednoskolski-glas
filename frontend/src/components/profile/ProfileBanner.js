@@ -9,6 +9,7 @@ import { followUser, unfollowUser } from "@/api/profile";
 import LogoutDialogs from "@/components/shell/LogoutDialogs";
 import { useLogout } from "@/hooks/useLogout";
 import { useProfile } from "@/hooks/useProfile";
+import { needsOnboarding, ONBOARDING_REQUIRED_MESSAGE } from "@/lib/capabilities";
 
 const GUEST_FOLLOW_ERROR = "Мора да си најавен за да следиш корисник.";
 
@@ -86,6 +87,11 @@ export default function ProfileBanner({
       return;
     }
 
+    if (!viewerLoading && needsOnboarding(viewer)) {
+      setFollowError(ONBOARDING_REQUIRED_MESSAGE);
+      return;
+    }
+
     const nextFollowing = !following;
     setFollowing(nextFollowing);
     setFollowBusy(true);
@@ -107,6 +113,8 @@ export default function ProfileBanner({
       setFollowing(!nextFollowing);
       if (err?.status === 401) {
         setFollowError(GUEST_FOLLOW_ERROR);
+      } else if (err?.status === 403) {
+        setFollowError(err.message || ONBOARDING_REQUIRED_MESSAGE);
       }
     } finally {
       setFollowBusy(false);

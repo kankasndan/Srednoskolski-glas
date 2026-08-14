@@ -126,13 +126,55 @@ it('forbids incomplete onboarding from creating threads and comments', function 
             'title' => 'Incomplete',
             'description' => 'Nope',
         ])
-        ->assertForbidden();
+        ->assertForbidden()
+        ->assertJsonPath('message', \App\Http\Middleware\EnsureOnboardingCompleted::MESSAGE);
 
     $this->actingAs($user)
         ->postJson("/api/threads/{$thread->id}/comments", [
             'content' => 'Incomplete comment',
         ])
-        ->assertForbidden();
+        ->assertForbidden()
+        ->assertJsonPath('message', \App\Http\Middleware\EnsureOnboardingCompleted::MESSAGE);
+});
+
+it('forbids incomplete onboarding from follow and vote actions', function () {
+    $user = User::factory()->create(['onboarding_completed_at' => null]);
+    $other = User::factory()->create([
+        'username' => 'other-user',
+        'onboarding_completed_at' => now(),
+    ]);
+    $forum = makeGeneralForum('opshti-follow');
+    $thread = Thread::query()->create([
+        'title' => 'Hello',
+        'description' => 'Body',
+        'upvotes' => 0,
+        'views' => 0,
+        'user_id' => $other->id,
+        'forum_id' => $forum->id,
+        'is_anonymous' => false,
+    ]);
+
+    $message = \App\Http\Middleware\EnsureOnboardingCompleted::MESSAGE;
+
+    $this->actingAs($user)
+        ->postJson("/api/u/{$other->username}/follow")
+        ->assertForbidden()
+        ->assertJsonPath('message', $message);
+
+    $this->actingAs($user)
+        ->postJson("/api/p/{$forum->slug}/follow")
+        ->assertForbidden()
+        ->assertJsonPath('message', $message);
+
+    $this->actingAs($user)
+        ->postJson("/api/threads/{$thread->id}/follow")
+        ->assertForbidden()
+        ->assertJsonPath('message', $message);
+
+    $this->actingAs($user)
+        ->postJson("/api/threads/{$thread->id}/upvote")
+        ->assertForbidden()
+        ->assertJsonPath('message', $message);
 });
 
 it('allows school members to create in general and own school, but not other schools', function () {

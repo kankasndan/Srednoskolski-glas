@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { CITIES } from "@/lib/schools";
+import { loadSessionUser, setSessionUser } from "@/lib/sessionUser";
 import TextField from "@/components/ui/TextField";
 import SelectField from "@/components/ui/SelectField";
 import TermsCheckbox from "@/components/auth/TermsCheckbox";
@@ -119,6 +120,16 @@ export default function OnboardingForm() {
         return;
       }
 
+      const nextUser = data.user ?? null;
+      if (nextUser && typeof nextUser === "object") {
+        nextUser.capabilities = data.capabilities ?? nextUser.capabilities ?? null;
+        nextUser.permissions = data.permissions ?? nextUser.permissions ?? [];
+      }
+
+      if (nextUser) {
+        setSessionUser(nextUser);
+      }
+      await loadSessionUser({ force: true });
       router.push("/register/onboarding_2");
     } catch {
       setError("Не можеме да се поврземе со серверот. Обиди се повторно.");
@@ -130,7 +141,7 @@ export default function OnboardingForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mx-auto mt-12 flex w-full max-w-[400px] flex-col gap-3 2xl:max-w-[440px] 2xl:gap-4"
+      className="mx-auto mt-[43px] flex w-full max-w-[342px] flex-col gap-3 sm:max-w-[380px] md:max-w-[400px] lg:mt-12 2xl:max-w-[440px] 2xl:gap-4"
     >
       <TextField
         id="pseudonym"
@@ -195,10 +206,12 @@ export default function OnboardingForm() {
         disabled={notStudent}
       />
 
-      <TermsCheckbox
-        checked={agreed}
-        onChange={(e) => setAgreed(e.target.checked)}
-      />
+      <div className="mt-4 lg:mt-0">
+        <TermsCheckbox
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+        />
+      </div>
 
       {error && (
         <p className="font-(family-name:--font-manrope) text-[13px] text-red-600">
@@ -206,10 +219,10 @@ export default function OnboardingForm() {
         </p>
       )}
 
-      <div className="mt-4">
+      <div className="mt-10 lg:mt-4">
         <SubmitButton
           label={submitting ? "Зачувување..." : "Продолжи"}
-          disabled={!agreed || submitting || (!notStudent && (!school || !area))}
+          disabled={!username.trim() || !agreed || submitting || (!notStudent && (!school || !area))}
           disabledTooltip="Прифати ги условите за да продолжиш"
         />
       </div>

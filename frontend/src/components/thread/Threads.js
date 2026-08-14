@@ -108,6 +108,7 @@ export default function Threads({
   defaultSort = "trending",
   showSort = true,
   staticThreads = null,
+  listPath = null,
 }) {
   const isSearch = searchQuery !== null;
   const hasStaticThreads = Array.isArray(staticThreads);
@@ -145,6 +146,10 @@ export default function Threads({
       if (searchQuery) params.set("q", searchQuery);
       if (forum) params.set("forum", forum);
       return `${API_BASE_URL}/api/search?${params}`;
+    }
+
+    if (listPath) {
+      return `${API_BASE_URL}${listPath}?${params}`;
     }
 
     const path = forum === null ? "/api/feed" : `/api/p/${forum}/threads`;
@@ -240,7 +245,7 @@ export default function Threads({
       fetchThreads({ append: false, sort: initialSort, page: 1 });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forum, searchQuery, defaultSort, hasStaticThreads, staticThreads]);
+  }, [forum, searchQuery, defaultSort, hasStaticThreads, staticThreads, listPath]);
 
   useEffect(() => {
     loadingRef.current = moreThreadsLoading;
@@ -279,7 +284,7 @@ export default function Threads({
     observer.observe(node);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasLoaded, noMoreThreads, threads.length, forum, searchQuery, selectedSort, selectedTimeFilter, hasStaticThreads]);
+  }, [hasLoaded, noMoreThreads, threads.length, forum, searchQuery, selectedSort, selectedTimeFilter, hasStaticThreads, listPath]);
 
   // Sort only reorders; an empty list with time=all means the forum truly has no threads.
   const isTrulyEmptyForum =

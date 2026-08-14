@@ -78,7 +78,9 @@ export default function SearchBar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const activeForumSlug = filterDismissed ? null : routeForumSlug;
-  const showForumChip = Boolean(activeForumSlug) && (focused || query.length > 0 || pathname === "/search");
+  const showForumChip =
+    Boolean(activeForumSlug) &&
+    (focused || query.length > 0 || pathname === "/search");
 
   useEffect(() => {
     setQuery(qFromUrl);
@@ -89,8 +91,8 @@ export default function SearchBar() {
   }, [routeForumSlug]);
 
   useEffect(() => {
-    if (!activeForumSlug) {
-      setForumMeta(null);
+    if (!showForumChip || !activeForumSlug) {
+      if (!showForumChip) setForumMeta(null);
       return;
     }
 
@@ -106,7 +108,7 @@ export default function SearchBar() {
     return () => {
       cancelled = true;
     };
-  }, [activeForumSlug]);
+  }, [showForumChip, activeForumSlug]);
 
   const runSearch = useCallback(async (value, forumSlug) => {
     const q = value.trim();
@@ -210,26 +212,6 @@ export default function SearchBar() {
           height={16}
           className="shrink-0"
         />
-        {showForumChip ? (
-          <button
-            type="button"
-            onClick={removeForumFilter}
-            aria-label="Отстрани филтер"
-            title={forumMeta?.name ?? "Отстрани филтер"}
-            className="group relative flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-[#F5F5F5] p-1 transition-colors hover:bg-[#E53935]"
-          >
-            <span className="size-full group-hover:opacity-0">
-              <ForumIcon
-                src={forumMeta?.imageUrl}
-                wrapperClassName="block size-full"
-                imageClassName="size-full max-h-none max-w-none object-contain"
-              />
-            </span>
-            <span className="pointer-events-none absolute inset-0 hidden items-center justify-center text-white group-hover:flex">
-              <FontAwesomeIcon icon={faXmark} className="h-4 w-4" />
-            </span>
-          </button>
-        ) : null}
         <input
           type="search"
           value={query}
@@ -250,6 +232,18 @@ export default function SearchBar() {
           aria-expanded={showDropdown}
           className="min-w-0 flex-1 bg-transparent font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[#595959] placeholder:text-[#595959] outline-none [&::-webkit-search-cancel-button]:hidden"
         />
+        {showForumChip ? (
+          <button
+            type="button"
+            onClick={removeForumFilter}
+            aria-label="Отстрани филтер"
+            title={forumMeta?.name ?? "Отстрани филтер"}
+            className="flex h-[18px] shrink-0 cursor-pointer items-center gap-1 rounded-xl bg-[#F5F5F5] px-2 py-0.5 font-[family-name:var(--font-manrope)] text-[10px] font-normal leading-none text-black transition-colors hover:bg-[#EBEBEB]"
+          >
+            <span>{forumMeta?.name ?? "Форум"}</span>
+            <FontAwesomeIcon icon={faXmark} className="size-2 shrink-0" />
+          </button>
+        ) : null}
       </form>
 
       {showDropdown ? (
