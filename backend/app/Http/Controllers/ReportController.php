@@ -6,12 +6,11 @@ use App\Models\Comment;
 use App\Models\FeedHide;
 use App\Models\Report;
 use App\Models\Thread;
-use App\Models\User;
 use App\Notifications\NewReportNotification;
 use App\Services\Feed\FeedCache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\ValidationException;
 
 class ReportController extends Controller
 {
@@ -81,8 +80,19 @@ class ReportController extends Controller
                 ], 422);
             }
         } elseif ($details !== '') {
-            // Optional extra info for any predefined reason.
             $otherReason = $otherReason ?: $details;
+        }
+
+        $alreadyReported = Report::query()
+            ->where('reporter_id', $request->user()->id)
+            ->where('reportable_id', $reportable->id)
+            ->where('reportable_type', $reportable::class)
+            ->exists();
+
+        if ($alreadyReported) {
+            throw ValidationException::withMessages([
+                'reason' => ['Веќе ја пријави оваа содржина.'],
+            ]);
         }
 
         $report = Report::query()->create([
@@ -95,7 +105,6 @@ class ReportController extends Controller
             'source' => 'human',
         ]);
 
-        // Negative feedback: reported threads leave the reporter's feed.
         if ($hideThreadId !== null) {
             FeedHide::query()->firstOrCreate([
                 'user_id' => $request->user()->id,
@@ -104,13 +113,7 @@ class ReportController extends Controller
             FeedCache::forgetForUser($request->user());
         }
 
-        // Notify all staff for the admin header bell dropdown.
-        // Include the reporter too — staff often report while testing on their own account.
-        $staff = User::role(['super_admin', 'admin', 'moderator'])->get();
-
-        if ($staff->isNotEmpty()) {
-            Notification::send($staff, new NewReportNotification($report));
-        }
+        NewReportNotification::syncForReport($report);
 
         return response()->json([
             'data' => [

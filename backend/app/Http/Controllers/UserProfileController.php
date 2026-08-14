@@ -34,7 +34,7 @@ class UserProfileController extends Controller
                 'counts' => [
                     'threads' => $profileUser->threads()->publiclyAttributed()->count(),
                     'comments' => $profileUser->comments()->withoutOwnAnonymousThreads($profileUser)->count(),
-                    'followed_forums' => $profileUser->forums()->count(),
+                    'followed_forums' => $profileUser->forums()->where('type', '!=', 'school')->count(),
                     'followers' => $profileUser->followers()->count(),
                 ],
                 'is_following' => $viewer !== null
@@ -102,6 +102,7 @@ class UserProfileController extends Controller
         $profileUser = $this->findPublicUser($username);
 
         $forums = $profileUser->forums()
+            ->where('type', '!=', 'school')
             ->orderBy('name')
             ->limit(100)
             ->get();

@@ -7,11 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Public profile banner payload (no email / secrets).
+ * Authenticated session payload. Includes email and school data for the owner,
+ * but not provider ids, role, or other internals.
  *
  * @mixin User
  */
-class PublicUserResource extends JsonResource
+class MeResource extends JsonResource
 {
     /**
      * @return array<string, mixed>
@@ -19,18 +20,6 @@ class PublicUserResource extends JsonResource
     public function toArray(Request $request): array
     {
         $studentData = $this->studentData;
-        $viewer = $request->user();
-
-        if ($viewer === null) {
-            return [
-                'id' => $this->id,
-                'username' => $this->username,
-                'imageUrl' => $this->imageUrl,
-                'created_at' => $this->created_at,
-                'student_data' => null,
-            ];
-        }
-
         $school = $studentData?->school;
         $city = $school?->city;
         $forum = $school?->forum;
@@ -39,7 +28,10 @@ class PublicUserResource extends JsonResource
         return [
             'id' => $this->id,
             'username' => $this->username,
+            'email' => $this->email,
             'imageUrl' => $this->imageUrl,
+            'onboarding_completed_at' => $this->onboarding_completed_at,
+            'last_active_at' => $this->last_active_at,
             'created_at' => $this->created_at,
             'student_data' => $studentData === null ? null : [
                 'grade' => $studentData->grade,

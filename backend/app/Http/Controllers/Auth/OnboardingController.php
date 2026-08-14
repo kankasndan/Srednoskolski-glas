@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOnboardingRequest;
+use App\Http\Resources\MeResource;
 use App\Models\StudentData;
 use App\Models\Vocation;
 use App\Services\StudentEnrollment;
@@ -74,7 +75,7 @@ class OnboardingController extends Controller
 
         return response()->json([
             'message' => 'Onboarding saved',
-            'user' => $user,
+            'user' => (new MeResource($user))->resolve(),
             'permissions' => $user->getAllPermissions()->pluck('name')->values(),
             'capabilities' => $enrollment->allCapabilities($user),
         ]);

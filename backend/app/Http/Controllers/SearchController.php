@@ -55,7 +55,12 @@ class SearchController extends Controller
 
         $this->applyHasVoted($query, $user);
 
+        if ($user === null) {
+            $query->listedForGuest();
+        }
+
         if ($forum !== null) {
+            $forum->abortUnlessReadableBy($user);
             $query->where('forum_id', $forum->id);
         }
 

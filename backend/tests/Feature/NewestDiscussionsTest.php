@@ -5,6 +5,7 @@ use App\Models\Forum;
 use App\Models\School;
 use App\Models\Thread;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -24,9 +25,9 @@ function newestForum(string $name, string $slug, ?int $schoolId = null): Forum
     ]);
 }
 
-function newestThread(Forum $forum, User $author, string $title, ?\Carbon\CarbonInterface $createdAt = null): Thread
+function newestThread(Forum $forum, User $author, string $title, ?CarbonInterface $createdAt = null): Thread
 {
-    $thread = Thread::query()->create([
+    $thread = Thread::forceCreate([
         'title' => $title,
         'description' => 'Body',
         'upvotes' => 0,

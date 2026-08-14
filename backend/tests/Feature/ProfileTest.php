@@ -25,7 +25,7 @@ function profileForum(array $overrides = []): Forum
 
 function profileThread(Forum $forum, User $author, array $overrides = []): Thread
 {
-    return Thread::query()->create(array_merge([
+    return Thread::forceCreate(array_merge([
         'title' => 'Моја дискусија',
         'description' => 'Текст',
         'upvotes' => 0,
@@ -73,7 +73,7 @@ it('returns the authenticated users comments with thread context', function () {
     ]);
     $thread = profileThread($forum, $other, ['title' => 'Тема за коментар']);
 
-    $comment = Comment::query()->create([
+    $comment = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => null,
         'user_id' => $user->id,
@@ -81,7 +81,7 @@ it('returns the authenticated users comments with thread context', function () {
         'upvotes' => 3,
     ]);
 
-    Comment::query()->create([
+    Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => null,
         'user_id' => $other->id,
@@ -207,19 +207,19 @@ it('does not list comments on the owners anonymous threads on the public profile
         'is_anonymous' => true,
     ]);
 
-    $ownAnonymousComment = Comment::query()->create([
+    $ownAnonymousComment = Comment::forceCreate([
         'thread_id' => $anonymous->id,
         'parent_id' => null,
         'user_id' => $author->id,
         'content' => 'I wrote this thread',
     ]);
-    $signedComment = Comment::query()->create([
+    $signedComment = Comment::forceCreate([
         'thread_id' => $signed->id,
         'parent_id' => null,
         'user_id' => $author->id,
         'content' => 'Normal comment',
     ]);
-    $onOthersAnonymous = Comment::query()->create([
+    $onOthersAnonymous = Comment::forceCreate([
         'thread_id' => $someoneElsesAnonymous->id,
         'parent_id' => null,
         'user_id' => $author->id,

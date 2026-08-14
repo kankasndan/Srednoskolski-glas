@@ -296,30 +296,19 @@
                 }
 
                 schools.forEach(school => {
-                    const row = document.createElement('a');
-                    row.href = roleShowTemplate.replace('__ID__', school.id);
-                    row.className =
-                        'block px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center text-sm border-b border-gray-100 last:border-0 no-underline text-inherit';
-                    row.innerHTML = `
-            <span class="font-medium text-gray-800">${school.name}</span>
-        `;
-
-                    // ADD: fill input and submit form on click
-                    row.addEventListener('click', (e) => {
-                        e.preventDefault(); // stop going to roleShowTemplate
-
-                        if (searchInput) {
-                            searchInput.value = school.name;
-                        }
-
-                        resultsBox.classList.add('hidden');
-
-                        if (filterForm) {
-                            filterForm.submit(); // same as clicking Filter
-                        }
-                    });
-
-                    resultsBox.appendChild(row);
+                    resultsBox.appendChild(adminSearchRow({
+                        primary: school.name,
+                        onClick: (e) => {
+                            e.preventDefault();
+                            if (searchInput) {
+                                searchInput.value = school.name ?? '';
+                            }
+                            resultsBox.classList.add('hidden');
+                            if (filterForm) {
+                                filterForm.submit();
+                            }
+                        },
+                    }));
                 });
 
                 resultsBox.classList.remove('hidden');

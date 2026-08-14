@@ -37,7 +37,7 @@ function onboardedCommenter(): User
 
 function commentThread(Forum $forum, User $author): Thread
 {
-    return Thread::query()->create([
+    return Thread::forceCreate([
         'title' => 'Test thread',
         'description' => 'Body',
         'upvotes' => 0,
@@ -85,7 +85,7 @@ it('creates a child comment under a parent on the same thread', function () {
     $user = onboardedCommenter();
     $thread = commentThread(commentForum(), $user);
 
-    $parent = Comment::query()->create([
+    $parent = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => null,
         'user_id' => $user->id,
@@ -112,14 +112,14 @@ it('creates a nested reply under another reply', function () {
     $user = onboardedCommenter();
     $thread = commentThread(commentForum(), $user);
 
-    $parent = Comment::query()->create([
+    $parent = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => null,
         'user_id' => $user->id,
         'content' => 'Top',
     ]);
 
-    $child = Comment::query()->create([
+    $child = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => $parent->id,
         'user_id' => $user->id,
@@ -139,7 +139,7 @@ it('rejects a parent_id from another thread', function () {
     $thread = commentThread($forum, $user);
     $otherThread = commentThread($forum, $user);
 
-    $foreignParent = Comment::query()->create([
+    $foreignParent = Comment::forceCreate([
         'thread_id' => $otherThread->id,
         'parent_id' => null,
         'user_id' => $user->id,

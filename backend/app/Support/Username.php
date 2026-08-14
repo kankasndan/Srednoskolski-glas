@@ -6,7 +6,10 @@ use Illuminate\Validation\Rule;
 
 final class Username
 {
-    public const PATTERN = '/^[A-Za-z0-9_.-]+$/';
+    /** Latin or Cyrillic letters, digits, underscore, dot, hyphen. */
+    public const PATTERN = '/^[\p{L}0-9_.-]+$/u';
+
+    public const ROUTE_PATTERN = '[\p{L}0-9_.-]+';
 
     /** @var list<string> */
     public const RESERVED = [
@@ -55,6 +58,6 @@ final class Username
             return false;
         }
 
-        return in_array(strtolower($value), self::RESERVED, true);
+        return in_array(mb_strtolower($value, 'UTF-8'), self::RESERVED, true);
     }
 }

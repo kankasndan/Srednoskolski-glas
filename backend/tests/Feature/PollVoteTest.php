@@ -23,7 +23,7 @@ function makePollThread(): array
         'members_count' => 0,
         'threads_count' => 0,
     ]);
-    $thread = Thread::query()->create([
+    $thread = Thread::forceCreate([
         'title' => 'Poll thread',
         'description' => 'Body',
         'upvotes' => 0,

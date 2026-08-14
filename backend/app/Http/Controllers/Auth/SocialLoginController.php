@@ -20,7 +20,7 @@ class SocialLoginController extends Controller
     {
         $this->assertAllowedProvider($provider);
 
-        return Socialite::driver($provider)->redirect();
+        return Socialite::driver($provider)->stateless()->redirect();
     }
 
     public function callback(string $provider): RedirectResponse
@@ -30,7 +30,7 @@ class SocialLoginController extends Controller
         $frontendUrl = rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'), '/');
 
         try {
-            $socialUser = Socialite::driver($provider)->user();
+            $socialUser = Socialite::driver($provider)->stateless()->user();
             $providerId = (string) $socialUser->getId();
             $email = $socialUser->getEmail();
 
@@ -43,7 +43,7 @@ class SocialLoginController extends Controller
             // Log the user into the session so Sanctum's SPA (cookie) auth takes
             // over. No token is exposed to the frontend; the browser holds an
             // httpOnly session cookie that JavaScript cannot read.
-            Auth::login($user, remember: true);
+            Auth::login($user, remember: false);
             request()->session()->regenerate();
 
             $onboardingStatus = $user->onboarding_completed_at ? 'complete' : 'required';
@@ -54,6 +54,7 @@ class SocialLoginController extends Controller
         } catch (\Exception $e) {
             Log::error('Social login failed', [
                 'provider' => $provider,
+                'exception' => $e::class,
                 'message' => $e->getMessage(),
             ]);
 
@@ -91,7 +92,6 @@ class SocialLoginController extends Controller
                 'email' => $email,
                 'provider' => $provider,
                 'provider_id' => $providerId,
-                'email_verified_at' => $this->isSyntheticSocialEmail($email) ? null : now(),
             ]);
             $user->save();
         } catch (UniqueConstraintViolationException) {
@@ -119,11 +119,6 @@ class SocialLoginController extends Controller
         }
 
         return sprintf('%s-%s@social.local', $provider, $providerId);
-    }
-
-    private function isSyntheticSocialEmail(string $email): bool
-    {
-        return str_ends_with($email, '@social.local');
     }
 
     private function assertAllowedProvider(string $provider): void

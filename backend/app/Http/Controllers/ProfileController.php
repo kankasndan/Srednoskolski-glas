@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\FiltersThreads;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\ForumResource;
+use App\Http\Resources\MeResource;
 use App\Http\Resources\ProfileCommentResource;
 use App\Http\Resources\PublicUserResource;
 use App\Http\Resources\ThreadResource;
@@ -62,7 +63,7 @@ class ProfileController extends Controller
         ]);
 
         return response()->json([
-            'user' => $user,
+            'user' => (new MeResource($user))->resolve(),
             'capabilities' => $this->enrollment->allCapabilities($user),
         ]);
     }

@@ -16,6 +16,7 @@ function fakeSocialiteUser(string $provider, string $id, ?string $email): void
     ]);
 
     $driver = Mockery::mock(SocialiteProvider::class);
+    $driver->shouldReceive('stateless')->andReturnSelf();
     $driver->shouldReceive('user')->andReturn($socialiteUser);
 
     Socialite::shouldReceive('driver')->with($provider)->andReturn($driver);
@@ -33,7 +34,7 @@ it('creates a new user from a first-time google login', function () {
         ->and($user->provider)->toBe('google')
         ->and($user->provider_id)->toBe('google-new-1')
         ->and($user->password)->toBeNull()
-        ->and($user->email_verified_at)->not->toBeNull();
+        ->and($user->email_verified_at)->toBeNull();
 
     $this->assertAuthenticatedAs($user);
 });

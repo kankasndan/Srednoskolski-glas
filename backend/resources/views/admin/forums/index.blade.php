@@ -292,15 +292,11 @@
                 }
 
                 forums.forEach(forum => {
-                    const row = document.createElement('a');
-                    row.href = roleShowTemplate.replace('__ID__', forum.id);
-                    row.className =
-                        'block px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center text-sm border-b border-gray-100 last:border-0 no-underline text-inherit';
-                    row.innerHTML = `
-                    <span class="text-gray-400 text-xs">${forum.imageUrl ? forum.imageUrl : "Нема слика"}</span>
-                <span class="font-medium text-gray-800">${forum.name ?? 'Нема корисничко име'}</span>
-            `;
-                    resultsBox.appendChild(row);
+                    resultsBox.appendChild(adminSearchRow({
+                        href: roleShowTemplate.replace('__ID__', forum.id),
+                        primary: forum.name ?? 'Нема име',
+                        secondary: forum.imageUrl ? 'Има слика' : 'Нема слика',
+                    }));
                 });
 
                 resultsBox.classList.remove('hidden');

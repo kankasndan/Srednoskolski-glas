@@ -15,7 +15,7 @@ class AdminLayoutComposer
         $view->with([
             'currentAdmin' => $admin,
             'currentAdminRole' => $admin?->getRoleNames()->first() ?? 'Guest',
-            'pendingReportsCount' => Report::query()->where('status', 'pending')->count(),
+            'pendingReportsCount' => Report::pendingTargetCount(),
             'pendingAppealsCount' => Appeal::query()->where('status', 'pending')->count(),
         ]);
     }

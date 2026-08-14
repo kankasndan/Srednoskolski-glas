@@ -3,30 +3,24 @@
 import Image from "next/image";
 import Link from "next/link";
 import { isRemoteAssetUrl } from "@/lib/banners";
-import { authorProfileHref, forumHref, schoolForumHref } from "@/lib/profileLinks";
+import { authorProfileHref, forumHref, schoolCityLabel, schoolForumHref } from "@/lib/profileLinks";
 
-const SCHOOL_ICON = "/icons/uchilishte.svg";
 const DEFAULT_AVATAR = "/Generic avatar.svg";
 
-function timestampsDiffer(first, second) {
-  if (!first || !second) return false;
-
-  const firstTime = new Date(first).getTime();
-  const secondTime = new Date(second).getTime();
-
-  if (Number.isNaN(firstTime) || Number.isNaN(secondTime)) {
-    return first !== second;
+function isPostedOnAuthorSchool(forum, thread) {
+  if (forum?.type !== "school") {
+    return false;
   }
 
-  return Math.abs(firstTime - secondTime) > 1000;
-}
+  const schoolForum = thread?.author?.school?.forum;
+  if (schoolForum?.id != null && forum.id != null) {
+    return Number(schoolForum.id) === Number(forum.id);
+  }
+  if (schoolForum?.slug && forum.slug) {
+    return schoolForum.slug === forum.slug;
+  }
 
-function wasThreadEdited(thread) {
-  if (!thread) return false;
-  if (Boolean(thread.is_edited)) return true;
-  if (thread.edited_at) return true;
-
-  return timestampsDiffer(thread.updated_at, thread.created_at);
+  return true;
 }
 
 export function buildThreadMetaTags(forum, thread) {
@@ -53,19 +47,16 @@ export function buildThreadMetaTags(forum, thread) {
     },
   ];
 
-  if (!thread.is_anonymous && thread.author?.school?.name) {
+  const showAuthorSchool =
+    !thread.is_anonymous &&
+    Boolean(thread.author?.school?.name) &&
+    !isPostedOnAuthorSchool(forumData, thread);
+
+  if (showAuthorSchool) {
     tags.push({
       key: "school",
-      label: thread.author.school.name,
-      icon: SCHOOL_ICON,
+      label: schoolCityLabel(thread.author.school),
       href: schoolForumHref(thread.author.school),
-    });
-  }
-
-  if (wasThreadEdited(thread)) {
-    tags.push({
-      key: "edited",
-      label: "изменето",
     });
   }
 

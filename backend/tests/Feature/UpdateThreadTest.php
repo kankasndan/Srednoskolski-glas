@@ -51,7 +51,7 @@ function updateThreadForum(): Forum
 
 function updateThread(Forum $forum, User $author): Thread
 {
-    return Thread::query()->create([
+    return Thread::forceCreate([
         'title' => 'Original title here',
         'description' => 'Original body',
         'upvotes' => 0,

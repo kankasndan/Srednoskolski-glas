@@ -3,8 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState } from "react";
-import { formatDistanceToNow } from "date-fns";
-import { mk } from "date-fns/locale";
+import { formatThreadPostedAgo } from "@/lib/time";
 import { deleteThread, updateThread } from "@/api/threads";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import InfoDialog from "@/components/ui/InfoDialog";
@@ -84,10 +83,7 @@ export default function ProfileThreadItem({
           <div className="flex items-center gap-2">
             <ProfileForumTag forum={thread.forum} />
             <span className="font-(family-name:--font-roboto) text-[12px] leading-4 text-[#595959]">
-              {formatDistanceToNow(new Date(thread.created_at), {
-                addSuffix: true,
-                locale: mk,
-              })}
+              {formatThreadPostedAgo(thread)}
             </span>
           </div>
 

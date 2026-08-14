@@ -14,7 +14,7 @@ class Comment extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['thread_id', 'parent_id', 'user_id', 'content', 'deleted_by'];
+    protected $fillable = ['content'];
 
     protected static function booted(): void
     {

@@ -151,8 +151,20 @@
 
                                 <span class="text-xs text-slate-400">Пријавено
                                     {{ $report->created_at->diffForHumans() }}</span>
+                                @if ((int) ($report->reports_count ?? 1) > 1)
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-800 text-white text-xs font-semibold">
+                                        {{ $report->reports_count }} пријави
+                                    </span>
+                                @endif
                             </div>
-                            <span class="text-xs text-slate-500">Пријавено од {{ $report->reporter->username }}</span>
+                            <span class="text-xs text-slate-500">Пријавено од
+                                @if (isset($report->group_reporters) && $report->group_reporters->isNotEmpty())
+                                    {{ $report->group_reporters->pluck('username')->filter()->join(', ') }}
+                                @else
+                                    {{ $report->reporter->username }}
+                                @endif
+                            </span>
                             <span class="text-xs text-slate-400">{{ $report->other_reason }}</span>
                         </div>
                         @if ($report->source == 'ai')

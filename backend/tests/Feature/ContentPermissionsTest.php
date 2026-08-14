@@ -86,7 +86,7 @@ function onboardWithoutSchool(User $user): User
 it('forbids guests from creating threads and comments', function () {
     $author = User::factory()->create();
     $forum = makeGeneralForum();
-    $thread = Thread::query()->create([
+    $thread = Thread::forceCreate([
         'title' => 'Hello',
         'description' => 'Body',
         'upvotes' => 0,
@@ -111,7 +111,7 @@ it('forbids incomplete onboarding from creating threads and comments', function 
     $user = User::factory()->create(['onboarding_completed_at' => null]);
     $author = User::factory()->create();
     $forum = makeGeneralForum('opshti-2');
-    $thread = Thread::query()->create([
+    $thread = Thread::forceCreate([
         'title' => 'Hello',
         'description' => 'Body',
         'upvotes' => 0,
@@ -145,7 +145,7 @@ it('forbids incomplete onboarding from follow and vote actions', function () {
         'onboarding_completed_at' => now(),
     ]);
     $forum = makeGeneralForum('opshti-follow');
-    $thread = Thread::query()->create([
+    $thread = Thread::forceCreate([
         'title' => 'Hello',
         'description' => 'Body',
         'upvotes' => 0,
@@ -215,7 +215,7 @@ it('allows users without school to comment but not create threads', function () 
     $general = makeGeneralForum('opshti-4');
     $author = onboardWithSchool(User::factory()->create(), $schoolA);
 
-    $thread = Thread::query()->create([
+    $thread = Thread::forceCreate([
         'title' => 'Existing',
         'description' => 'Body',
         'upvotes' => 0,

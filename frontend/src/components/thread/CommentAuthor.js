@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { authorProfileHref, schoolForumHref } from "@/lib/profileLinks";
+import { authorProfileHref, schoolCityLabel, schoolForumHref } from "@/lib/profileLinks";
 
 function MetaLink({ href, className, children }) {
   if (!href) {
@@ -41,7 +41,7 @@ export default function CommentAuthor({ author }) {
           href={schoolForumHref(author.school)}
           className="text-[12px] leading-none text-[#999999]"
         >
-          {author.school.name}
+          {schoolCityLabel(author.school)}
         </MetaLink>
       ) : null}
     </div>

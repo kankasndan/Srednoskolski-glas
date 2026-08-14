@@ -37,6 +37,7 @@ class ThreadController extends Controller
     public function index(Forum $forum, Request $request): JsonResponse
     {
         $user = $request->user('web') ?? $request->user();
+        $forum->abortUnlessReadableBy($user);
 
         $query = $forum->threads()
             ->with($this->threadListWith($user))
@@ -62,7 +63,7 @@ class ThreadController extends Controller
         $files = $this->normalizeUploadedFiles($request->file('files', []));
 
         $thread = DB::transaction(function () use ($validated, $user, $files): Thread {
-            $thread = Thread::query()->create([
+            $thread = Thread::forceCreate([
                 'title' => $validated['title'],
                 'description' => HtmlSanitizer::clean($validated['description'] ?? ''),
                 'forum_id' => $validated['forum_id'],
@@ -248,6 +249,7 @@ class ThreadController extends Controller
         }
 
         $user = $request->user('web') ?? $request->user();
+        $forum->abortUnlessReadableBy($user);
 
         if ($this->shouldTrackThreadView($request) && ViewThrottle::shouldIncrement($request, 'thread', $thread->id)) {
             $thread->increment('views');

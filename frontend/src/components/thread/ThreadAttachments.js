@@ -150,7 +150,8 @@ function LinkDisplay({ url }) {
         <iframe
           src={toEmbedUrl(embed)}
           title="YouTube video"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          sandbox="allow-scripts allow-same-origin allow-presentation"
           allowFullScreen
           className="size-full"
         />
@@ -164,7 +165,8 @@ function LinkDisplay({ url }) {
         <iframe
           src={`${toEmbedUrl(embed)}?description=0&music_info=0&rel=0`}
           title="TikTok video"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          sandbox="allow-scripts allow-same-origin allow-presentation"
           allowFullScreen
           className="size-full"
         />

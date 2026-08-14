@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Facades\Media;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\Username;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -32,7 +33,7 @@ class AdminController extends Controller
         abort_unless($request->user()?->is($user), 403);
 
         $validated = $request->validate([
-            'username' => ['required', 'string', 'max:255', 'unique:users,username,'.$user->id],
+            'username' => Username::rules($user->id),
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
         ]);
 

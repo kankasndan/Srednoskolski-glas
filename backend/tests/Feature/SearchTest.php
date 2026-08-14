@@ -25,7 +25,7 @@ function searchForum(string $name, string $slug): Forum
 
 function searchThread(Forum $forum, User $author, string $title, int $upvotes): Thread
 {
-    return Thread::query()->create([
+    return Thread::forceCreate([
         'title' => $title,
         'description' => 'Body',
         'upvotes' => $upvotes,
@@ -57,7 +57,7 @@ it('ranks title matches above comment-only matches', function () {
     $titleHit = searchThread($forum, $author, 'Совети за матура', 0);
     $commentHit = searchThread($forum, $author, 'Нешто друго', 50);
 
-    Comment::query()->create([
+    Comment::forceCreate([
         'thread_id' => $commentHit->id,
         'parent_id' => null,
         'user_id' => $author->id,

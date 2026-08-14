@@ -20,7 +20,7 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
-        if ($request->is('admin') || $request->is('admin/*')) {
+        if (app()->isProduction() && ($request->is('admin') || $request->is('admin/*'))) {
             $response->headers->set('Content-Security-Policy', $this->adminCsp());
         } else {
             $response->headers->set(
@@ -43,10 +43,10 @@ class SecurityHeaders
     {
         return implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' https://kit.fontawesome.com",
-            "style-src 'self' 'unsafe-inline' https://ka-f.fontawesome.com",
+            "script-src 'self' 'unsafe-inline' https://kit.fontawesome.com https://ka-f.fontawesome.com https://cdn.jsdelivr.net",
+            "style-src 'self' 'unsafe-inline' https://ka-f.fontawesome.com https://fonts.bunny.net",
             "img-src 'self' data: https:",
-            "font-src 'self' data: https://ka-f.fontawesome.com",
+            "font-src 'self' data: https://ka-f.fontawesome.com https://fonts.bunny.net",
             "connect-src 'self' https://ka-f.fontawesome.com https://kit.fontawesome.com",
             "frame-ancestors 'none'",
             "object-src 'none'",

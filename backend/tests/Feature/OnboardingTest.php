@@ -114,3 +114,22 @@ it('rejects reserved and invalid usernames', function () {
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['username']);
 });
+
+it('accepts cyrillic usernames', function () {
+    $user = User::factory()->create([
+        'username' => null,
+        'onboarding_completed_at' => null,
+    ]);
+
+    $this->actingAs($user)
+        ->putJson('/api/onboarding', [
+            'username' => 'марко_2026',
+            'is_student' => false,
+        ])
+        ->assertSuccessful()
+        ->assertJsonPath('user.username', 'марко_2026');
+
+    $this->getJson('/api/u/'.rawurlencode('марко_2026'))
+        ->assertSuccessful()
+        ->assertJsonPath('data.user.username', 'марко_2026');
+});

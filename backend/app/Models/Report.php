@@ -33,4 +33,12 @@ class Report extends Model
     {
         return $this->hasMany(Sanction::class);
     }
+
+    public static function pendingTargetCount(): int
+    {
+        return (int) static::query()
+            ->where('status', 'pending')
+            ->selectRaw('count(distinct concat(reportable_type, "-", reportable_id)) as aggregate')
+            ->value('aggregate');
+    }
 }

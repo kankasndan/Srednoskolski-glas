@@ -20,3 +20,16 @@ export function formatPostedAgo(value) {
 
   return `пред ${Math.floor(diffHours / 24)}д.`;
 }
+
+export function formatThreadPostedAgo(thread) {
+  if (!thread) {
+    return "";
+  }
+
+  if (thread.edited_at) {
+    const ago = formatPostedAgo(thread.edited_at);
+    return ago ? `Изменето ${ago}` : "";
+  }
+
+  return formatPostedAgo(thread.created_at);
+}

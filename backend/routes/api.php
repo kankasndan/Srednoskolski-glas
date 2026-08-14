@@ -21,15 +21,13 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\VoteController;
+use App\Support\Username;
 use Illuminate\Support\Facades\Route;
 
-// Social login needs the web middleware so OAuth can start a session cookie.
 Route::middleware(['web', 'throttle:social-auth'])->group(function () {
-    // Redirect the browser to Google/Facebook OAuth.
     Route::get('/auth/{provider}/redirect', [SocialLoginController::class, 'redirect'])
         ->whereIn('provider', ['google', 'facebook'])
         ->name('social.redirect');
-    // Handle the OAuth callback and log the user in.
     Route::get('/auth/{provider}/callback', [SocialLoginController::class, 'callback'])
         ->whereIn('provider', ['google', 'facebook'])
         ->name('social.callback');
@@ -53,16 +51,16 @@ Route::middleware(['auth:sanctum', 'throttle:api-writes'])->post('/logout', Logo
 // Public user profiles (by username).
 Route::middleware('throttle:api-reads')->group(function () {
     Route::get('/u/{username}', [UserProfileController::class, 'show'])
-        ->where('username', '[A-Za-z0-9_.-]+')
+        ->where('username', Username::ROUTE_PATTERN)
         ->name('users.profile.show');
     Route::get('/u/{username}/threads', [UserProfileController::class, 'threads'])
-        ->where('username', '[A-Za-z0-9_.-]+')
+        ->where('username', Username::ROUTE_PATTERN)
         ->name('users.profile.threads');
     Route::get('/u/{username}/comments', [UserProfileController::class, 'comments'])
-        ->where('username', '[A-Za-z0-9_.-]+')
+        ->where('username', Username::ROUTE_PATTERN)
         ->name('users.profile.comments');
     Route::get('/u/{username}/followed-forums', [UserProfileController::class, 'followedForums'])
-        ->where('username', '[A-Za-z0-9_.-]+')
+        ->where('username', Username::ROUTE_PATTERN)
         ->name('users.profile.followed-forums');
 
     Route::get('/forums', [ForumController::class, 'index'])->name('forums.index');
@@ -86,11 +84,11 @@ Route::middleware(['auth:sanctum', 'not_banned', 'onboarding'])->group(function 
     // Follow / unfollow another user.
     Route::post('/u/{username}/follow', [UserProfileController::class, 'follow'])
         ->middleware('throttle:api-writes')
-        ->where('username', '[A-Za-z0-9_.-]+')
+        ->where('username', Username::ROUTE_PATTERN)
         ->name('users.follow');
     Route::delete('/u/{username}/follow', [UserProfileController::class, 'unfollow'])
         ->middleware('throttle:api-writes')
-        ->where('username', '[A-Za-z0-9_.-]+')
+        ->where('username', Username::ROUTE_PATTERN)
         ->name('users.unfollow');
 
     // Create a new thread (optional files, link, or poll).

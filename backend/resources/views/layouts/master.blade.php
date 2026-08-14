@@ -60,7 +60,7 @@
                     </div>
 
                     @php
-                        $notifications = auth()->user()?->notifications()->latest()->take(10)->get();
+                        $notifications = auth()->user()?->notifications()->latest('updated_at')->take(10)->get();
                     @endphp
 
                     @forelse($notifications as $notification)
@@ -82,6 +82,11 @@
                             <div class="text-[12px] text-[#595959]">
                                 {{ $data['message'] ?? '' }}
                             </div>
+                            @if (($data['count'] ?? 1) > 1)
+                                <div class="mt-1 text-[11px] font-semibold text-my-purple">
+                                    {{ $data['count'] }} пријави
+                                </div>
+                            @endif
                             <div class="mt-1 text-[11px] text-[#9598A6]">
                                 {{ $notification->created_at?->diffForHumans() }}
                             </div>
@@ -217,6 +222,44 @@
         </div>
 
     </main>
+
+    <script>
+        function adminText(value, fallback = '') {
+            const text = value == null || value === '' ? fallback : String(value);
+            const node = document.createTextNode(text);
+            const wrap = document.createElement('span');
+            wrap.appendChild(node);
+            return wrap.textContent;
+        }
+
+        function adminSearchRow({ href, primary, secondary, onClick }) {
+            const row = href ? document.createElement('a') : document.createElement('div');
+            if (href) {
+                row.href = href;
+            }
+            row.className = href
+                ? 'block px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center text-sm border-b border-gray-100 last:border-0 no-underline text-inherit'
+                : 'block px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center text-sm border-b border-gray-100 last:border-0';
+
+            const left = document.createElement('span');
+            left.className = 'font-medium text-gray-800';
+            left.textContent = primary || 'Нема корисничко име';
+            row.appendChild(left);
+
+            if (secondary != null && secondary !== '') {
+                const right = document.createElement('span');
+                right.className = 'text-gray-400 text-xs';
+                right.textContent = secondary;
+                row.appendChild(right);
+            }
+
+            if (onClick) {
+                row.addEventListener('click', onClick);
+            }
+
+            return row;
+        }
+    </script>
 
     @stack('scripts')
     @stack('scripts1')

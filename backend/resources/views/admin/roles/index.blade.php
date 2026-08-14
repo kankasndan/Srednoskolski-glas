@@ -180,15 +180,11 @@
                 }
 
                 users.forEach(user => {
-                    const row = document.createElement('a');
-                    row.href = roleShowTemplate.replace('__ID__', user.id);
-                    row.className =
-                        'block px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center text-sm border-b border-gray-100 last:border-0 no-underline text-inherit';
-                    row.innerHTML = `
-                <span class="font-medium text-gray-800">${user.username ?? 'Нема корисничко име'}</span>
-                <span class="text-gray-400 text-xs">${user.email}</span>
-            `;
-                    resultsBox.appendChild(row);
+                    resultsBox.appendChild(adminSearchRow({
+                        href: roleShowTemplate.replace('__ID__', user.id),
+                        primary: user.username ?? 'Нема корисничко име',
+                        secondary: user.email,
+                    }));
                 });
 
                 resultsBox.classList.remove('hidden');
@@ -230,19 +226,16 @@
                 }
 
                 users.forEach(user => {
-                    const row = document.createElement('div');
-                    row.className = 'px-3 py-2 hover:bg-gray-50 cursor-pointer flex justify-between text-sm';
-                    row.innerHTML = `
-                <span class="font-medium text-gray-800">${user.username ?? 'Нема корисничко име'}</span>
-                <span class="text-gray-400 text-xs">${user.email}</span>
-            `;
-
-                    row.addEventListener('click', () => {
-                        grantSearchInput.value = user.username;
-                        grantSelectedUserId.value = user.id;
-                        grantResultsBox.classList.add('hidden');
+                    const row = adminSearchRow({
+                        primary: user.username ?? 'Нема корисничко име',
+                        secondary: user.email,
+                        onClick: () => {
+                            grantSearchInput.value = user.username ?? '';
+                            grantSelectedUserId.value = user.id;
+                            grantResultsBox.classList.add('hidden');
+                        },
                     });
-
+                    row.className = 'px-3 py-2 hover:bg-gray-50 cursor-pointer flex justify-between text-sm';
                     grantResultsBox.appendChild(row);
                 });
 

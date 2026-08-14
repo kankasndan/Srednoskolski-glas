@@ -62,6 +62,8 @@ class ForumController extends Controller
      */
     public function show(Request $request, Forum $forum): JsonResponse
     {
+        $forum->abortUnlessReadableBy($request->user('web') ?? $request->user());
+
         if ($request->boolean('track_view') && ViewThrottle::shouldIncrement($request, 'forum', $forum->id)) {
             $forum->increment('views');
             $forum->refresh();

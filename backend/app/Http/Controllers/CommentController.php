@@ -14,7 +14,7 @@ class CommentController extends Controller
 {
     public function store(StoreCommentRequest $request, Thread $thread): JsonResponse
     {
-        $comment = Comment::query()->create([
+        $comment = Comment::forceCreate([
             'thread_id' => $thread->id,
             'parent_id' => $request->integer('parent_id') ?: null,
             'user_id' => $request->user()->id,
@@ -38,6 +38,8 @@ class CommentController extends Controller
     public function replies(Request $request, Comment $comment): JsonResponse
     {
         $user = $request->user('web') ?? $request->user();
+        $comment->loadMissing('thread.forum');
+        $comment->thread?->forum?->abortUnlessReadableBy($user);
 
         $query = $comment->replies()
             ->visibleInThread()

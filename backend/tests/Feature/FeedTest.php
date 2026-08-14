@@ -8,6 +8,7 @@ use App\Models\StudentData;
 use App\Models\Thread;
 use App\Models\ThreadView;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -27,9 +28,9 @@ function makeForum(string $name, string $slug, ?int $schoolId = null): Forum
     ]);
 }
 
-function makeThread(Forum $forum, User $author, string $title, int $upvotes, ?\Carbon\CarbonInterface $createdAt = null): Thread
+function makeThread(Forum $forum, User $author, string $title, int $upvotes, ?CarbonInterface $createdAt = null): Thread
 {
-    $thread = Thread::query()->create([
+    $thread = Thread::forceCreate([
         'title' => $title,
         'description' => 'Body',
         'upvotes' => $upvotes,
@@ -226,7 +227,7 @@ it('records a thread view when an authenticated user opens a thread', function (
 });
 
 it('hides a thread from the feed via the hide endpoint', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['onboarding_completed_at' => now()]);
     $author = User::factory()->create();
     $forum = makeForum('Спорт', 'sport');
     $thread = makeThread($forum, $author, 'Hide me', 10);
@@ -244,7 +245,7 @@ it('hides a thread from the feed via the hide endpoint', function () {
 });
 
 it('reports a thread and removes it from the reporter feed', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['onboarding_completed_at' => now()]);
     $author = User::factory()->create();
     $forum = makeForum('Спорт', 'sport');
     $thread = makeThread($forum, $author, 'Report me', 10);

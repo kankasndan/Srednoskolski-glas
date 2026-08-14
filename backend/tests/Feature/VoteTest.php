@@ -26,7 +26,7 @@ function voteForum(): Forum
 
 function voteThread(Forum $forum, User $author, int $upvotes = 0): Thread
 {
-    return Thread::query()->create([
+    return Thread::forceCreate([
         'title' => 'Test thread',
         'description' => 'Body',
         'upvotes' => $upvotes,
@@ -39,7 +39,7 @@ function voteThread(Forum $forum, User $author, int $upvotes = 0): Thread
 
 function voteComment(Thread $thread, User $author, int $upvotes = 0): Comment
 {
-    $comment = Comment::query()->create([
+    $comment = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => null,
         'user_id' => $author->id,

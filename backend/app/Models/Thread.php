@@ -16,7 +16,7 @@ class Thread extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['title', 'description', 'upvotes', 'views', 'user_id', 'forum_id', 'is_anonymous', 'deleted_by'];
+    protected $fillable = ['title', 'description', 'is_anonymous'];
 
     /**
      * @return array<string, string>
@@ -73,6 +73,14 @@ class Thread extends Model
     public function scopePubliclyAttributed(Builder $query): void
     {
         $query->where('is_anonymous', false);
+    }
+
+    /**
+     * School-forum threads are only listed to signed-in visitors.
+     */
+    public function scopeListedForGuest(Builder $query): void
+    {
+        $query->whereHas('forum', fn (Builder $forum) => $forum->where('type', '!=', 'school'));
     }
 
     public function forum()

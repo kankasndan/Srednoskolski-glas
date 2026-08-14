@@ -22,7 +22,7 @@ function makeThreadForFollowTests(): Thread
         'threads_count' => 0,
     ]);
 
-    return Thread::query()->create([
+    return Thread::forceCreate([
         'title' => 'Тест дискусија',
         'description' => 'Содржина',
         'user_id' => $author->id,

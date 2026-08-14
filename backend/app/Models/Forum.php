@@ -28,4 +28,18 @@ class Forum extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function isSchool(): bool
+    {
+        return $this->type === 'school';
+    }
+
+    public function abortUnlessReadableBy(?User $user): void
+    {
+        if (! $this->isSchool()) {
+            return;
+        }
+
+        abort_if($user === null, 401);
+    }
 }

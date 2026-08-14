@@ -22,7 +22,7 @@ function makeThreadWithComments(): array
         'members_count' => 0,
         'threads_count' => 0,
     ]);
-    $thread = Thread::query()->create([
+    $thread = Thread::forceCreate([
         'title' => 'Poll thread',
         'description' => 'Body',
         'upvotes' => 0,
@@ -32,7 +32,7 @@ function makeThreadWithComments(): array
         'is_anonymous' => false,
     ]);
 
-    $oldest = Comment::query()->create([
+    $oldest = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => null,
         'user_id' => $author->id,
@@ -44,7 +44,7 @@ function makeThreadWithComments(): array
         'updated_at' => now()->subDays(3),
     ])->save();
 
-    $best = Comment::query()->create([
+    $best = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => null,
         'user_id' => $author->id,
@@ -56,7 +56,7 @@ function makeThreadWithComments(): array
         'updated_at' => now()->subDay(),
     ])->save();
 
-    $newest = Comment::query()->create([
+    $newest = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => null,
         'user_id' => $author->id,
@@ -68,7 +68,7 @@ function makeThreadWithComments(): array
         'updated_at' => now(),
     ])->save();
 
-    Comment::query()->create([
+    Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => $best->id,
         'user_id' => $author->id,
@@ -148,7 +148,7 @@ it('hides the anonymous thread author on their own comments', function () {
 it('omits deleted leaves and keeps tombstones that still have replies', function () {
     ['forum' => $forum, 'thread' => $thread, 'best' => $best] = makeThreadWithComments();
 
-    $deletedLeaf = Comment::query()->create([
+    $deletedLeaf = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => $best->id,
         'user_id' => $best->user_id,
@@ -156,13 +156,13 @@ it('omits deleted leaves and keeps tombstones that still have replies', function
     ]);
     $deletedLeaf->delete();
 
-    $deletedRoot = Comment::query()->create([
+    $deletedRoot = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => null,
         'user_id' => $best->user_id,
         'content' => 'Deleted root',
     ]);
-    Comment::query()->create([
+    Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => $deletedRoot->id,
         'user_id' => $best->user_id,
@@ -170,7 +170,7 @@ it('omits deleted leaves and keeps tombstones that still have replies', function
     ]);
     $deletedRoot->delete();
 
-    $lonelyDeleted = Comment::query()->create([
+    $lonelyDeleted = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => null,
         'user_id' => $best->user_id,
@@ -198,7 +198,7 @@ it('loads direct replies from the replies endpoint', function () {
     ['forum' => $forum, 'thread' => $thread, 'best' => $best] = makeThreadWithComments();
 
     $child = Comment::query()->where('parent_id', $best->id)->first();
-    $grandchild = Comment::query()->create([
+    $grandchild = Comment::forceCreate([
         'thread_id' => $thread->id,
         'parent_id' => $child->id,
         'user_id' => $best->user_id,

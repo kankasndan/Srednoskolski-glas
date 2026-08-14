@@ -8,7 +8,7 @@ import ThreadShareButton from "@/components/thread/ThreadShareButton";
 import ThreadStats from "@/components/thread/ThreadStats";
 import ThreadViewCount from "@/components/thread/ThreadViewCount";
 import { renderHtmlProps } from "@/lib/html";
-import { formatPostedAgo } from "@/lib/time";
+import { formatThreadPostedAgo } from "@/lib/time";
 
 export default function ThreadPost({ forum, thread, onThreadUpdated }) {
   const isOwner = Boolean(thread?.is_owner);
@@ -18,7 +18,7 @@ export default function ThreadPost({ forum, thread, onThreadUpdated }) {
       <div className="flex items-start justify-between gap-3 md:gap-4">
         <ThreadMetaTags
           tags={buildThreadMetaTags(thread.forum ?? forum, thread)}
-          postedAgo={formatPostedAgo(thread.created_at)}
+          postedAgo={formatThreadPostedAgo(thread)}
           hideForumOnPhone
         />
 

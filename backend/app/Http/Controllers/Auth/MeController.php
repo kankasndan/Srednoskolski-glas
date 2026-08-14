@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MeResource;
 use App\Services\StudentEnrollment;
 use App\Support\SyncUserContentPermissions;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class MeController extends Controller
         $syncPermissions->ensureFresh($user);
 
         return response()->json([
-            'user' => $user,
+            'user' => (new MeResource($user))->resolve(),
             'permissions' => $user->getAllPermissions()->pluck('name')->values(),
             'capabilities' => $enrollment->allCapabilities($user),
         ]);

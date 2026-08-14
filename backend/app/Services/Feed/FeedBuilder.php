@@ -54,7 +54,7 @@ final class FeedBuilder
                 ? UserFeedContext::forUser($user)
                 : UserFeedContext::guest();
 
-            $candidates = $this->loadLeanCandidates($request, $context);
+            $candidates = $this->loadLeanCandidates($request, $context, $user);
             $scored = $this->ranker->scoreThreads($candidates, $context);
             $ordered = $this->ranker->buildMixedOrder($scored, $context);
             $orderedIds = $ordered->map(fn (Thread $thread) => (int) $thread->id)->all();
@@ -73,7 +73,7 @@ final class FeedBuilder
      *
      * @return Collection<int, Thread>
      */
-    private function loadLeanCandidates(Request $request, UserFeedContext $context): Collection
+    private function loadLeanCandidates(Request $request, UserFeedContext $context, ?User $user): Collection
     {
         $since = $this->effectiveCandidateSince($request->query('time'));
         $recentSince = now()->subDay();
@@ -96,6 +96,10 @@ final class FeedBuilder
                 'comments as recent_comments_count' => fn ($comments) => $comments->where('created_at', '>=', $recentSince),
             ])
             ->where('created_at', '>=', $since);
+
+        if ($user === null) {
+            $query->listedForGuest();
+        }
 
         $excluded = $context->excludedThreadIds();
         if ($excluded->isNotEmpty()) {
@@ -225,6 +229,10 @@ final class FeedBuilder
             ->withCount('comments');
 
         $this->applyHasVoted($query, $user);
+
+        if ($user === null) {
+            $query->listedForGuest();
+        }
 
         if ($since = $this->threadTimeWindow($request->query('time'))) {
             $query->where('created_at', '>=', $since);

@@ -17,7 +17,6 @@ class MediaController extends Controller
     private const ALLOWED_DIRECTORIES = [
         'uploads',
         'avatars',
-        'forums',
         'threads',
     ];
 

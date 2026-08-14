@@ -63,7 +63,7 @@ it('ranks weekly threads by votes and comments interactions', function () {
     $forum = exploreForum('Спорт', 'sport-threads');
     $quiet = exploreForum('Тивко', 'quiet-threads');
 
-    $hot = Thread::query()->create([
+    $hot = Thread::forceCreate([
         'title' => 'Hot week',
         'description' => 'Body',
         'upvotes' => 0,
@@ -73,7 +73,7 @@ it('ranks weekly threads by votes and comments interactions', function () {
         'is_anonymous' => false,
     ]);
 
-    $cold = Thread::query()->create([
+    $cold = Thread::forceCreate([
         'title' => 'Cold week',
         'description' => 'Body',
         'upvotes' => 100,
@@ -89,7 +89,7 @@ it('ranks weekly threads by votes and comments interactions', function () {
         'votable_id' => $hot->id,
     ]);
 
-    Comment::query()->create([
+    Comment::forceCreate([
         'thread_id' => $hot->id,
         'user_id' => $author->id,
         'content' => 'Nice',
@@ -114,7 +114,7 @@ it('excludes threads created more than a week ago', function () {
     $author = User::factory()->create();
     $forum = exploreForum('Спорт', 'sport-old');
 
-    $recent = Thread::query()->create([
+    $recent = Thread::forceCreate([
         'title' => 'Recent thread',
         'description' => 'Body',
         'upvotes' => 0,
@@ -124,7 +124,7 @@ it('excludes threads created more than a week ago', function () {
         'is_anonymous' => false,
     ]);
 
-    $old = Thread::query()->create([
+    $old = Thread::forceCreate([
         'title' => 'Old thread',
         'description' => 'Body',
         'upvotes' => 999,

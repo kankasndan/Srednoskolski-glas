@@ -345,21 +345,15 @@
                 }
 
                 users.forEach(user => {
-                    const row = document.createElement('div');
-                    row.className =
-                        'block px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center text-sm border-b border-gray-100 last:border-0';
-                    row.innerHTML = `
-            <span class="font-medium text-gray-800">${user.username ?? 'Нема корисничко име'}</span>
-            <span class="text-gray-400 text-xs">${user.email ?? ''}</span>
-        `;
-
-                    row.addEventListener('click', () => {
-                        searchInput.value = user.username;
-                        selectedUserId.value = user.id;
-                        resultsBox.classList.add('hidden');
-                    });
-
-                    resultsBox.appendChild(row);
+                    resultsBox.appendChild(adminSearchRow({
+                        primary: user.username ?? 'Нема корисничко име',
+                        secondary: user.email ?? '',
+                        onClick: () => {
+                            searchInput.value = user.username ?? '';
+                            selectedUserId.value = user.id;
+                            resultsBox.classList.add('hidden');
+                        },
+                    }));
                 });
 
                 resultsBox.classList.remove('hidden');
