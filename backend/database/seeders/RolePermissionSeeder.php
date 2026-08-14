@@ -40,6 +40,7 @@ class RolePermissionSeeder extends Seeder
             'view sanctions',
             'create sanctions',
             'remove sanctions',
+            'remove permanent sanctions',
 
             // Appeals
             'view appeals',

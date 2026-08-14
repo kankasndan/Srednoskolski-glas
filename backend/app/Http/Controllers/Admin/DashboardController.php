@@ -44,7 +44,7 @@ class DashboardController extends Controller
     private function registrationLabels(int $range): array
     {
         return collect(range($range - 1, 0))
-            ->map(fn ($daysAgo) => now()->subDays($daysAgo)->format('M d'))
+            ->map(fn($daysAgo) => now()->subDays($daysAgo)->format('M d'))
             ->toArray();
     }
 
@@ -68,40 +68,38 @@ class DashboardController extends Controller
     {
         $cacheKey = "admin.dashboard.range.{$range}";
 
-        return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($range) {
-            $totalUsers = User::count();
+        $totalUsers = User::count();
 
-            $activeUsers = User::where('last_active_at', '>=', now()->subDays(7))->count();
+        $activeUsers = User::where('last_active_at', '>=', now()->subDays(7))->count();
 
-            $newRegistrations30d = User::where('created_at', '>=', now()->subDays(30))->count();
+        $newRegistrations30d = User::where('created_at', '>=', now()->subDays(30))->count();
 
-            $usersByCity = City::whereHas('studentData')
-                ->withCount('studentData')
-                ->get();
+        $usersByCity = City::whereHas('studentData')
+            ->withCount('studentData')
+            ->get();
 
-            $usersBySchool = StudentData::selectRaw('school_id, count(*) as total')
-                ->groupBy('school_id')
-                ->get();
+        $usersBySchool = StudentData::selectRaw('school_id, count(*) as total')
+            ->groupBy('school_id')
+            ->get();
 
-            $topForums = Forum::withCount('threads')
-                ->orderByDesc('threads_count')
-                ->limit(5)
-                ->get();
+        $topForums = Forum::withCount('threads')
+            ->orderByDesc('threads_count')
+            ->limit(5)
+            ->get();
 
-            $registrationLabels = $this->registrationLabels($range);
-            $registrationCounts = $this->registrationCounts($range);
+        $registrationLabels = $this->registrationLabels($range);
+        $registrationCounts = $this->registrationCounts($range);
 
-            return compact(
-                'totalUsers',
-                'activeUsers',
-                'newRegistrations30d',
-                'usersBySchool',
-                'usersByCity',
-                'topForums',
-                'registrationCounts',
-                'registrationLabels'
-            );
-        });
+        return compact(
+            'totalUsers',
+            'activeUsers',
+            'newRegistrations30d',
+            'usersBySchool',
+            'usersByCity',
+            'topForums',
+            'registrationCounts',
+            'registrationLabels'
+        );
     }
 
     public function exportPdf(Request $request)
@@ -112,6 +110,6 @@ class DashboardController extends Controller
 
         $pdf = Pdf::loadView('admin.dashboard.export', $this->getDashboardData($range));
 
-        return $pdf->download('dashboard-report-'.now()->format('Y-m-d').'.pdf');
+        return $pdf->download('dashboard-report-' . now()->format('Y-m-d') . '.pdf');
     }
 }

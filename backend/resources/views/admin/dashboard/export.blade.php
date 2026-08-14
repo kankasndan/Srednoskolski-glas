@@ -137,7 +137,6 @@
             <tr>
                 <th>#</th>
                 <th>Форум</th>
-                <th class="right">Активност</th>
             </tr>
         </thead>
         <tbody>
@@ -145,7 +144,6 @@
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $forum->name }}</td>
-                    <td class="right">{{ $forum->activity_score }}</td>
                 </tr>
             @endforeach
         </tbody>

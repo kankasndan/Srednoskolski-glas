@@ -48,9 +48,6 @@
                            class="text-sm text-gray-700 hover:text-my-purple">
                             {{ $forum->name }}
                         </a>
-                        <span class="text-xs font-medium bg-my-purple/10 text-my-purple rounded-full px-2 py-0.5">
-                            {{ $forum->activity_score }}
-                        </span>
                     </li>
                 @endforeach
             </ul>

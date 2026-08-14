@@ -15,6 +15,8 @@ class ReportController extends Controller
     {
         $this->authorize('view reports');
 
+        $activeTab = $request->get('tab', 'queue');
+
         $reports = Report::query()
             ->with([
                 'reporter',
@@ -78,7 +80,7 @@ class ReportController extends Controller
             ->latest('updated_at')
             ->paginate(10, ['*'], 'history_page');
 
-        return view('admin.reports.index', compact('reports', 'resolvedReports'));
+        return view('admin.reports.index', compact('reports', 'resolvedReports', 'activeTab'));
     }
 
     public function approve(Report $report)

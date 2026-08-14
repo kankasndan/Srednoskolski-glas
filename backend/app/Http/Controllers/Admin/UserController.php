@@ -68,8 +68,17 @@ class UserController extends Controller
 
         $query = $request->get('q', '');
 
-        $users = User::where('username', 'like', "%{$query}%")
-            ->where('role', 'user')
+        $usersQuery = User::where('username', 'like', "%{$query}%")
+            ->where('role', 'user');
+
+        if ($request->boolean('only_without_sanctions')) {
+            $usersQuery->whereDoesntHave('sanctions', function ($q) {
+                // adjust this to your active-sanction definition
+                $q->whereNull('revoked_at');
+            });
+        }
+
+        $users = $usersQuery
             ->limit(10)
             ->get(['id', 'username', 'email', 'role']);
 

@@ -19,6 +19,7 @@ class AppealController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+
         $resolvedAppeals = Appeal::whereIn('status', ['accepted', 'rejected'])
             ->with('sanction', 'user')
             ->paginate(10)
