@@ -94,7 +94,7 @@ export default function ThreadCard({ thread }) {
   return (
     <article
       onClick={openThread}
-      className={`relative flex cursor-pointer flex-col items-start justify-center gap-4 rounded-3xl border-b border-b-[#CFE9ED] px-2 pb-6 pt-4 transition-colors active:bg-[#DCEBED] md:px-4 lg:p-4 lg:pt-6 lg:hover:bg-[#DCEBED] ${
+      className={`relative flex cursor-pointer flex-col items-start justify-center gap-4 rounded-3xl border-b border-b-[#CFE9ED] px-2 pb-6 pt-4 transition-colors active:bg-[#DCEBED] md:p-4 md:pt-6 md:hover:bg-[#DCEBED] ${
         opening ? "bg-[#DCEBED]" : "bg-transparent"
       }`}
     >
@@ -107,21 +107,21 @@ export default function ThreadCard({ thread }) {
           />
 
           <div className="flex w-full min-w-0 flex-col gap-2">
-            <h3 className="font-[family-name:var(--font-manrope)] text-[16px] font-bold text-black md:text-[18px] lg:w-fit lg:max-w-full lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap lg:text-[20px] lg:leading-[27px]">
+            <h3 className="font-[family-name:var(--font-manrope)] text-[16px] font-bold text-black md:w-fit md:max-w-full md:overflow-hidden md:text-ellipsis md:whitespace-nowrap md:text-[20px] md:leading-[27px]">
               {thread.title}
             </h3>
             {thread.description ? (
-              <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal text-[#595959] lg:leading-[22px]">
+              <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal text-[#595959] md:leading-snug">
                 {stripHtml(thread.description)}
               </p>
             ) : null}
-            <div className="hidden lg:block">
+            <div className="hidden md:block">
               <ThreadViewCount views={thread.views} />
             </div>
           </div>
         </div>
 
-        <div className="relative z-10 hidden shrink-0 self-center flex-col gap-2 lg:flex">
+        <div className="relative z-10 hidden shrink-0 self-center flex-col gap-2 md:flex">
           <ActionButton
             icon="/Chevrons up.svg"
             label="Гласај нагоре"
@@ -150,7 +150,7 @@ export default function ThreadCard({ thread }) {
         </div>
       ) : null}
 
-      <div className="relative z-10 flex items-center gap-2 lg:hidden">
+      <div className="relative z-10 flex items-center gap-2 md:hidden">
         <ActionButton
           compact
           icon="/Chevrons up.svg"

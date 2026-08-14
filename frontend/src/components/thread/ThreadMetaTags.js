@@ -57,7 +57,7 @@ function MetaTag({ tag, hiddenOnMobile = false }) {
   const iconSize = tag.avatar ? 24 : tag.zoom ? 44 : 20;
 
   const className = `relative z-10 ${
-    hiddenOnMobile ? "hidden lg:flex" : "flex"
+    hiddenOnMobile ? "hidden md:flex" : "flex"
   } h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 text-[12px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB]`;
 
   const content = (

@@ -42,7 +42,7 @@ export default function FeedFilterSheet({
   return (
     <div
       aria-hidden={!open}
-      className={`fixed inset-0 z-[70] lg:hidden ${open ? "" : "pointer-events-none"}`}
+      className={`fixed inset-0 z-[70] md:hidden ${open ? "" : "pointer-events-none"}`}
     >
       <div
         onClick={onClose}

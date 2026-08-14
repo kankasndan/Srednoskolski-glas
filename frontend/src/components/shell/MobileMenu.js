@@ -31,7 +31,7 @@ export default function MobileMenu({
       />
 
       <div
-        className={`relative flex h-full w-[315px] max-w-[85%] flex-col rounded-r-[40px] bg-white pt-4 transition-transform duration-300 ease-out ${
+        className={`relative flex h-full w-[315px] max-w-[85%] flex-col rounded-r-[40px] bg-white pt-4 transition-transform duration-300 ease-out md:w-100 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -50,7 +50,8 @@ export default function MobileMenu({
           />
         </button>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-8 pt-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Listata e 268px shiroka, pa na tablet se centrira vo poshirokata fioka. */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-8 pt-6 [scrollbar-width:none] md:flex md:flex-col md:items-center [&::-webkit-scrollbar]:hidden">
           <SidebarNav selectedKey={selectedKey} onSelect={onSelect} collapsed={false} />
           <ThematicForums
             forums={general}

@@ -38,14 +38,25 @@ export default function Header({ onMenuOpen }) {
           />
         </button>
 
-        <Link href="/feed" className="flex h-12 w-[71px] shrink-0 items-center justify-center">
+        <Link
+          href="/feed"
+          className="flex h-12 w-[71px] shrink-0 items-center justify-center md:h-14 md:w-60"
+        >
           <Image
             src="/logo.svg"
             alt="Средношколски глас"
             width={71}
             height={48}
             priority
-            className="h-12 w-[71px] object-contain"
+            className="h-12 w-[71px] object-contain md:hidden"
+          />
+          <Image
+            src="/logo-with-text.svg"
+            alt="Средношколски глас"
+            width={240}
+            height={56}
+            priority
+            className="hidden h-14 w-60 md:block"
           />
         </Link>
 
@@ -67,7 +78,7 @@ export default function Header({ onMenuOpen }) {
         </Link>
       </div>
 
-      <div className="flex w-full items-center justify-between gap-6 px-6 pb-4 pt-8 lg:px-14 lg:py-4">
+      <div className="flex w-full items-center justify-between gap-6 px-6 pb-4 pt-8 md:justify-center lg:justify-between lg:px-14 lg:py-4">
         <Link
           href="/feed"
           className="hidden h-14 w-60 shrink-0 cursor-pointer items-center justify-center gap-3 overflow-hidden lg:flex"

@@ -4,13 +4,13 @@ import StartDiscussionButton from "@/components/forum/StartDiscussionButton";
 export default function CommunityBanner() {
   return (
     <section className="flex w-full flex-col items-center gap-4 rounded-xl bg-[#CFE9ED] px-3 py-6 lg:h-32 lg:w-[990px] lg:max-w-full lg:flex-row lg:gap-[92px] lg:rounded-3xl lg:p-6">
-      <div className="flex flex-col items-center gap-2 lg:h-20 lg:w-[582px] lg:shrink-0 lg:flex-row lg:gap-4">
+      <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4 lg:h-20 lg:w-[582px] lg:shrink-0">
         <Image
           src="/logo.svg"
           alt=""
           width={119}
           height={80}
-          className="hidden h-20 w-[119px] shrink-0 object-contain lg:block"
+          className="hidden h-20 w-[119px] shrink-0 object-contain md:block"
           priority
         />
 

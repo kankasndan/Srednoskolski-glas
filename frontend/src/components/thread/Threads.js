@@ -303,7 +303,7 @@ export default function Threads({
       <button
         type="button"
         onClick={() => setFiltersOpen(true)}
-        className="flex h-10 cursor-pointer items-center gap-2 self-start rounded-xl p-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black lg:hidden"
+        className="flex h-10 cursor-pointer items-center gap-2 self-start rounded-xl p-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black md:hidden"
       >
         <Image src="/mobile version/filter.svg" alt="" width={24} height={24} className="size-6" />
         Филтери
@@ -326,7 +326,7 @@ export default function Threads({
         }}
       />
 
-      <div ref={filterContainerRef} className="hidden self-end gap-2 lg:flex">
+      <div ref={filterContainerRef} className="hidden self-end gap-2 md:flex">
         {showSort ? (
           <FeedSelect
             name="sort"
