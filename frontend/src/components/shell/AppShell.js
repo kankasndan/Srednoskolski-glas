@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Header from "@/components/shell/Header";
+import MobileMenu from "@/components/shell/MobileMenu";
 import SchoolForums from "@/components/forum/SchoolForums";
 import SidebarNav from "@/components/shell/SidebarNav";
 import ThematicForums from "@/components/forum/ThematicForums";
@@ -46,7 +47,6 @@ export default function AppShell({ children, contentClassName = "" }) {
     navOverride.pathname === pathname && navOverride.key
       ? navOverride.key
       : getSelectedKey(pathname);
-  const showCollapsedIcons = collapsed && !mobileMenuOpen;
 
   function handleSelect(key) {
     setNavOverride({
@@ -62,19 +62,19 @@ export default function AppShell({ children, contentClassName = "" }) {
         onMenuToggle={() => setMobileMenuOpen((open) => !open)}
         menuOpen={mobileMenuOpen}
       />
+      <MobileMenu
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        general={general}
+        schoolsByCity={schoolsByCity}
+        loading={loading}
+        error={error}
+        selectedKey={selectedKey}
+        onSelect={handleSelect}
+      />
+
       <div className="flex min-h-0 min-w-0 flex-1 px-4 lg:px-6">
-        {mobileMenuOpen && (
-          <div
-            onClick={() => setMobileMenuOpen(false)}
-            aria-hidden="true"
-            className="fixed inset-0 z-30 bg-black/40 lg:hidden"
-          />
-        )}
-        <aside
-          className={`box-border min-h-0 flex-col border-r border-[#CCCCCC] bg-white pr-6 pt-1 pl-8 lg:static lg:z-auto lg:flex lg:shrink-0 ${
-            mobileMenuOpen ? "fixed inset-y-0 left-0 z-40 flex" : "hidden"
-          }`}
-        >
+        <aside className="box-border hidden min-h-0 shrink-0 flex-col border-r border-[#CCCCCC] bg-white pr-6 pt-1 pl-8 lg:flex">
           <button
             type="button"
             onClick={toggleCollapsed}
@@ -101,7 +101,7 @@ export default function AppShell({ children, contentClassName = "" }) {
             <SidebarNav
               selectedKey={selectedKey}
               onSelect={handleSelect}
-              collapsed={showCollapsedIcons}
+              collapsed={collapsed}
             />
             <ThematicForums
               forums={general}
@@ -109,9 +109,9 @@ export default function AppShell({ children, contentClassName = "" }) {
               error={error}
               selectedKey={selectedKey}
               onSelect={handleSelect}
-              collapsed={showCollapsedIcons}
+              collapsed={collapsed}
             />
-            {!showCollapsedIcons && (
+            {!collapsed && (
               <SchoolForums
                 schoolsByCity={schoolsByCity}
                 loading={loading}

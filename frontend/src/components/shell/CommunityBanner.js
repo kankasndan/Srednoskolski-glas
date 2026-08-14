@@ -11,13 +11,8 @@ export default function CommunityBanner() {
   const showCreate = !loading && canCreateThreads(user);
 
   return (
-<<<<<<< HEAD
-    <section className="flex w-full flex-col items-center gap-4 rounded-xl bg-[#CFE9ED] px-3 py-6 lg:h-32 lg:w-[990px] lg:max-w-full lg:flex-row lg:gap-[92px] lg:rounded-3xl lg:p-6">
-      <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4 lg:h-20 lg:w-[582px] lg:shrink-0">
-=======
     <section className="flex w-[990px] max-w-full flex-col gap-4 rounded-3xl bg-[#CFE9ED] px-6 py-6 lg:min-h-32 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:py-6 lg:pl-6 lg:pr-[22px]">
       <div className="flex min-w-0 flex-1 items-center gap-[15px]">
->>>>>>> 5397c7e03cc16a8b2de1ec7ef44a077c4821c45d
         <Image
           src="/logo.svg"
           alt=""
@@ -27,7 +22,7 @@ export default function CommunityBanner() {
           priority
         />
 
-        <div className="flex min-w-0 flex-1 flex-col gap-2 text-center lg:text-left">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 text-center md:text-left">
           <h2 className="font-[family-name:var(--font-oswald)] text-[20px] font-bold leading-none text-black">
             МЕСТО КАДЕ СЕКОЈ СРЕДНОШКОЛЕЦ ИМА ГЛАС
           </h2>
