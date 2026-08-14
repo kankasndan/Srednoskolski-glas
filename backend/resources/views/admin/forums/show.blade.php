@@ -1,13 +1,13 @@
 @extends('layouts.master')
 
-@section('title', 'Forum Details')
+@section('title', 'Детали за форум')
 
 @section('content')
 <div class="max-w-7xl mx-auto w-full px-4 py-6 space-y-6">
 
     {{-- Back link --}}
-    <a href="{{ route('forum.index') }}" class="text-sm text-indigo-600 hover:underline mb-6">
-        &larr; Back to Forums
+    <a href="{{ route('forum.index') }}" class="text-sm text-my-purple hover:underline mb-6">
+        &larr; Назад кон форуми
     </a>
 
     @if (session('success'))
@@ -47,12 +47,16 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-xl font-semibold text-gray-900">{{ $forum->name }}</h1>
-                        <span class="text-xs bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5">{{ $forum->type }}</span>
+                        <span class="text-xs bg-my-purple/10 text-my-purple rounded-full px-2 py-0.5">{{ match ($forum->type) {
+                            'general' => 'Општ',
+                            'school' => 'Училишен',
+                            default => $forum->type,
+                        } }}</span>
                     </div>
                     @if($forum->school && $forum->school->city)
-                        <p class="text-sm text-gray-500 mt-1">City: {{ $forum->school->city->name }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Град: {{ $forum->school->city->name }}</p>
                     @endif
-                    <p class="text-sm text-gray-500 mt-1">Slug: {{ $forum->slug }}</p>
+                    <p class="text-sm text-gray-500 mt-1">Слаг: {{ $forum->slug }}</p>
                     <p class="text-gray-600 text-sm mt-2 max-w-xl">
                         {{ $forum->description }}
                     </p>
@@ -60,14 +64,18 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <button type="button" onclick="openForumModal()"
-                    class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
-                    Edit Forum
-                </button>
-                <button type="button" onclick="openDeleteForumModal()"
-                    class="px-4 py-2 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700">
-                    Delete Forum
-                </button>
+                @can('update forums')
+                    <button type="button" onclick="openForumModal()"
+                        class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
+                        Уреди форум
+                    </button>
+                @endcan
+                @can('delete forums')
+                    <button type="button" onclick="openDeleteForumModal()"
+                        class="px-4 py-2 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700">
+                        Избриши форум
+                    </button>
+                @endcan
             </div>
         </div>
     </div>
@@ -75,11 +83,11 @@
     {{-- Stats row: threads, comments, followers --}}
     <div class="flex justify-between items-center w-full gap-4">
         <div class="bg-white rounded-xl shadow p-5">
-            <h6 class="text-sm text-gray-500 mb-1">Total Threads</h6>
+            <h6 class="text-sm text-gray-500 mb-1">Вкупно дискусии</h6>
             <p class="text-2xl font-semibold text-gray-900">{{ $forum->threads_count }}</p>
         </div>
         <div class="bg-white rounded-xl shadow p-5">
-            <h6 class="text-sm text-gray-500 mb-1">Followers</h6>
+            <h6 class="text-sm text-gray-500 mb-1">Следбеници</h6>
             <p class="text-2xl font-semibold text-gray-900">{{ $forum->members_count }}</p>
         </div>
     </div>
@@ -87,7 +95,7 @@
     {{-- Threads in this forum --}}
     <div class="bg-white rounded-xl shadow">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h2 class="font-semibold text-gray-900">Threads in this Forum</h2>
+            <h2 class="font-semibold text-gray-900">Дискусии во овој форум</h2>
         </div>
 
         <div id="forum-threads" class="divide-y divide-gray-100">
@@ -101,21 +109,21 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <a href="#" class="font-medium text-gray-900 hover:underline">{{ $thread->name }}</a>
-                            <span class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5">Anonymous</span>
-                            <span class="text-xs bg-orange-100 text-orange-600 rounded-full px-2 py-0.5">Under review</span>
+                            <span class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5">Анонимно</span>
+                            <span class="text-xs bg-orange-100 text-orange-600 rounded-full px-2 py-0.5">Под преглед</span>
                         </div>
-                        <p class="text-xs text-gray-400 mt-1">by {{ $thread->user->username }} · 2 hours ago</p>
+                        <p class="text-xs text-gray-400 mt-1">од {{ $thread->user->username }} · {{ $thread->created_at?->diffForHumans() }}</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-6 text-sm text-gray-500">
-                    <span>▲ {{ $thread->upvotes }} upvotes</span>
-                    <span>💬 {{ $thread->comments_count }} comments</span>
+                    <span>▲ {{ $thread->upvotes }} гласови</span>
+                    <span>💬 {{ $thread->comments_count }} коментари</span>
                     <button type="button"
                     {{-- {{ route('thread.destroy', ['thread' => $thread->id]) }} --}}
                         onclick="openDeleteThreadModal('', '{{ $thread->name }}')"
                         class="text-red-600 hover:underline text-xs">
-                        Delete
+                        Избриши
                     </button>
                 </div>
             </div>
@@ -124,7 +132,7 @@
 
             {{-- Empty state --}}
             <div class="px-5 py-10 text-center text-sm text-gray-400">
-                No threads have been posted in this forum yet.
+                Сè уште нема дискусии во овој форум.
             </div>
 
             @endforelse
@@ -136,23 +144,23 @@
             <nav class="flex gap-1 text-sm">
                 @if ($threads->onFirstPage())
                     <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                        Previous
+                        Претходна
                     </button>
                 @else
                     <a href="{{ $threads->previousPageUrl() }}"
                         class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                        Previous
+                        Претходна
                     </a>
                 @endif
 
                 @if ($threads->hasMorePages())
                     <a href="{{ $threads->nextPageUrl() }}"
                         class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                        Next
+                        Следна
                     </a>
                 @else
                     <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                        Next
+                        Следна
                     </button>
                 @endif
             </nav>
@@ -161,11 +169,11 @@
 
 </div>
 
-{{-- Edit Forum Modal --}}
+{{-- Уреди форум Modal --}}
 <div class="fixed inset-0 bg-black/40 hidden items-center justify-center" id="forumModal">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4">
         <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900">Edit Forum</h2>
+            <h2 class="text-lg font-semibold text-gray-900">Уреди форум</h2>
             <button type="button" onclick="closeForumModal()" class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
 
@@ -173,57 +181,56 @@
             @csrf
             @method('patch')
             <div>
-                <label class="text-sm text-gray-600">Name</label>
+                <label class="text-sm text-gray-600">Име</label>
                 <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="name" value="{{ $forum->name }}">
             </div>
 
             <div>
-                <label class="text-sm text-gray-600">Slug</label>
+                <label class="text-sm text-gray-600">Слаг</label>
                 <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="slug" value="{{ $forum->slug }}">
             </div>
 
             <div>
-                <label class="text-sm text-gray-600">Description</label>
+                <label class="text-sm text-gray-600">Опис</label>
                 <textarea rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="description">{{ $forum->description }}</textarea>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="text-sm text-gray-600">Icon</label>
+                    <label class="text-sm text-gray-600">Икона</label>
                     @if ($forum->imageUrl)
                         <img src="{{ $forum->imageUrl }}" alt="" class="mb-2 h-12 w-12 rounded-lg object-cover">
                     @endif
                     <input type="file" accept="image/*"
                         class="w-full text-sm border border-gray-300 p-2 rounded-md" name="icon">
-                    <p class="text-xs text-gray-400 mt-1">Leave empty to keep the current icon.</p>
+                    <p class="text-xs text-gray-400 mt-1">Остави празно за да се задржи тековната икона.</p>
                 </div>
                 <div>
-                    <label class="text-sm text-gray-600">Banner</label>
+                    <label class="text-sm text-gray-600">Банер</label>
                     @if ($forum->bannerUrl)
                         <img src="{{ $forum->bannerUrl }}" alt="" class="mb-2 h-12 w-full rounded-lg object-cover">
                     @endif
                     <input type="file" accept="image/*"
                         class="w-full text-sm border border-gray-300 p-2 rounded-md" name="banner">
-                    <p class="text-xs text-gray-400 mt-1">Leave empty to keep the current banner.</p>
+                    <p class="text-xs text-gray-400 mt-1">Остави празно за да се задржи тековниот банер.</p>
                 </div>
             </div>
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button" onclick="closeForumModal()"
-                    class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
+                    class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Откажи</button>
                 <button type="submit"
-                    class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">Save
-                    Forum</button>
+                    class="px-4 py-2 rounded-md bg-my-purple text-white text-sm font-medium hover:bg-my-purple/90">Зачувај форум</button>
             </div>
         </form>
     </div>
 </div>
 
-{{-- Delete Forum Modal --}}
+{{-- Избриши форум Modal --}}
 <div class="fixed inset-0 bg-black/40 hidden items-center justify-center" id="deleteForumModal">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-        <h2 class="text-lg font-semibold text-gray-900">Delete Forum</h2>
+        <h2 class="text-lg font-semibold text-gray-900">Избриши форум</h2>
         <p class="text-sm text-gray-600">
-            This will permanently delete <span class="font-medium text-gray-900">{{ $forum->name }}</span> and unlink all its threads, comments, saves, and follows. This action cannot be undone.
+            Ова трајно ќе го избрише <span class="font-medium text-gray-900">{{ $forum->name }}</span> и ќе ги отстрани сите дискусии, коментари, зачувувања и следења. Оваа акција не може да се поништи.
         </p>
 
         <form method="POST" action="{{ route('forum.destroy', ['forum' => $forum->id]) }}">
@@ -231,20 +238,20 @@
             @method('delete')
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button" onclick="closeDeleteForumModal()"
-                    class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
+                    class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Откажи</button>
                 <button type="submit"
-                    class="px-4 py-2 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700">Delete Forum</button>
+                    class="px-4 py-2 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700">Избриши форум</button>
             </div>
         </form>
     </div>
 </div>
 
-{{-- Delete Thread + Ban Author Modal --}}
+{{-- Избриши дискусија + Ban Author Modal --}}
 <div class="fixed inset-0 bg-black/40 hidden items-center justify-center" id="deleteThreadModal">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-        <h2 class="text-lg font-semibold text-gray-900">Delete Thread</h2>
+        <h2 class="text-lg font-semibold text-gray-900">Избриши дискусија</h2>
         <p class="text-sm text-gray-600">
-            This will permanently delete <span class="font-medium text-gray-900" id="deleteThreadName"></span>. You may also sanction the author in the same action.
+            Ова трајно ќе избрише <span class="font-medium text-gray-900" id="deleteThreadName"></span>. You may also sanction the author in the same action.
         </p>
 
         <form method="POST" id="deleteThreadForm" action="">
@@ -253,14 +260,14 @@
 
             <label class="flex items-center gap-2 text-sm text-gray-700">
                 <input type="checkbox" name="ban_author" value="1">
-                Also ban the author of this thread
+                Исто така банирај го авторот на дискусијата
             </label>
 
             <div class="flex justify-end gap-2 pt-4">
                 <button type="button" onclick="closeDeleteThreadModal()"
-                    class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
+                    class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Откажи</button>
                 <button type="submit"
-                    class="px-4 py-2 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700">Delete Thread</button>
+                    class="px-4 py-2 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700">Избриши дискусија</button>
             </div>
         </form>
     </div>

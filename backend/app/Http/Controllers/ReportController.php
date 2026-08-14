@@ -6,9 +6,12 @@ use App\Models\Comment;
 use App\Models\FeedHide;
 use App\Models\Report;
 use App\Models\Thread;
+use App\Models\User;
+use App\Notifications\NewReportNotification;
 use App\Services\Feed\FeedCache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class ReportController extends Controller
 {
@@ -65,8 +68,10 @@ class ReportController extends Controller
         }
 
         $otherReason = $validated['other_reason'] ?? null;
+        $details = isset($validated['details']) ? trim((string) $validated['details']) : '';
+
         if ($reasonKey === 'other') {
-            $otherReason = $otherReason ?: ($validated['details'] ?? null);
+            $otherReason = $otherReason ?: ($details !== '' ? $details : null);
             if ($otherReason === null || trim($otherReason) === '') {
                 return response()->json([
                     'message' => 'За „Друго“ внеси детали.',
@@ -75,6 +80,9 @@ class ReportController extends Controller
                     ],
                 ], 422);
             }
+        } elseif ($details !== '') {
+            // Optional extra info for any predefined reason.
+            $otherReason = $otherReason ?: $details;
         }
 
         $report = Report::query()->create([
@@ -94,6 +102,14 @@ class ReportController extends Controller
                 'thread_id' => $hideThreadId,
             ]);
             FeedCache::forgetForUser($request->user());
+        }
+
+        // Notify all staff for the admin header bell dropdown.
+        // Include the reporter too — staff often report while testing on their own account.
+        $staff = User::role(['super_admin', 'admin', 'moderator'])->get();
+
+        if ($staff->isNotEmpty()) {
+            Notification::send($staff, new NewReportNotification($report));
         }
 
         return response()->json([

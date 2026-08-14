@@ -2,29 +2,56 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getProfileUser } from "@/api/profile";
+import { hasCompletedOnboarding, needsOnboarding } from "@/lib/capabilities";
 
-// Guards the onboarding step: it may only be reached right after completing the
-// registration OAuth flow, which sets the "onboarding_pending" flag (see the
-// auth callback). A direct visit, a refresh after finishing, or a user who
-// signed in via /login won't have the flag and is sent back to /register.
+// Allows the onboarding flow when:
+// - OAuth callback just set onboarding_pending, or
+// - the signed-in user still has incomplete onboarding (resume from home CTA).
 export default function OnboardingGuard({ children }) {
   const router = useRouter();
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
-    // The "onboarding_pending" flag is set by the OAuth callback right after a
-    // successful login. Real authorization is still enforced server-side by the
-    // auth:sanctum guard on the /onboarding endpoint; this is only a UX gate.
-    const pending = localStorage.getItem("onboarding_pending");
+    let cancelled = false;
 
-    if (pending) {
-      setAllowed(true);
-      return;
+    async function check() {
+      const pending = localStorage.getItem("onboarding_pending");
+      if (pending) {
+        if (!cancelled) setAllowed(true);
+        return;
+      }
+
+      try {
+        const user = await getProfileUser();
+        if (cancelled) return;
+
+        if (needsOnboarding(user)) {
+          localStorage.setItem("onboarding_pending", "1");
+          setAllowed(true);
+          return;
+        }
+
+        if (hasCompletedOnboarding(user)) {
+          router.replace("/feed");
+          return;
+        }
+      } catch {
+        // Not signed in — fall through to register.
+      }
+
+      if (!cancelled) {
+        router.replace("/register");
+      }
     }
 
-    router.replace("/register");
+    check();
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
-  if (!allowed) return null; // render nothing until the check passes / redirect fires
+  if (!allowed) return null;
   return children;
 }

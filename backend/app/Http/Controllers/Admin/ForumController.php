@@ -16,6 +16,8 @@ class ForumController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('view forums');
+
         $forums = Forum::query()
             ->with('school', 'forumUser')
             ->when($request->filled('search'), function ($query) use ($request) {
@@ -44,6 +46,8 @@ class ForumController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create forums');
+
         if ($request->input('slug') === '') {
             $request->merge(['slug' => null]);
         }
@@ -79,11 +83,13 @@ class ForumController extends Controller
             'bannerUrl' => $bannerUrl,
         ]);
 
-        return back()->with('success', 'Forum created!');
+        return back()->with('success', 'Форумот е креиран!');
     }
 
     public function liveSearch(Request $request)
     {
+        $this->authorize('search forums');
+
         $query = $request->q;
 
         $forums = Forum::where('name', 'like', "%{$query}%")
@@ -95,6 +101,8 @@ class ForumController extends Controller
 
     public function show(Forum $forum)
     {
+        $this->authorize('view forum details');
+
         $forum->load(['school.city', 'moderator']);
 
         $threads = $forum->threads()->with('user')->withCount('comments')->latest()->paginate(10);
@@ -104,6 +112,8 @@ class ForumController extends Controller
 
     public function edit(Forum $forum, Request $request)
     {
+        $this->authorize('update forums');
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
@@ -131,14 +141,16 @@ class ForumController extends Controller
             'bannerUrl' => $bannerUrl,
         ]);
 
-        return back()->with('success', 'Forum updated!');
+        return back()->with('success', 'Форумот е ажуриран!');
     }
 
     public function destroy(Forum $forum)
     {
+        $this->authorize('delete forums');
+
         $forum->delete();
 
-        return redirect()->route('forum.index')->with('success', 'Forum successfully deleted!');
+        return redirect()->route('forum.index')->with('success', 'Форумот е успешно избришан!');
     }
 
     private function defaultIconUrl(string $slug, string $type): string

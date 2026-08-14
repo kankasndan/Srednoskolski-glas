@@ -70,6 +70,20 @@ trait FiltersThreads
     }
 
     /**
+     * Eager-load whether the current user follows each thread.
+     */
+    protected function applyIsFollowing(Builder $query, mixed $user): void
+    {
+        if ($user === null) {
+            return;
+        }
+
+        $query->withExists([
+            'followers as is_following' => fn ($followers) => $followers->where('users.id', $user->id),
+        ]);
+    }
+
+    /**
      * Shared eager-loads for thread cards (feed / forum / profile).
      * Poll votes load only the current user's row (not every vote).
      *

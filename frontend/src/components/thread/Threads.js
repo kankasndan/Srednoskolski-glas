@@ -1,17 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useState, useEffect, useRef } from "react";
+import { useCallback, useId, useState, useEffect, useRef } from "react";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import ForumEmptyState from "@/components/forum/ForumEmptyState";
+import FeedFilterSheet from "@/components/thread/FeedFilterSheet";
 import NoMoreThreads from "@/components/thread/NoMoreThreads";
 import ThreadCard from "@/components/thread/ThreadCard";
 import { API_BASE_URL } from "@/lib/api";
 
 const SORT_OPTIONS = [
   { value: "trending", label: "Трендинг" },
-  { value: "top", label: "Топ" },
-  { value: "newest", label: "Најнови" },
-  { value: "discussed", label: "Дискутирани" },
+  { value: "top", label: "Популарно" },
+  { value: "newest", label: "Ново" },
+  { value: "discussed", label: "Истакнато" },
 ];
 
 const TIME_FILTER_OPTIONS = [
@@ -19,8 +21,7 @@ const TIME_FILTER_OPTIONS = [
   { value: "day", label: "Денес" },
   { value: "week", label: "Оваа недела" },
   { value: "month", label: "Овој месец" },
-  { value: "six-months", label: "6 месеци" },
-  { value: "year", label: "1 година" },
+  { value: "year", label: "Оваа година" },
 ];
 
 const PAGE_SIZE = 5;
@@ -50,6 +51,8 @@ function FeedSelect({
   onToggle,
   onSelect,
 }) {
+  const shownOptions = options.filter((option) => option.value !== selected.value);
+
   return (
     <div className="relative h-10 w-36 shrink-0">
       <input type="hidden" name={name} value={selected.value} />
@@ -60,7 +63,9 @@ function FeedSelect({
         aria-expanded={isOpen}
         aria-controls={listboxId}
         onClick={onToggle}
-        className="flex h-10 w-36 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#CCCCCC] bg-white px-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#DCEBED]"
+        className={`flex h-10 w-36 cursor-pointer items-center justify-center gap-2 px-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors ${
+          isOpen ? "rounded-t-xl" : "rounded-xl"
+        } ${isOpen ? "bg-[#CFE9ED]" : "bg-white hover:bg-[#CFE9ED]"}`}
       >
         <span className="flex h-[19px] items-center">{selected.label}</span>
         <Image
@@ -77,16 +82,16 @@ function FeedSelect({
           id={listboxId}
           role="listbox"
           aria-label={label}
-          className="absolute left-0 top-12 z-20 flex w-36 flex-col overflow-hidden rounded-[12px] bg-white py-2 shadow-[0_12px_24px_rgba(88,47,245,0.14)]"
+          className="absolute left-0 top-10 z-20 flex w-36 flex-col overflow-hidden rounded-b-xl bg-white shadow-[0_12px_24px_rgba(0,0,0,0.12)]"
         >
-          {options.map((option) => (
+          {shownOptions.map((option) => (
             <button
               key={option.value}
               type="button"
               role="option"
               aria-selected={selected.value === option.value}
               onClick={() => onSelect(option)}
-              className="flex h-10 w-full cursor-pointer items-center px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#E5E5E5]"
+              className="flex h-10 w-full cursor-pointer items-center justify-center border-t border-[#CCCCCC] px-4 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-black transition-colors hover:bg-[#E5E5E5]"
             >
               {option.label}
             </button>
@@ -103,12 +108,14 @@ export default function Threads({
   defaultSort = "trending",
   showSort = true,
   staticThreads = null,
+  listPath = null,
 }) {
   const isSearch = searchQuery !== null;
   const hasStaticThreads = Array.isArray(staticThreads);
   const sortListboxId = useId();
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const filterContainerRef = useRef(null);
   const [selectedSort, setSelectedSort] = useState(
     SORT_OPTIONS.find((option) => option.value === defaultSort) ?? SORT_OPTIONS[0],
@@ -139,6 +146,10 @@ export default function Threads({
       if (searchQuery) params.set("q", searchQuery);
       if (forum) params.set("forum", forum);
       return `${API_BASE_URL}/api/search?${params}`;
+    }
+
+    if (listPath) {
+      return `${API_BASE_URL}${listPath}?${params}`;
     }
 
     const path = forum === null ? "/api/feed" : `/api/p/${forum}/threads`;
@@ -216,18 +227,11 @@ export default function Threads({
     }
   };
 
-  useEffect(() => {
-    if (!openSelect) return;
-
-    const handleClickOutside = (event) => {
-      if (filterContainerRef.current && !filterContainerRef.current.contains(event.target)) {
-        setOpenSelect(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [openSelect]);
+  useClickOutside(
+    filterContainerRef,
+    useCallback(() => setOpenSelect(null), []),
+    Boolean(openSelect),
+  );
 
   useEffect(() => {
     if (hasStaticThreads) return;
@@ -241,7 +245,7 @@ export default function Threads({
       fetchThreads({ append: false, sort: initialSort, page: 1 });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forum, searchQuery, defaultSort, hasStaticThreads, staticThreads]);
+  }, [forum, searchQuery, defaultSort, hasStaticThreads, staticThreads, listPath]);
 
   useEffect(() => {
     loadingRef.current = moreThreadsLoading;
@@ -280,7 +284,7 @@ export default function Threads({
     observer.observe(node);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasLoaded, noMoreThreads, threads.length, forum, searchQuery, selectedSort, selectedTimeFilter, hasStaticThreads]);
+  }, [hasLoaded, noMoreThreads, threads.length, forum, searchQuery, selectedSort, selectedTimeFilter, hasStaticThreads, listPath]);
 
   // Sort only reorders; an empty list with time=all means the forum truly has no threads.
   const isTrulyEmptyForum =
@@ -288,7 +292,7 @@ export default function Threads({
     forum !== null &&
     hasLoaded &&
     threads.length === 0 &&
-    selectedTimeFilter.value === "all";
+    selectedTimeFilter.value === TIME_FILTER_OPTIONS[0].value;
 
   if (isTrulyEmptyForum) {
     return (
@@ -300,7 +304,34 @@ export default function Threads({
 
   return (
     <section className="flex w-full max-w-[990px] flex-col items-center gap-8">
-      <div ref={filterContainerRef} className="flex self-end gap-2">
+      {/* Na mobilen mesto dvata dropdown-a stoi kopce Филтери. */}
+      <button
+        type="button"
+        onClick={() => setFiltersOpen(true)}
+        className="flex h-10 cursor-pointer items-center gap-2 self-start rounded-xl p-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black lg:hidden"
+      >
+        <Image src="/mobile version/filter.svg" alt="" width={24} height={24} className="size-6" />
+        Филтери
+      </button>
+
+      <FeedFilterSheet
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        sortOptions={SORT_OPTIONS}
+        selectedSort={selectedSort}
+        onSelectSort={(option) => {
+          selectSortOption(option);
+          setFiltersOpen(false);
+        }}
+        timeOptions={TIME_FILTER_OPTIONS}
+        selectedTime={selectedTimeFilter}
+        onSelectTime={(option) => {
+          selectTimeFilterOption(option);
+          setFiltersOpen(false);
+        }}
+      />
+
+      <div ref={filterContainerRef} className="hidden self-end gap-2 lg:flex">
         {showSort ? (
           <FeedSelect
             name="sort"

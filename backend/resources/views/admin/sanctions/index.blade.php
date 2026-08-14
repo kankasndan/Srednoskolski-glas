@@ -1,7 +1,7 @@
 {{-- resources/views/admin/sanctions/index.blade.php --}}
 @extends('layouts.master')
 
-@section('title', 'Sanctions')
+@section('title', 'Санкции')
 
 @section('content')
     <div class="max-w-7xl mx-auto px-4 py-8">
@@ -92,12 +92,18 @@
                                 <td class="px-4 py-3">
                                     <span
                                         class="text-xs font-medium px-2 py-1 rounded-full {{ match ($sanction->type) {
-                                            'warning' => 'bg-yellow-100 text-yellow-700',
+                                            'warning' => 'bg-my-yellow/30 text-gray-800',
                                             'permanent_ban' => 'bg-red-100 text-red-700',
                                             '7-day' => 'bg-green-100 text-green-600',
                                             default => 'bg-gray-100 text-gray-600',
                                         } }}">
-                                        {{ $sanction->type }}
+                                        {{ match ($sanction->type) {
+                                            'warning' => 'Предупредување',
+                                            'permanent_ban' => 'Трајна забрана',
+                                            '7-day' => '7-дневна забрана',
+                                            'custom' => 'Прилагодена',
+                                            default => $sanction->type,
+                                        } }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-gray-600">{{ $sanction->reason }}</td>
@@ -105,16 +111,18 @@
                                 @if ($sanction->expires_at != null)
                                     <td class="px-4 py-3 text-gray-600">{{ $sanction->expires_at->diffForHumans() }}</td>
                                 @else
-                                    <td class="px-4 py-3 text-gray-600">NULL</td>
+                                    <td class="px-4 py-3 text-gray-600">Трајна</td>
                                 @endif
                                 <td class="px-4 py-3 text-gray-600">{{ $sanction->user->sanctions()->count() }}</td>
                                 <td class="px-4 py-3 text-right">
-                                    <form action="{{ route('sanction.remove', ['sanction' => $sanction->id]) }}"
-                                        method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="text-blue-600 hover:underline font-medium">Тргни санkција</button>
-                                    </form>
+                                    @can('remove sanctions')
+                                        <form action="{{ route('sanction.remove', ['sanction' => $sanction->id]) }}"
+                                            method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="text-blue-600 hover:underline font-medium">Тргни санкција</button>
+                                        </form>
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach
@@ -126,24 +134,24 @@
                     @if ($activeSanctions->onFirstPage())
                         <button disabled
                             class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Previous
+                            Претходна
                         </button>
                     @else
                         <a href="{{ $activeSanctions->previousPageUrl() }}"
                             class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Previous
+                            Претходна
                         </a>
                     @endif
 
                     @if ($activeSanctions->hasMorePages())
                         <a href="{{ $activeSanctions->nextPageUrl() }}"
                             class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Next
+                            Следна
                         </a>
                     @else
                         <button disabled
                             class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Next
+                            Следна
                         </button>
                     @endif
                 </nav>
@@ -167,7 +175,13 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 font-medium text-gray-900">{{ $sanction->user->username }}</td>
                                 <td class="px-4 py-3"><span
-                                        class="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">{{ $sanction->type }}</span>
+                                        class="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">{{ match ($sanction->type) {
+                                            'warning' => 'Предупредување',
+                                            'permanent_ban' => 'Трајна забрана',
+                                            '7-day' => '7-дневна забрана',
+                                            'custom' => 'Прилагодена',
+                                            default => $sanction->type,
+                                        } }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-green-600">{{ $sanction->issued_by ? "Избришана" : "Истечена" }}</td>
                                 <td class="px-4 py-3 text-gray-500">{{ $sanction->deleted_at?->format('d.m.Y') }}</td>
@@ -181,24 +195,24 @@
                     @if ($expiredSanctions->onFirstPage())
                         <button disabled
                             class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Previous
+                            Претходна
                         </button>
                     @else
                         <a href="{{ $expiredSanctions->previousPageUrl() }}"
                             class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Previous
+                            Претходна
                         </a>
                     @endif
 
                     @if ($expiredSanctions->hasMorePages())
                         <a href="{{ $expiredSanctions->nextPageUrl() }}"
                             class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Next
+                            Следна
                         </a>
                     @else
                         <button disabled
                             class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Next
+                            Следна
                         </button>
                     @endif
                 </nav>
@@ -220,7 +234,7 @@
                 <form action="{{ route('sanction.create') }}" method="POST">
                     <div class="relative">
                         <input type="text" id="user-search" name="search" value="{{ request('search') }}"
-                            placeholder="Search by username or email..."
+                            placeholder="Пребарај по корисничко име или е-пошта..."
                             class="flex-1 min-w-[220px] border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
 
                         <div id="search-results"
@@ -241,11 +255,13 @@
                                 <input type="radio" name="type" value="7-day" checked class="text-red-600">
                                 7-дневна забрана
                             </label>
-                            <label
-                                class="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer">
-                                <input type="radio" name="type" value="permanent_ban" class="text-red-600"> Трајна
-                                забрана
-                            </label>
+                            @if (auth()->user()?->hasAnyRole(['admin', 'super_admin']))
+                                <label
+                                    class="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer">
+                                    <input type="radio" name="type" value="permanent_ban" class="text-red-600"> Трајна
+                                    забрана
+                                </label>
+                            @endif
                             <label
                                 class="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer">
                                 <input type="radio" name="type" value="custom" class="text-red-600"> Прилагодено траење
@@ -323,7 +339,7 @@
                 resultsBox.innerHTML = '';
 
                 if (users.length === 0) {
-                    resultsBox.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">No matching users</div>`;
+                    resultsBox.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">Нема совпаѓања</div>`;
                     resultsBox.classList.remove('hidden');
                     return;
                 }
@@ -333,7 +349,7 @@
                     row.className =
                         'block px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center text-sm border-b border-gray-100 last:border-0';
                     row.innerHTML = `
-            <span class="font-medium text-gray-800">${user.username ?? 'No username'}</span>
+            <span class="font-medium text-gray-800">${user.username ?? 'Нема корисничко име'}</span>
             <span class="text-gray-400 text-xs">${user.email ?? ''}</span>
         `;
 

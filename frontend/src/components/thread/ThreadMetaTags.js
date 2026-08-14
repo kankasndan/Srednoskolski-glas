@@ -44,20 +44,21 @@ export function buildThreadMetaTags(forum, thread) {
   return tags;
 }
 
-function MetaTag({ tag }) {
+function MetaTag({ tag, hiddenOnMobile = false }) {
   const remoteIcon = isRemoteAssetUrl(tag.icon);
   const iconBoxClass = tag.avatar
-    ? "relative size-6 shrink-0 overflow-hidden rounded-full"
+    ? "relative size-4 shrink-0 overflow-hidden rounded-full lg:size-6"
     : "relative size-5 shrink-0 overflow-hidden";
   const iconClass = tag.avatar
-    ? "size-6 object-cover"
+    ? "size-4 object-cover lg:size-6"
     : tag.zoom
       ? "size-11"
       : "size-5";
   const iconSize = tag.avatar ? 24 : tag.zoom ? 44 : 20;
 
-  const className =
-    "relative z-10 flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 text-[12px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB]";
+  const className = `relative z-10 ${
+    hiddenOnMobile ? "hidden lg:flex" : "flex"
+  } shrink-0 cursor-pointer items-center gap-2 rounded-md border-[0.5px] border-[#CCCCCC] bg-[#E5E5E5] px-2 py-1 font-[family-name:var(--font-roboto)] text-[12px] font-normal leading-[16px] text-black transition-colors hover:bg-[#EBEBEB] lg:h-7 lg:gap-1.5 lg:border-0 lg:bg-[#F5F5F5] lg:py-0 lg:font-sans lg:font-bold lg:leading-none`;
 
   const content = (
     <>
@@ -99,14 +100,19 @@ function MetaTag({ tag }) {
   return <span className={className.replace("cursor-pointer ", "")}>{content}</span>;
 }
 
-export default function ThreadMetaTags({ tags, postedAgo }) {
+// Na mobilen karticata gi prikazuva samo forumot i vremeto.
+export default function ThreadMetaTags({ tags, postedAgo, forumOnlyOnMobile = false }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       {tags.map((tag) => (
-        <MetaTag key={tag.key ?? tag.label} tag={tag} />
+        <MetaTag
+          key={tag.key ?? tag.label}
+          tag={tag}
+          hiddenOnMobile={forumOnlyOnMobile && tag.key !== "forum"}
+        />
       ))}
       {postedAgo ? (
-        <span className="text-[12px] leading-none text-[#595959]">
+        <span className="font-[family-name:var(--font-roboto)] text-[12px] font-normal leading-[16px] text-[#595959] lg:font-sans lg:leading-none">
           {postedAgo}
         </span>
       ) : null}

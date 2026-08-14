@@ -7,6 +7,8 @@ import { toggleThreadVote } from "@/api/threads";
 import ThreadAttachments from "@/components/thread/ThreadAttachments";
 import ThreadMetaTags, { buildThreadMetaTags } from "@/components/thread/ThreadMetaTags";
 import ThreadPoll from "@/components/thread/ThreadPoll";
+import ThreadViewCount from "@/components/thread/ThreadViewCount";
+import { ONBOARDING_REQUIRED_MESSAGE } from "@/lib/capabilities";
 import { formatCount } from "@/lib/formatCount";
 import { stripHtml } from "@/lib/html";
 import { formatPostedAgo } from "@/lib/time";
@@ -14,11 +16,16 @@ import { nextVoteState } from "@/lib/votes";
 
 function ActionButton({ icon, label, count, onClick, active = false }) {
   const baseClassName =
-    "group flex cursor-pointer items-center justify-center gap-4 rounded-2xl border px-4 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors";
+    "group flex h-10 w-24 cursor-pointer items-center justify-center gap-4 rounded-2xl border font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors";
+
+  function handleClick(event) {
+    event.stopPropagation();
+    onClick?.(event);
+  }
 
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       type="button"
       aria-label={label}
       className={
@@ -43,14 +50,46 @@ function ActionButton({ icon, label, count, onClick, active = false }) {
   );
 }
 
+function StatPill({ icon, count, onClick, active = false }) {
+  function handleClick(event) {
+    event.stopPropagation();
+    onClick?.(event);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className={`group flex h-8 w-[72px] shrink-0 cursor-pointer items-center gap-2 rounded-xl border px-4 py-2 opacity-80 font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-none transition-colors hover:opacity-100 ${
+        active
+          ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white"
+          : "border-[#CCCCCC] text-black"
+      }`}
+    >
+      <Image
+        src={icon}
+        alt=""
+        width={16}
+        height={16}
+        className={active ? "size-4 -scale-y-100 white-icon" : "size-4"}
+      />
+      {formatCount(count ?? 0)}
+    </button>
+  );
+}
+
 export default function ThreadCard({ thread }) {
   const [upvotes, setUpvotes] = useState(thread.upvotes ?? 0);
   const [hasVoted, setHasVoted] = useState(Boolean(thread.has_voted));
   const [voting, setVoting] = useState(false);
+  const [voteError, setVoteError] = useState("");
+  const [opening, setOpening] = useState(false);
   const router = useRouter();
   const threadHref = `/p/${thread.forum.slug}/${thread.id}`;
   const hasAttachments = (thread.attachments?.length ?? 0) > 0;
   const hasPoll = Boolean(thread.poll);
+  const metaTags = buildThreadMetaTags(thread.forum, thread);
+  const authorTag = metaTags.find((tag) => tag.key === "author");
 
   async function upvote() {
     if (voting) return;
@@ -59,6 +98,7 @@ export default function ThreadCard({ thread }) {
       nextVoteState(upvotes, hasVoted);
 
     setVoting(true);
+    setVoteError("");
     setUpvotes(nextVotes);
     setHasVoted(nextHasVoted);
 
@@ -66,27 +106,35 @@ export default function ThreadCard({ thread }) {
       const data = await toggleThreadVote(thread.id);
       setUpvotes(data.upvotes ?? nextVotes);
       setHasVoted(Boolean(data.has_voted));
-    } catch {
+    } catch (err) {
       setUpvotes(previousVotes);
       setHasVoted(previousHasVoted);
+      if (err?.status === 403) {
+        setVoteError(err.message || ONBOARDING_REQUIRED_MESSAGE);
+      }
     } finally {
       setVoting(false);
     }
   }
 
   function openThread() {
+    setOpening(true);
     router.push(threadHref);
   }
 
   return (
-    <article className="relative flex flex-col gap-4 items-start justify-center bg-transparent border-b border-b-[#CFE9ED] p-4 pt-6 rounded-3xl transition-colors hover:bg-[#DCEBED]">
-      <div className="flex w-full items-start justify-between gap-8">
+    <article
+      className={`relative flex flex-col items-start justify-center gap-4 rounded-3xl border-b border-b-[#CFE9ED] p-4 transition-colors lg:pt-6 lg:hover:bg-[#DCEBED] ${
+        opening ? "bg-[#DCEBED]" : "bg-transparent"
+      }`}
+    >
+      <div className="hidden w-full items-start justify-between gap-8 lg:flex">
         <div
           className="flex min-w-0 flex-1 cursor-pointer flex-col gap-4"
           onClick={openThread}
         >
           <ThreadMetaTags
-            tags={buildThreadMetaTags(thread.forum, thread)}
+            tags={metaTags}
             postedAgo={formatPostedAgo(thread.created_at)}
           />
 
@@ -99,16 +147,11 @@ export default function ThreadCard({ thread }) {
                 {stripHtml(thread.description)}
               </p>
             ) : null}
+            <ThreadViewCount views={thread.views} />
           </div>
         </div>
 
-        <div className="relative z-10 flex shrink-0 flex-col gap-2">
-          <ActionButton
-            icon="/eye-line.svg"
-            label="Прегледи"
-            count={thread.views}
-            onClick={openThread}
-          />
+        <div className="relative z-10 flex shrink-0 self-center flex-col gap-2">
           <ActionButton
             icon="/Chevrons up.svg"
             label="Гласај нагоре"
@@ -122,6 +165,41 @@ export default function ThreadCard({ thread }) {
             count={thread.comments_count}
             onClick={openThread}
           />
+          {voteError ? (
+            <p className="max-w-[120px] font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[#DC2626]">
+              {voteError}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="flex w-full flex-col gap-3 lg:hidden">
+        <div className="flex min-w-0 cursor-pointer flex-col gap-3" onClick={openThread}>
+          <ThreadMetaTags
+            tags={authorTag ? [authorTag] : []}
+            postedAgo={formatPostedAgo(thread.created_at)}
+          />
+
+          <h3 className="font-[family-name:var(--font-manrope)] text-[18px] font-bold leading-snug text-black">
+            {thread.title}
+          </h3>
+
+          {thread.description ? (
+            <p className="line-clamp-3 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-[20px] text-[#595959]">
+              {stripHtml(thread.description)}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="relative z-10 flex flex-wrap items-center gap-2">
+          <StatPill icon="/Chevrons up.svg" count={upvotes} onClick={upvote} active={hasVoted} />
+          <StatPill icon="/chat-1-line.svg" count={thread.comments_count} onClick={openThread} />
+          <StatPill icon="/eye-line.svg" count={thread.views} onClick={openThread} />
+          {voteError ? (
+            <p className="w-full font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[#DC2626]">
+              {voteError}
+            </p>
+          ) : null}
         </div>
       </div>
 

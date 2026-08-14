@@ -94,6 +94,10 @@ export function getMyFollowedForums() {
   return getProfileList("/api/me/followed-forums");
 }
 
+export function getMyFollowedThreads() {
+  return getProfileList("/api/me/followed-threads");
+}
+
 export function getMyFollowingUsers() {
   return getProfileList("/api/me/following-users");
 }

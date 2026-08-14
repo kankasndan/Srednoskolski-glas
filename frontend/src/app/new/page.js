@@ -9,9 +9,10 @@ export default function NewDiscussionPage() {
     <div className="flex min-h-screen w-full flex-col overflow-x-clip bg-white">
       <Header />
 
-      <div className="flex flex-1 flex-col px-14 pb-8">
-        <BackButton label="Врати се назад" />
-
+      <div className="flex flex-1 flex-col items-stretch px-14 pb-8">
+        <div className="self-start">
+          <BackButton label="Врати се назад" />
+        </div>
         <div className="mt-6 grid w-full grid-cols-1 items-start xl:grid-cols-2">
           <main
             aria-label="Започни дискусија"

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Admin Dashboard Report</title>
+    <title>Извештај од контролна табла — Средношколски Глас</title>
     <style>
         @page {
             margin: 30px;
@@ -109,35 +109,35 @@
 
 <body>
 
-    <h1>Srednoskolski Glas — Admin Dashboard Report</h1>
-    <p class="subtitle">Generated on {{ now()->format('d.m.Y H:i') }}</p>
+    <h1>Средношколски Глас — Извештај од контролна табла</h1>
+    <p class="subtitle">Генерирано на {{ now()->format('d.m.Y H:i') }}</p>
 
     {{-- Stat Cards --}}
     <table class="stats">
         <tr>
             <td>
-                <div class="label">Total Users</div>
+                <div class="label">Вкупно корисници</div>
                 <div class="value">{{ number_format($totalUsers) }}</div>
             </td>
             <td>
-                <div class="label">Active Users</div>
+                <div class="label">Активни корисници</div>
                 <div class="value">{{ number_format($activeUsers) }}</div>
             </td>
             <td>
-                <div class="label">New Registrations (30d)</div>
+                <div class="label">Нови регистрации (30 дена)</div>
                 <div class="value">{{ number_format($newRegistrations30d) }}</div>
             </td>
         </tr>
     </table>
 
-    {{-- Top Forums --}}
-    <h2>Top Forums</h2>
+    {{-- Топ форуми --}}
+    <h2>Топ форуми</h2>
     <table class="data">
         <thead>
             <tr>
                 <th>#</th>
-                <th>Forum</th>
-                <th class="right">Activity Score</th>
+                <th>Форум</th>
+                <th class="right">Активност</th>
             </tr>
         </thead>
         <tbody>
@@ -151,16 +151,16 @@
         </tbody>
     </table>
 
-    {{-- Users by City / School side by side --}}
+    {{-- Корисници по град / School side by side --}}
     <table class="two-col">
         <tr>
             <td>
-                <h2>Users by City</h2>
+                <h2>Корисници по град</h2>
                 <table class="data">
                     <thead>
                         <tr>
-                            <th>City</th>
-                            <th class="right">Users</th>
+                            <th>Град</th>
+                            <th class="right">Корисници</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -174,12 +174,12 @@
                 </table>
             </td>
             <td>
-                <h2>Users by School</h2>
+                <h2>Корисници по училиште</h2>
                 <table class="data">
                     <thead>
                         <tr>
-                            <th>School</th>
-                            <th class="right">Users</th>
+                            <th>Училиште</th>
+                            <th class="right">Корисници</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -196,7 +196,7 @@
     </table>
 
     <div class="footer">
-        Srednoskolski Glas Admin Panel — Confidential internal report
+        Админ панел Средношколски Глас — Внатрешен доверлив извештај
     </div>
 
 </body>

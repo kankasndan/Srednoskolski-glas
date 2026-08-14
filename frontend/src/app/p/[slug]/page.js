@@ -1,6 +1,7 @@
 "use client";
 
 import AppShell from "@/components/shell/AppShell";
+import MobileFooter from "@/components/shell/MobileFooter";
 import Threads from "@/components/thread/Threads";
 import ForumBanner from "@/components/forum/ForumBanner";
 import { useParams } from "next/navigation";
@@ -20,7 +21,7 @@ export default function ForumPage() {
       setForumError(null);
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/p/${slug}`, {
+        const response = await fetch(`${API_BASE_URL}/api/p/${slug}?track_view=1`, {
           credentials: "include",
         });
 
@@ -50,7 +51,7 @@ export default function ForumPage() {
 
   return (
     <AppShell>
-      <div className="flex w-[990px] max-w-full flex-col gap-8">
+      <div className="flex w-[990px] max-w-full flex-col gap-3 lg:gap-8">
         {forumError ? (
           <p className="font-(family-name:--font-manrope) text-[16px] text-[#595959]">
             Форумот не може да се вчита.
@@ -78,8 +79,11 @@ export default function ForumPage() {
           />
         ) : null}
 
-        {/* Threads wait for forum metadata so /api/p/{slug} finishes before /threads. */}
-        {forum ? <Threads forum={forum.slug} /> : null}
+        {/* Threads use the URL slug so they load in parallel with forum metadata. */}
+        {slug && !forumError ? <Threads forum={slug} /> : null}
+
+        {/* Kontejnerot ovde ima gap-8, pa treba pomala margina od feed-ot. */}
+        <MobileFooter className="mt-3" />
       </div>
     </AppShell>
   );

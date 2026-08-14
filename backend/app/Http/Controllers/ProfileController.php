@@ -9,6 +9,7 @@ use App\Http\Resources\ProfileCommentResource;
 use App\Http\Resources\PublicUserResource;
 use App\Http\Resources\ThreadResource;
 use App\Models\City;
+use App\Models\Forum;
 use App\Models\School;
 use App\Models\StudentData;
 use App\Models\User;
@@ -94,6 +95,7 @@ class ProfileController extends Controller
                 'threads' => $user->threads()->count(),
                 'comments' => $user->comments()->count(),
                 'followed_forums' => $user->forums()->count(),
+                'followed_threads' => $user->followedThreads()->count(),
                 'following_users' => $user->following()->count(),
             ],
         ]);
@@ -157,7 +159,32 @@ class ProfileController extends Controller
             ->limit(100)
             ->get();
 
+        $forums->each(fn (Forum $forum) => $forum->setAttribute('is_following', true));
+
         return ForumResource::collection($forums)->response();
+    }
+
+    /**
+     * Threads the authenticated user follows (newest follow first).
+     *
+     * GET /api/me/followed-threads
+     */
+    public function followedThreads(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $threads = $user->followedThreads()
+            ->with($this->threadListWith($user))
+            ->withCount('comments')
+            ->withExists([
+                'votes as has_voted' => fn ($votes) => $votes->where('user_id', $user->id),
+                'followers as is_following' => fn ($followers) => $followers->where('users.id', $user->id),
+            ])
+            ->orderByDesc('thread_follows.created_at')
+            ->limit(50)
+            ->get();
+
+        return ThreadResource::collection($threads)->response();
     }
 
     /**

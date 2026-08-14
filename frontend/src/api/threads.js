@@ -2,9 +2,14 @@ import Cookies from "js-cookie";
 import { API_BASE_URL, apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { normalizeEmbedLink } from "@/lib/embeds";
 
-export async function getThread(forumSlug, threadId, { sort = "best" } = {}) {
+export async function getThread(
+  forumSlug,
+  threadId,
+  { sort = "best", trackView = false } = {},
+) {
   const params = new URLSearchParams();
   if (sort) params.set("sort", sort);
+  params.set("track_view", trackView ? "1" : "0");
   const query = params.toString();
   const res = await apiFetch(
     `/api/p/${forumSlug}/comments/${threadId}${query ? `?${query}` : ""}`,
@@ -143,6 +148,42 @@ export async function updateThread(threadId, payload) {
 
   if (!response.ok) {
     const error = new Error(body.message || `Failed to update thread (${response.status})`);
+    error.status = response.status;
+    error.body = body;
+    throw error;
+  }
+
+  return body.data;
+}
+
+/** @param {number} threadId */
+export async function followThread(threadId) {
+  const response = await apiFetch(`/api/threads/${threadId}/follow`, {
+    method: "POST",
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Failed to follow thread (${response.status})`);
+    error.status = response.status;
+    error.body = body;
+    throw error;
+  }
+
+  return body.data;
+}
+
+/** @param {number} threadId */
+export async function unfollowThread(threadId) {
+  const response = await apiFetch(`/api/threads/${threadId}/follow`, {
+    method: "DELETE",
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Failed to unfollow thread (${response.status})`);
     error.status = response.status;
     error.body = body;
     throw error;

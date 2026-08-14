@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Header from "@/components/shell/Header";
 import SchoolForums from "@/components/forum/SchoolForums";
 import SidebarNav from "@/components/shell/SidebarNav";
@@ -26,11 +26,11 @@ function getSelectedKey(pathname) {
 }
 
 export default function AppShell({ children, contentClassName = "" }) {
-  const router = useRouter();
   const pathname = usePathname();
   const { general, schoolsByCity, loading, error } = useForums();
   const [collapsed, setCollapsed] = useState(sidebarCollapsed);
   const [navOverride, setNavOverride] = useState({ key: null, pathname: null });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     sidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
@@ -46,24 +46,40 @@ export default function AppShell({ children, contentClassName = "" }) {
     navOverride.pathname === pathname && navOverride.key
       ? navOverride.key
       : getSelectedKey(pathname);
+  const showCollapsedIcons = collapsed && !mobileMenuOpen;
 
   function handleSelect(key) {
     setNavOverride({
       key,
       pathname,
     });
+    setMobileMenuOpen(false);
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-white">
-      <Header />
-      <div className="flex min-h-0 flex-1 px-6">
-        <aside className="box-border flex shrink-0 flex-col border-r border-[#CCCCCC] pr-6 pt-1 pl-8">
+    <div className="flex h-full max-h-full flex-col overflow-hidden bg-white">
+      <Header
+        onMenuToggle={() => setMobileMenuOpen((open) => !open)}
+        menuOpen={mobileMenuOpen}
+      />
+      <div className="flex min-h-0 min-w-0 flex-1 px-4 lg:px-6">
+        {mobileMenuOpen && (
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+            className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          />
+        )}
+        <aside
+          className={`box-border min-h-0 flex-col border-r border-[#CCCCCC] bg-white pr-6 pt-1 pl-8 lg:static lg:z-auto lg:flex lg:shrink-0 ${
+            mobileMenuOpen ? "fixed inset-y-0 left-0 z-40 flex" : "hidden"
+          }`}
+        >
           <button
             type="button"
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Прошири мени" : "Собери мени"}
-            className="mb-1 flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
+            className="mb-1 hidden size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-gray-100 lg:flex"
           >
             <Image
               src="/collapsed icons/menu-collapse.svg"
@@ -85,7 +101,7 @@ export default function AppShell({ children, contentClassName = "" }) {
             <SidebarNav
               selectedKey={selectedKey}
               onSelect={handleSelect}
-              collapsed={collapsed}
+              collapsed={showCollapsedIcons}
             />
             <ThematicForums
               forums={general}
@@ -93,9 +109,9 @@ export default function AppShell({ children, contentClassName = "" }) {
               error={error}
               selectedKey={selectedKey}
               onSelect={handleSelect}
-              collapsed={collapsed}
+              collapsed={showCollapsedIcons}
             />
-            {!collapsed && (
+            {!showCollapsedIcons && (
               <SchoolForums
                 schoolsByCity={schoolsByCity}
                 loading={loading}
@@ -107,7 +123,7 @@ export default function AppShell({ children, contentClassName = "" }) {
           </div>
         </aside>
         <main
-          className={`flex flex-1 items-start justify-center overflow-y-auto pb-10 pt-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${contentClassName}`}
+          className={`flex min-h-0 min-w-0 flex-1 items-start justify-center overflow-x-hidden overflow-y-auto px-2 pb-8 pt-4 [scrollbar-width:none] [-ms-overflow-style:none] lg:px-0 lg:pb-12 lg:pt-12 [&::-webkit-scrollbar]:hidden ${contentClassName}`}
         >
           {children}
         </main>

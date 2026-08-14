@@ -375,7 +375,8 @@ export default function RichTextEditor({
         </div>
 
         <div className="flex min-h-16 items-center justify-between border-t border-[#D9D9D9] px-4 py-3">
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* Na telefon alatkite se zbieni za da stanat vo eden red. */}
+          <div className="flex flex-wrap items-center md:gap-1.5">
             {editor &&
               TOOLBAR_BUTTONS.map((button) => {
                 if (button.key === "link") {
@@ -435,7 +436,7 @@ export default function RichTextEditor({
           </div>
           <div className="flex shrink-0 items-center gap-4">
             <span
-              className={`font-[family-name:var(--font-manrope)] text-[12px] leading-none ${counterTextColor}`}
+              className={`hidden font-[family-name:var(--font-manrope)] text-[12px] leading-none md:inline ${counterTextColor}`}
             >
               {characterCount}/{MAX_DESCRIPTION_LENGTH}
             </span>

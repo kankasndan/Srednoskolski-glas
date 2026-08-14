@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import DialogShell from "@/components/ui/DialogShell";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import PostTypeButtons from "@/components/compose/PostTypeButtons";
 import RichTextEditor from "@/components/compose/RichTextEditor";
 import TitleInput from "@/components/compose/TitleInput";
@@ -71,6 +72,7 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
       label="Уреди ја дискусијата"
       onClose={saving ? undefined : onClose}
       widthClassName="max-w-4xl"
+      fullScreenOnMobile
     >
       <form onSubmit={handleSubmit} noValidate className="flex w-full flex-col gap-8">
         <TitleInput value={title} onChange={setTitle} widthClassName="w-full" />
@@ -79,15 +81,7 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
           <RichTextEditor
             initialContent={thread?.description ?? ""}
             widthClassName="w-full"
-            action={
-              <button
-                type="submit"
-                disabled={saving}
-                className="cursor-pointer rounded-xl bg-[var(--color-primary-200)] px-6 py-3 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:cursor-not-allowed disabled:bg-[#CCCCCC]"
-              >
-                {saving ? "Се зачувува…" : "Објави"}
-              </button>
-            }
+            action={<PublishButton saving={saving} className="hidden px-6 py-3 md:block" />}
           />
           <PostTypeButtons
             widthClassName="w-full"
@@ -103,7 +97,23 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
             </p>
           ) : null}
         </div>
+
+        <div className="flex justify-end md:hidden">
+          <PublishButton saving={saving} className="h-10 w-36" />
+        </div>
       </form>
     </DialogShell>
+  );
+}
+
+function PublishButton({ saving, className }) {
+  return (
+    <PrimaryButton
+      type="submit"
+      disabled={saving}
+      className={`font-[family-name:var(--font-manrope)] text-[14px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:bg-[#CCCCCC] ${className}`}
+    >
+      {saving ? "Се зачувува…" : "Објави"}
+    </PrimaryButton>
   );
 }

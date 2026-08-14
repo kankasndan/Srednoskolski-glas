@@ -7,6 +7,7 @@ import BackButton from "@/components/shell/BackButton";
 import CommentComposer from "@/components/thread/CommentComposer";
 import CommentList from "@/components/thread/CommentList";
 import CommentsHeader from "@/components/thread/CommentsHeader";
+import MobileFooter from "@/components/shell/MobileFooter";
 import ThreadPost from "@/components/thread/ThreadPost";
 import { useThread } from "@/hooks/useThread";
 
@@ -21,7 +22,7 @@ function StatusMessage({ children }) {
 export default function ThreadPage() {
   const { slug, threadId } = useParams();
   const [sort, setSort] = useState("best");
-  const { forum, thread, comments, loading, error, missing, reload, patchThread } =
+  const { forum, thread, comments, loading, error, missing, patchThread, addComment } =
     useThread(slug, threadId, sort);
 
   if (loading && !thread) {
@@ -46,7 +47,7 @@ export default function ThreadPage() {
 
   return (
     <AppShell>
-      <div className="flex w-[990px] max-w-full flex-col gap-8 font-(family-name:--font-manrope)">
+      <div className="flex w-[990px] max-w-full flex-col gap-8 font-(family-name:--font-manrope) md:max-w-[680px] lg:max-w-full">
         <div className="self-start">
           <BackButton
             href={`/p/${forum.slug}`}
@@ -56,16 +57,18 @@ export default function ThreadPage() {
         </div>
         <ThreadPost forum={forum} thread={thread} onThreadUpdated={patchThread} />
         <CommentComposer
-          forumSlug={forum.slug}
           threadId={thread.id}
-          onCreated={() => reload()}
+          onCreated={addComment}
         />
         <CommentsHeader
           count={thread.comments_count}
           sort={sort}
           onSortChange={setSort}
         />
-        <CommentList comments={comments} threadId={thread.id} onCommentCreated={reload} />
+        <CommentList comments={comments} threadId={thread.id} onCommentCreated={addComment} />
+
+        {/* Kontejnerot ovde ima gap-8, pa treba pomala margina od feed-ot. */}
+        <MobileFooter className="mt-3" />
       </div>
     </AppShell>
   );

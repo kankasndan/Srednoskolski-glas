@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { followForum, unfollowForum } from "@/api/forums";
 import { useProfile } from "@/hooks/useProfile";
+import { needsOnboarding, ONBOARDING_REQUIRED_MESSAGE } from "@/lib/capabilities";
 
 const GUEST_ERROR = "Мора да си најавен за да следиш форум.";
 
@@ -32,6 +33,11 @@ export default function FollowForumButton({
       return;
     }
 
+    if (!profileLoading && needsOnboarding(user)) {
+      setError(ONBOARDING_REQUIRED_MESSAGE);
+      return;
+    }
+
     const nextFollowing = !following;
     setFollowing(nextFollowing);
     setPending(true);
@@ -55,6 +61,8 @@ export default function FollowForumButton({
       setFollowing(!nextFollowing);
       if (err?.status === 401) {
         setError(GUEST_ERROR);
+      } else if (err?.status === 403) {
+        setError(err.message || ONBOARDING_REQUIRED_MESSAGE);
       }
     } finally {
       setPending(false);
@@ -66,14 +74,14 @@ export default function FollowForumButton({
     : "bg-[#582FF5] text-white hover:bg-[#DCEBED] hover:text-[#0A0A0A]";
 
   return (
-    <div className="flex w-[268px] shrink-0 flex-col gap-1">
+    <div className="flex shrink-0 flex-col gap-1 lg:w-[268px]">
       <button
         type="button"
         aria-pressed={following}
         disabled={pending || locked}
         onClick={toggleFollow}
         title={locked ? "Форумот на твоето училиште е секогаш следен" : undefined}
-        className={`flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-80 ${stateClasses} ${className}`}
+        className={`flex h-10 w-full cursor-pointer items-center justify-center gap-3 rounded-xl px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-80 ${stateClasses} ${className}`}
       >
         {following && <CheckIcon />}
         <span className="flex h-[19px] items-center leading-none">

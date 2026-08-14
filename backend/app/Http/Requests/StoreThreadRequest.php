@@ -48,6 +48,11 @@ class StoreThreadRequest extends FormRequest
 
     protected function failedAuthorization(): void
     {
+        $user = $this->user();
+        if ($user !== null && ! $user->hasCompletedOnboarding()) {
+            abort(403, 'Заврши го onboarding процесот за да можеш да започнеш дискусија.');
+        }
+
         abort(403, 'Немаш дозвола да започнеш дискусија во овој форум.');
     }
 

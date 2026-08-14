@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Reports')
+@section('title', 'Пријави')
 
 @section('content')
     <div class="min-h-screen p-6 space-y-6">
@@ -8,8 +8,8 @@
         {{-- Header --}}
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-slate-900">Reports Queue</h1>
-                <p class="text-sm text-slate-500">Review AI-flagged and user-reported content across the platform.</p>
+                <h1 class="text-2xl font-bold text-slate-900">Пријави</h1>
+                <p class="text-sm text-slate-500">Прегледај содржина означена од AI и пријавена од корисници.</p>
             </div>
         </div>
 
@@ -17,11 +17,11 @@
         <div class="flex gap-6 border-b border-slate-200">
             <button data-tab-btn="queue"
                 class="tab-btn pb-3 border-b-2 border-indigo-600 text-indigo-600 text-sm font-medium">
-                Reports Queue
+                Пријави
             </button>
             <button data-tab-btn="history"
                 class="tab-btn pb-3 border-b-2 border-transparent text-slate-500 text-sm font-medium">
-                History
+                Историја
             </button>
         </div>
 
@@ -50,36 +50,36 @@
 
                 <div class="flex items-center gap-2">
                     <select class="rounded-lg border border-gray-300 text-sm p-1.5" name="source">
-                        <option value="">All Sources</option>
-                        <option value="ai" @selected(request('source') === 'ai')>AI-Flagged</option>
-                        <option value="human" @selected(request('source') === 'human')>Human-Reported</option>
+                        <option value="">Сите извори</option>
+                        <option value="ai" @selected(request('source') === 'ai')>Означено од AI</option>
+                        <option value="human" @selected(request('source') === 'human')>Пријавено од корисник</option>
                     </select>
                 </div>
 
                 <div class="flex items-center gap-2">
                     <select id="typeFilter" class="rounded-lg border border-gray-300 text-sm p-1.5" name="type">
-                        <option value="">All Types</option>
-                        <option value="User" @selected(request('type') === 'User')>Users</option>
-                        <option value="Comment" @selected(request('type') === 'Comment')>Comments</option>
-                        <option value="Thread" @selected(request('type') === 'Thread')>Threads</option>
+                        <option value="">Сите типови</option>
+                        <option value="User" @selected(request('type') === 'User')>Корисници</option>
+                        <option value="Comment" @selected(request('type') === 'Comment')>Коментари</option>
+                        <option value="Thread" @selected(request('type') === 'Thread')>Дискусии</option>
                     </select>
                 </div>
 
                 <div class="flex items-center gap-2">
                     <select class="rounded-lg border border-gray-300 text-sm p-1.5" name="reason">
-                        <option value="">All Reasons</option>
-                        <option value="spam" @selected(request('reason') === 'spam')>Spam</option>
-                        <option value="harassment" @selected(request('reason') === 'harassment')>Harassment</option>
-                        <option value="hate_speech" @selected(request('reason') === 'hate_speech')>Hate speech</option>
-                        <option value="inappropriate_content" @selected(request('reason') === 'inappropriate_content')>Inappropriate content</option>
-                        <option value="misinformation" @selected(request('reason') === 'misinformation')>Misinformation</option>
-                        <option value="other" @selected(request('reason') === 'other')>Other</option>
+                        <option value="">Сите причини</option>
+                        <option value="spam" @selected(request('reason') === 'spam')>Спам</option>
+                        <option value="harassment" @selected(request('reason') === 'harassment')>Вознемирување</option>
+                        <option value="hate_speech" @selected(request('reason') === 'hate_speech')>Говор на омраза</option>
+                        <option value="inappropriate_content" @selected(request('reason') === 'inappropriate_content')>Несоодветна содржина</option>
+                        <option value="misinformation" @selected(request('reason') === 'misinformation')>Дезинформација</option>
+                        <option value="other" @selected(request('reason') === 'other')>Друго</option>
                     </select>
                 </div>
 
                 <button type="submit"
                     class="bg-my-purple text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-my-purple/90">
-                    Filter
+                    Филтрирај
                 </button>
 
                 @if (request()->anyFilled(['source', 'type', 'reason']))
@@ -88,18 +88,18 @@
                 @endif
             </form>
 
-            {{-- Report Card: AI-Flagged Discussion --}}
+            {{-- Report Card: Означено од AI Discussion --}}
             @forelse ($reports as $report)
                 @if ($report->reportable_type === 'App\Models\Comment')
                     @php
                         $type = 'comment';
-                        $content = $report->reportable?->content ?? '[Content no longer available]';
+                        $content = $report->reportable?->content ?? '[Содржината повеќе не е достапна]';
                     @endphp
                 @elseif ($report->reportable_type === 'App\Models\Thread')
                     @php
                         $type = 'thread';
-                        $content = $report->reportable?->title ?? '[Content no longer available]';
-                        $description = $report->reportable?->description ?? '';
+                        $content = $report->reportable?->title ?? '[Содржината повеќе не е достапна]';
+                        $description = \App\Support\HtmlSanitizer::plainText($report->reportable?->description);
                     @endphp
                 @else
                     @php
@@ -113,12 +113,12 @@
                                 @if ($report->source == 'ai')
                                     <span
                                         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
-                                        🤖 AI-Flagged
+                                        🤖 Означено од AI
                                     </span>
                                 @else
                                     <span
                                         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
-                                        🧑 Human-Reported
+                                        🧑 Пријавено од корисник
                                     </span>
                                 @endif
 
@@ -140,31 +140,50 @@
                                 @endif
 
                                 <span
-                                    class="inline-flex items-center px-2.5 py-1 rounded-full bg-yellow-200 text-yellow-600 text-xs font-semibold capitalize">
-                                    {{ $report->status }}
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full bg-yellow-200 text-yellow-600 text-xs font-semibold">
+                                    {{ match ($report->status) {
+                                        'pending' => 'Во тек',
+                                        'approved' => 'Одобрена',
+                                        'rejected' => 'Одбиена',
+                                        default => $report->status,
+                                    } }}
                                 </span>
 
-                                <span class="text-xs text-slate-400">Reported
+                                <span class="text-xs text-slate-400">Пријавено
                                     {{ $report->created_at->diffForHumans() }}</span>
                             </div>
-                            <span class="text-xs text-slate-500">Reported by {{ $report->reporter->username }}</span>
+                            <span class="text-xs text-slate-500">Пријавено од {{ $report->reporter->username }}</span>
                             <span class="text-xs text-slate-400">{{ $report->other_reason }}</span>
                         </div>
                         @if ($report->source == 'ai')
                             <div class="flex flex-col items-start">
                                 <div class="text-right">
-                                    <div class="text-xs text-slate-500">AI Confidence</div>
+                                    <div class="text-xs text-slate-500">AI доверба</div>
                                     <div class="text-lg font-bold text-red-600">{{ $report->ai_confidence }}%</div>
                                 </div>
                                 <div class="">
-                                    <span class="text-xs text-slate-500">Reason:</span>
-                                    <span class="text-sm font-semibold text-slate-700">{{ $report->reason }}</span>
+                                    <span class="text-xs text-slate-500">Причина:</span>
+                                    <span class="text-sm font-semibold text-slate-700">{{ match ($report->reason) {
+                                        'spam' => 'Спам',
+                                        'insulting_content' => 'Навредлива содржина',
+                                        'misinformation' => 'Дезинформација',
+                                        'age_inappropriate' => 'Несоодветна содржина',
+                                        'other' => 'Друго',
+                                        default => $report->reason,
+                                    } }}</span>
                                 </div>
                             </div>
                         @else
                             <div class="">
-                                <span class="text-xs text-slate-500">Reason:</span>
-                                <span class="text-sm font-semibold text-slate-700">{{ $report->reason }}</span>
+                                <span class="text-xs text-slate-500">Причина:</span>
+                                <span class="text-sm font-semibold text-slate-700">{{ match ($report->reason) {
+                                    'spam' => 'Спам',
+                                    'insulting_content' => 'Навредлива содржина',
+                                    'misinformation' => 'Дезинформација',
+                                    'age_inappropriate' => 'Несоодветна содржина',
+                                    'other' => 'Друго',
+                                    default => $report->reason,
+                                } }}</span>
                             </div>
                         @endif
                     </div>
@@ -173,10 +192,10 @@
                         @if ($type == 'comment')
                             <div class="text-sm font-semibold text-slate-800 mb-1">"{{ $content }}"</div>
                             <div class="flex items-center gap-2 mt-3 text-xs text-slate-500">
-                                <span>Posted by</span>
+                                <span>Објавено од</span>
                                 <span class="font-medium text-slate-700">{{ $report->reportable->user->username }}</span>
                                 <span>·</span>
-                                <span>Forum:
+                                <span>Форум:
                                     {{ $report->reportable->thread()->withTrashed()->first()->forum->name }}</span>
                             </div>
                         @elseif($type == 'thread')
@@ -185,10 +204,10 @@
                                 {{ $description }}
                             </p>
                             <div class="flex items-center gap-2 mt-3 text-xs text-slate-500">
-                                <span>Posted by</span>
+                                <span>Објавено од</span>
                                 <span class="font-medium text-slate-700">{{ $report->reportable->user->username }}</span>
                                 <span>·</span>
-                                <span>Forum: {{ $report->reportable->forum->name }}</span>
+                                <span>Форум: {{ $report->reportable->forum->name }}</span>
                             </div>
                         @elseif($type == 'user')
                             <a href="{{ route('user.show', ['user' => $report->reportable->id]) }}"
@@ -210,7 +229,7 @@
 
                     @if ($report->source == 'ai')
                         <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                            <div class="text-xs font-semibold text-amber-800 uppercase mb-1">AI Reasoning</div>
+                            <div class="text-xs font-semibold text-amber-800 uppercase mb-1">AI образложение</div>
                             <p class="text-sm text-amber-900">
                                 {{ $report->ai_reasoning }}
                             </p>
@@ -224,7 +243,7 @@
                                 @method('patch')
                                 <button
                                     class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700">
-                                    Approve report
+                                    Одобри пријава
                                 </button>
                             </form>
                             <form action="{{ route('report.reject', ['report' => $report->id]) }}" method="POST">
@@ -232,7 +251,7 @@
                                 @method('patch')
                                 <button
                                     class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700">
-                                    Reject report
+                                    Одбиј пријава
                                 </button>
                             </form>
                         </div>
@@ -240,12 +259,12 @@
                             @if ($type == 'comment' || $type == 'thread')
                                 <button data-open-modal="sanctionModal-{{ $report->id }}"
                                     class="px-4 py-2 rounded-lg border border-orange-300 text-orange-700 text-sm font-medium hover:bg-orange-50">
-                                    Delete Content + Sanction User
+                                    Избриши содржина + санкционирај
                                 </button>
                             @else
                                 <button data-open-modal="sanctionModal-{{ $report->id }}"
                                     class="px-4 py-2 rounded-lg border border-orange-300 text-orange-700 text-sm font-medium hover:bg-orange-50">
-                                    Sanction User
+                                    Санкционирај корисник
                                 </button>
                             @endif
                         </div>
@@ -257,13 +276,13 @@
                     class="modal hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div class="modal-box bg-white rounded-xl w-full max-w-md p-6 space-y-5">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-lg font-bold text-slate-900">Sanction User</h2>
+                            <h2 class="text-lg font-bold text-slate-900">Санкционирај корисник</h2>
                             <button data-close-modal="sanctionModal-{{ $report->id }}"
                                 class="text-slate-400 hover:text-slate-600">✕</button>
                         </div>
 
                         <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-                            <div class="text-xs font-semibold text-indigo-700 uppercase mb-1">System Recommendation</div>
+                            <div class="text-xs font-semibold text-indigo-700 uppercase mb-1">Системска препорака</div>
                             <p class="text-sm text-indigo-900">
                                 Based on 2 prior offenses, a <span class="font-semibold">7-day ban</span> is recommended
                                 for consistency.
@@ -273,7 +292,9 @@
                         <form action="{{ route('sanction.create') }}" method="POST" class="space-y-2">
                             @csrf
 
-                            <input type="hidden" name="user_id" value="{{ $report->reportable->user->id }}">
+                            {{-- Author id for thread/comment; reportable id for user reports. Server re-resolves from report_id. --}}
+                            <input type="hidden" name="user_id"
+                                value="{{ $type === 'user' ? $report->reportable?->id : $report->reportable?->user_id }}">
                             <input type="hidden" name="report_id" value="{{ $report->id }}">
 
                             <label
@@ -281,8 +302,8 @@
                                 <input type="radio" name="type" value="warning"
                                     class="sanction-radio text-indigo-600">
                                 <div>
-                                    <div class="text-sm font-medium text-slate-800">Warning</div>
-                                    <div class="text-xs text-slate-500">User is notified but not restricted</div>
+                                    <div class="text-sm font-medium text-slate-800">Предупредување</div>
+                                    <div class="text-xs text-slate-500">Корисникот е известен, без ограничувања</div>
                                 </div>
                             </label>
                             <label
@@ -292,45 +313,47 @@
                                 <div>
                                     <div class="text-sm font-medium text-slate-800">7-Day Ban <span
                                             class="text-indigo-600 text-xs">(recommended)</span></div>
-                                    <div class="text-xs text-slate-500">Account locked for one week</div>
+                                    <div class="text-xs text-slate-500">Сметката е заклучена една недела</div>
                                 </div>
                             </label>
-                            <label
-                                class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
-                                <input type="radio" name="type" value="permanent_ban"
-                                    class="sanction-radio text-indigo-600">
-                                <div>
-                                    <div class="text-sm font-medium text-slate-800">Permanent Ban</div>
-                                    <div class="text-xs text-slate-500">Account is permanently disabled</div>
-                                </div>
-                            </label>
+                            @if (auth()->user()?->hasAnyRole(['admin', 'super_admin']))
+                                <label
+                                    class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
+                                    <input type="radio" name="type" value="permanent_ban"
+                                        class="sanction-radio text-indigo-600">
+                                    <div>
+                                        <div class="text-sm font-medium text-slate-800">Трајна забрана</div>
+                                        <div class="text-xs text-slate-500">Сметката е трајно оневозможена</div>
+                                    </div>
+                                </label>
+                            @endif
                             <label
                                 class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
                                 <input type="radio" name="type" value="custom"
                                     class="sanction-radio text-indigo-600">
                                 <div class="flex-1">
-                                    <div class="text-sm font-medium text-slate-800">Custom Duration</div>
-                                    <input id="customDaysInput" type="number" placeholder="Days"
+                                    <div class="text-sm font-medium text-slate-800">Прилагодено траење</div>
+                                    <input id="customDaysInput" type="number" placeholder="Денови"
                                         class="hidden mt-2 w-24 rounded-lg border-slate-300 text-sm p-1.5 border">
                                 </div>
                             </label>
-                            <textarea rows="3" placeholder="Reason..." name="reason"
+                            <textarea rows="3" placeholder="Причина..." name="reason"
                                 class="w-full rounded-lg text-sm p-3 border border-slate-200 "></textarea>
 
                             @if ($type == 'comment' || $type == 'thread')
                                 <label class="flex items-center gap-2">
                                     <input type="checkbox" name="content" checked class="rounded text-red-600">
-                                    <span class="text-sm text-slate-700">Delete content immediately</span>
+                                    <span class="text-sm text-slate-700">Избриши ја содржината веднаш</span>
                                 </label>
                             @endif
                             <div class="flex gap-2 pt-2">
                                 <button data-close-modal="sanctionModal-{{ $report->id }}"
                                     class="flex-1 px-4 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                                    Cancel
+                                    Откажи
                                 </button>
                                 <button data-action="confirm-sanction" data-close-modal="sanctionModal-{{ $report->id }}"
                                     class="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700">
-                                    Confirm Sanction
+                                    Потврди санкција
                                 </button>
                             </div>
                         </form>
@@ -338,7 +361,7 @@
                 </div>
             @empty
                 <div id="emptyState" class="text-center py-16 text-slate-400">
-                    <p class="text-sm">No reports matching.</p>
+                    <p class="text-sm">Нема пријави што одговараат.</p>
                 </div>
             @endforelse
 
@@ -347,24 +370,24 @@
                     @if ($reports->onFirstPage())
                         <button disabled
                             class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Previous
+                            Претходна
                         </button>
                     @else
                         <a href="{{ $reports->previousPageUrl() }}"
                             class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Previous
+                            Претходна
                         </a>
                     @endif
 
                     @if ($reports->hasMorePages())
                         <a href="{{ $reports->nextPageUrl() }}"
                             class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Next
+                            Следна
                         </a>
                     @else
                         <button disabled
                             class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Next
+                            Следна
                         </button>
                     @endif
                 </nav>
@@ -380,21 +403,21 @@
                 <input type="hidden" name="tab" value="history">
 
                 <select class="rounded-lg border border-gray-300 text-sm p-1.5" name="status">
-                    <option value="">All Statuses</option>
-                    <option value="approved" @selected(request('status') === 'approved')>Approved</option>
-                    <option value="rejected" @selected(request('status') === 'rejected')>Rejected</option>
+                    <option value="">Сите статуси</option>
+                    <option value="approved" @selected(request('status') === 'approved')>Одобрена</option>
+                    <option value="rejected" @selected(request('status') === 'rejected')>Одбиена</option>
                 </select>
 
                 <select class="rounded-lg border border-gray-300 text-sm p-1.5" name="type">
-                    <option value="">All Types</option>
-                    <option value="User" @selected(request('type') === 'User')>Users</option>
-                    <option value="Comment" @selected(request('type') === 'Comment')>Comments</option>
-                    <option value="Thread" @selected(request('type') === 'Thread')>Threads</option>
+                    <option value="">Сите типови</option>
+                    <option value="User" @selected(request('type') === 'User')>Корисници</option>
+                    <option value="Comment" @selected(request('type') === 'Comment')>Коментари</option>
+                    <option value="Thread" @selected(request('type') === 'Thread')>Дискусии</option>
                 </select>
 
                 <button type="submit"
                     class="bg-my-purple text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-my-purple/90">
-                    Filter
+                    Филтрирај
                 </button>
             </form>
 
@@ -405,26 +428,37 @@
                             @if ($historyReport->status === 'approved')
                                 <span
                                     class="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
-                                    Approved
+                                    Одобрена
                                 </span>
                             @else
                                 <span
                                     class="inline-flex items-center px-2.5 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">
-                                    Rejected
+                                    Одбиена
                                 </span>
                             @endif
-                            <span
-                                class="text-xs text-slate-400 capitalize">{{ class_basename($historyReport->reportable_type) }}</span>
+                            <span class="text-xs text-slate-400">{{ match (class_basename($historyReport->reportable_type)) {
+                                'Comment' => 'Коментар',
+                                'Thread' => 'Дискусија',
+                                'User' => 'Корисник',
+                                default => class_basename($historyReport->reportable_type),
+                            } }}</span>
                         </div>
-                        <span class="text-sm text-slate-700">Reported by {{ $historyReport->reporter->username }} ·
-                            Reason: {{ $historyReport->reason }}</span>
-                        <span class="text-xs text-slate-400">Resolved
+                        <span class="text-sm text-slate-700">Пријавено од {{ $historyReport->reporter->username }} ·
+                            Причина: {{ match ($historyReport->reason) {
+                                'spam' => 'Спам',
+                                'insulting_content' => 'Навредлива содржина',
+                                'misinformation' => 'Дезинформација',
+                                'age_inappropriate' => 'Несоодветна содржина',
+                                'other' => 'Друго',
+                                default => $historyReport->reason,
+                            } }}</span>
+                        <span class="text-xs text-slate-400">Решено
                             {{ $historyReport->updated_at->diffForHumans() }}</span>
                     </div>
                 </div>
             @empty
                 <div class="text-center py-16 text-slate-400">
-                    <p class="text-sm">No resolved reports yet.</p>
+                    <p class="text-sm">Сè уште нема решени пријави.</p>
                 </div>
             @endforelse
 

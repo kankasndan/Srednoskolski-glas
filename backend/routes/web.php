@@ -27,9 +27,9 @@ Route::prefix('admin')
 
     // MARK AS READ
     Route::post('notifications/read-all', [AdminController::class, 'readAllNotifications'])
-        ->name('admin.notifications.readAll')
-        ->middleware('permission:view dashboard');
-
+        ->name('admin.notifications.readAll');
+    Route::get('notifications/{id}/read', [AdminController::class, 'readNotification'])
+        ->name('admin.notifications.read');
 
     // DAHSBOARD
     Route::get('dashboard', [DashboardController::class, 'index'])

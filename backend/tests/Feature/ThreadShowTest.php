@@ -78,15 +78,16 @@ function makeThreadWithComments(): array
     return compact('forum', 'thread', 'oldest', 'best', 'newest');
 }
 
-it('increments views and returns nested comments', function () {
+it('increments views and returns top-level comments with replies_count', function () {
     ['forum' => $forum, 'thread' => $thread, 'best' => $best] = makeThreadWithComments();
 
-    $response = $this->getJson("/api/p/{$forum->slug}/comments/{$thread->id}")
+    $this->getJson("/api/p/{$forum->slug}/comments/{$thread->id}")
         ->assertSuccessful()
         ->assertJsonPath('data.thread.id', $thread->id)
         ->assertJsonCount(3, 'data.comments')
         ->assertJsonPath('data.comments.0.id', $best->id)
-        ->assertJsonCount(1, 'data.comments.0.replies');
+        ->assertJsonPath('data.comments.0.replies_count', 1)
+        ->assertJsonMissingPath('data.comments.0.replies');
 
     expect($thread->fresh()->views)->toBe(1);
 });
@@ -113,4 +114,91 @@ it('sorts comments by oldest', function () {
     $this->getJson("/api/p/{$forum->slug}/comments/{$thread->id}?sort=oldest")
         ->assertSuccessful()
         ->assertJsonPath('data.comments.0.id', $oldest->id);
+});
+
+it('does not increment views when track_view is disabled', function () {
+    ['forum' => $forum, 'thread' => $thread] = makeThreadWithComments();
+
+    $this->getJson("/api/p/{$forum->slug}/comments/{$thread->id}?track_view=0")
+        ->assertSuccessful();
+
+    expect($thread->fresh()->views)->toBe(0);
+});
+
+it('omits deleted leaves and keeps tombstones that still have replies', function () {
+    ['forum' => $forum, 'thread' => $thread, 'best' => $best] = makeThreadWithComments();
+
+    $deletedLeaf = Comment::query()->create([
+        'thread_id' => $thread->id,
+        'parent_id' => $best->id,
+        'user_id' => $best->user_id,
+        'content' => 'Soon deleted leaf',
+    ]);
+    $deletedLeaf->delete();
+
+    $deletedRoot = Comment::query()->create([
+        'thread_id' => $thread->id,
+        'parent_id' => null,
+        'user_id' => $best->user_id,
+        'content' => 'Deleted root',
+    ]);
+    Comment::query()->create([
+        'thread_id' => $thread->id,
+        'parent_id' => $deletedRoot->id,
+        'user_id' => $best->user_id,
+        'content' => 'Live reply under deleted',
+    ]);
+    $deletedRoot->delete();
+
+    $lonelyDeleted = Comment::query()->create([
+        'thread_id' => $thread->id,
+        'parent_id' => null,
+        'user_id' => $best->user_id,
+        'content' => 'Gone',
+    ]);
+    $lonelyDeleted->delete();
+
+    $response = $this->getJson("/api/p/{$forum->slug}/comments/{$thread->id}")
+        ->assertSuccessful();
+
+    $roots = collect($response->json('data.comments'));
+    expect($roots->pluck('id'))->toContain($deletedRoot->id)
+        ->and($roots->pluck('id'))->not->toContain($lonelyDeleted->id);
+
+            $bestRow = $roots->firstWhere('id', $best->id);
+    // Live "Reply under best" counts; the deleted leaf does not.
+    expect($bestRow['replies_count'])->toBe(1);
+
+    $deletedRow = $roots->firstWhere('id', $deletedRoot->id);
+    expect($deletedRow['replies_count'])->toBe(1)
+        ->and($deletedRow['content'])->toBe('');
+});
+
+it('loads direct replies from the replies endpoint', function () {
+    ['forum' => $forum, 'thread' => $thread, 'best' => $best] = makeThreadWithComments();
+
+    $child = Comment::query()->where('parent_id', $best->id)->first();
+    $grandchild = Comment::query()->create([
+        'thread_id' => $thread->id,
+        'parent_id' => $child->id,
+        'user_id' => $best->user_id,
+        'content' => 'Nested reply',
+    ]);
+
+    $this->getJson("/api/p/{$forum->slug}/comments/{$thread->id}")
+        ->assertSuccessful()
+        ->assertJsonMissingPath('data.comments.0.replies');
+
+    $this->getJson("/api/comments/{$best->id}/replies")
+        ->assertSuccessful()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $child->id)
+        ->assertJsonPath('data.0.replies_count', 1)
+        ->assertJsonMissingPath('data.0.replies');
+
+    $this->getJson("/api/comments/{$child->id}/replies")
+        ->assertSuccessful()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $grandchild->id)
+        ->assertJsonPath('data.0.replies_count', 0);
 });

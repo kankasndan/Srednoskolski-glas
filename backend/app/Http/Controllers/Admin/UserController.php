@@ -12,11 +12,13 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('view users');
+
         $users = User::query()
             ->with([
                 'studentData.school.city',
                 'sanctions',
-                'threads.forum'
+                'threads.forum',
             ])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->get('search');
@@ -51,21 +53,23 @@ class UserController extends Controller
                         });
                 });
             })
-            ->where("role", "user")
+            ->where('role', 'user')
             ->paginate(20)
             ->withQueryString();
 
-        $schools = School::orderBy("name")->get();
+        $schools = School::orderBy('name')->get();
 
-        return view("admin.users.index", compact("users", "schools"));
+        return view('admin.users.index', compact('users', 'schools'));
     }
 
     public function liveSearch(Request $request)
     {
+        $this->authorize('search users');
+
         $query = $request->get('q', '');
 
         $users = User::where('username', 'like', "%{$query}%")
-            ->where('role', "user")
+            ->where('role', 'user')
             ->limit(10)
             ->get(['id', 'username', 'email', 'role']);
 
@@ -74,22 +78,18 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        if (!$user->hasRole('user')) {
-            abort(403);
-        }
+        $this->authorize('view user details');
+        abort_unless($user->role === 'user', 404);
 
-        $user->whereHas("studentData")->with(["studentData.school.city", "sanctions", "forums", "threads, topics"]);
+        $user->load(['studentData.school.city', 'sanctions', 'forums', 'threads', 'topics']);
 
-        return view("admin.users.show", compact("user"));
+        return view('admin.users.show', compact('user'));
     }
-
-
 
     public function export(User $user)
     {
-        if (! $user->hasRole('user')) {
-            abort(403);
-        }
+        $this->authorize('export user as pdf');
+        abort_unless($user->role === 'user', 404);
 
         $user->load([
             'studentData.school.city',

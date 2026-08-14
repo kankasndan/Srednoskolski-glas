@@ -13,6 +13,8 @@ class SchoolController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('view forums');
+
         $schools = School::query()
             ->with("studentData.user", "city")
             ->when($request->filled("city"), function ($query) use ($request){
@@ -30,6 +32,8 @@ class SchoolController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create forums');
+
         $request->validate([
             'name' => "required",
             'city' => "required",
@@ -48,11 +52,13 @@ class SchoolController extends Controller
             "slug" => $slug
         ]);
 
-        return back()->with(['success' => 'School and forum created successfully!']);
+        return back()->with(['success' => 'Училиштето и форумот се успешно креирани!']);
     }
 
     public function liveSearch(Request $request)
     {
+        $this->authorize('search forums');
+
         $query = $request->q;    
 
         $schools = School::where("name", "like", "%$query%")->get();
@@ -62,12 +68,14 @@ class SchoolController extends Controller
 
     public function destroy(School $school, Request $request)
     {
+        $this->authorize('delete forums');
+
         $school->delete();
 
         if($request->q){
             unset($request->q);
         }
 
-        return back()->with(["success" => "School deleted successfully"]);
+        return back()->with(['success' => 'Училиштето е успешно избришано.']);
     }
 }

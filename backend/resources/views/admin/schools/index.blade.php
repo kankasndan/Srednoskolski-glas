@@ -1,16 +1,16 @@
 @extends('layouts.master')
 
-@section('title', 'Schools')
+@section('title', 'Училишта')
 
 @section('content')
     <div class="max-w-7xl mx-auto w-full px-4 py-6 space-y-6">
 
         {{-- Header + Create button --}}
         <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold text-gray-900">Schools</h1>
+            <h1 class="text-xl font-semibold text-gray-900">Училишта</h1>
             <button type="button" onclick="openSchoolModal()"
-                class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">
-                + Create School
+                class="px-4 py-2 rounded-md bg-my-purple text-white text-sm font-medium hover:bg-my-purple/90">
+                + Креирај училиште
             </button>
         </div>
 
@@ -20,7 +20,7 @@
 
             <div class="flex-1 min-w-[200px] relative">
                 <input type="text" id="school-search" name="search" value="{{ request('search') }}"
-                    placeholder="Search forum"
+                    placeholder="Пребарај училиште"
                     class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
 
                 <div id="search-results"
@@ -29,7 +29,7 @@
             </div>
 
             <select name="city" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="">All cities</option>
+                <option value="">Сите градови</option>
                 @foreach ($cities as $city)
                     <option value="{{ $city->id }}" {{ request('city') == $city->id ? 'selected' : '' }}>
                         {{ $city->name }}</option>
@@ -38,11 +38,11 @@
 
             <button type="submit"
                 class="bg-my-purple text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-my-purple/90">
-                Filter
+                Филтрирај
             </button>
 
             @if (request()->anyFilled(['search', 'city']))
-                <a href="{{ route('school.index') }}" class="text-sm text-gray-500 hover:underline">Clear filters</a>
+                <a href="{{ route('school.index') }}" class="text-sm text-gray-500 hover:underline">Исчисти филтри</a>
             @endif
         </form>
 
@@ -67,10 +67,10 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="text-left text-gray-500 border-b bg-gray-50">
-                        <th class="px-4 py-3">School</th>
-                        <th class="px-4 py-3">City</th>
-                        <th class="px-4 py-3">Students</th>
-                        <th class="px-4 py-3">Actions</th>
+                        <th class="px-4 py-3">Училиште</th>
+                        <th class="px-4 py-3">Град</th>
+                        <th class="px-4 py-3">Ученици</th>
+                        <th class="px-4 py-3">Акции</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -86,14 +86,14 @@
                             </td>
                             <td class="px-4 py-3">
                                 <span
-                                    class="text-xs bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5">{{ $school->city->name }}</span>
+                                    class="text-xs bg-my-purple/10 text-my-purple rounded-full px-2 py-0.5">{{ $school->city->name }}</span>
                             </td>
                             <td class="px-4 py-3 text-gray-500 text-xs">{{ $school->studentData->count() }}</td>
                             <td class="px-4 py-3">
                                 <button type="button"
                                     class="text-red-500 text-sm rounded-lg hover:text-red-600 cursor-pointer"
                                     onclick="openDeleteSchoolModal({{ $school->id }}, '{{ addslashes($school->name) }}')">
-                                    Delete
+                                    Избриши
                                 </button>
                             </td>
                         </tr>
@@ -102,7 +102,7 @@
 
                         <tr>
                             <td colspan="4" class="px-4 py-6 text-center text-sm text-gray-500">
-                                No matching schools
+                                Нема совпаѓачки училишта
                             </td>
                         </tr>
                     @endforelse
@@ -119,23 +119,23 @@
         <nav class="flex gap-1 text-sm">
             @if ($schools->onFirstPage())
                 <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                    Previous
+                    Претходна
                 </button>
             @else
                 <a href="{{ $schools->previousPageUrl() }}"
                     class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                    Previous
+                    Претходна
                 </a>
             @endif
 
             @if ($schools->hasMorePages())
                 <a href="{{ $schools->nextPageUrl() }}"
                     class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                    Next
+                    Следна
                 </a>
             @else
                 <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                    Next
+                    Следна
                 </button>
             @endif
         </nav>
@@ -145,7 +145,7 @@
     <div class="fixed inset-0 bg-black/40 hidden items-center justify-center" id="schoolModal">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4">
             <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900">Create</h2>
+                <h2 class="text-lg font-semibold text-gray-900">Креирај училиште</h2>
                 <button type="button" onclick="closeSchoolModal()" class="text-gray-400 hover:text-gray-600">✕</button>
             </div>
 
@@ -154,13 +154,13 @@
 
 
                 <div>
-                    <label class="text-sm text-gray-600">Name</label>
+                    <label class="text-sm text-gray-600">Име</label>
                     <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="name"
                         id="schoolName" required>
                 </div>
 
                 <div id="schoolModal">
-                    <label class="text-sm text-gray-600">City</label>
+                    <label class="text-sm text-gray-600">Град</label>
                     <select class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="city"
                         id="schoolModalSelect">
                         @foreach ($cities as $city)
@@ -171,10 +171,9 @@
 
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="closeSchoolModal()"
-                        class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
+                        class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Откажи</button>
                     <button type="submit"
-                        class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">Save
-                        School</button>
+                        class="px-4 py-2 rounded-md bg-my-purple text-white text-sm font-medium hover:bg-my-purple/90">Зачувај училиште</button>
                 </div>
             </form>
 
@@ -185,13 +184,13 @@
     <div class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50" id="deleteSchoolModal">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
             <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900">Delete School</h2>
+                <h2 class="text-lg font-semibold text-gray-900">Избриши училиште</h2>
                 <button type="button" onclick="closeDeleteSchoolModal()"
                     class="text-gray-400 hover:text-gray-600">✕</button>
             </div>
 
             <p class="text-sm text-gray-700">
-                Are you sure you want to delete
+                Дали си сигурен дека сакаш да го избришеш
                 <span class="font-semibold" id="deleteSchoolName"></span>?
             </p>
 
@@ -202,11 +201,11 @@
                 <div class="flex justify-end gap-2 pt-4">
                     <button type="button" onclick="closeDeleteSchoolModal()"
                         class="px-4 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
-                        Cancel
+                        Откажи
                     </button>
                     <button type="submit"
                         class="px-4 py-2 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700">
-                        Delete School
+                        Избриши училиште
                     </button>
                 </div>
             </form>
@@ -291,7 +290,7 @@
                 resultsBox.innerHTML = '';
 
                 if (schools.length === 0) {
-                    resultsBox.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">No matching schools</div>`;
+                    resultsBox.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">Нема совпаѓачки училишта</div>`;
                     resultsBox.classList.remove('hidden');
                     return;
                 }

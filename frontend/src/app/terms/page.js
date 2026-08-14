@@ -1,3 +1,4 @@
+import Link from "next/link";
 import LegalPage from "@/components/legal/LegalPage";
 import LegalSection from "@/components/legal/LegalSection";
 import MailLink from "@/components/legal/MailLink";
@@ -69,8 +70,14 @@ export default function TermsPage() {
       <LegalSection title="Прекин на налогот">
         <p>
           Можеме привремено или трајно да го суспендираме или избришеме твојот
-          налог доколку ги прекршиш овие услови или Правилата на заедницата.
-          Исто така, можеш сам да го избришеш својот налог преку поставките на
+          налог доколку ги прекршиш овие услови или{" "}
+          <Link
+            href="/rules"
+            className="font-bold text-[var(--color-primary-200)] underline-offset-2 hover:underline"
+          >
+            Правилата на заедницата
+          </Link>
+          . Исто така, можеш сам да го избришеш својот налог преку поставките на
           профилот.
         </p>
       </LegalSection>

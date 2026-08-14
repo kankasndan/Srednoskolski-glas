@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import Image from "next/image";
 import { createPortal } from "react-dom";
+import { useModalDismiss } from "@/hooks/useModalDismiss";
 
 // Zaednichka obvivka za site pop-up prozorci.
 export default function DialogShell({
@@ -9,24 +10,10 @@ export default function DialogShell({
   label,
   onClose,
   widthClassName = "max-w-md",
+  fullScreenOnMobile = false,
   children,
 }) {
-  useEffect(() => {
-    if (!open) return;
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") onClose?.();
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [open, onClose]);
+  useModalDismiss(open, onClose);
 
   // `open` se vklucuva samo po klik, pa document sekogas postoi tuka.
   if (!open || typeof document === "undefined") return null;
@@ -37,25 +24,55 @@ export default function DialogShell({
       className="fixed inset-0 z-50 overflow-y-auto bg-black/40 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       onClick={onClose}
     >
-      <div className="flex min-h-full items-center justify-center p-4">
+      <div
+        className={`flex min-h-full justify-center ${
+          fullScreenOnMobile ? "items-stretch md:items-center md:p-4" : "items-center p-4"
+        }`}
+      >
         <div
           role="dialog"
           aria-modal="true"
           aria-label={label}
           onClick={(event) => event.stopPropagation()}
-          className={`relative flex w-full flex-col items-center gap-8 overflow-hidden rounded-xl bg-white p-10 shadow-[0_12px_24px_rgba(0,0,0,0.12)] ${widthClassName}`}
+          className={`relative flex w-full flex-col items-center overflow-hidden bg-white shadow-[0_12px_24px_rgba(0,0,0,0.12)] ${
+            fullScreenOnMobile
+              ? "gap-6 rounded-none px-6 pb-10 md:gap-8 md:rounded-xl md:p-10"
+              : "gap-8 rounded-xl p-10"
+          } ${widthClassName}`}
         >
-          {/* Grayscale go vadi violetovoto od sharata za da ostane siva. */}
+          {/* Sharata e vekje pecatena siva vo samiot PNG, bez CSS filter. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-[url('/pop-up%20backround.png')] bg-[length:95%] bg-center bg-no-repeat opacity-[0.06] grayscale"
+            className={`pointer-events-none absolute inset-0 bg-[url('/pop-up-background-grey.png')] opacity-[0.08] ${
+              fullScreenOnMobile
+                ? "bg-[length:100%] bg-top bg-repeat md:bg-[length:95%] md:bg-center md:bg-no-repeat"
+                : "bg-[length:95%] bg-center bg-no-repeat"
+            }`}
           />
+
+          {/* Samo na telefon dijalogot e cela strana, pa namesto krsce ima „Назад“. */}
+          {fullScreenOnMobile ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="relative flex w-full shrink-0 cursor-pointer items-end pb-3 pt-12 md:hidden"
+            >
+              <span className="flex h-8 items-center gap-2">
+                <ChevronLeftIcon />
+                <span className="font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[#595959]">
+                  Назад
+                </span>
+              </span>
+            </button>
+          ) : null}
 
           <button
             type="button"
             aria-label="Затвори"
             onClick={onClose}
-            className="absolute right-4 top-4 cursor-pointer p-2 text-[#595959]"
+            className={`absolute right-8 top-4 cursor-pointer p-2 text-[#595959] ${
+              fullScreenOnMobile ? "hidden md:block" : ""
+            }`}
           >
             <CrossIcon />
           </button>
@@ -68,6 +85,19 @@ export default function DialogShell({
       </div>
     </div>,
     document.body,
+  );
+}
+
+// Feathericons chevron-down zavrten na levo, isto kako vo dizajnot.
+function ChevronLeftIcon() {
+  return (
+    <Image
+      src="/chevron-down.svg"
+      alt=""
+      width={24}
+      height={24}
+      className="size-6 shrink-0 rotate-90"
+    />
   );
 }
 

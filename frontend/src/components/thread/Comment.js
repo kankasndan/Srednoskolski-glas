@@ -6,19 +6,57 @@ import CommentActions from "@/components/thread/CommentActions";
 import CommentAuthor from "@/components/thread/CommentAuthor";
 import CommentBody from "@/components/thread/CommentBody";
 import CommentComposer from "@/components/thread/CommentComposer";
+import { getCommentReplies } from "@/api/comments";
 import { reportComment, reportErrorMessage } from "@/api/moderation";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ReportDialog from "@/components/ui/ReportDialog";
 
 export default function Comment({ comment, threadId, onCommentCreated, depth = 0 }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [replies, setReplies] = useState([]);
+  const [repliesCount, setRepliesCount] = useState(comment.replies_count ?? 0);
+  const [loadingReplies, setLoadingReplies] = useState(false);
   const [replying, setReplying] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [reported, setReported] = useState(false);
-  const replies = comment.replies ?? [];
-  const hasReplies = replies.length > 0;
-  const showThread = !collapsed && hasReplies;
-  const showLine = hasReplies || depth > 0;
+  const hasReplies = repliesCount > 0;
+  const showThread = expanded && (replies.length > 0 || loadingReplies);
+  const showLine = hasReplies || depth > 0 || showThread;
+
+  async function loadReplies() {
+    setLoadingReplies(true);
+    try {
+      const next = await getCommentReplies(comment.id);
+      setReplies(next);
+      setRepliesCount(next.length);
+    } catch {
+      setReplies([]);
+    } finally {
+      setLoadingReplies(false);
+    }
+  }
+
+  async function toggleReplies() {
+    if (loadingReplies) return;
+
+    if (expanded) {
+      setExpanded(false);
+      return;
+    }
+
+    setExpanded(true);
+    if (replies.length === 0 && repliesCount > 0) {
+      await loadReplies();
+    }
+  }
+
+  async function handleReplyCreated(created) {
+    onCommentCreated?.(created);
+    setReplying(false);
+    setRepliesCount((count) => count + 1);
+    setExpanded(true);
+    await loadReplies();
+  }
 
   async function handleReport({ reason, details }) {
     try {
@@ -49,9 +87,10 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
           commentId={comment.id}
           votes={comment.upvotes}
           hasVoted={comment.has_voted}
-          hasReplies={hasReplies}
-          collapsed={collapsed}
-          onToggle={() => setCollapsed(!collapsed)}
+          repliesCount={repliesCount}
+          expanded={expanded}
+          loadingReplies={loadingReplies}
+          onToggle={toggleReplies}
           onReply={() => setReplying(!replying)}
           onReport={() => setReporting(true)}
         />
@@ -76,21 +115,25 @@ export default function Comment({ comment, threadId, onCommentCreated, depth = 0
             threadId={threadId}
             parentId={comment.id}
             onClose={() => setReplying(false)}
-            onCreated={() => onCommentCreated?.()}
+            onCreated={handleReplyCreated}
           />
         ) : null}
 
         {showThread ? (
           <div className="flex flex-col gap-4 pt-1">
-            {replies.map((reply) => (
-              <Comment
-                key={reply.id}
-                comment={reply}
-                threadId={threadId}
-                onCommentCreated={onCommentCreated}
-                depth={depth + 1}
-              />
-            ))}
+            {loadingReplies && replies.length === 0 ? (
+              <p className="text-[13px] text-[#999999]">Се вчитуваат одговорите…</p>
+            ) : (
+              replies.map((reply) => (
+                <Comment
+                  key={reply.id}
+                  comment={reply}
+                  threadId={threadId}
+                  onCommentCreated={onCommentCreated}
+                  depth={depth + 1}
+                />
+              ))
+            )}
           </div>
         ) : null}
       </div>

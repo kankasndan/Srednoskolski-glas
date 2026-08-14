@@ -59,7 +59,7 @@ it('creates a top-level comment on a thread', function () {
         ->assertJsonPath('data.upvotes', 0)
         ->assertJsonPath('data.has_voted', false)
         ->assertJsonPath('data.author.id', $user->id)
-        ->assertJsonPath('data.replies', []);
+        ->assertJsonPath('data.replies_count', 0);
 
     expect(Comment::query()->where([
         'thread_id' => $thread->id,

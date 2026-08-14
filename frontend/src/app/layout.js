@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono, Manrope, Oswald, Roboto } from "next/font/google";
 import "./globals.css";
 import NavigationTracker from "@/components/shell/NavigationTracker";
+import ImageProtection from "@/components/shell/ImageProtection";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,10 +38,11 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${oswald.variable} ${roboto.variable} h-full antialiased text-zinc-600`}
+      className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${oswald.variable} ${roboto.variable} h-full overflow-x-hidden antialiased text-zinc-600`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex h-full flex-col overflow-x-hidden">
         <NavigationTracker />
+        <ImageProtection />
         {children}
       </body>
     </html>

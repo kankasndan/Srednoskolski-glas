@@ -11,7 +11,11 @@ config.autoAddCss = false;
 import { getCities, updateProfile } from "@/api/profile";
 import { uploadMedia } from "@/api/media";
 import { CITIES } from "@/lib/schools";
+import InfoDialog from "@/components/ui/InfoDialog";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import SelectField from "@/components/ui/SelectField";
+
+const SAVED_TITLE = "Промените на профилот се зачувани.";
 
 const DEFAULT_AVATARS = [
   "/avatars/default-1.svg",
@@ -80,6 +84,7 @@ export default function EditProfileForm({ user: initialUser }) {
   const [year, setYear] = useState(gradeFromUser(initialUser));
   const [schoolGroups, setSchoolGroups] = useState(CITIES);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -157,7 +162,8 @@ export default function EditProfileForm({ user: initialUser }) {
       }
 
       await updateProfile(payload);
-      window.location.assign("/profile");
+      // Vrakjanjeto na profilot cheka da se zatvori potvrdata.
+      setSaved(true);
     } catch (err) {
       const validation = err.body?.errors;
       if (validation) {
@@ -192,13 +198,13 @@ export default function EditProfileForm({ user: initialUser }) {
             />
 
             <div className="flex flex-wrap items-center gap-3">
-              <button
+              <PrimaryButton
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex h-10 cursor-pointer items-center justify-center rounded-xl bg-[#582FF5] px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0]"
+                className="flex h-10 items-center justify-center px-4 font-[family-name:var(--font-manrope)] text-[14px]"
               >
                 Прикачи слика
-              </button>
+              </PrimaryButton>
               <button
                 type="button"
                 onClick={handleRemoveAvatar}
@@ -281,7 +287,7 @@ export default function EditProfileForm({ user: initialUser }) {
           id="school"
           label="Училиште"
           value={school}
-          onChange={(event) => setSchool(event.target.value)}
+          onChange={setSchool}
           placeholder="Избери училиште"
           groups={schoolGroups}
         />
@@ -289,7 +295,7 @@ export default function EditProfileForm({ user: initialUser }) {
           id="area"
           label="Подрачје на образование"
           value={area}
-          onChange={(event) => setArea(event.target.value)}
+          onChange={setArea}
           placeholder="Избери подрачје"
           options={area && !AREAS.includes(area) ? [area, ...AREAS] : AREAS}
         />
@@ -297,7 +303,7 @@ export default function EditProfileForm({ user: initialUser }) {
           id="year"
           label="Година"
           value={year}
-          onChange={(event) => setYear(event.target.value)}
+          onChange={setYear}
           placeholder="Избери година"
           options={YEARS}
         />
@@ -317,14 +323,20 @@ export default function EditProfileForm({ user: initialUser }) {
         >
           Откажи
         </button>
-        <button
+        <PrimaryButton
           type="submit"
           disabled={saving}
-          className="flex h-10 cursor-pointer items-center justify-center rounded-xl bg-[#582FF5] px-5 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[#4B25E0] disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex h-10 items-center justify-center px-5 font-[family-name:var(--font-manrope)] text-[14px] disabled:opacity-60"
         >
           {saving ? "Се зачувува…" : "Зачувај промени"}
-        </button>
+        </PrimaryButton>
       </div>
+
+      <InfoDialog
+        open={saved}
+        title={SAVED_TITLE}
+        onClose={() => window.location.assign("/profile")}
+      />
     </form>
   );
 }

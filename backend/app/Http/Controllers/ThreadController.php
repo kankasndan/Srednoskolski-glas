@@ -8,6 +8,7 @@ use App\Http\Requests\StoreThreadRequest;
 use App\Http\Requests\UpdateThreadRequest;
 use App\Http\Resources\CommentResource;
 use App\Http\Resources\ThreadResource;
+use App\Models\Comment;
 use App\Models\Forum;
 use App\Models\Poll;
 use App\Models\Thread;
@@ -235,7 +236,8 @@ class ThreadController extends Controller
     }
 
     /**
-     * Show a single thread (scoped to its forum) with its nested comment tree.
+     * Show a single thread (scoped to its forum) with top-level comments.
+     * Replies are loaded separately via GET /api/comments/{comment}/replies.
      * Records a per-user view (for feed personalization) and bumps the public views counter.
      */
     public function show(Forum $forum, Thread $thread, Request $request): JsonResponse
@@ -244,42 +246,36 @@ class ThreadController extends Controller
             throw new NotFoundHttpException('Thread does not belong to this forum.');
         }
 
-        $thread->increment('views');
-
         $user = $request->user('web') ?? $request->user();
 
-        if ($user !== null) {
-            ThreadView::query()->updateOrCreate(
-                [
-                    'user_id' => $user->id,
-                    'thread_id' => $thread->id,
-                ],
-                [
-                    'last_viewed_at' => now(),
-                ],
-            );
+        if ($this->shouldTrackThreadView($request)) {
+            $thread->increment('views');
+
+            if ($user !== null) {
+                $now = now();
+                ThreadView::query()->upsert(
+                    [[
+                        'user_id' => $user->id,
+                        'thread_id' => $thread->id,
+                        'last_viewed_at' => $now,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ]],
+                    uniqueBy: ['user_id', 'thread_id'],
+                    update: ['last_viewed_at', 'updated_at'],
+                );
+            }
         }
 
         $threadQuery = Thread::query()->whereKey($thread->id);
         $this->applyHasVoted($threadQuery, $user);
+        $this->applyIsFollowing($threadQuery, $user);
         $thread = $threadQuery
             ->with($this->threadListWith($user))
             ->withCount('comments')
             ->firstOrFail();
 
-        // Soft-deleted top-level comments stay visible only when they still have live replies.
-        $commentsQuery = $thread->comments()
-            ->withTrashed()
-            ->whereNull('parent_id')
-            ->where(function ($query): void {
-                $query->whereNull('comments.deleted_at')
-                    ->orWhereHas('replies', fn ($replies) => $replies->withoutTrashed());
-            })
-            ->with(['user.studentData.school.city', 'user.studentData.school.forum', 'allReplies']);
-
-        $this->applyCommentSort($commentsQuery, (string) $request->query('sort', 'best'));
-        $this->applyHasVoted($commentsQuery, $user);
-        $comments = $commentsQuery->get();
+        $comments = $this->loadTopLevelComments($thread, $user, (string) $request->query('sort', 'best'));
 
         return response()->json([
             'data' => [
@@ -287,6 +283,36 @@ class ThreadController extends Controller
                 'comments' => CommentResource::collection($comments),
             ],
         ]);
+    }
+
+    /**
+     * Sort/refetch requests pass track_view=0 so they do not inflate the counter.
+     */
+    private function shouldTrackThreadView(Request $request): bool
+    {
+        if (! $request->exists('track_view')) {
+            return true;
+        }
+
+        return $request->boolean('track_view');
+    }
+
+    /**
+     * Top-level comments only. Each row includes replies_count for the "view replies" button.
+     */
+    private function loadTopLevelComments(Thread $thread, mixed $user, string $sort)
+    {
+        $commentsQuery = $thread->comments()
+            ->withTrashed()
+            ->whereNull('parent_id')
+            ->visibleInThread()
+            ->with(Comment::authorWith())
+            ->withVisibleRepliesCount();
+
+        $this->applyCommentSort($commentsQuery, $sort);
+        $this->applyHasVoted($commentsQuery, $user);
+
+        return $commentsQuery->get();
     }
 
     /**
@@ -299,7 +325,6 @@ class ThreadController extends Controller
         match ($sort) {
             'newest' => $query->latest('created_at')->orderByDesc('id'),
             'oldest' => $query->oldest('created_at')->orderBy('id'),
-            // best: highest upvotes, then newest as tiebreaker
             default => $query->orderByDesc('upvotes')->latest('created_at')->orderByDesc('id'),
         };
     }
@@ -378,8 +403,13 @@ class ThreadController extends Controller
     {
         $user = auth('web')->user() ?? Auth::user();
 
-        $thread->load($this->threadListWith($user))->loadCount('comments');
+        $query = Thread::query()->whereKey($thread->id);
+        $this->applyHasVoted($query, $user);
+        $this->applyIsFollowing($query, $user);
 
-        return $thread;
+        return $query
+            ->with($this->threadListWith($user))
+            ->withCount('comments')
+            ->firstOrFail();
     }
 }

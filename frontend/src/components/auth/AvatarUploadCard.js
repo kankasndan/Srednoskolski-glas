@@ -3,10 +3,12 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { loadSessionUser } from "@/lib/sessionUser";
 
 function finishOnboarding(router) {
   localStorage.removeItem("onboarding_pending");
-  router.push("/feed");
+  // Ensure /api/me capabilities (create threads, etc.) are fresh on the feed.
+  loadSessionUser({ force: true }).finally(() => router.push("/feed"));
 }
 
 export default function AvatarUploadCard() {
@@ -42,8 +44,7 @@ export default function AvatarUploadCard() {
 
   return (
     <div
-      className="mx-auto flex w-full flex-col rounded-2xl bg-[#E5E5E5] p-6"
-      style={{ boxShadow: "7px 7px 9.4px 0px #00000026" }}
+      className="flex w-full max-w-[342px] flex-col items-center gap-14 sm:max-w-[clamp(342px,67.4vw,690px)] lg:max-w-[850px] lg:gap-8 lg:rounded-2xl lg:bg-[#E5E5E5] lg:px-20 lg:pt-10 lg:pb-5 lg:shadow-[7px_7px_4.7px_0px_rgba(0,0,0,0.15)]"
     >
       <input
         ref={fileInputRef}
@@ -62,51 +63,82 @@ export default function AvatarUploadCard() {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`flex w-full min-h-[280px] cursor-pointer flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed px-4 py-8 transition-colors ${
-          isDragging ? "border-[#582FF5] bg-[#582FF5]/5" : "border-[#B5B5B5]"
+        className={`flex h-[182px] w-full cursor-pointer rounded-2xl p-3 shadow-[7px_7px_9.4px_0px_rgba(0,0,0,0.15)] transition-colors sm:h-[clamp(182px,31.6vw,324px)] sm:w-[clamp(342px,67.4vw,690px)] lg:h-auto lg:bg-transparent lg:p-0 lg:shadow-none ${
+          isDragging
+            ? "bg-[#582FF5]/5"
+            : "bg-[#E5E5E5] lg:bg-transparent"
         }`}
       >
-        {previewUrl ? (
-          <span className="flex size-[166px] items-center justify-center overflow-hidden rounded-full">
-            <img
-              src={previewUrl}
-              alt="Преглед на фотографијата"
-              className="size-full object-cover"
+        <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 rounded-2xl p-3 sm:gap-[clamp(16px,3.1vw,32px)] sm:p-[clamp(12px,3.9vw,40px)] lg:h-[324px] lg:w-[690px] lg:gap-8 lg:p-10">
+          <svg
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 size-full"
+            preserveAspectRatio="none"
+            viewBox="0 0 100 100"
+          >
+            <rect
+              x="0.5"
+              y="0.5"
+              width="99"
+              height="99"
+              rx="4.8"
+              fill="none"
+              stroke={isDragging ? "#582FF5" : "#000000"}
+              strokeWidth="1"
+              strokeDasharray="12 12"
+              vectorEffect="non-scaling-stroke"
             />
-          </span>
-        ) : (
-          <Image
-            src="/Generic_avatar_onboarding.svg"
-            alt=""
-            width={166}
-            height={166}
-            className="size-[166px]"
-            priority
-          />
-        )}
+          </svg>
 
-        <p className="text-center font-(family-name:--font-manrope) text-[20px] font-normal leading-[22.59px] text-[#333333]">
-          Прикачи своја фотографија,
-          <br />а ние ќе ја претвориме во{" "}
-          <span className="text-[#582FF5]">твој личен аватар.</span>
-        </p>
+          {previewUrl ? (
+            <span className="flex size-[92px] items-center justify-center overflow-hidden rounded-full sm:size-[clamp(92px,16.2vw,166px)] lg:size-[166px]">
+              <img
+                src={previewUrl}
+                alt="Преглед на фотографијата"
+                className="size-full object-cover"
+              />
+            </span>
+          ) : (
+            <Image
+              src="/Generic_avatar_onboarding.svg"
+              alt=""
+              width={166}
+              height={166}
+              className="size-[92px] sm:size-[clamp(92px,16.2vw,166px)] lg:size-[166px]"
+              priority
+            />
+          )}
+
+          <p className="max-w-[280px] text-center font-(family-name:--font-manrope) text-[14px] font-normal leading-none text-black sm:max-w-[clamp(280px,49vw,502px)] sm:text-[clamp(14px,1.95vw,20px)] sm:leading-[1.13] lg:max-w-[502px] lg:text-[20px] lg:leading-[22.595px]">
+            <span className="lg:hidden">
+              Прикачи фотографија за дополнителна персонализација на твојот
+              профил.
+            </span>
+            <span className="hidden lg:inline">
+              Прикачи своја фотографија за дополнителна персонализација на твојот
+              профил.
+            </span>
+          </p>
+        </div>
       </button>
 
-      <button
-        type="button"
-        onClick={previewUrl ? () => finishOnboarding(router) : openFilePicker}
-        className="mx-auto mt-6 h-12 w-full max-w-[400px] cursor-pointer rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[15px] font-bold text-white transition-colors hover:bg-[#4B25E0]"
-      >
-        {previewUrl ? "Продолжи" : "Прикачи фотографија"}
-      </button>
+      <div className="flex w-full flex-col items-center gap-[21px] lg:gap-6">
+        <button
+          type="button"
+          onClick={previewUrl ? () => finishOnboarding(router) : openFilePicker}
+          className="h-10 w-full cursor-pointer rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[16px] font-bold text-white transition-colors hover:bg-[#4B25E0] lg:h-14 lg:max-w-[400px]"
+        >
+          {previewUrl ? "Продолжи" : "Прикачи фотографија"}
+        </button>
 
-      <button
-        type="button"
-        onClick={() => finishOnboarding(router)}
-        className="mx-auto mt-4 block cursor-pointer text-center font-(family-name:--font-manrope) text-[16px] font-normal leading-none text-[#737373] transition-colors hover:text-[#333333]"
-      >
-        Можеби подоцна
-      </button>
+        <button
+          type="button"
+          onClick={() => finishOnboarding(router)}
+          className="cursor-pointer text-center font-(family-name:--font-manrope) text-[14px] font-normal leading-none text-[#595959] transition-colors hover:text-[#333333] lg:text-[16px]"
+        >
+          Можеби подоцна
+        </button>
+      </div>
     </div>
   );
 }

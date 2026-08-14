@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createComment } from "@/api/comments";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import { useProfile } from "@/hooks/useProfile";
-import { canCreateComments } from "@/lib/capabilities";
+import { canCreateComments, needsOnboarding } from "@/lib/capabilities";
 
 const MAX_COMMENT_LENGTH = 1000;
 
 export default function CommentComposer({
-  forumSlug,
   threadId,
   parentId = null,
   compact = false,
@@ -72,8 +72,15 @@ export default function CommentComposer({
             </Link>{" "}
             за да коментираш.
           </>
+        ) : needsOnboarding(user) ? (
+          <>
+            <Link href="/register/onboarding" className="font-bold text-[#582FF5] hover:underline">
+              Заврши ја регистрацијата
+            </Link>{" "}
+            за да можеш да коментираш.
+          </>
         ) : (
-          "Заврши го onboarding процесот за да можеш да коментираш."
+          "Немаш дозвола да коментираш."
         )}
       </div>
     );
@@ -131,22 +138,22 @@ export default function CommentComposer({
           </button>
         ) : (
           <Link
-            href={`/p/${forumSlug}`}
+            href="/rules"
             className="cursor-pointer text-[12px] leading-[18px] text-[#595959] underline underline-offset-[3px] transition-colors hover:text-black"
           >
             Внимавај на правилата на заедницата.
           </Link>
         )}
 
-        <button
+        <PrimaryButton
           type="submit"
           disabled={isEmpty || busy}
-          className={`shrink-0 cursor-pointer rounded-xl bg-[#582FF5] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0] disabled:cursor-not-allowed disabled:bg-[#CCCCCC] ${
+          className={`shrink-0 leading-none disabled:bg-[#CCCCCC] ${
             compact ? "h-9 px-5 text-[12px]" : "h-10 w-36 text-[14px]"
           }`}
         >
           {busy ? "…" : "Објави"}
-        </button>
+        </PrimaryButton>
       </div>
     </form>
   );

@@ -1,10 +1,7 @@
 import AppShell from "@/components/shell/AppShell";
 import Threads from "@/components/thread/Threads";
-import newestDiscussions from "../../../public/newest-discussions-mock.json";
 
 export default function NewestDiscussions() {
-  const threads = Array.isArray(newestDiscussions.data) ? newestDiscussions.data : [];
-
   return (
     <AppShell>
       <div className="flex w-[990px] max-w-full flex-col gap-8">
@@ -18,8 +15,9 @@ export default function NewestDiscussions() {
         </div>
 
         <Threads
+          listPath="/api/newest"
           defaultSort="newest"
-          staticThreads={threads}
+          showSort={false}
         />
       </div>
     </AppShell>

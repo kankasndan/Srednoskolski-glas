@@ -5,6 +5,7 @@ import ThreadAttachments from "@/components/thread/ThreadAttachments";
 import ThreadMetaTags, { buildThreadMetaTags } from "@/components/thread/ThreadMetaTags";
 import ThreadPoll from "@/components/thread/ThreadPoll";
 import ThreadStats from "@/components/thread/ThreadStats";
+import ThreadViewCount from "@/components/thread/ThreadViewCount";
 import { renderHtmlProps } from "@/lib/html";
 import { formatPostedAgo } from "@/lib/time";
 
@@ -30,6 +31,7 @@ export default function ThreadPost({ forum, thread, onThreadUpdated }) {
             {...renderHtmlProps(thread.description)}
           />
         ) : null}
+        <ThreadViewCount views={thread.views} />
         <ThreadAttachments attachments={thread.attachments} />
         <ThreadPoll poll={thread.poll} />
       </div>
@@ -38,11 +40,12 @@ export default function ThreadPost({ forum, thread, onThreadUpdated }) {
 
       <ThreadStats
         threadId={thread.id}
-        views={thread.views}
         comments={thread.comments_count}
         votes={thread.upvotes}
         hasVoted={thread.has_voted}
+        isFollowing={thread.is_following}
         onVoted={(vote) => onThreadUpdated?.(vote)}
+        onFollowingChange={(is_following) => onThreadUpdated?.({ is_following })}
       />
     </article>
   );

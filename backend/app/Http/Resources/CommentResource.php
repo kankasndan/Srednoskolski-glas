@@ -27,9 +27,7 @@ class CommentResource extends JsonResource
             'edited_at' => $this->edited_at,
             'deleted_by' => $this->deleted_by,
             'author' => new UserResource($this->whenLoaded('user')),
-            'replies' => CommentResource::collection(
-                $this->whenLoaded('allReplies'),
-            ),
+            'replies_count' => (int) ($this->replies_count ?? 0),
         ];
     }
 }

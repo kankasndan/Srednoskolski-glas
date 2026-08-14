@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Dashboard')
+@section('title', 'Контролна табла')
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
@@ -8,15 +8,15 @@
     {{-- Stat Cards --}}
     <div class="flex justify-start items-center gap-4">
         <div class="bg-white rounded-xl shadow p-5">
-            <h6 class="text-sm text-gray-500 mb-1">Total Users</h6>
+            <h6 class="text-sm text-gray-500 mb-1">Вкупно корисници</h6>
             <p class="text-2xl font-semibold text-gray-900">{{ number_format($totalUsers) }}</p>
         </div>
         <div class="bg-white rounded-xl shadow p-5">
-            <h6 class="text-sm text-gray-500 mb-1">Active Users</h6>
+            <h6 class="text-sm text-gray-500 mb-1">Активни корисници</h6>
             <p class="text-2xl font-semibold text-gray-900">{{ number_format($activeUsers) }}</p>
         </div>
         <div class="bg-white rounded-xl shadow p-5">
-            <h6 class="text-sm text-gray-500 mb-1">New Registrations (30d)</h6>
+            <h6 class="text-sm text-gray-500 mb-1">Нови регистрации (30 дена)</h6>
             <p class="text-2xl font-semibold text-gray-900">{{ number_format($newRegistrations30d) }}</p>
         </div>
     </div>
@@ -25,30 +25,30 @@
         {{-- Registrations Over Time Chart --}}
         <div class="lg:col-span-2 bg-white rounded-xl shadow p-5">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="font-semibold text-gray-900">New Registrations Over Time</h2>
+                <h2 class="font-semibold text-gray-900">Нови регистрации низ време</h2>
                 <form method="GET">
                     <select name="range" onchange="this.form.submit()"
-                        class="border border-gray-300 rounded-md text-sm px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="7"  {{ request('range') == 7  ? 'selected' : '' }}>Last 7 days</option>
-                        <option value="30" {{ request('range', 30) == 30 ? 'selected' : '' }}>Last 30 days</option>
-                        <option value="90" {{ request('range') == 90 ? 'selected' : '' }}>Last 90 days</option>
+                        class="border border-gray-300 rounded-md text-sm px-2 py-1 focus:outline-none focus:ring-2 focus:ring-my-purple">
+                        <option value="7"  {{ request('range') == 7  ? 'selected' : '' }}>Последни 7 дена</option>
+                        <option value="30" {{ request('range', 30) == 30 ? 'selected' : '' }}>Последни 30 дена</option>
+                        <option value="90" {{ request('range') == 90 ? 'selected' : '' }}>Последни 90 дена</option>
                     </select>
                 </form>
             </div>
             <canvas id="registrationsChart" height="120"></canvas>
         </div>
 
-        {{-- Top Forums --}}
+        {{-- Топ форуми --}}
         <div class="bg-white rounded-xl shadow p-5">
-            <h2 class="font-semibold text-gray-900 mb-3">Top Forums</h2>
+            <h2 class="font-semibold text-gray-900 mb-3">Топ форуми</h2>
             <ul class="divide-y divide-gray-100">
                 @foreach ($topForums as $forum)
                     <li class="flex justify-between items-center py-2">
                         <a href="{{ route('forum.show', ["forum" => $forum->id]) }}"
-                           class="text-sm text-gray-700 hover:text-indigo-600">
+                           class="text-sm text-gray-700 hover:text-my-purple">
                             {{ $forum->name }}
                         </a>
-                        <span class="text-xs font-medium bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5">
+                        <span class="text-xs font-medium bg-my-purple/10 text-my-purple rounded-full px-2 py-0.5">
                             {{ $forum->activity_score }}
                         </span>
                     </li>
@@ -58,15 +58,15 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {{-- Users by City --}}
+        {{-- Корисници по град --}}
         <div class="bg-white rounded-xl shadow p-5">
-            <h2 class="font-semibold text-gray-900 mb-3">Users by City</h2>
+            <h2 class="font-semibold text-gray-900 mb-3">Корисници по град</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="text-left text-gray-500 border-b">
-                            <th class="py-2">City</th>
-                            <th class="py-2 text-right">Users</th>
+                            <th class="py-2">Град</th>
+                            <th class="py-2 text-right">Корисници</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -81,15 +81,15 @@
             </div>
         </div>
 
-        {{-- Users by School --}}
+        {{-- Корисници по училиште --}}
         <div class="bg-white rounded-xl shadow p-5">
-            <h2 class="font-semibold text-gray-900 mb-3">Users by School</h2>
+            <h2 class="font-semibold text-gray-900 mb-3">Корисници по училиште</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="text-left text-gray-500 border-b">
-                            <th class="py-2">School</th>
-                            <th class="py-2 text-right">Users</th>
+                            <th class="py-2">Училиште</th>
+                            <th class="py-2 text-right">Корисници</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -108,8 +108,8 @@
     {{-- Export --}}
     <div class="flex justify-end">
         <a href="{{ route('admin.dashboard.export') }}"
-           class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
-            Export PDF Report
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-my-purple text-sm font-medium text-white hover:bg-my-purple/90">
+            Извези PDF извештај
         </a>
     </div>
 
@@ -125,10 +125,10 @@
         data: {
             labels: @json($registrationLabels),
             datasets: [{
-                label: 'New Registrations',
+                label: 'Нови регистрации',
                 data: @json($registrationCounts),
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99,102,241,0.1)',
+                borderColor: '#582FF5',
+                backgroundColor: 'rgba(88,47,245,0.12)',
                 fill: true,
                 tension: 0.3
             }]

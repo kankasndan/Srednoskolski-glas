@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
+import { useModalDismiss } from "@/hooks/useModalDismiss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faXmark } from "@fortawesome/free-solid-svg-icons";
 
@@ -47,20 +48,7 @@ async function downloadImage(url) {
 export default function ImageLightbox({ src, onClose }) {
   const [downloading, setDownloading] = useState(false);
 
-  useEffect(() => {
-    function handleKeyDown(event) {
-      if (event.key === "Escape") onClose?.();
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose]);
+  useModalDismiss(true, onClose);
 
   async function handleDownload(event) {
     event.stopPropagation();
@@ -113,7 +101,7 @@ export default function ImageLightbox({ src, onClose }) {
         src={src}
         alt=""
         onClick={(event) => event.stopPropagation()}
-        className="max-h-full max-w-full object-contain"
+        className="max-h-[78vh] max-w-full rounded-xl object-contain lg:max-h-full lg:rounded-none"
       />
     </div>,
     document.body,
