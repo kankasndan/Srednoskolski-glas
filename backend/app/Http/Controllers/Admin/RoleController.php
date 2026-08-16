@@ -64,7 +64,7 @@ class RoleController extends Controller
         $user->update(['role' => 'user']);
         $user->syncRoles(['user']);
 
-        return back()->with(['success' => 'Улогата е одземена. Корисникот е вратен на обичен корисник.']);
+        return redirect()->route('role.index')->with(['success' => 'Улогата е одземена. Корисникот е вратен на обичен корисник.']);
     }
 
     public function liveSearch(Request $request)

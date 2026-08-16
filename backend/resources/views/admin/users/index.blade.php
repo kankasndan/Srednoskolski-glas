@@ -26,7 +26,7 @@
         <div class="flex items-center gap-3 relative">
             <input type="text" id="user-search" name="search" value="{{ request('search') }}"
                 placeholder="Пребарај по корисничко име или е-пошта..."
-                class="flex-1 min-w-[220px] border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
+                class="flex-1 min-w-55 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
 
             <div id="search-results"
                 class="absolute left-0 top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg hidden z-50">
@@ -79,7 +79,8 @@
             </thead>
             <tbody class="divide-y divide-gray-100">
                 @forelse ($users as $user)
-                    <tr class="cursor-pointer hover:bg-gray-50" onclick="window.location='{{ route('user.show', $user->id) }}'">
+                    <tr class="cursor-pointer hover:bg-gray-50"
+                        onclick="window.location='{{ route('user.show', $user->id) }}'">
                         <td class="px-4 py-3 flex items-center gap-3">
                             <img src="{{ $user->imageUrl ?? 'https://via.placeholder.com/32' }}"
                                 class="w-8 h-8 rounded-full object-cover">
@@ -91,80 +92,112 @@
                         <td class="px-4 py-3 text-gray-500 capitalize">{{ $user->provider ?? '—' }}</td>
                         <td class="px-4 py-3 text-gray-800 font-medium">{{ $user->karma ?? 0 }}</td>
                         <td class="px-4 py-3">
-                            @if ($user->sanctions()->exists())
-                                @foreach ($user->sanctions as $sanction)
-                                    @if ($sanction->type != 'warning' && ($sanction->expires_at === null || $sanction->expires_at->isFuture()))
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Баниран</span>
-                                    @endif
-                                @endforeach
-                            @else
-                                <span
-                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Активен</span>
-                            @endif
+                            @switch($user->sanction_status)
+                                @case('banned')
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                        Баниран
+                                    </span>
+                                @break
+
+                                @case('warning')
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                                        Предупредување
+                                    </span>
+                                @break
+
+                                @default
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                        Активен
+                                    </span>
+                            @endswitch
                         </td>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="px-4 py-8 text-center text-gray-400 text-sm">
-                            Нема корисници што одговараат на филтрите.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="px-4 py-8 text-center text-gray-400 text-sm">
+                                Нема корисници што одговараат на филтрите.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-    {{-- Pagination --}}
-    <div class="mt-6">
-        {{ $users->withQueryString()->links() }}
-    </div>
+        {{-- Pagination --}}
+        <div class="flex justify-center my-10">
+            <nav class="flex gap-1 text-sm">
+                @if ($users->onFirstPage())
+                    <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
+                        Претходна
+                    </button>
+                @else
+                    <a href="{{ $users->previousPageUrl() }}"
+                        class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
+                        Претходна
+                    </a>
+                @endif
 
-    @push('scripts')
-        <script>
-            const roleShowTemplate = "{{ route('user.show', ['user' => '__ID__']) }}";
-            const liveSearchUrl = "{{ route('user.liveSearch') }}";
+                @if ($users->hasMorePages())
+                    <a href="{{ $users->nextPageUrl() }}"
+                        class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
+                        Следна
+                    </a>
+                @else
+                    <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
+                        Следна
+                    </button>
+                @endif
+            </nav>
+        </div>
 
-            const searchInput = document.getElementById('user-search');
-            const resultsBox = document.getElementById('search-results');
+        @push('scripts')
+            <script>
+                const roleShowTemplate = "{{ route('user.show', ['user' => '__ID__']) }}";
+                const liveSearchUrl = "{{ route('user.liveSearch') }}";
 
-            searchInput.addEventListener('input', function() {
-                const query = this.value.trim();
+                const searchInput = document.getElementById('user-search');
+                const resultsBox = document.getElementById('search-results');
 
-                if (query.length < 2) {
-                    resultsBox.classList.add('hidden');
-                    return;
-                }
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.trim();
 
-                fetch(`${liveSearchUrl}?q=${encodeURIComponent(query)}`)
-                    .then(res => res.json())
-                    .then(users => renderResults(users))
-                    .catch(err => console.error(err));
-            });
+                    if (query.length < 2) {
+                        resultsBox.classList.add('hidden');
+                        return;
+                    }
 
-            function renderResults(users) {
-                resultsBox.innerHTML = '';
+                    fetch(`${liveSearchUrl}?q=${encodeURIComponent(query)}`)
+                        .then(res => res.json())
+                        .then(users => renderResults(users))
+                        .catch(err => console.error(err));
+                });
 
-                if (users.length === 0) {
-                    resultsBox.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">Нема совпаѓања</div>`;
-                    resultsBox.classList.remove('hidden');
-                    return;
-                }
+                function renderResults(users) {
+                    resultsBox.innerHTML = '';
 
-                users.forEach(user => {
-                    const row = document.createElement('a');
-                    row.href = roleShowTemplate.replace('__ID__', user.id);
-                    row.className =
-                        'block px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center text-sm border-b border-gray-100 last:border-0 no-underline text-inherit';
-                    row.innerHTML = `
+                    if (users.length === 0) {
+                        resultsBox.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">Нема совпаѓања</div>`;
+                        resultsBox.classList.remove('hidden');
+                        return;
+                    }
+
+                    users.forEach(user => {
+                        const row = document.createElement('a');
+                        row.href = roleShowTemplate.replace('__ID__', user.id);
+                        row.className =
+                            'block px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center text-sm border-b border-gray-100 last:border-0 no-underline text-inherit';
+                        row.innerHTML = `
                 <span class="font-medium text-gray-800">${user.username ?? 'Нема корисничко име'}</span>
                 <span class="text-gray-400 text-xs">${user.email}</span>
             `;
-                    resultsBox.appendChild(row);
-                });
+                        resultsBox.appendChild(row);
+                    });
 
-                resultsBox.classList.remove('hidden');
-            }
-        </script>
-    @endpush
-@endsection
+                    resultsBox.classList.remove('hidden');
+                }
+            </script>
+        @endpush
+    @endsection

@@ -194,7 +194,7 @@
                                     <td class="px-6 py-4 text-gray-600">
                                         {{ $resolvedAppeal->resolvedBy->username ?? 'Систем' }}</td>
                                     <td class="px-6 py-4 text-gray-500">
-                                        {{ $resolvedAppeal->deleted_at?->diffForHumans() ?? '—' }}</td>
+                                        {{ $resolvedAppeal->resolved_at?->format('d.m.y') ?? '—' }}</td>
                                     <td class="px-6 py-4 text-right">
                                         <button type="button"
                                             class="text-my-purple hover:text-my-purple font-medium text-sm"

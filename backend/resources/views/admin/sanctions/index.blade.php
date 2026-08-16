@@ -84,7 +84,11 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach ($activeSanctions as $sanction)
+                        @if($sanctionId && $sanction->id == $sanctionId)
+                            <tr class="bg-gray-100">
+                        @else
                             <tr class="hover:bg-gray-50">
+                        @endif
                                 <td class="px-4 py-3 flex items-center gap-2">
                                     <img src="{{ $sanction->user->imageUrl }}" class="w-8 h-8 rounded-full">
                                     <span class="font-medium text-gray-900">{{ $sanction->user->username }}</span>

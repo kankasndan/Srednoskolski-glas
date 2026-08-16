@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SanctionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view sanctions');
 
@@ -26,7 +26,10 @@ class SanctionController extends Controller
 
         $appeals = Appeal::where("status", "pending")->count();
 
-        return view('admin.sanctions.index', compact('expiredSanctions', 'activeSanctions', 'appeals', 'permanentBansCount', 'warnings30Days'));
+        $sanctionId = $request->query('sanction');
+            
+        return view('admin.sanctions.index', compact('expiredSanctions', 'activeSanctions', 'appeals', 'permanentBansCount', 'warnings30Days', 'sanctionId'));
+
     }
 
     public function remove(Sanction $sanction)

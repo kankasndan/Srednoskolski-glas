@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appeal;
+use Carbon\Traits\Timestamp;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AppealController extends Controller
 {
@@ -56,6 +58,8 @@ class AppealController extends Controller
 
         $appeal->update([
             'status' => 'accepted',
+            'admin_id' => Auth::id(),
+            'resolved_at' => now(),
         ]);
 
         return redirect()->route('appeal.index')->with(['success' => 'Жалбата е успешно прифатена.']);
@@ -67,6 +71,8 @@ class AppealController extends Controller
 
         $appeal->update([
             'status' => 'rejected',
+            'admin_id' => Auth::id(),
+            'resolved_at' => now(),
         ]);
 
         return redirect()->route('appeal.index')->with(['success' => 'Жалбата е успешно одбиена.']);

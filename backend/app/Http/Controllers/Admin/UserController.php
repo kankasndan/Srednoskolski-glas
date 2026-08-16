@@ -54,7 +54,7 @@ class UserController extends Controller
                 });
             })
             ->where('role', 'user')
-            ->paginate(20)
+            ->paginate(10)
             ->withQueryString();
 
         $schools = School::orderBy('name')->get();
@@ -112,4 +112,25 @@ class UserController extends Controller
 
         return $pdf->download("user-{$user->id}-report.pdf");
     }
+
+
+public function getSanctionStatusAttribute(): string
+{
+    $activeBan = $this->sanctions
+        ->where('type', '!=', 'warning')
+        ->first(function ($sanction) {
+            return $sanction->expires_at === null
+                || $sanction->expires_at->isFuture();
+        });
+
+    if ($activeBan) {
+        return 'banned';
+    }
+
+    if ($this->sanctions->where('type', 'warning')->isNotEmpty()) {
+        return 'warning';
+    }
+
+    return 'active';
+}
 }
