@@ -63,7 +63,6 @@ class AppealSeeder extends Seeder
                     'explanation' => $row['explanation'],
                     'status' => $row['status'],
                     'admin_id' => $adminId,
-                    'admin_response' => $row['admin_response'] ?? null,
                     'resolved_at' => in_array($row['status'], ['accepted', 'rejected'], true) ? now()->subHours(5) : null,
                 ],
             );

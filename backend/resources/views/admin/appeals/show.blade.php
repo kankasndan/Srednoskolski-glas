@@ -61,7 +61,7 @@
             </div>
 
             <!-- Ban Info Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6 hover:bg-gray-100 cursor-pointer" onclick="window.location='{{ route('sanction.index', ['sanction' => $sanction->id]) }}'">
                 <h2 class="text-sm font-semibold text-gray-500 uppercase mb-4">Детали за санкција</h2>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -153,8 +153,9 @@
 
             <!-- Decision Actions -->
             <div class="flex justify-between items-center bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                
+                @if($appeal->status == "pending")
                 <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Реши жалба</h2>
-
                 <div class="flex justify-end gap-3">
                     @can('reject appeals')
                         <form action="{{ route('appeal.reject', ['appeal' => $appeal->id]) }}" method="POST">
@@ -172,11 +173,18 @@
                             @method('PATCH')
                             <button type="submit"
                                 class="px-5 py-2 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700">
-                                Прифати и одбани
+                                Прифати и отстрани санкција
                             </button>
                         </form>
                     @endcan
                 </div>
+                @else
+                    <div class="">
+                        <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Решена Жалба</h2>
+                    </div>
+
+                        Жалбата е решена на: {{ $appeal->resolved_at->format('d.m.Y') }}
+                @endif
             </div>
 
         </div>

@@ -15,7 +15,6 @@ return new class extends Migration
             $table->text('explanation');
             $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending');
             $table->foreignId('admin_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->text('admin_response')->nullable();
             $table->timestamp('resolved_at')->nullable();
             $table->timestamps();
         });

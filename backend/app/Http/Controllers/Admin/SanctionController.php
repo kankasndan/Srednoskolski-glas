@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class SanctionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view sanctions');
 
@@ -26,9 +26,11 @@ class SanctionController extends Controller
         $permanentBansCount = Sanction::where('type', 'permanent_ban')->count();
         $warnings30Days = Sanction::where('type', 'warning')->where('created_at', '>=', now()->subDays(30))->count();
 
-        $appeals = Appeal::count();
+        $appeals = Appeal::where('status', 'pending')->count();
 
-        return view('admin.sanctions.index', compact('expiredSanctions', 'activeSanctions', 'appeals', 'permanentBansCount', 'warnings30Days'));
+        $sanctionId = $request->query('sanction');
+
+        return view('admin.sanctions.index', compact('expiredSanctions', 'activeSanctions', 'appeals', 'permanentBansCount', 'warnings30Days', 'sanctionId'));
     }
 
     public function remove(Sanction $sanction)
@@ -39,6 +41,8 @@ class SanctionController extends Controller
             'revoked_at' => now(),
             'revoked_by' => Auth::id(),
         ]);
+
+        $sanction->appeal?->delete();
 
         $sanction->delete();
 
@@ -55,7 +59,6 @@ class SanctionController extends Controller
             'days' => ['required_if:type,custom', 'nullable', 'integer', 'min:1'],
             'reason' => ['required', 'string', 'max:1000'],
             'report_id' => ['nullable', 'exists:reports,id'],
-            'content' => ['nullable', 'boolean'],
         ]);
 
         $actor = Auth::user();
@@ -98,6 +101,8 @@ class SanctionController extends Controller
 
         $sanctionedUser = User::findOrFail($validated['user_id']);
 
+        // Both halves matter: `role` is the column, `hasRole` is the assigned
+        // Spatie role. Checking only one leaves a staff account sanctionable.
         if (StaffRoleHierarchy::isStaff($sanctionedUser->role) || ! $sanctionedUser->hasRole('user')) {
             return back()
                 ->withErrors(['user_id' => 'Санкции може да се издадат само на обични корисници.'])

@@ -55,7 +55,7 @@ class UserController extends Controller
                 });
             })
             ->where('role', 'user')
-            ->paginate(20)
+            ->paginate(10)
             ->withQueryString();
 
         $schools = School::orderBy('name')->get();
@@ -69,8 +69,17 @@ class UserController extends Controller
 
         $query = mb_substr(trim((string) $request->get('q', '')), 0, 100);
 
-        $users = User::where('username', 'like', LikeEscape::contains($query))
-            ->where('role', 'user')
+        $usersQuery = User::where('username', 'like', LikeEscape::contains($query))
+            ->where('role', 'user');
+
+        if ($request->boolean('only_without_sanctions')) {
+            $usersQuery->whereDoesntHave('sanctions', function ($q) {
+                // adjust this to your active-sanction definition
+                $q->whereNull('revoked_at');
+            });
+        }
+
+        $users = $usersQuery
             ->limit(10)
             ->get(['id', 'username', 'email', 'role']);
 
@@ -103,5 +112,25 @@ class UserController extends Controller
         $pdf = Pdf::loadView('admin.users.export', ['user' => $user]);
 
         return $pdf->download("user-{$user->id}-report.pdf");
+    }
+
+    public function getSanctionStatusAttribute(): string
+    {
+        $activeBan = $this->sanctions
+            ->where('type', '!=', 'warning')
+            ->first(function ($sanction) {
+                return $sanction->expires_at === null
+                    || $sanction->expires_at->isFuture();
+            });
+
+        if ($activeBan) {
+            return 'banned';
+        }
+
+        if ($this->sanctions->where('type', 'warning')->isNotEmpty()) {
+            return 'warning';
+        }
+
+        return 'active';
     }
 }

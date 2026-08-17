@@ -16,11 +16,13 @@
         {{-- Tabs --}}
         <div class="flex gap-6 border-b border-slate-200">
             <button data-tab-btn="queue"
-                class="tab-btn pb-3 border-b-2 border-indigo-600 text-indigo-600 text-sm font-medium">
+                class="tab-btn pb-3 border-b-2 text-sm font-medium
+               {{ ($activeTab ?? 'queue') === 'queue' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
                 Пријави
             </button>
             <button data-tab-btn="history"
-                class="tab-btn pb-3 border-b-2 border-transparent text-slate-500 text-sm font-medium">
+                class="tab-btn pb-3 border-b-2 text-sm font-medium
+               {{ ($activeTab ?? 'queue') === 'history' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
                 Историја
             </button>
         </div>
@@ -42,11 +44,13 @@
         @endif
 
         {{-- =========================== REPORTS QUEUE TAB =========================== --}}
-        <div class="tab-panel space-y-4" data-tab-panel="queue">
+        <div class="tab-panel space-y-4 {{ ($activeTab ?? 'queue') === 'queue' ? '' : 'hidden' }}" data-tab-panel="queue">
 
             {{-- Filters --}}
             <form action="{{ route('report.index') }}" method="GET"
                 class="bg-white rounded-xl border border-slate-200 p-4 flex justify-start items-center gap-4">
+                <input type="hidden" name="tab" value="queue">
+
 
                 <div class="flex items-center gap-2">
                     <select class="rounded-lg border border-gray-300 text-sm p-1.5" name="source">
@@ -83,8 +87,9 @@
                 </button>
 
                 @if (request()->anyFilled(['source', 'type', 'reason']))
-                    <a href="{{ route('report.index') }}" class="text-sm text-gray-500 hover:underline">Clear
-                        filters</a>
+                    <a href="{{ route('report.index', ['tab' => 'queue']) }}" class="text-sm text-gray-500 hover:underline">
+                        Clear filters
+                    </a>
                 @endif
             </form>
 
@@ -175,7 +180,22 @@
                                 </div>
                                 <div class="">
                                     <span class="text-xs text-slate-500">Причина:</span>
-                                    <span class="text-sm font-semibold text-slate-700">{{ match ($report->reason) {
+                                    <span
+                                        class="text-sm font-semibold text-slate-700">{{ match ($report->reason) {
+                                            'spam' => 'Спам',
+                                            'insulting_content' => 'Навредлива содржина',
+                                            'misinformation' => 'Дезинформација',
+                                            'age_inappropriate' => 'Несоодветна содржина',
+                                            'other' => 'Друго',
+                                            default => $report->reason,
+                                        } }}</span>
+                                </div>
+                            </div>
+                        @else
+                            <div class="">
+                                <span class="text-xs text-slate-500">Причина:</span>
+                                <span
+                                    class="text-sm font-semibold text-slate-700">{{ match ($report->reason) {
                                         'spam' => 'Спам',
                                         'insulting_content' => 'Навредлива содржина',
                                         'misinformation' => 'Дезинформација',
@@ -183,19 +203,6 @@
                                         'other' => 'Друго',
                                         default => $report->reason,
                                     } }}</span>
-                                </div>
-                            </div>
-                        @else
-                            <div class="">
-                                <span class="text-xs text-slate-500">Причина:</span>
-                                <span class="text-sm font-semibold text-slate-700">{{ match ($report->reason) {
-                                    'spam' => 'Спам',
-                                    'insulting_content' => 'Навредлива содржина',
-                                    'misinformation' => 'Дезинформација',
-                                    'age_inappropriate' => 'Несоодветна содржина',
-                                    'other' => 'Друго',
-                                    default => $report->reason,
-                                } }}</span>
                             </div>
                         @endif
                     </div>
@@ -288,17 +295,9 @@
                     class="modal hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div class="modal-box bg-white rounded-xl w-full max-w-md p-6 space-y-5">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-lg font-bold text-slate-900">Санкционирај корисник</h2>
+                            <h2 class="text-lg font-bold text-slate-900">Санкционирај</h2>
                             <button data-close-modal="sanctionModal-{{ $report->id }}"
                                 class="text-slate-400 hover:text-slate-600">✕</button>
-                        </div>
-
-                        <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-                            <div class="text-xs font-semibold text-indigo-700 uppercase mb-1">Системска препорака</div>
-                            <p class="text-sm text-indigo-900">
-                                Based on 2 prior offenses, a <span class="font-semibold">7-day ban</span> is recommended
-                                for consistency.
-                            </p>
                         </div>
 
                         <form action="{{ route('sanction.create') }}" method="POST" class="space-y-2">
@@ -323,12 +322,12 @@
                                 <input type="radio" name="type" value="7-day"
                                     class="sanction-radio text-indigo-600" checked>
                                 <div>
-                                    <div class="text-sm font-medium text-slate-800">7-Day Ban <span
-                                            class="text-indigo-600 text-xs">(recommended)</span></div>
+                                    <div class="text-sm font-medium text-slate-800">7 дневна санкција</div>
                                     <div class="text-xs text-slate-500">Сметката е заклучена една недела</div>
                                 </div>
                             </label>
-                            @if (auth()->user()?->hasAnyRole(['admin', 'super_admin']))
+                            @if (auth()->user()
+                                    ?->hasAnyRole(['admin', 'super_admin']))
                                 <label
                                     class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
                                     <input type="radio" name="type" value="permanent_ban"
@@ -363,7 +362,8 @@
                                     class="flex-1 px-4 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50">
                                     Откажи
                                 </button>
-                                <button data-action="confirm-sanction" data-close-modal="sanctionModal-{{ $report->id }}"
+                                <button data-action="confirm-sanction"
+                                    data-close-modal="sanctionModal-{{ $report->id }}"
                                     class="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700">
                                     Потврди санкција
                                 </button>
@@ -408,7 +408,8 @@
         </div>
 
         {{-- =========================== HISTORY TAB =========================== --}}
-        <div class="tab-panel space-y-4 hidden" data-tab-panel="history">
+        <div class="tab-panel space-y-4 {{ ($activeTab ?? 'queue') === 'history' ? '' : 'hidden' }}"
+            data-tab-panel="history">
 
             <form action="{{ route('report.index') }}" method="GET"
                 class="bg-white rounded-xl border border-slate-200 p-4 flex justify-start items-center gap-4">
@@ -431,6 +432,13 @@
                     class="bg-my-purple text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-my-purple/90">
                     Филтрирај
                 </button>
+
+                @if (request()->anyFilled(['status', 'type']))
+                    <a href="{{ route('report.index', ['tab' => 'history']) }}"
+                        class="text-sm text-gray-500 hover:underline">
+                        Clear filters
+                    </a>
+                @endif
             </form>
 
             @forelse ($resolvedReports as $historyReport)
@@ -448,15 +456,17 @@
                                     Одбиена
                                 </span>
                             @endif
-                            <span class="text-xs text-slate-400">{{ match (class_basename($historyReport->reportable_type)) {
-                                'Comment' => 'Коментар',
-                                'Thread' => 'Дискусија',
-                                'User' => 'Корисник',
-                                default => class_basename($historyReport->reportable_type),
-                            } }}</span>
+                            <span
+                                class="text-xs text-slate-400">{{ match (class_basename($historyReport->reportable_type)) {
+                                    'Comment' => 'Коментар',
+                                    'Thread' => 'Дискусија',
+                                    'User' => 'Корисник',
+                                    default => class_basename($historyReport->reportable_type),
+                                } }}</span>
                         </div>
                         <span class="text-sm text-slate-700">Пријавено од {{ $historyReport->reporter->username }} ·
-                            Причина: {{ match ($historyReport->reason) {
+                            Причина:
+                            {{ match ($historyReport->reason) {
                                 'spam' => 'Спам',
                                 'insulting_content' => 'Навредлива содржина',
                                 'misinformation' => 'Дезинформација',
@@ -551,7 +561,8 @@
                             label.classList.add('border-slate-200');
                         });
                         radio.closest('.sanction-option').classList.remove('border-slate-200');
-                        radio.closest('.sanction-option').classList.add('border-indigo-300', 'bg-indigo-50');
+                        radio.closest('.sanction-option').classList.add('border-indigo-300',
+                            'bg-indigo-50');
 
                         var customInput = radio.closest('form').querySelector('#customDaysInput');
                         if (customInput) {
@@ -616,7 +627,8 @@
                         var visibleCount = 0;
 
                         document.querySelectorAll('.report-card').forEach(function(card) {
-                            var matchesSource = sourceVal === 'all' || card.getAttribute('data-source') === sourceVal;
+                            var matchesSource = sourceVal === 'all' || card.getAttribute('data-source') ===
+                                sourceVal;
                             var matchesType = typeVal === 'all' || card.getAttribute('data-type') === typeVal;
                             var visible = matchesSource && matchesType;
                             card.classList.toggle('hidden', !visible);

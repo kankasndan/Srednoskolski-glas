@@ -84,7 +84,11 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach ($activeSanctions as $sanction)
+                        @if($sanctionId && $sanction->id == $sanctionId)
+                            <tr class="bg-gray-100">
+                        @else
                             <tr class="hover:bg-gray-50">
+                        @endif
                                 <td class="px-4 py-3 flex items-center gap-2">
                                     <img src="{{ $sanction->user->imageUrl }}" class="w-8 h-8 rounded-full">
                                     <span class="font-medium text-gray-900">{{ $sanction->user->username }}</span>
@@ -115,14 +119,27 @@
                                 @endif
                                 <td class="px-4 py-3 text-gray-600">{{ $sanction->user->sanctions()->count() }}</td>
                                 <td class="px-4 py-3 text-right">
-                                    @can('remove sanctions')
-                                        <form action="{{ route('sanction.remove', ['sanction' => $sanction->id]) }}"
-                                            method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="text-blue-600 hover:underline font-medium">Тргни санкција</button>
-                                        </form>
-                                    @endcan
+                                    @if ($sanction->type == 'permanent_ban')
+                                        @can('remove permanent sanctions')
+                                            <form action="{{ route('sanction.remove', ['sanction' => $sanction->id]) }}"
+                                                method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="text-blue-600 hover:underline font-medium">Тргни
+                                                    санкција</button>
+                                            </form>
+                                        @endcan
+                                    @else
+                                        @can('remove sanctions')
+                                            <form action="{{ route('sanction.remove', ['sanction' => $sanction->id]) }}"
+                                                method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="text-blue-600 hover:underline font-medium">Тргни
+                                                    санкција</button>
+                                            </form>
+                                        @endcan
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -183,7 +200,8 @@
                                             default => $sanction->type,
                                         } }}</span>
                                 </td>
-                                <td class="px-4 py-3 text-green-600">{{ $sanction->issued_by ? "Избришана" : "Истечена" }}</td>
+                                <td class="px-4 py-3 text-green-600">{{ $sanction->issued_by ? 'Избришана' : 'Истечена' }}
+                                </td>
                                 <td class="px-4 py-3 text-gray-500">{{ $sanction->deleted_at?->format('d.m.Y') }}</td>
                             </tr>
                         @endforeach
@@ -255,16 +273,19 @@
                                 <input type="radio" name="type" value="7-day" checked class="text-red-600">
                                 7-дневна забрана
                             </label>
-                            @if (auth()->user()?->hasAnyRole(['admin', 'super_admin']))
+                            @if (auth()->user()
+                                    ?->hasAnyRole(['admin', 'super_admin']))
                                 <label
                                     class="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer">
-                                    <input type="radio" name="type" value="permanent_ban" class="text-red-600"> Трајна
+                                    <input type="radio" name="type" value="permanent_ban" class="text-red-600">
+                                    Трајна
                                     забрана
                                 </label>
                             @endif
                             <label
                                 class="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer">
-                                <input type="radio" name="type" value="custom" class="text-red-600"> Прилагодено траење
+                                <input type="radio" name="type" value="custom" class="text-red-600"> Прилагодено
+                                траење
                             </label>
                         </div>
                     </div>
@@ -308,10 +329,11 @@
                 document.getElementById('tab-' + name).classList.remove('border-transparent', 'text-gray-500');
             }
 
-            document.querySelectorAll('input[name="type"]').forEach((radio, i) => {
+            document.querySelectorAll('input[name="type"]').forEach((radio) => {
                 radio.addEventListener('change', function() {
-                    document.getElementById('customDurationField').classList.toggle('hidden', i !== 3 || !this
-                        .checked);
+                    const isCustom = this.value === 'custom' && this.checked;
+                    document.getElementById('customDurationField')
+                        .classList.toggle('hidden', !isCustom);
                 });
             });
 
@@ -329,7 +351,7 @@
                     return;
                 }
 
-                fetch(`${liveSearchUrl}?q=${encodeURIComponent(query)}`)
+                fetch(`${liveSearchUrl}?q=${encodeURIComponent(query)}&only_without_sanctions=1`)
                     .then(res => res.json())
                     .then(users => renderResults(users))
                     .catch(err => console.error(err));

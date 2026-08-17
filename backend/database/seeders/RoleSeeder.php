@@ -15,6 +15,7 @@ class RoleSeeder extends Seeder
      * @var list<string>
      */
     private const ROLES = [
+        'user',
         'super_admin',
         'admin',
         'moderator',
