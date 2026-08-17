@@ -1,10 +1,7 @@
 import Link from "next/link";
+import { LEGAL_LINKS } from "@/lib/legalLinks";
 
-const links = [
-  { href: "/privacy", label: "Приватност" },
-  { href: "/terms", label: "Услови за користење" },
-  { href: "/rules", label: "Правила" },
-];
+const links = [LEGAL_LINKS.privacy, LEGAL_LINKS.terms, LEGAL_LINKS.rules];
 
 // Sekoja stranica ima drug gap vo kontejnerot, pa marginata se dopolnuva do ~44px vkupno.
 export default function MobileFooter({ className = "mt-8" }) {
