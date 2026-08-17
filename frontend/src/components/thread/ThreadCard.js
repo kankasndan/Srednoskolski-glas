@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toggleThreadVote } from "@/api/threads";
+import HighlightedText from "@/components/search/HighlightedText";
 import ThreadAttachments from "@/components/thread/ThreadAttachments";
 import ThreadMetaTags, { buildThreadMetaTags } from "@/components/thread/ThreadMetaTags";
 import ThreadPoll from "@/components/thread/ThreadPoll";
@@ -53,7 +54,7 @@ function ActionButton({ icon, label, count, onClick, active = false, compact = f
   );
 }
 
-export default function ThreadCard({ thread }) {
+export default function ThreadCard({ thread, highlight = null }) {
   const [upvotes, setUpvotes] = useState(thread.upvotes ?? 0);
   const [hasVoted, setHasVoted] = useState(Boolean(thread.has_voted));
   const [voting, setVoting] = useState(false);
@@ -108,7 +109,7 @@ export default function ThreadCard({ thread }) {
 
           <div className="flex w-full min-w-0 flex-col gap-2">
             <h3 className="font-[family-name:var(--font-manrope)] text-[16px] font-bold text-black md:w-fit md:max-w-full md:overflow-hidden md:text-ellipsis md:whitespace-nowrap md:text-[20px] md:leading-[27px]">
-              {thread.title}
+              <HighlightedText text={thread.title} query={highlight} />
             </h3>
             {thread.description ? (
               <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal text-[#595959] md:leading-snug">

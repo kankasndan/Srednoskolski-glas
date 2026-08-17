@@ -36,16 +36,16 @@ export default function ForumBanner({
         <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:gap-6">
           <div className="flex min-w-0 items-center gap-4 lg:hidden">
             <div className="flex min-w-0 shrink items-center gap-3">
-              <span className="size-10 shrink-0 translate-y-0.5 overflow-hidden">
+              <span className="size-10 shrink-0 translate-y-0.5">
                 {remoteIcon ? (
-                  <img src={iconSrc} alt="" className="size-full scale-[1.9] object-cover" />
+                  <img src={iconSrc} alt="" className="size-full object-contain" />
                 ) : (
                   <Image
                     src={iconSrc}
                     alt=""
                     width={40}
                     height={40}
-                    className="size-full scale-[1.9] object-cover"
+                    className="size-full object-contain"
                   />
                 )}
               </span>
@@ -65,20 +65,16 @@ export default function ForumBanner({
             {description}
           </p>
 
-          <span className="relative hidden shrink-0 overflow-hidden lg:block lg:size-20">
+          <span className="hidden shrink-0 lg:block lg:size-20">
             {remoteIcon ? (
-              <img
-                src={iconSrc}
-                alt=""
-                className="absolute left-1/2 top-1/2 size-[150px] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover"
-              />
+              <img src={iconSrc} alt="" className="size-full object-contain" />
             ) : (
               <Image
                 src={iconSrc}
                 alt=""
-                width={150}
-                height={150}
-                className="absolute left-1/2 top-1/2 size-[150px] max-w-none -translate-x-1/2 -translate-y-1/2"
+                width={80}
+                height={80}
+                className="size-full object-contain"
                 priority
               />
             )}

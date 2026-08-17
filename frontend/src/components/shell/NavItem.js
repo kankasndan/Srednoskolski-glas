@@ -15,11 +15,7 @@ export default function NavItem({ label, href, icon, active = false, onSelect, c
   }`;
   const content = (
     <>
-      <ForumIcon
-        src={icon}
-        active={active}
-        imageClassName="max-h-5 max-w-5 object-contain"
-      />
+      <ForumIcon src={icon} active={active} className="size-4" />
       {!collapsed && <span>{label}</span>}
     </>
   );

@@ -449,7 +449,7 @@ export default function Threads({
           </p>
         ) : (
           threads.map((thread) => (
-            <ThreadCard key={thread.id} thread={thread} />
+            <ThreadCard key={thread.id} thread={thread} highlight={searchQuery} />
           ))
         )}
       </div>

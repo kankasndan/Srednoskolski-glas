@@ -387,9 +387,10 @@ export default function PostTypeButtons({
               disabledMessage={disabled ? exclusiveDisabledMessage : undefined}
               leading={
                 type.faIcon ? (
-                  <FontAwesomeIcon icon={type.faIcon} className="size-8" />
+                  // Bez ! goleminata ja gazi CSS-ot na FontAwesome.
+                  <FontAwesomeIcon icon={type.faIcon} className="!size-[17px] text-[#333333]" />
                 ) : (
-                  type.icon && <img src={type.icon} alt="" className="size-8 object-contain" />
+                  type.icon && <img src={type.icon} alt="" />
                 )
               }
               className="flex-1"

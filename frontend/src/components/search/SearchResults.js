@@ -10,17 +10,13 @@ export default function SearchResults() {
   const trimmed = q.trim();
 
   return (
-    <div className="flex w-[990px] max-w-full flex-col gap-8">
-      <header className="flex w-full flex-col gap-2">
-        <h1 className="font-[family-name:var(--font-manrope)] text-[28px] font-bold leading-none text-black">
-          Истражи
+    <div className="flex w-[990px] max-w-full flex-col gap-3 lg:gap-8">
+      {trimmed ? (
+        <h1 className="font-[family-name:var(--font-manrope)] text-[24px] font-bold tracking-normal text-black">
+          Пребарување за „
+          <span className="text-[var(--color-primary-200)]">{trimmed}</span>“
         </h1>
-        <p className="font-[family-name:var(--font-manrope)] text-[16px] text-[#595959]">
-          {trimmed
-            ? `Резултати за „${trimmed}”`
-            : "Откриј дискусии низ заедницата."}
-        </p>
-      </header>
+      ) : null}
       <Threads key={`${trimmed}|${forum ?? ""}`} searchQuery={q} forum={forum} />
     </div>
   );

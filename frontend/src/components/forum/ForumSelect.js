@@ -121,12 +121,7 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
         >
           <span className="flex min-w-0 items-center gap-3">
             {selected && (
-              <ForumIcon
-                src={selected.imageUrl}
-                imageClassName={
-                  selected.type === "school" ? "size-4" : "size-9 max-w-none"
-                }
-              />
+              <ForumIcon src={selected.imageUrl} />
             )}
             <span className="truncate leading-5">
               {selected?.name ??

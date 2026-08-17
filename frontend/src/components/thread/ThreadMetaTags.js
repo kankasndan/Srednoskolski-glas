@@ -31,7 +31,6 @@ export function buildThreadMetaTags(forum, thread) {
       key: "forum",
       label: forumData?.name ?? "Форум",
       icon: forumData?.imageUrl,
-      zoom: true,
       href: forumHref(forumData),
     },
     {
@@ -66,14 +65,12 @@ export function buildThreadMetaTags(forum, thread) {
 function MetaTag({ tag, hiddenOnMobile = false, hiddenOnPhone = false }) {
   const remoteIcon = isRemoteAssetUrl(tag.icon);
   const iconBoxClass = tag.avatar
-    ? "relative size-5 shrink-0 overflow-hidden rounded-full md:size-6"
-    : "relative size-4 shrink-0 overflow-hidden md:size-5";
+    ? "size-5 shrink-0 overflow-hidden rounded-full md:size-6"
+    : "size-4 shrink-0 md:size-5";
   const iconClass = tag.avatar
-    ? "size-5 object-cover md:size-6"
-    : tag.zoom
-      ? "size-9 md:size-11"
-      : "size-4 md:size-5";
-  const iconSize = tag.avatar ? 24 : tag.zoom ? 44 : 20;
+    ? "size-full object-cover"
+    : "size-full object-contain";
+  const iconSize = tag.avatar ? 24 : 20;
   const displayClass = hiddenOnMobile
     ? "hidden lg:flex"
     : hiddenOnPhone
@@ -87,18 +84,14 @@ function MetaTag({ tag, hiddenOnMobile = false, hiddenOnPhone = false }) {
       {tag.icon ? (
         <span className={iconBoxClass}>
           {remoteIcon ? (
-            <img
-              src={tag.icon}
-              alt=""
-              className={`absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2 ${iconClass}`}
-            />
+            <img src={tag.icon} alt="" className={iconClass} />
           ) : (
             <Image
               src={tag.icon}
               alt=""
               width={iconSize}
               height={iconSize}
-              className={`absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2 ${iconClass}`}
+              className={iconClass}
             />
           )}
         </span>

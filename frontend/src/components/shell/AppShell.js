@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import Header from "@/components/shell/Header";
 import MobileMenu from "@/components/shell/MobileMenu";
 import SchoolForums from "@/components/forum/SchoolForums";
+import SidebarFooter from "@/components/shell/SidebarFooter";
 import SidebarNav from "@/components/shell/SidebarNav";
 import ThematicForums from "@/components/forum/ThematicForums";
 import { useForums } from "@/hooks/useForums";
@@ -16,9 +17,8 @@ let sidebarCollapsed = false;
 function getSelectedKey(pathname) {
   if (pathname === "/feed") return "nav:home";
   if (pathname === "/newest") return "nav:latest";
-  if (pathname === "/explore" || pathname === "/search" || pathname?.startsWith("/search?")) {
-    return "nav:explore";
-  }
+  // Na /search nishto ne e izbrano vo stranichnata lenta.
+  if (pathname === "/explore") return "nav:explore";
   if (pathname?.startsWith("/p/")) {
     const slug = pathname.split("/")[2];
     if (slug) return `forum:${slug}`;
@@ -96,7 +96,7 @@ export default function AppShell({ children, contentClassName = "" }) {
             onScroll={(event) => {
               sidebarScrollTop = event.currentTarget.scrollTop;
             }}
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mask-fade-out pb-4"
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mask-fade-out pb-4"
           >
             <SidebarNav
               selectedKey={selectedKey}
@@ -120,6 +120,7 @@ export default function AppShell({ children, contentClassName = "" }) {
                 onSelect={handleSelect}
               />
             )}
+            {!collapsed && <SidebarFooter />}
           </div>
         </aside>
         <main
