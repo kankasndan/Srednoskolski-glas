@@ -274,10 +274,7 @@ export default function SearchBar() {
                     }}
                     className="flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-[#F5F5F5]"
                   >
-                    <ForumIcon
-                      src={forum.imageUrl}
-                      imageClassName="max-h-5 max-w-5 object-contain"
-                    />
+                    <ForumIcon src={forum.imageUrl} className="size-5" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-[family-name:var(--font-manrope)] text-[14px] font-medium text-black">
                         {highlightMatch(forum.name, query)}

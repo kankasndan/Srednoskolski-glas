@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Alias na veshtachka_inteligencija.svg. Redot vo bazata (forum id=4) go ima
+  staroto pogresno ime "Вештачка интелегенција", pa bara /icons/veshtachka_intelegencija.svg
+  i vrakja 404. Ova e privremena zakrpa — imeto i slug-ot vo bazata se ushte se pogresni.
+  Otkako redot kje se sredi, ovoj fajl treba da se izbrishe.
+-->
 <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="87.59 76.53 324.83 324.83">
   <!-- Generator: Adobe Illustrator 30.0.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 123)  -->
   <defs>

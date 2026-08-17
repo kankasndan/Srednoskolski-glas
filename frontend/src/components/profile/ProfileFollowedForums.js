@@ -33,13 +33,13 @@ function FollowCard({ forum, canUnfollow, onUnfollowed }) {
       />
 
       <div className="flex min-w-0 items-center gap-5">
-        <span className="flex size-16 shrink-0 items-center justify-center overflow-hidden">
+        <span className="flex size-16 shrink-0 items-center justify-center">
           <img
             src={forum.imageUrl || "/avatars/default-1.svg"}
             alt=""
-            width={120}
-            height={120}
-            className="size-30 max-w-none object-cover"
+            width={64}
+            height={64}
+            className="size-full object-contain"
           />
         </span>
 
