@@ -47,7 +47,9 @@ final class FeedBuilder
             return $this->paginateSimpleSort($request, $user, $context, $sort, $page, $perPage);
         }
 
-        $orderedIds = FeedCache::get($user, $sort, $timeKey);
+        $orderedIds = $request->boolean('fresh')
+            ? null
+            : FeedCache::get($user, $sort, $timeKey);
 
         if ($orderedIds === null) {
             $context = $user instanceof User

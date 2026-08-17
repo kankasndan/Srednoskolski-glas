@@ -1,13 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useId, useState, useEffect, useRef } from "react";
+import { useCallback, useId, useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import ForumEmptyState from "@/components/forum/ForumEmptyState";
 import FeedFilterSheet from "@/components/thread/FeedFilterSheet";
 import NoMoreThreads from "@/components/thread/NoMoreThreads";
 import ThreadCard from "@/components/thread/ThreadCard";
 import { API_BASE_URL } from "@/lib/api";
+import {
+  isReloadNavigation,
+  listSnapshotKey,
+  readListSnapshot,
+  writeListSnapshot,
+} from "@/lib/listSnapshot";
 
 const SORT_OPTIONS = [
   { value: "trending", label: "Трендинг" },
@@ -25,6 +31,10 @@ const TIME_FILTER_OPTIONS = [
 ];
 
 const PAGE_SIZE = 5;
+
+function appMain() {
+  return typeof document === "undefined" ? null : document.querySelector("main");
+}
 
 function LoadingLogo() {
   return (
@@ -112,35 +122,51 @@ export default function Threads({
 }) {
   const isSearch = searchQuery !== null;
   const hasStaticThreads = Array.isArray(staticThreads);
+  const cacheKey = listSnapshotKey({ forum, searchQuery, listPath });
+  const restored = hasStaticThreads ? null : readListSnapshot(cacheKey);
+  const restoredScrollRef = useRef(restored?.scrollTop);
   const sortListboxId = useId();
   const timeListboxId = useId();
   const [openSelect, setOpenSelect] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filterContainerRef = useRef(null);
   const [selectedSort, setSelectedSort] = useState(
-    SORT_OPTIONS.find((option) => option.value === defaultSort) ?? SORT_OPTIONS[0],
+    restored?.selectedSort ??
+      SORT_OPTIONS.find((option) => option.value === defaultSort) ??
+      SORT_OPTIONS[0],
   );
   const [selectedTimeFilter, setSelectedTimeFilter] = useState(
-    TIME_FILTER_OPTIONS[0],
+    restored?.selectedTimeFilter ?? TIME_FILTER_OPTIONS[0],
   );
-  const [paginationPage, setPaginationPage] = useState(1);
+  const [paginationPage, setPaginationPage] = useState(
+    restored?.paginationPage ?? 1,
+  );
 
-  const [threads, setThreads] = useState(hasStaticThreads ? staticThreads : []);
+  const [threads, setThreads] = useState(
+    hasStaticThreads ? staticThreads : (restored?.threads ?? []),
+  );
   const [moreThreadsLoading, setMoreThreadsLoading] = useState(false);
-  const [noMoreThreads, setNoMoreThreads] = useState(hasStaticThreads);
-  const [hasLoaded, setHasLoaded] = useState(hasStaticThreads);
+  const [noMoreThreads, setNoMoreThreads] = useState(
+    hasStaticThreads || Boolean(restored?.noMoreThreads),
+  );
+  const [hasLoaded, setHasLoaded] = useState(hasStaticThreads || Boolean(restored));
   const sentinelRef = useRef(null);
   const loadingRef = useRef(false);
-  const noMoreRef = useRef(false);
-  const pageRef = useRef(1);
-  const hasLoadedRef = useRef(false);
+  const noMoreRef = useRef(Boolean(restored?.noMoreThreads));
+  const pageRef = useRef(restored?.paginationPage ?? 1);
+  const hasLoadedRef = useRef(hasStaticThreads || Boolean(restored));
+  const snapshotStateRef = useRef(null);
 
-  function buildListUrl({ page, sort, time }) {
+  function buildListUrl({ page, sort, time, fresh = false }) {
     const params = new URLSearchParams({
       page: String(page),
       time: time.value,
       sort: sort.value,
     });
+
+    if (fresh) {
+      params.set("fresh", "1");
+    }
 
     if (isSearch) {
       if (searchQuery) params.set("q", searchQuery);
@@ -178,7 +204,15 @@ export default function Threads({
     }
 
     try {
-      const response = await fetch(buildListUrl({ page, sort, time }), {
+      const fresh =
+        !append &&
+        page === 1 &&
+        forum === null &&
+        !isSearch &&
+        !listPath &&
+        isReloadNavigation();
+
+      const response = await fetch(buildListUrl({ page, sort, time, fresh }), {
         credentials: "include",
       });
 
@@ -191,10 +225,23 @@ export default function Threads({
 
       const payload = await response.json();
       const next = Array.isArray(payload.data) ? payload.data : [];
+      const reachedEnd = next.length < PAGE_SIZE;
+      const threadsNext = append
+        ? [...(snapshotStateRef.current?.threads ?? []), ...next]
+        : next;
 
-      setThreads((prev) => (append ? [...prev, ...next] : next));
+      setThreads(threadsNext);
+      writeListSnapshot(cacheKey, {
+        hasLoaded: true,
+        threads: threadsNext,
+        paginationPage: page,
+        noMoreThreads: reachedEnd,
+        selectedSort: sort,
+        selectedTimeFilter: time,
+        scrollTop: appMain()?.scrollTop ?? 0,
+      });
 
-      if (next.length < PAGE_SIZE) {
+      if (reachedEnd) {
         setNoMoreThreads(true);
         noMoreRef.current = true;
       }
@@ -233,8 +280,38 @@ export default function Threads({
     Boolean(openSelect),
   );
 
+  snapshotStateRef.current = {
+    hasLoaded,
+    threads,
+    paginationPage,
+    noMoreThreads,
+    selectedSort,
+    selectedTimeFilter,
+  };
+
+  useLayoutEffect(() => {
+    const top = restoredScrollRef.current;
+    if (top == null) return;
+    const node = appMain();
+    if (node) node.scrollTop = top;
+  }, []);
+
+  useEffect(() => {
+    if (hasStaticThreads) return undefined;
+
+    return () => {
+      const state = snapshotStateRef.current;
+      if (!state?.hasLoaded) return;
+      writeListSnapshot(cacheKey, {
+        ...state,
+        scrollTop: appMain()?.scrollTop ?? 0,
+      });
+    };
+  }, [cacheKey, hasStaticThreads]);
+
   useEffect(() => {
     if (hasStaticThreads) return;
+    if (restored) return;
 
     const initialSort =
       SORT_OPTIONS.find((option) => option.value === defaultSort) ?? SORT_OPTIONS[0];

@@ -262,3 +262,16 @@ it('reports a thread and removes it from the reporter feed', function () {
 
     expect($titles)->not->toContain('Report me');
 });
+
+it('rebuilds the trending feed when fresh=1', function () {
+    $author = User::factory()->create();
+    $forum = makeForum('Општи дискусии', 'opshti_diskusii');
+    makeThread($forum, $author, 'First', 1);
+
+    $this->getJson('/api/feed')->assertSuccessful();
+
+    makeThread($forum, $author, 'Second', 1);
+
+    expect($this->getJson('/api/feed')->json('data.*.title'))->not->toContain('Second');
+    expect($this->getJson('/api/feed?fresh=1')->json('data.*.title'))->toContain('Second');
+});

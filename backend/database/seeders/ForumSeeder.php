@@ -18,7 +18,7 @@ class ForumSeeder extends Seeder
         'Општи дискусии',
         'Државна матура',
         'Помош при учење',
-        'Вештачка интелегенција',
+        'Вештачка интелигенција',
         'Факултети',
         'Странски јазици',
         'Кариера и професии',
@@ -41,6 +41,10 @@ class ForumSeeder extends Seeder
 
     private function seedGeneralForums(): void
     {
+        Forum::query()
+            ->where('slug', 'veshtachka_intelegencija')
+            ->update(['slug' => Slug::make('Вештачка интелигенција')]);
+
         foreach (self::GENERAL_FORUMS as $name) {
             $slug = Slug::make($name);
 

@@ -767,7 +767,7 @@ GET /api/me/followed-forums
     {
       "id": 6,
       "name": "Вештачка интелигенција",
-      "slug": "veshtachka_intelegencija",
+      "slug": "veshtachka_inteligencija",
       "type": "general",
       "school_id": null,
       "imageUrl": "https://…/forum.png",
