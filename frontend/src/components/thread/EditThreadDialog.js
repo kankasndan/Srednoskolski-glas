@@ -81,7 +81,7 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
           <RichTextEditor
             initialContent={thread?.description ?? ""}
             widthClassName="w-full"
-            action={<PublishButton saving={saving} className="hidden px-6 py-3 md:block" />}
+            action={<PublishButton saving={saving} className="hidden h-10 w-48 px-4 py-2 md:block" />}
           />
           <PostTypeButtons
             widthClassName="w-full"
@@ -99,7 +99,7 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
         </div>
 
         <div className="flex justify-end md:hidden">
-          <PublishButton saving={saving} className="h-10 w-36" />
+          <PublishButton saving={saving} className="h-10 w-48" />
         </div>
       </form>
     </DialogShell>
@@ -113,7 +113,7 @@ function PublishButton({ saving, className }) {
       disabled={saving}
       className={`font-[family-name:var(--font-manrope)] text-[14px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:bg-[#CCCCCC] ${className}`}
     >
-      {saving ? "Се зачувува…" : "Објави"}
+      {saving ? "Се зачувува…" : "Објави дискусија"}
     </PrimaryButton>
   );
 }

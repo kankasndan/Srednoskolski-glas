@@ -22,7 +22,7 @@ export default function CommunityBanner() {
           priority
         />
 
-        <div className="flex min-w-0 flex-1 flex-col gap-2 text-center md:text-left">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 text-center md:text-left">
           <h2 className="font-[family-name:var(--font-oswald)] text-[20px] font-bold leading-none text-black">
             МЕСТО КАДЕ СЕКОЈ СРЕДНОШКОЛЕЦ ИМА ГЛАС
           </h2>

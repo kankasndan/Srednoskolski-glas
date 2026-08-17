@@ -141,6 +141,8 @@ export default function NewDiscussionForm() {
           setErrors((current) => ({ ...current, forum: undefined }));
         }}
         errorMessage={errors.forum}
+        widthClassName="w-full lg:w-[310px]"
+        className="!mb-4 lg:!mb-12"
       />
       <TitleInput
         value={title}
@@ -153,7 +155,7 @@ export default function NewDiscussionForm() {
       />
       <RichTextEditor
         errorMessage={errors.content}
-        widthClassName="w-full"
+        widthClassName="w-full -mt-2 lg:mt-0"
         onContentChange={(nextContent) => {
           if (!getPlainTextFromHtml(nextContent)) return;
           setErrors((current) => ({ ...current, content: undefined }));
@@ -168,9 +170,9 @@ export default function NewDiscussionForm() {
           <PrimaryButton
             type="submit"
             disabled={submitting}
-            className="h-10 w-36 font-[family-name:var(--font-manrope)] text-[14px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:opacity-60"
+            className="h-10 w-full px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:opacity-60 xl:w-48"
           >
-            {submitting ? "Се објавува…" : "Објави"}
+            {submitting ? "Се објавува…" : "Објави дискусија"}
           </PrimaryButton>
         }
       />

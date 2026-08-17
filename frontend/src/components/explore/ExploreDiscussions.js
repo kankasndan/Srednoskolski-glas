@@ -106,10 +106,6 @@ function FeaturedForumCard({ forum, onForumChange }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    setFollowing(Boolean(forum.is_following));
-  }, [forum.is_following]);
-
   async function toggleFollow(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -190,8 +186,8 @@ function FeaturedForumCard({ forum, onForumChange }) {
           onClick={toggleFollow}
           className={`flex h-10 w-24 cursor-pointer items-center justify-center rounded-xl px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-70 ${
             following
-              ? "bg-[var(--color-primary-300)] text-white"
-              : "bg-[#582FF5] text-white hover:bg-[#3300F5]"
+              ? "bg-[var(--color-primary-200)] text-white"
+              : "bg-[var(--color-primary-300)] text-white hover:bg-[var(--color-primary-200)]"
           }`}
         >
           {following ? "Следиш" : "Следи"}

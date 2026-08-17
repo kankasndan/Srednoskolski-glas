@@ -15,23 +15,19 @@ export default function AnonymousToggle({ className = "", action, checked, onCha
   }
 
   return (
-    <div className={`flex w-full flex-col gap-1 ${className}`}>
-      <div className="flex items-center justify-between gap-3">
-        <Checkbox
-          checked={value}
-          onChange={handleChange}
-          className="w-fit"
-        >
+    <div className={`flex w-full flex-col gap-6 ${className}`}>
+      <div className="flex w-full flex-col gap-2">
+        <Checkbox checked={value} onChange={handleChange} className="w-fit">
           <span className="font-[family-name:var(--font-manrope)] text-[14px] text-black">
             Објави ја дискусијата анонимно
           </span>
         </Checkbox>
-        {action}
+        <p className="w-full font-[family-name:var(--font-manrope)] text-[12px] leading-4 text-[#595959] lg:w-1/2">
+          Објавувањето на оваа дискусија анонимно значи дека твојот псевдоним нема да биде видлив на
+          останатите корисници.
+        </p>
       </div>
-      <p className="w-1/2 font-[family-name:var(--font-manrope)] text-[12px] leading-4 text-[#595959]">
-        Објавувањето на оваа дискусија анонимно значи дека твојот псевдоним нема да биде видлив на
-        останатите корисници.
-      </p>
+      {action ? <div className="w-full">{action}</div> : null}
     </div>
   );
 }
