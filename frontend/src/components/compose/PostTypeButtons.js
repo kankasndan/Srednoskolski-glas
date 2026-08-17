@@ -373,7 +373,7 @@ export default function PostTypeButtons({
         />
       )}
 
-      <div className="grid grid-cols-2 gap-2 md:flex md:gap-3">
+      <div className="flex max-w-full flex-wrap justify-center gap-2 md:gap-3 xl:justify-start">
         {visibleTypes.map((type) => {
           const disabled = isTypeDisabled(type.label);
 
@@ -390,10 +390,10 @@ export default function PostTypeButtons({
                   // Bez ! goleminata ja gazi CSS-ot na FontAwesome.
                   <FontAwesomeIcon icon={type.faIcon} className="!size-[17px] text-[#333333]" />
                 ) : (
-                  type.icon && <img src={type.icon} alt="" />
+                  type.icon && <img src={type.icon} alt="" className="size-5 object-contain" />
                 )
               }
-              className="flex-1"
+              className="w-[158px] flex-none md:min-w-[158px] xl:w-auto xl:min-w-0 xl:flex-1"
             />
           );
         })}

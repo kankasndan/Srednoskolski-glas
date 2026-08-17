@@ -8,7 +8,7 @@ import OnboardingForm from "@/components/auth/OnboardingForm";
 export default function Onboarding() {
   return (
     <OnboardingGuard>
-      <main className="relative flex min-h-dvh w-full overflow-hidden bg-white lg:min-h-screen">
+      <main className="relative flex min-h-dvh w-full overflow-x-hidden bg-white lg:min-h-screen">
         <Image
           src="/login-hero.png"
           alt=""

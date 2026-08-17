@@ -83,7 +83,7 @@ function ToolbarButton({ editor, button, active, onClick }) {
       aria-label={button.label}
       aria-pressed={active}
       onClick={() => (onClick ?? button.onClick)(editor)}
-      className={`flex size-9 cursor-pointer items-center justify-center rounded-lg text-[16px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] ${
+      className={`flex size-6 cursor-pointer items-center justify-center rounded-md text-[16px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] lg:size-9 lg:rounded-lg ${
         active
           ? "bg-[#CFE9ED] text-black"
           : "text-[#595959] hover:bg-[#DCEBED] hover:text-black"
@@ -255,7 +255,7 @@ export default function RichTextEditor({
       attributes: {
         "aria-label": "Содржина на дискусијата",
         class:
-          "min-h-[195px] w-full px-4 pb-8 pt-4 font-[family-name:var(--font-manrope)] text-[14px] leading-6 text-black outline-none",
+          "h-[263px] min-h-[263px] w-full px-4 pb-8 pt-4 font-[family-name:var(--font-manrope)] text-[14px] leading-6 text-black outline-none lg:h-auto lg:min-h-[195px]",
       },
       handleClickOn(view, pos, node, nodePos, event) {
         const anchor = event.target instanceof HTMLElement ? event.target.closest("a") : null;
@@ -325,11 +325,11 @@ export default function RichTextEditor({
     >
       <input type="hidden" name={name} value={html} />
       <div
-        className={`overflow-hidden rounded-[13px] border bg-white ${
-          errorMessage ? "border-[var(--color-error)]" : "border-[#D9D9D9]"
+        className={`overflow-hidden rounded-xl border bg-white lg:rounded-[13px] ${
+          errorMessage ? "border-[var(--color-error)]" : "border-[#CCCCCC] lg:border-[#D9D9D9]"
         }`}
       >
-        <div className="relative min-h-[195px]">
+        <div className="relative h-[263px] min-h-[263px] lg:h-auto lg:min-h-[195px]">
           {isEmpty && (
             <span className="pointer-events-none absolute left-4 top-4 font-[family-name:var(--font-manrope)] text-[14px] leading-6 text-[#595959]">
               {placeholder}
@@ -338,12 +338,17 @@ export default function RichTextEditor({
           <EditorContent
             editor={editor}
             aria-describedby={errorMessage ? `${name}-error` : undefined}
-            className="min-h-[195px] [&_.ProseMirror_blockquote]:border-l-2 [&_.ProseMirror_blockquote]:border-[#CCCCCC] [&_.ProseMirror_blockquote]:pl-3 [&_.ProseMirror_code]:rounded [&_.ProseMirror_code]:bg-[#E5E5E5] [&_.ProseMirror_code]:px-1 [&_.ProseMirror_code]:py-0.5 [&_.ProseMirror_pre]:overflow-x-auto [&_.ProseMirror_pre]:rounded-lg [&_.ProseMirror_pre]:bg-[#E5E5E5] [&_.ProseMirror_pre]:p-3 [&_.ProseMirror_pre]:font-mono [&_.ProseMirror_pre]:text-[13px] [&_.ProseMirror_pre_code]:bg-transparent [&_.ProseMirror_pre_code]:p-0 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_p]:my-0 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6"
+            className="h-[263px] min-h-[263px] lg:h-auto lg:min-h-[195px] [&_.ProseMirror_blockquote]:border-l-2 [&_.ProseMirror_blockquote]:border-[#CCCCCC] [&_.ProseMirror_blockquote]:pl-3 [&_.ProseMirror_code]:rounded [&_.ProseMirror_code]:bg-[#E5E5E5] [&_.ProseMirror_code]:px-1 [&_.ProseMirror_code]:py-0.5 [&_.ProseMirror_pre]:overflow-x-auto [&_.ProseMirror_pre]:rounded-lg [&_.ProseMirror_pre]:bg-[#E5E5E5] [&_.ProseMirror_pre]:p-3 [&_.ProseMirror_pre]:font-mono [&_.ProseMirror_pre]:text-[13px] [&_.ProseMirror_pre_code]:bg-transparent [&_.ProseMirror_pre_code]:p-0 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_p]:my-0 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6"
           />
+          <span
+            className={`pointer-events-none absolute bottom-3 right-4 font-[family-name:var(--font-manrope)] text-[12px] leading-none lg:hidden ${counterTextColor}`}
+          >
+            {characterCount}/{MAX_DESCRIPTION_LENGTH}
+          </span>
         </div>
 
-        <div className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-t border-[#D9D9D9] px-3 py-3 sm:px-4">
-          <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex h-16 min-h-16 items-center justify-between gap-4 border-t border-[#CCCCCC] px-4 py-2 lg:h-auto lg:flex-wrap lg:gap-3 lg:border-[#D9D9D9] lg:px-4 lg:py-3">
+          <div className="flex min-w-0 flex-nowrap items-center gap-4 lg:flex-wrap lg:gap-1.5">
             {editor &&
               TOOLBAR_BUTTONS.map((button) => {
                 if (button.key === "link") {
@@ -383,7 +388,7 @@ export default function RichTextEditor({
           </div>
           <div className="flex shrink-0 items-center gap-3 sm:gap-4">
             <span
-              className={`font-[family-name:var(--font-manrope)] text-[12px] leading-none ${counterTextColor}`}
+              className={`hidden font-[family-name:var(--font-manrope)] text-[12px] leading-none lg:inline ${counterTextColor}`}
             >
               {characterCount}/{MAX_DESCRIPTION_LENGTH}
             </span>

@@ -31,7 +31,14 @@ function findUserSchoolForum(schoolsByCity, user) {
   return null;
 }
 
-export default function ForumSelect({ selected, onChange, onBlur, errorMessage }) {
+export default function ForumSelect({
+  selected,
+  onChange,
+  onBlur,
+  errorMessage,
+  widthClassName = "w-[310px]",
+  className = "",
+}) {
   const { general, schoolsByCity, loading, error } = useForums();
   const [schoolForum, setSchoolForum] = useState(null);
   const [userLoading, setUserLoading] = useState(true);
@@ -88,7 +95,7 @@ export default function ForumSelect({ selected, onChange, onBlur, errorMessage }
   const isLoading = loading || userLoading;
 
   return (
-    <div className="mb-12 flex w-[310px] max-w-full flex-col gap-2">
+    <div className={`mb-12 flex max-w-full flex-col gap-2 ${widthClassName} ${className}`}>
       <FieldLabel htmlFor="forum-select" required>
         Каде сакаш да започнеш дискусија?
       </FieldLabel>
