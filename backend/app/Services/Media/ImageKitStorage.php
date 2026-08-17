@@ -36,7 +36,7 @@ class ImageKitStorage implements MediaStorage
 
     public function upload(UploadedFile $file, ?string $directory = null, array $options = []): StoredMedia
     {
-        $fileName = $options['file_name'] ?? ($file->getClientOriginalName() ?: Str::uuid()->toString());
+        $fileName = $options['file_name'] ?? $this->safeFileName($file);
 
         $payload = [
             'fileName' => $fileName,
@@ -77,6 +77,26 @@ class ImageKitStorage implements MediaStorage
             mimeType: $file->getMimeType(),
             metadata: $data,
         );
+    }
+
+    /**
+     * Keeps the uploader's name recognisable but never trusts it: the extension
+     * comes from the sniffed MIME type (a "photo.html" would otherwise be served
+     * as HTML from the media host) and odd characters are collapsed.
+     */
+    private function safeFileName(UploadedFile $file): string
+    {
+        $extension = (string) ($file->extension() ?: '');
+
+        $base = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $base = preg_replace('/[^\p{L}\p{N}_-]+/u', '-', $base) ?? '';
+        $base = trim(mb_substr($base, 0, 60), '-_');
+
+        if ($base === '') {
+            $base = Str::uuid()->toString();
+        }
+
+        return $extension !== '' ? "{$base}.{$extension}" : $base;
     }
 
     public function delete(StoredMedia|string $media): bool

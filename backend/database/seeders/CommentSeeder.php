@@ -26,7 +26,7 @@ class CommentSeeder extends Seeder
         [
             'thread' => 'Кога почнуваат пријавите за државна матура?',
             'author' => 'demo@example.com',
-            'content' => 'Обично пријавите се отвораат кон крајот на март. Провери на страницата на матурската комисија.',
+            'content' => 'Обично пријавите се отвораат кон крајот на март, @ana_k. Провери на страницата на матурската комисија.',
             'upvotes' => 12,
             'replies' => [
                 ['author' => 'ana@example.com', 'content' => 'Благодарам! Ќе проверам таму.', 'upvotes' => 3],
@@ -72,7 +72,7 @@ class CommentSeeder extends Seeder
         [
             'thread' => 'Прв програмски јазик за почетници?',
             'author' => 'stefan@example.com',
-            'content' => 'Python е одличен за почеток, синтаксата е чиста и лесна за разбирање.',
+            'content' => 'Python е одличен за почеток, @demo_student, синтаксата е чиста и лесна за разбирање.',
             'upvotes' => 20,
             'replies' => [
                 ['author' => 'demo@example.com', 'content' => 'Се согласувам, и има огромна заедница и материјали.', 'upvotes' => 6],

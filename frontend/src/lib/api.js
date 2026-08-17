@@ -5,6 +5,20 @@ export const API_BASE_URL =
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
+/**
+ * Text from the server is only shown for 4xx responses, which carry messages
+ * written for the user. A 5xx body can contain internal detail (SQL, file
+ * paths) whenever debug mode is left on, so those get the local fallback.
+ */
+export function userFacingError(error, fallback) {
+  const status = error?.status ?? 0;
+  const message = typeof error?.message === "string" ? error.message.trim() : "";
+
+  if (message !== "" && status >= 400 && status < 500) return message;
+
+  return fallback;
+}
+
 function readCookie(name) {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(

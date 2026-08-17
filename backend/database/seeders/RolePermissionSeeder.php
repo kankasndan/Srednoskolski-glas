@@ -62,6 +62,13 @@ class RolePermissionSeeder extends Seeder
             'delete forums',
             'view forum details',
 
+            // Schools (kept separate from forums: deleting a school touches
+            // student records, which is not the same authority as forum CRUD)
+            'view schools',
+            'search schools',
+            'create schools',
+            'delete schools',
+
             // Roles & staff management
             'view roles page',
             'update user role',
@@ -127,6 +134,9 @@ class RolePermissionSeeder extends Seeder
             'search forums',
             'view forum details',
 
+            'view schools',
+            'search schools',
+
             'logout admin',
 
             'manage threads',
@@ -147,6 +157,9 @@ class RolePermissionSeeder extends Seeder
             'create forums',
             'update forums',
             'delete forums',
+
+            'create schools',
+            'delete schools',
         ]);
 
         $superAdmin->syncPermissions($permissions);

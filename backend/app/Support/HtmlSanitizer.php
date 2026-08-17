@@ -18,6 +18,17 @@ class HtmlSanitizer
         'blockquote', 'code', 'pre',
     ];
 
+    /**
+     * Removed with their whole subtree. Their content is never renderable text,
+     * so unwrapping them would leak script bodies or re-parsed markup.
+     *
+     * @var list<string>
+     */
+    private const DROPPED_TAGS = [
+        'script', 'style', 'template', 'noscript', 'iframe', 'object', 'embed',
+        'svg', 'math', 'head', 'meta', 'link', 'base', 'title',
+    ];
+
     /** @var array<string, list<string>> */
     private const ALLOWED_ATTRS = [
         'a' => ['href', 'target', 'rel'],
@@ -31,6 +42,9 @@ class HtmlSanitizer
         if ($html === null || trim($html) === '') {
             return '';
         }
+
+        // Drop script/style bodies so their source never shows up as preview text.
+        $html = preg_replace('/<\s*(script|style)\b[^>]*>.*?<\s*\/\s*\1\s*>/isu', ' ', $html) ?? $html;
 
         // Turn block/break tags into spaces so adjacent paragraphs don't glue together.
         $withBreaks = preg_replace('/<\s*\/?\s*(p|div|br|li|h[1-6]|blockquote|tr)\b[^>]*>/iu', ' ', $html) ?? $html;
@@ -104,8 +118,19 @@ class HtmlSanitizer
 
             $tag = strtolower($child->tagName);
 
+            if (in_array($tag, self::DROPPED_TAGS, true)) {
+                $node->removeChild($child);
+
+                continue;
+            }
+
             if (! in_array($tag, self::ALLOWED_TAGS, true)) {
-                // Keep children of disallowed wrappers (e.g. <div>, <span>).
+                // Keep children of disallowed wrappers (e.g. <div>, <span>), but
+                // clean the subtree *before* hoisting it: the loop iterates over a
+                // snapshot of $node's children, so anything moved in afterwards
+                // would never be visited again.
+                self::sanitizeNode($child);
+
                 while ($child->firstChild !== null) {
                     $node->insertBefore($child->firstChild, $child);
                 }

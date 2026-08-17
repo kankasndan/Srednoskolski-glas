@@ -90,7 +90,7 @@ export default function Comment({
 
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         <CommentAuthor author={comment.author} />
-        <CommentBody text={comment.content} muted={depth === 0} />
+        <CommentBody text={comment.content} mentions={comment.mentions} muted={depth === 0} />
         <CommentActions
           commentId={comment.id}
           votes={comment.upvotes}

@@ -27,6 +27,7 @@ class ProfileCommentResource extends JsonResource
             'created_at' => $this->created_at,
             'edited_at' => $this->edited_at,
             'author' => new UserResource($this->whenLoaded('user')),
+            'mentions' => UserMentionResource::collection($this->mentionedUsers())->resolve(),
             'thread' => $this->whenLoaded('thread', fn () => $this->thread === null ? null : [
                 'id' => $this->thread->id,
                 'title' => $this->thread->title,

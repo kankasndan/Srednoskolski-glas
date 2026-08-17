@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\School;
 use App\Models\User;
+use App\Support\LikeEscape;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -21,10 +22,10 @@ class UserController extends Controller
                 'threads.forum',
             ])
             ->when($request->filled('search'), function ($query) use ($request) {
-                $search = $request->get('search');
+                $search = LikeEscape::contains((string) $request->get('search'));
                 $query->where(function ($q) use ($search) {
-                    $q->where('username', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                    $q->where('username', 'like', $search)
+                        ->orWhere('email', 'like', $search);
                 });
             })
             ->when($request->filled('school'), function ($query) use ($request) {
@@ -66,9 +67,9 @@ class UserController extends Controller
     {
         $this->authorize('search users');
 
-        $query = $request->get('q', '');
+        $query = mb_substr(trim((string) $request->get('q', '')), 0, 100);
 
-        $users = User::where('username', 'like', "%{$query}%")
+        $users = User::where('username', 'like', LikeEscape::contains($query))
             ->where('role', 'user')
             ->limit(10)
             ->get(['id', 'username', 'email', 'role']);

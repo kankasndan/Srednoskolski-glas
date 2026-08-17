@@ -8,9 +8,11 @@ import { deleteComment, updateComment } from "@/api/comments";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import EditCommentDialog from "@/components/thread/EditCommentDialog";
 import InfoDialog from "@/components/ui/InfoDialog";
+import CommentBody from "@/components/thread/CommentBody";
 import ProfileForumTag from "@/components/profile/ProfileForumTag";
 import ThreadActionButton from "@/components/thread/ThreadActionButton";
 import { getMyComments, getUserComments } from "@/api/profile";
+import { userFacingError } from "@/lib/api";
 
 function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = true }) {
   const [comment, setComment] = useState(initialComment);
@@ -30,6 +32,7 @@ function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = tr
       ...prev,
       content: updated.content,
       edited_at: updated.edited_at,
+      mentions: updated.mentions ?? prev.mentions,
     }));
     setEditing(false);
   }
@@ -45,7 +48,7 @@ function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = tr
       setConfirmingDelete(false);
       setDeleted(true);
     } catch (err) {
-      setActionError(err.message || "Неуспешно бришење. Обиди се повторно.");
+      setActionError(userFacingError(err, "Неуспешно бришење. Обиди се повторно."));
       setConfirmingDelete(false);
     } finally {
       setBusy(false);
@@ -71,9 +74,11 @@ function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = tr
           </span>
         </div>
 
-        <p className="font-(family-name:--font-manrope) text-[16px] leading-none text-black">
-          {comment.content}
-        </p>
+          <CommentBody
+            text={comment.content}
+            mentions={comment.mentions}
+            className="font-(family-name:--font-manrope) text-[16px] leading-none"
+          />
 
         <div className="flex items-center gap-1.5 font-(family-name:--font-manrope) text-[12px] leading-none text-(--color-grays-700)">
           <span aria-hidden>↳</span>

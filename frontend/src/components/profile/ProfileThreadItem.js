@@ -13,6 +13,7 @@ import ThreadPoll from "@/components/thread/ThreadPoll";
 import ThreadStatButtons from "@/components/thread/ThreadStatButtons";
 import ThreadViewCount from "@/components/thread/ThreadViewCount";
 import { stripHtml } from "@/lib/html";
+import { userFacingError } from "@/lib/api";
 
 const EditThreadDialog = dynamic(
   () => import("@/components/thread/EditThreadDialog"),
@@ -67,7 +68,7 @@ export default function ProfileThreadItem({
       setConfirmingDelete(false);
       setDeleted(true);
     } catch (err) {
-      setActionError(err.message || "Неуспешно бришење. Обиди се повторно.");
+      setActionError(userFacingError(err, "Неуспешно бришење. Обиди се повторно."));
       setConfirmingDelete(false);
     } finally {
       setBusy(false);

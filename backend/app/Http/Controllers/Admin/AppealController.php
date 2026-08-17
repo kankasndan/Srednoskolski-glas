@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Appeal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AppealController extends Controller
 {
+    private const ALREADY_RESOLVED = 'Жалбата е веќе разгледана.';
+
     public function index(Request $request)
     {
         $this->authorize('view appeals');
@@ -45,17 +49,29 @@ class AppealController extends Controller
     {
         $this->authorize('accept appeals');
 
-        $appeal->loadMissing('sanction.report');
-
-        if ($appeal->sanction?->report) {
-            $appeal->sanction->report->delete();
+        if ($appeal->status !== 'pending') {
+            return redirect()->route('appeal.index')->withErrors(['status' => self::ALREADY_RESOLVED]);
         }
 
-        $appeal->sanction?->delete();
+        DB::transaction(function () use ($appeal): void {
+            // Re-read under a lock so two moderators can't both lift the sanction.
+            $locked = Appeal::query()->whereKey($appeal->getKey())->lockForUpdate()->first();
 
-        $appeal->update([
-            'status' => 'accepted',
-        ]);
+            if ($locked === null || $locked->status !== 'pending') {
+                return;
+            }
+
+            $locked->loadMissing('sanction.report');
+
+            $locked->sanction?->report?->delete();
+            $locked->sanction?->delete();
+
+            $locked->update($this->resolution('accepted'));
+        });
+
+        if ($appeal->fresh()?->status !== 'accepted') {
+            return redirect()->route('appeal.index')->withErrors(['status' => self::ALREADY_RESOLVED]);
+        }
 
         return redirect()->route('appeal.index')->with(['success' => 'Жалбата е успешно прифатена.']);
     }
@@ -64,10 +80,27 @@ class AppealController extends Controller
     {
         $this->authorize('reject appeals');
 
-        $appeal->update([
-            'status' => 'rejected',
-        ]);
+        $updated = Appeal::query()
+            ->whereKey($appeal->getKey())
+            ->where('status', 'pending')
+            ->update($this->resolution('rejected'));
+
+        if ($updated === 0) {
+            return redirect()->route('appeal.index')->withErrors(['status' => self::ALREADY_RESOLVED]);
+        }
 
         return redirect()->route('appeal.index')->with(['success' => 'Жалбата е успешно одбиена.']);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function resolution(string $status): array
+    {
+        return [
+            'status' => $status,
+            'admin_id' => Auth::id(),
+            'resolved_at' => now(),
+        ];
     }
 }

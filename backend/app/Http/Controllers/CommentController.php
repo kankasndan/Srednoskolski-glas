@@ -7,13 +7,17 @@ use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Thread;
+use App\Support\SyncCommentMentions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function store(StoreCommentRequest $request, Thread $thread): JsonResponse
-    {
+    public function store(
+        StoreCommentRequest $request,
+        Thread $thread,
+        SyncCommentMentions $syncMentions,
+    ): JsonResponse {
         $comment = Comment::forceCreate([
             'thread_id' => $thread->id,
             'parent_id' => $request->integer('parent_id') ?: null,
@@ -21,6 +25,7 @@ class CommentController extends Controller
             'content' => $request->string('content')->toString(),
         ]);
 
+        $syncMentions->handle($comment);
         $comment->load(Comment::authorWith());
         $comment->setAttribute('has_voted', false);
         $comment->setAttribute('replies_count', 0);
@@ -62,12 +67,16 @@ class CommentController extends Controller
      *
      * PUT /api/comments/{comment}
      */
-    public function update(UpdateCommentRequest $request, Comment $comment): JsonResponse
-    {
+    public function update(
+        UpdateCommentRequest $request,
+        Comment $comment,
+        SyncCommentMentions $syncMentions,
+    ): JsonResponse {
         $comment->content = $request->string('content')->toString();
         $comment->edited_at = now();
         $comment->save();
 
+        $syncMentions->handle($comment);
         $comment->load(Comment::authorWith());
         $comment->loadCount([
             'replies as replies_count' => fn ($replies) => $replies->visibleInThread(),

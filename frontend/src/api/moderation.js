@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, userFacingError } from "@/lib/api";
 
 export function reportErrorMessage(error) {
   if (error?.status === 401) {
@@ -13,7 +13,7 @@ export function reportErrorMessage(error) {
       "Провери ја пријавата и обиди се повторно."
     );
   }
-  return error?.message || "Неуспешна пријава. Обиди се повторно.";
+  return userFacingError(error, "Неуспешна пријава. Обиди се повторно.");
 }
 
 /** @param {number} threadId */

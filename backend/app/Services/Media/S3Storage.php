@@ -32,11 +32,18 @@ class S3Storage implements MediaStorage
     public function upload(UploadedFile $file, ?string $directory = null, array $options = []): StoredMedia
     {
         $directory = trim($directory ?? '', '/');
-        $extension = $file->getClientOriginalExtension();
+        $mimeType = $file->getMimeType();
+
+        // Derive the stored extension from the sniffed MIME type, never from the
+        // client file name: S3 picks Content-Type from the key, so "photo.html"
+        // would be served as HTML and execute whatever the bytes contain.
+        $extension = (string) ($file->extension() ?: '');
         $fileName = $options['file_name'] ?? Str::uuid()->toString().($extension !== '' ? ".{$extension}" : '');
 
         $path = $this->disk()->putFileAs($directory, $file, $fileName, [
             'visibility' => $options['visibility'] ?? $this->config['visibility'] ?? 'public',
+            'mimetype' => $mimeType,
+            'ContentType' => $mimeType,
         ]);
 
         return new StoredMedia(
@@ -45,9 +52,9 @@ class S3Storage implements MediaStorage
             path: $path,
             url: $this->disk()->url($path),
             name: $fileName,
-            type: $this->resolveMediaType($file->getMimeType()),
+            type: $this->resolveMediaType($mimeType),
             size: $file->getSize(),
-            mimeType: $file->getMimeType(),
+            mimeType: $mimeType,
         );
     }
 

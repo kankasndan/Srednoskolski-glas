@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\MeController;
 use App\Http\Controllers\Auth\OnboardingController;
-use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ExploreController;
@@ -20,18 +19,13 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\UserSearchController;
 use App\Http\Controllers\VoteController;
 use App\Support\Username;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['web', 'throttle:social-auth'])->group(function () {
-    Route::get('/auth/{provider}/redirect', [SocialLoginController::class, 'redirect'])
-        ->whereIn('provider', ['google', 'facebook'])
-        ->name('social.redirect');
-    Route::get('/auth/{provider}/callback', [SocialLoginController::class, 'callback'])
-        ->whereIn('provider', ['google', 'facebook'])
-        ->name('social.callback');
-});
+// The social login routes live in routes/web.php (under the same /api prefix) so
+// the session middleware runs exactly once. See the note there.
 
 // Save onboarding profile (and auto-follow the student's school forum).
 Route::middleware(['auth:sanctum', 'not_banned', 'throttle:api-writes'])->put('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
@@ -81,6 +75,11 @@ Route::get('/search', [SearchController::class, 'index'])
     ->name('search.index');
 
 Route::middleware(['auth:sanctum', 'not_banned', 'onboarding'])->group(function () {
+    // Username autocomplete for @mentions in comments.
+    Route::get('/users/search', [UserSearchController::class, 'index'])
+        ->middleware('throttle:api-search')
+        ->name('users.search');
+
     // Follow / unfollow another user.
     Route::post('/u/{username}/follow', [UserProfileController::class, 'follow'])
         ->middleware('throttle:api-writes')

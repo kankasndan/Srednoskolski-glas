@@ -22,7 +22,8 @@ function EmbedPreview({ embed, onClose }) {
         <iframe
           src={src}
           title={embed.type === "youtube" ? "YouTube video" : "TikTok video"}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          sandbox="allow-scripts allow-same-origin allow-presentation"
           allowFullScreen
           className="size-full"
         />

@@ -1,9 +1,14 @@
 <?php
 
+use App\Models\City;
 use App\Models\Forum;
 use App\Models\Poll;
+use App\Models\School;
+use App\Models\StudentData;
 use App\Models\Thread;
 use App\Models\User;
+use App\Support\SyncUserContentPermissions;
+use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
@@ -11,6 +16,8 @@ use Illuminate\Support\Facades\Http;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    $this->seed(RolePermissionSeeder::class);
+
     config()->set('media.default', 'imagekit');
     config()->set('media.drivers.imagekit', [
         'public_key' => 'public_test',
@@ -33,7 +40,7 @@ beforeEach(function () {
     ]);
 });
 
-function makeGeneralForum(): Forum
+function makeStoreThreadForum(): Forum
 {
     return Forum::query()->create([
         'name' => 'Државна матура',
@@ -48,8 +55,32 @@ function makeGeneralForum(): Forum
     ]);
 }
 
+/** Starting a thread needs "create threads", which only school members get. */
+function storeThreadAuthor(): User
+{
+    $city = City::query()->firstOrCreate(['name' => 'Скопје']);
+    $school = School::query()->create([
+        'name' => 'Георги Димитров',
+        'city_id' => $city->id,
+    ]);
+
+    $user = User::factory()->create(['onboarding_completed_at' => now()]);
+
+    StudentData::query()->create([
+        'user_id' => $user->id,
+        'school_id' => $school->id,
+        'vocation_id' => null,
+        'grade' => 3,
+    ]);
+
+    $user = $user->fresh(['studentData.school.forum']);
+    app(SyncUserContentPermissions::class)->handle($user);
+
+    return $user->fresh(['studentData.school.forum']);
+}
+
 it('requires authentication to create a thread', function () {
-    $forum = makeGeneralForum();
+    $forum = makeStoreThreadForum();
 
     $this->post('/api/threads', [
         'forum_id' => $forum->id,
@@ -58,8 +89,8 @@ it('requires authentication to create a thread', function () {
 });
 
 it('creates a thread with optional description, link, and poll', function () {
-    $user = User::factory()->create();
-    $forum = makeGeneralForum();
+    $user = storeThreadAuthor();
+    $forum = makeStoreThreadForum();
 
     $response = $this->actingAs($user)->post('/api/threads', [
         'forum_id' => $forum->id,
@@ -90,8 +121,8 @@ it('creates a thread with optional description, link, and poll', function () {
 });
 
 it('rejects poll duration longer than one month', function () {
-    $user = User::factory()->create();
-    $forum = makeGeneralForum();
+    $user = storeThreadAuthor();
+    $forum = makeStoreThreadForum();
 
     $this->actingAs($user)->post('/api/threads', [
         'forum_id' => $forum->id,
@@ -105,8 +136,8 @@ it('rejects poll duration longer than one month', function () {
 });
 
 it('uploads files to imagekit and stores attachments', function () {
-    $user = User::factory()->create();
-    $forum = makeGeneralForum();
+    $user = storeThreadAuthor();
+    $forum = makeStoreThreadForum();
 
     $response = $this->actingAs($user)->post('/api/threads', [
         'forum_id' => $forum->id,
@@ -127,8 +158,8 @@ it('uploads files to imagekit and stores attachments', function () {
 });
 
 it('rejects combining a document with a poll', function () {
-    $user = User::factory()->create();
-    $forum = makeGeneralForum();
+    $user = storeThreadAuthor();
+    $forum = makeStoreThreadForum();
 
     $this->actingAs($user)->post('/api/threads', [
         'forum_id' => $forum->id,
@@ -145,8 +176,8 @@ it('rejects combining a document with a poll', function () {
 });
 
 it('normalizes pasted youtube embed html into a valid link url', function () {
-    $user = User::factory()->create();
-    $forum = makeGeneralForum();
+    $user = storeThreadAuthor();
+    $forum = makeStoreThreadForum();
 
     $iframe = '<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video" frameborder="0" allowfullscreen></iframe>';
 
@@ -162,8 +193,8 @@ it('normalizes pasted youtube embed html into a valid link url', function () {
 });
 
 it('allows combining images with a video attachment', function () {
-    $user = User::factory()->create();
-    $forum = makeGeneralForum();
+    $user = storeThreadAuthor();
+    $forum = makeStoreThreadForum();
 
     $response = $this->actingAs($user)->post('/api/threads', [
         'forum_id' => $forum->id,
@@ -179,8 +210,8 @@ it('allows combining images with a video attachment', function () {
 });
 
 it('rejects combining a link with uploaded media', function () {
-    $user = User::factory()->create();
-    $forum = makeGeneralForum();
+    $user = storeThreadAuthor();
+    $forum = makeStoreThreadForum();
 
     $this->actingAs($user)->post('/api/threads', [
         'forum_id' => $forum->id,

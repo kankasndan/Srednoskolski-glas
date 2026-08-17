@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createComment } from "@/api/comments";
+import MentionTextarea from "@/components/thread/MentionTextarea";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { useProfile } from "@/hooks/useProfile";
+import { userFacingError } from "@/lib/api";
 import { canCreateComments, needsOnboarding } from "@/lib/capabilities";
 
 const MAX_COMMENT_LENGTH = 1000;
@@ -43,11 +45,11 @@ export default function CommentComposer({
       onClose?.();
     } catch (err) {
       if (err.status === 403) {
-        setError(err.message || "Немаш дозвола да коментираш.");
+        setError(userFacingError(err, "Немаш дозвола да коментираш."));
       } else if (err.status === 401) {
         setError("Мора да си најавен за да коментираш.");
       } else {
-        setError(err.message || "Неуспешно објавување. Обиди се повторно.");
+        setError(userFacingError(err, "Неуспешно објавување. Обиди се повторно."));
       }
     } finally {
       setBusy(false);
@@ -110,9 +112,9 @@ export default function CommentComposer({
         </p>
       ) : null}
 
-      <textarea
+      <MentionTextarea
         value={comment}
-        onChange={(event) => setComment(event.target.value)}
+        onChange={setComment}
         maxLength={MAX_COMMENT_LENGTH}
         placeholder={
           compact
@@ -122,7 +124,7 @@ export default function CommentComposer({
         aria-label={compact ? "Одговор" : "Коментар"}
         autoFocus={compact}
         disabled={busy}
-        className={`resize-none rounded-[14px] border border-[#CCCCCC] p-3 text-[14px] leading-6 text-black outline-none transition-colors placeholder:text-[#595959] focus:border-[#582FF5] disabled:opacity-60 ${
+        className={`w-full resize-none rounded-[14px] border border-[#CCCCCC] p-3 text-[14px] leading-6 text-black outline-none transition-colors placeholder:text-[#595959] focus:border-[#582FF5] disabled:opacity-60 ${
           compact ? "h-20" : "h-20 md:h-32"
         }`}
       />

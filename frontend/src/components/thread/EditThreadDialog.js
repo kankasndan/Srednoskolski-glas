@@ -6,6 +6,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import PostTypeButtons from "@/components/compose/PostTypeButtons";
 import RichTextEditor from "@/components/compose/RichTextEditor";
 import TitleInput from "@/components/compose/TitleInput";
+import { userFacingError } from "@/lib/api";
 
 export default function EditThreadDialog({ open, thread, onClose, onSave }) {
   const [title, setTitle] = useState(thread?.title ?? "");
@@ -59,7 +60,7 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
       if (validation) {
         setError(Object.values(validation).flat().join(" "));
       } else {
-        setError(err.message || "Неуспешно зачувување. Обиди се повторно.");
+        setError(userFacingError(err, "Неуспешно зачувување. Обиди се повторно."));
       }
     } finally {
       setSaving(false);

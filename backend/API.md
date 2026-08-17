@@ -200,6 +200,7 @@ Notes:
     "imageUrl": "https://…/avatar.png",
     "school": null
   },
+  "mentions": [],
   "replies": [
     {
       "id": 41,
@@ -210,6 +211,7 @@ Notes:
       "edited_at": null,
       "deleted_by": null,
       "author": { "id": 1, "username": "ana_mk", "imageUrl": "…", "school": null },
+      "mentions": [],
       "replies": []
     }
   ]
@@ -217,6 +219,8 @@ Notes:
 ```
 
 Top-level comments have `parent_id: null`. Replies nest under `replies`.
+
+`mentions` is the list of users resolved from `@username` tokens in `content` (comments only; unknown names and self-mentions are omitted). Render those tokens as profile links. Mentions do not send notifications in MVP.
 
 ---
 
@@ -452,6 +456,43 @@ GET /api/search?page=2&sort=newest&time=week
   }
 }
 ```
+
+---
+
+### Search users (@mention autocomplete)
+
+```
+GET /api/users/search
+```
+
+**Auth required** (onboarding completed). Used by the comment composer when the user types `@`. Mentions exist only on comments, not threads. Matching is a **username prefix**. Results exclude the current user and accounts that have not finished onboarding. People the viewer follows are listed first (then alphabetically). Max 8 rows. Mentions do **not** send notifications in MVP.
+
+| Query | Values | Default | Meaning |
+|-------|--------|---------|---------|
+| `q` | string, max 20; letters, digits, `_`, `.`, `-` | empty | Username prefix (`LIKE 'q%'`). Empty `q` returns users with followed accounts first |
+
+```
+GET /api/users/search
+GET /api/users/search?q=ana
+```
+
+```json
+{
+  "data": [
+    {
+      "id": 2,
+      "username": "ana_k",
+      "imageUrl": "https://…/avatar.png"
+    }
+  ]
+}
+```
+
+| Status | When |
+|--------|------|
+| `401` | Guest |
+| `403` | Banned / onboarding incomplete |
+| `422` | `q` has characters that cannot appear in a username |
 
 ---
 
@@ -1303,13 +1344,15 @@ POST /api/threads/{thread}/comments
 
 Omit `parent_id` (or send `null`) for a top-level comment. Pass a comment id to nest a reply under it (any depth).
 
+`@username` tokens in `content` are parsed on save: existing onboarded users (except the author) are stored in `mentions` and returned for display.
+
 **Success (`201`)** — single `Comment` resource (same shape as in the thread tree; `replies` is `[]` for a freshly created node):
 
 ```json
 {
   "data": {
     "id": 42,
-    "content": "Се согласувам.",
+    "content": "Се согласувам @ana_k.",
     "parent_id": null,
     "upvotes": 0,
     "has_voted": false,
@@ -1318,10 +1361,13 @@ Omit `parent_id` (or send `null`) for a top-level comment. Pass a comment id to 
     "deleted_by": null,
     "author": {
       "id": 1,
-      "username": "ana_mk",
+      "username": "marko_p",
       "imageUrl": "…",
       "school": null
     },
+    "mentions": [
+      { "id": 2, "username": "ana_k", "imageUrl": "…" }
+    ],
     "replies": []
   }
 }
@@ -1343,7 +1389,7 @@ PUT /api/comments/{id}
 |-------|------|--------|
 | `content` | string | required; 1–1000 characters |
 
-Sets `edited_at` to now. Soft-deleted comments cannot be updated (`404`).
+Sets `edited_at` to now. Soft-deleted comments cannot be updated (`404`). Re-parses `@username` mentions from the new content.
 
 **Success (`200`)** — `Comment` resource (same shape as create).
 
@@ -1468,6 +1514,7 @@ DELETE /api/media
 | `GET` | `/api/forums` | — | Sidebar forums |
 | `GET` | `/api/feed` | optional | Paginated personalized / site-wide feed (5/page) |
 | `GET` | `/api/search` | — | Search threads (+ matching forums); empty `q` = explore |
+| `GET` | `/api/users/search` | yes | Username prefix autocomplete for @mentions |
 | `GET` | `/api/p/{slug}` | optional | Forum metadata only (`is_following` when auth) |
 | `GET` | `/api/p/{slug}/threads` | — | Paginated threads (page 1, filters, scroll) |
 | `GET` | `/api/p/{slug}/comments/{id}` | — | Thread + comment tree (`sort=best\|newest\|oldest`) |

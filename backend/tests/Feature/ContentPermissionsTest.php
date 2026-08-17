@@ -17,7 +17,7 @@ beforeEach(function () {
     $this->seed(RolePermissionSeeder::class);
 });
 
-function makeGeneralForum(string $slug = 'opshti'): Forum
+function makeContentGeneralForum(string $slug = 'opshti'): Forum
 {
     return Forum::query()->create([
         'name' => 'Општ форум',
@@ -85,7 +85,7 @@ function onboardWithoutSchool(User $user): User
 
 it('forbids guests from creating threads and comments', function () {
     $author = User::factory()->create();
-    $forum = makeGeneralForum();
+    $forum = makeContentGeneralForum();
     $thread = Thread::forceCreate([
         'title' => 'Hello',
         'description' => 'Body',
@@ -110,7 +110,7 @@ it('forbids guests from creating threads and comments', function () {
 it('forbids incomplete onboarding from creating threads and comments', function () {
     $user = User::factory()->create(['onboarding_completed_at' => null]);
     $author = User::factory()->create();
-    $forum = makeGeneralForum('opshti-2');
+    $forum = makeContentGeneralForum('opshti-2');
     $thread = Thread::forceCreate([
         'title' => 'Hello',
         'description' => 'Body',
@@ -144,7 +144,7 @@ it('forbids incomplete onboarding from follow and vote actions', function () {
         'username' => 'other-user',
         'onboarding_completed_at' => now(),
     ]);
-    $forum = makeGeneralForum('opshti-follow');
+    $forum = makeContentGeneralForum('opshti-follow');
     $thread = Thread::forceCreate([
         'title' => 'Hello',
         'description' => 'Body',
@@ -181,7 +181,7 @@ it('forbids incomplete onboarding from follow and vote actions', function () {
 it('allows school members to create in general and own school, but not other schools', function () {
     [$schoolA, $forumA] = makeSchoolWithForum('Училиште А', 'school-a');
     [, $forumB] = makeSchoolWithForum('Училиште Б', 'school-b');
-    $general = makeGeneralForum('opshti-3');
+    $general = makeContentGeneralForum('opshti-3');
 
     $user = onboardWithSchool(User::factory()->create(), $schoolA);
 
@@ -212,7 +212,7 @@ it('allows school members to create in general and own school, but not other sch
 
 it('allows users without school to comment but not create threads', function () {
     [$schoolA, $forumA] = makeSchoolWithForum('Училиште В', 'school-c');
-    $general = makeGeneralForum('opshti-4');
+    $general = makeContentGeneralForum('opshti-4');
     $author = onboardWithSchool(User::factory()->create(), $schoolA);
 
     $thread = Thread::forceCreate([

@@ -30,6 +30,9 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // Most tests need a user who can already act; the ones that exercise
+            // the onboarding gate pass `onboarding_completed_at => null`.
+            'onboarding_completed_at' => now(),
         ];
     }
 

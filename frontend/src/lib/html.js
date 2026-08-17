@@ -24,11 +24,19 @@ const ALLOWED_TAGS = [
 const ALLOWED_ATTR = ["href", "target", "rel"];
 
 DOMPurify.addHook("afterSanitizeAttributes", (node) => {
-  if (node.tagName !== "A" || !node.hasAttribute("href")) return;
+  if (node.tagName !== "A") return;
 
   const href = node.getAttribute("href") || "";
   if (href.startsWith("//") || /^\s*(javascript|data|vbscript):/i.test(href)) {
     node.removeAttribute("href");
+  }
+
+  // Never trust stored markup to carry rel itself — without noopener the opened
+  // page can rewrite this tab through window.opener.
+  if (node.getAttribute("target") === "_blank") {
+    node.setAttribute("rel", "noopener noreferrer ugc");
+  } else {
+    node.removeAttribute("target");
   }
 });
 

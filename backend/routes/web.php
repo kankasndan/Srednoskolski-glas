@@ -10,7 +10,27 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SanctionController;
 use App\Http\Controllers\Admin\SchoolController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\SocialLoginController;
 use Illuminate\Support\Facades\Route;
+
+/**
+ * OAuth lives here rather than in routes/api.php, even though the URLs keep the
+ * /api prefix that Google and Facebook already have registered as the callback.
+ *
+ * Socialite's CSRF defence stores a `state` value in the session and re-reads it
+ * on the callback. Reaching the session from routes/api.php meant adding the
+ * `web` group on top of Sanctum's stateful pipeline, which made EncryptCookies
+ * and StartSession run twice per request and silently lost the write. Declaring
+ * the routes here gives them the `web` group once and no Sanctum wrapper.
+ */
+Route::prefix('api')->middleware('throttle:social-auth')->group(function () {
+    Route::get('/auth/{provider}/redirect', [SocialLoginController::class, 'redirect'])
+        ->whereIn('provider', ['google', 'facebook'])
+        ->name('social.redirect');
+    Route::get('/auth/{provider}/callback', [SocialLoginController::class, 'callback'])
+        ->whereIn('provider', ['google', 'facebook'])
+        ->name('social.callback');
+});
 
 Route::get('admin', [AuthController::class, 'redirecting']);
 
@@ -28,7 +48,9 @@ Route::prefix('admin')
         // MARK AS READ
         Route::post('notifications/read-all', [AdminController::class, 'readAllNotifications'])
             ->name('admin.notifications.readAll');
-        Route::get('notifications/{id}/read', [AdminController::class, 'readNotification'])
+        // POST: marking a notification read changes state, so it must not be
+        // reachable through a plain link (or a cross-site <img> tag).
+        Route::post('notifications/{id}/read', [AdminController::class, 'readNotification'])
             ->name('admin.notifications.read');
 
         // DAHSBOARD
@@ -93,11 +115,6 @@ Route::prefix('admin')
         Route::get('appeals', [AppealController::class, 'index'])
             ->name('appeal.index')
             ->middleware('permission:view appeals');
-
-        // SEARCH APPEALS
-        Route::get('appeals/liveSearch', [AppealController::class, 'liveSearch'])
-            ->name('appeal.liveSearch')
-            ->middleware('permission:search appeals');
 
         // SHOW
         Route::get('appeals/{appeal}/show', [AppealController::class, 'show'])
@@ -167,22 +184,22 @@ Route::prefix('admin')
         // SCHOOLS
         Route::get('shools', [SchoolController::class, 'index'])
             ->name('school.index')
-            ->middleware('permission:view forums');
+            ->middleware('permission:view schools');
 
         // CREATE
         Route::post('school/store', [SchoolController::class, 'store'])
             ->name('school.store')
-            ->middleware('permission:create forums');
+            ->middleware('permission:create schools');
 
         // SEARCH
         Route::get('schools/liveSearch', [SchoolController::class, 'liveSearch'])
             ->name('school.liveSearch')
-            ->middleware('permission:search forums');
+            ->middleware('permission:search schools');
 
         // DELETE
         Route::delete('schools/{school}/delete', [SchoolController::class, 'destroy'])
             ->name('school.delete')
-            ->middleware('permission:delete forums');
+            ->middleware('permission:delete schools');
 
         // ROLES AND PERMISSIONS
         Route::middleware('permission:view roles page')->group(function () {

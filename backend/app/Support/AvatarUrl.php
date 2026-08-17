@@ -8,8 +8,8 @@ use App\Models\User;
 final class AvatarUrl
 {
     /**
-     * Default local assets, the user's current photo, ImageKit/S3 media
-     * (uploads and generated images), or a file this user uploaded.
+     * Default local assets, the user's current photo, an ImageKit-generated
+     * image, or a file this user uploaded themselves.
      */
     public static function isAllowed(string $url, ?User $user): bool
     {
@@ -22,7 +22,7 @@ final class AvatarUrl
             return true;
         }
 
-        if (self::isConfiguredMediaUrl($url)) {
+        if (self::isGeneratedAvatarUrl($url)) {
             return true;
         }
 
@@ -38,8 +38,19 @@ final class AvatarUrl
     }
 
     /**
+     * ImageKit builds these from a prompt in the URL itself, so there is no
+     * upload row to own. Being on the media host is not enough on its own:
+     * otherwise any avatar or attachment URL could be worn by any user.
+     */
+    public static function isGeneratedAvatarUrl(string $url): bool
+    {
+        return self::isConfiguredMediaUrl($url)
+            && str_contains($url, '/ik-genimg-');
+    }
+
+    /**
      * True when the URL is hosted on the configured ImageKit endpoint or S3
-     * public URL. AI-generated avatars live on ImageKit without a MediaUpload row.
+     * public URL.
      */
     public static function isConfiguredMediaUrl(string $url): bool
     {

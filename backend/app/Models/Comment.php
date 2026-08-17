@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class Comment extends Model
@@ -100,6 +101,7 @@ class Comment extends Model
             'user.studentData.school.city',
             'user.studentData.school.forum',
             'thread',
+            'mentions.mentionedUser',
         ];
     }
 
@@ -108,9 +110,25 @@ class Comment extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function mentions()
+    public function mentions(): MorphMany
     {
         return $this->morphMany(Mention::class, 'mentionable');
+    }
+
+    /**
+     * Users tagged via @username in this comment (unknown/self names are not stored).
+     *
+     * @return Collection<int, User>
+     */
+    public function mentionedUsers(): Collection
+    {
+        $this->loadMissing('mentions.mentionedUser');
+
+        return $this->mentions
+            ->map(fn (Mention $mention) => $mention->mentionedUser)
+            ->filter()
+            ->unique('id')
+            ->values();
     }
 
     public function reports()

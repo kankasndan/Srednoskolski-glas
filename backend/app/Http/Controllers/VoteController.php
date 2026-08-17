@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ChecksContentAccess;
 use App\Models\Comment;
 use App\Models\Thread;
 use App\Models\Vote;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 
 class VoteController extends Controller
 {
+    use ChecksContentAccess;
+
     /**
      * Toggle upvote on a thread.
      *
@@ -19,6 +22,8 @@ class VoteController extends Controller
      */
     public function toggleThread(Request $request, Thread $thread): JsonResponse
     {
+        $this->assertThreadAccessible($thread, $request->user());
+
         return $this->toggle($request, $thread);
     }
 
@@ -29,6 +34,8 @@ class VoteController extends Controller
      */
     public function toggleComment(Request $request, Comment $comment): JsonResponse
     {
+        $this->assertCommentAccessible($comment, $request->user());
+
         return $this->toggle($request, $comment);
     }
 

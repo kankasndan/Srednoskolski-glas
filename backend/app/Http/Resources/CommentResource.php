@@ -28,6 +28,9 @@ class CommentResource extends JsonResource
             'author' => $this->shouldHideAuthor()
                 ? null
                 : new UserResource($this->whenLoaded('user')),
+            'mentions' => $this->trashed()
+                ? []
+                : UserMentionResource::collection($this->mentionedUsers())->resolve(),
             'replies_count' => (int) ($this->replies_count ?? 0),
         ];
     }

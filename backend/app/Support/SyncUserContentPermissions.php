@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\User;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -51,7 +52,23 @@ final class SyncUserContentPermissions
         }
     }
 
+    /**
+     * Cheap check that only pays for a full sync when something is actually off.
+     *
+     * The lookups below throw when the permission rows are missing, which happens
+     * on a database that has never been seeded. That is exactly the case handle()
+     * repairs, so treat it as "out of sync" rather than letting a 500 escape.
+     */
     public function ensureFresh(User $user): void
+    {
+        try {
+            $this->checkFresh($user);
+        } catch (PermissionDoesNotExist) {
+            $this->handle($user);
+        }
+    }
+
+    private function checkFresh(User $user): void
     {
         if ($user->onboarding_completed_at === null) {
             if ($user->hasRole('user') || $user->hasDirectPermission(self::CREATE_THREADS) || $user->hasDirectPermission(self::CREATE_COMMENTS)) {

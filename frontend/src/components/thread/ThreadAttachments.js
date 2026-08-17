@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight, faLink } from "@fortawesome/free-solid-svg-icons";
 import ImageLightbox from "@/components/thread/ImageLightbox";
 import { parseEmbed as parseEmbedPaste, toEmbedUrl } from "@/lib/embeds";
+import { safeExternalUrl } from "@/lib/paths";
 
 config.autoAddCss = false;
 
@@ -41,9 +42,13 @@ function parseEmbed(input) {
 }
 
 /** Scrollable gallery of images + videos, in the order they were attached. */
-function MediaGallery({ items }) {
+function MediaGallery({ items: rawItems }) {
   const trackRef = useRef(null);
   const [lightboxSrc, setLightboxSrc] = useState(null);
+
+  const items = rawItems
+    .map((item) => ({ ...item, url: safeExternalUrl(item.url) }))
+    .filter((item) => item.url !== null);
 
   function scrollByFrame(direction) {
     const track = trackRef.current;
@@ -120,7 +125,10 @@ function MediaGallery({ items }) {
   );
 }
 
-function FileCard({ url }) {
+function FileCard({ url: rawUrl }) {
+  const url = safeExternalUrl(rawUrl);
+  if (!url) return null;
+
   return (
     <a
       href={url}
@@ -141,8 +149,8 @@ function FileCard({ url }) {
   );
 }
 
-function LinkDisplay({ url }) {
-  const embed = parseEmbed(url);
+function LinkDisplay({ url: rawUrl }) {
+  const embed = parseEmbed(rawUrl);
 
   if (embed?.type === "youtube") {
     return (
@@ -173,6 +181,9 @@ function LinkDisplay({ url }) {
       </div>
     );
   }
+
+  const url = safeExternalUrl(rawUrl);
+  if (!url) return null;
 
   return (
     <a

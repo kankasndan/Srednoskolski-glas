@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ChecksContentAccess;
 use App\Models\Comment;
 use App\Models\FeedHide;
 use App\Models\Report;
@@ -14,6 +15,8 @@ use Illuminate\Validation\ValidationException;
 
 class ReportController extends Controller
 {
+    use ChecksContentAccess;
+
     private const REASON_MAP = [
         'Спам' => 'spam',
         'spam' => 'spam',
@@ -34,6 +37,8 @@ class ReportController extends Controller
      */
     public function storeThread(Request $request, Thread $thread): JsonResponse
     {
+        $this->assertThreadAccessible($thread, $request->user());
+
         return $this->storeReport($request, $thread, hideThreadId: $thread->id);
     }
 
@@ -44,6 +49,8 @@ class ReportController extends Controller
      */
     public function storeComment(Request $request, Comment $comment): JsonResponse
     {
+        $this->assertCommentAccessible($comment, $request->user());
+
         return $this->storeReport($request, $comment, hideThreadId: null);
     }
 

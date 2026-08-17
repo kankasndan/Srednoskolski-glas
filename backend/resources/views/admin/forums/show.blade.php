@@ -108,7 +108,7 @@
 
                     <div>
                         <div class="flex items-center gap-2">
-                            <a href="#" class="font-medium text-gray-900 hover:underline">{{ $thread->name }}</a>
+                            <a href="#" class="font-medium text-gray-900 hover:underline">{{ $thread->title }}</a>
                             <span class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5">Анонимно</span>
                             <span class="text-xs bg-orange-100 text-orange-600 rounded-full px-2 py-0.5">Под преглед</span>
                         </div>
@@ -119,10 +119,14 @@
                 <div class="flex items-center gap-6 text-sm text-gray-500">
                     <span>▲ {{ $thread->upvotes }} гласови</span>
                     <span>💬 {{ $thread->comments_count }} коментари</span>
+                    {{-- Values travel in data-* attributes: Blade's escaping is not enough
+                         inside an inline handler, where the HTML parser decodes entities
+                         before the JS string is parsed.
+                         NOTE: no admin thread-destroy route exists yet, so the form action
+                         stays empty and this button is a no-op. --}}
                     <button type="button"
-                    {{-- {{ route('thread.destroy', ['thread' => $thread->id]) }} --}}
-                        onclick="openDeleteThreadModal('', '{{ $thread->name }}')"
-                        class="text-red-600 hover:underline text-xs">
+                        class="js-delete-thread text-red-600 hover:underline text-xs"
+                        data-thread-title="{{ $thread->title }}">
                         Избриши
                     </button>
                 </div>
@@ -310,6 +314,15 @@
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
+
+    document.addEventListener('click', function(e) {
+        const trigger = e.target.closest('.js-delete-thread');
+        if (!trigger) {
+            return;
+        }
+
+        openDeleteThreadModal('', trigger.dataset.threadTitle ?? '');
+    });
 
     function closeDeleteThreadModal() {
         const modal = document.getElementById('deleteThreadModal');

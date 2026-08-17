@@ -52,9 +52,9 @@ it('returns top general forums by views and excludes schools', function () {
         ->assertSuccessful()
         ->json('data.forums.*.slug');
 
-    expect($slugs)->toBe(['high', 'mid', 'also', 'low'])
+    expect($slugs)->toBe(['high', 'mid', 'also', 'fifth'])
         ->and($slugs)->not->toContain('school-explore')
-        ->and($slugs)->not->toContain('fifth');
+        ->and($slugs)->not->toContain('low');
 });
 
 it('ranks weekly threads by votes and comments interactions', function () {

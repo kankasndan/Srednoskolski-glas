@@ -16,7 +16,8 @@ it('updates last_active_at for authenticated api requests', function () {
 });
 
 it('does not thrash last_active_at within two minutes', function () {
-    $recent = now()->subMinute();
+    // Whole seconds only: the column has no sub-second precision to compare against.
+    $recent = now()->subMinute()->startOfSecond();
     $user = User::factory()->create(['last_active_at' => $recent]);
 
     $this->actingAs($user)

@@ -9,7 +9,6 @@ import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faAt,
   faBold,
   faCode,
   faItalic,
@@ -74,11 +73,6 @@ const TOOLBAR_BUTTONS = [
 
       editor.chain().focus().insertContentAt(to, "“").insertContentAt(from, "„").run();
     },
-  },
-  {
-    key: "mention",
-    label: "Спомни корисник",
-    icon: faAt,
   },
 ];
 
@@ -212,31 +206,6 @@ function LinkPopover({ initialText, initialUrl, onSubmit, onClose }) {
   );
 }
 
-// TODO lista na korisnici koga kje ima endpoint - za sega prazna.
-function MentionPopover({ onClose }) {
-  const popoverRef = useRef(null);
-
-  useEffect(() => {
-    function handlePointerDown(event) {
-      if (!popoverRef.current?.contains(event.target)) onClose();
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    return () => document.removeEventListener("pointerdown", handlePointerDown);
-  }, [onClose]);
-
-  return (
-    <div
-      ref={popoverRef}
-      className="absolute bottom-full left-0 z-20 mb-2 w-56 rounded-xl border border-[#CCCCCC] bg-white p-3 shadow-lg"
-    >
-      <p className="font-[family-name:var(--font-manrope)] text-[13px] text-[#595959]">
-        Нема пронајден корисник
-      </p>
-    </div>
-  );
-}
-
 export default function RichTextEditor({
   name = "content",
   placeholder = "Напиши сè што сакаш да кажеш...",
@@ -253,7 +222,6 @@ export default function RichTextEditor({
   const [isEmpty, setIsEmpty] = useState(!initialContent);
   const [characterCount, setCharacterCount] = useState(0);
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
-  const [mentionPopoverOpen, setMentionPopoverOpen] = useState(false);
 
   function syncEditorState(editor) {
     const nextHtml = editor.getHTML();
@@ -386,7 +354,6 @@ export default function RichTextEditor({
                         button={button}
                         active={activeStates?.link ?? false}
                         onClick={() => {
-                          setMentionPopoverOpen(false);
                           setLinkPopoverOpen((prev) => !prev);
                         }}
                       />
@@ -399,25 +366,6 @@ export default function RichTextEditor({
                           }}
                           onClose={() => setLinkPopoverOpen(false)}
                         />
-                      )}
-                    </div>
-                  );
-                }
-
-                if (button.key === "mention") {
-                  return (
-                    <div key={button.key} className="relative">
-                      <ToolbarButton
-                        editor={editor}
-                        button={button}
-                        active={mentionPopoverOpen}
-                        onClick={() => {
-                          setLinkPopoverOpen(false);
-                          setMentionPopoverOpen((prev) => !prev);
-                        }}
-                      />
-                      {mentionPopoverOpen && (
-                        <MentionPopover onClose={() => setMentionPopoverOpen(false)} />
                       )}
                     </div>
                   );

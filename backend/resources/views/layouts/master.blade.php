@@ -69,28 +69,31 @@
                             $isUnread = is_null($notification->read_at);
                         @endphp
 
-                        <a href="{{ route('admin.notifications.read', $notification->id) }}"
-                            class="block rounded-[8px] px-3 py-2 text-[13px] hover:bg-my-purple/5 {{ $isUnread ? 'bg-my-purple/10' : '' }}">
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="font-bold text-[#1F2333]">
-                                    {{ $data['title'] ?? 'Нотификација' }}
-                                </span>
-                                @if ($isUnread)
-                                    <span class="ml-2 h-2 w-2 shrink-0 rounded-full bg-my-purple"></span>
-                                @endif
-                            </div>
-                            <div class="text-[12px] text-[#595959]">
-                                {{ $data['message'] ?? '' }}
-                            </div>
-                            @if (($data['count'] ?? 1) > 1)
-                                <div class="mt-1 text-[11px] font-semibold text-my-purple">
-                                    {{ $data['count'] }} пријави
+                        <form method="POST" action="{{ route('admin.notifications.read', $notification->id) }}">
+                            @csrf
+                            <button type="submit"
+                                class="block w-full cursor-pointer rounded-[8px] px-3 py-2 text-left text-[13px] hover:bg-my-purple/5 {{ $isUnread ? 'bg-my-purple/10' : '' }}">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="font-bold text-[#1F2333]">
+                                        {{ $data['title'] ?? 'Нотификација' }}
+                                    </span>
+                                    @if ($isUnread)
+                                        <span class="ml-2 h-2 w-2 shrink-0 rounded-full bg-my-purple"></span>
+                                    @endif
                                 </div>
-                            @endif
-                            <div class="mt-1 text-[11px] text-[#9598A6]">
-                                {{ $notification->created_at?->diffForHumans() }}
-                            </div>
-                        </a>
+                                <div class="text-[12px] text-[#595959]">
+                                    {{ $data['message'] ?? '' }}
+                                </div>
+                                @if (($data['count'] ?? 1) > 1)
+                                    <div class="mt-1 text-[11px] font-semibold text-my-purple">
+                                        {{ $data['count'] }} пријави
+                                    </div>
+                                @endif
+                                <div class="mt-1 text-[11px] text-[#9598A6]">
+                                    {{ $notification->created_at?->diffForHumans() }}
+                                </div>
+                            </button>
+                        </form>
                     @empty
                         <div class="px-3 py-2 text-[13px] text-[#9598A6]">
                             Нема нотификации.
@@ -199,7 +202,9 @@
                 <a href="{{ route('forum.index') }}" data-nav-key="nav:forums">
                     Форуми
                 </a>
+            @endcan
 
+            @can('view schools')
                 <a href="{{ route('school.index') }}" data-nav-key="nav:schools">
                     Училишта
                 </a>

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Forum;
 use App\Models\School;
+use App\Support\LikeEscape;
 use App\Support\Slug;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -21,8 +22,7 @@ class ForumController extends Controller
         $forums = Forum::query()
             ->with('school', 'forumUser')
             ->when($request->filled('search'), function ($query) use ($request) {
-                $search = $request->search;
-                $query->where('name', 'like', "%{$search}%");
+                $query->where('name', 'like', LikeEscape::contains((string) $request->search));
             })
             ->when($request->filled('type'), function ($query) use ($request) {
                 $type = $request->type;
@@ -64,8 +64,10 @@ class ForumController extends Controller
             ? $validated['slug']
             : Slug::make($validated['name']);
 
-        $imageUrl = $this->defaultIconUrl($slug, $validated['type']);
-        $bannerUrl = $this->defaultBannerUrl($slug, $validated['type']);
+        // School forums are created together with their school (SchoolController),
+        // so anything created here is a general forum.
+        $imageUrl = $this->defaultIconUrl($slug, 'general');
+        $bannerUrl = $this->defaultBannerUrl($slug, 'general');
 
         if ($request->file('icon') instanceof UploadedFile) {
             $imageUrl = Media::upload($request->file('icon'), 'forums/icons')->url;
@@ -79,6 +81,7 @@ class ForumController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'],
             'slug' => $slug,
+            'type' => 'general',
             'imageUrl' => $imageUrl,
             'bannerUrl' => $bannerUrl,
         ]);
@@ -90,11 +93,11 @@ class ForumController extends Controller
     {
         $this->authorize('search forums');
 
-        $query = $request->q;
+        $query = mb_substr(trim((string) $request->query('q', '')), 0, 100);
 
-        $forums = Forum::where('name', 'like', "%{$query}%")
+        $forums = Forum::where('name', 'like', LikeEscape::contains($query))
             ->limit(10)
-            ->get();
+            ->get(['id', 'name', 'slug', 'type', 'imageUrl']);
 
         return response()->json($forums);
     }

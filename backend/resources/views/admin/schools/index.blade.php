@@ -8,10 +8,12 @@
         {{-- Header + Create button --}}
         <div class="flex items-center justify-between">
             <h1 class="text-xl font-semibold text-gray-900">Училишта</h1>
-            <button type="button" onclick="openSchoolModal()"
-                class="px-4 py-2 rounded-md bg-my-purple text-white text-sm font-medium hover:bg-my-purple/90">
-                + Креирај училиште
-            </button>
+            @can('create schools')
+                <button type="button" onclick="openSchoolModal()"
+                    class="px-4 py-2 rounded-md bg-my-purple text-white text-sm font-medium hover:bg-my-purple/90">
+                    + Креирај училиште
+                </button>
+            @endcan
         </div>
 
         {{-- Filters: type (topic / school), city, search --}}
@@ -90,11 +92,17 @@
                             </td>
                             <td class="px-4 py-3 text-gray-500 text-xs">{{ $school->studentData->count() }}</td>
                             <td class="px-4 py-3">
-                                <button type="button"
-                                    class="text-red-500 text-sm rounded-lg hover:text-red-600 cursor-pointer"
-                                    onclick="openDeleteSchoolModal({{ $school->id }}, '{{ addslashes($school->name) }}')">
-                                    Избриши
-                                </button>
+                                @can('delete schools')
+                                    {{-- Values travel in data-* attributes: Blade's escaping is not
+                                         enough inside an inline handler, where the HTML parser decodes
+                                         entities before the JS string is parsed. --}}
+                                    <button type="button"
+                                        class="js-delete-school text-red-500 text-sm rounded-lg hover:text-red-600 cursor-pointer"
+                                        data-school-id="{{ $school->id }}"
+                                        data-school-name="{{ $school->name }}">
+                                        Избриши
+                                    </button>
+                                @endcan
                             </td>
                         </tr>
 
@@ -249,6 +257,15 @@
                     modal.classList.add('flex');
                 }
             }
+
+            document.addEventListener('click', function(e) {
+                const trigger = e.target.closest('.js-delete-school');
+                if (!trigger) {
+                    return;
+                }
+
+                openDeleteSchoolModal(trigger.dataset.schoolId, trigger.dataset.schoolName ?? '');
+            });
 
             function closeDeleteSchoolModal() {
                 const modal = document.getElementById('deleteSchoolModal');

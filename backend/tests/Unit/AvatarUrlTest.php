@@ -29,6 +29,11 @@ it('allows imagekit urls including generated avatars', function () {
         ))->toBeTrue();
 });
 
+it('rejects media-host urls that are not generated and not owned', function () {
+    expect(AvatarUrl::isAllowed('https://ik.imagekit.io/demo/avatars/someone-else.png', null))->toBeFalse()
+        ->and(AvatarUrl::isAllowed('https://ik.imagekit.io/demo/threads/12/photo.jpg', null))->toBeFalse();
+});
+
 it('rejects urls on a different imagekit account or host', function () {
     expect(AvatarUrl::isConfiguredMediaUrl('https://ik.imagekit.io/other/avatars/user.png'))->toBeFalse()
         ->and(AvatarUrl::isConfiguredMediaUrl('https://evil.example/demo/avatars/user.png'))->toBeFalse()

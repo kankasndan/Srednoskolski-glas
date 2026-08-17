@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Cookies from "js-cookie";
-import { API_BASE_URL, ensureCsrfCookie } from "@/lib/api";
+import { API_BASE_URL, ensureCsrfCookie, userFacingError } from "@/lib/api";
 
 function formatEndsAt(endsAt) {
   if (!endsAt) return null;
@@ -69,7 +69,7 @@ export default function ThreadPoll({ poll: initialPoll }) {
       if (err.status === 401) {
         setError("Мора да си најавен за да гласаш.");
       } else {
-        setError(err.message || "Неуспешно гласање.");
+        setError(userFacingError(err, "Неуспешно гласање."));
       }
     } finally {
       setSubmitting(false);

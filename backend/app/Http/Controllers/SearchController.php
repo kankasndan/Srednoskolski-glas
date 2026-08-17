@@ -7,6 +7,7 @@ use App\Http\Resources\ForumResource;
 use App\Http\Resources\ThreadResource;
 use App\Models\Forum;
 use App\Models\Thread;
+use App\Support\LikeEscape;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -123,8 +124,6 @@ class SearchController extends Controller
 
     private function likePattern(string $q): string
     {
-        $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $q);
-
-        return '%'.$escaped.'%';
+        return LikeEscape::contains($q);
     }
 }

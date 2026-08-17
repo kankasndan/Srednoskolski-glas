@@ -11,9 +11,12 @@ use App\Notifications\NewReportNotification;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
+    private const ALREADY_RESOLVED = 'Пријавата е веќе разгледана.';
+
     public function index(Request $request)
     {
         $this->authorize('view reports');
@@ -102,7 +105,9 @@ class ReportController extends Controller
     {
         $this->authorize('approve reports');
 
-        $this->resolveTarget($report, 'approved');
+        if ($this->resolveTarget($report, 'approved') === 0) {
+            return back()->withErrors(['status' => self::ALREADY_RESOLVED]);
+        }
 
         return back()->with(['success' => 'Пријавата е успешно одобрена!']);
     }
@@ -111,7 +116,9 @@ class ReportController extends Controller
     {
         $this->authorize('reject reports');
 
-        $this->resolveTarget($report, 'rejected');
+        if ($this->resolveTarget($report, 'rejected') === 0) {
+            return back()->withErrors(['status' => self::ALREADY_RESOLVED]);
+        }
 
         return back()->with(['success' => 'Пријавата е успешно одбиена!']);
     }
@@ -162,14 +169,25 @@ class ReportController extends Controller
             ->groupBy(fn (Report $report) => $report->reportable_type.'#'.$report->reportable_id);
     }
 
-    private function resolveTarget(Report $report, string $status): void
+    /**
+     * Resolve every pending report on the same target and record who did it.
+     * Returns the number of rows touched — zero means someone already handled it.
+     */
+    private function resolveTarget(Report $report, string $status): int
     {
-        Report::query()
+        $resolved = Report::query()
             ->where('reportable_type', $report->reportable_type)
             ->where('reportable_id', $report->reportable_id)
             ->where('status', 'pending')
-            ->update(['status' => $status]);
+            ->update([
+                'status' => $status,
+                'reviewed_by' => Auth::id(),
+            ]);
 
-        NewReportNotification::markTargetRead($report);
+        if ($resolved > 0) {
+            NewReportNotification::markTargetRead($report);
+        }
+
+        return $resolved;
     }
 }

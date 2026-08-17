@@ -12,17 +12,13 @@ import InfoDialog from "@/components/ui/InfoDialog";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { createThread } from "@/api/threads";
 import { useProfile } from "@/hooks/useProfile";
+import { userFacingError } from "@/lib/api";
+import { stripHtml } from "@/lib/html";
 import {
   canCreateThreadInForum,
   canCreateThreads,
   needsOnboarding,
 } from "@/lib/capabilities";
-
-function getPlainTextFromHtml(html) {
-  const container = document.createElement("div");
-  container.innerHTML = html;
-  return container.textContent?.trim() ?? "";
-}
 
 const POSTED_TITLE = "Дискусијата беше успешно објавена.";
 const POSTED_MESSAGE = "Можеш да ја следиш на форумот или на твојот профил.";
@@ -75,7 +71,7 @@ export default function NewDiscussionForm() {
       const thread = await createThread({
         forumId: selectedForum.id,
         title: title.trim(),
-        description: getPlainTextFromHtml(content) ? content : "",
+        description: stripHtml(content) ? content : "",
         isAnonymous,
         files: attachments.files,
         link: attachments.link || undefined,
@@ -91,9 +87,11 @@ export default function NewDiscussionForm() {
       } else if (error.status === 401) {
         setSubmitError("Мора да си најавен за да објавиш дискусија.");
       } else if (error.status === 403) {
-        setSubmitError(error.message || "Немаш дозвола да започнеш дискусија во овој форум.");
+        setSubmitError(
+          userFacingError(error, "Немаш дозвола да започнеш дискусија во овој форум."),
+        );
       } else {
-        setSubmitError(error.message || "Неуспешно објавување. Обиди се повторно.");
+        setSubmitError(userFacingError(error, "Неуспешно објавување. Обиди се повторно."));
       }
     } finally {
       setSubmitting(false);
@@ -155,7 +153,7 @@ export default function NewDiscussionForm() {
         errorMessage={errors.content}
         widthClassName="w-full"
         onContentChange={(nextContent) => {
-          if (!getPlainTextFromHtml(nextContent)) return;
+          if (!stripHtml(nextContent)) return;
           setErrors((current) => ({ ...current, content: undefined }));
         }}
       />

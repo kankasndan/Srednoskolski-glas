@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import DialogShell from "@/components/ui/DialogShell";
+import MentionTextarea from "@/components/thread/MentionTextarea";
+import { userFacingError } from "@/lib/api";
 
 const MAX_COMMENT_LENGTH = 1000;
 
@@ -30,7 +32,7 @@ export default function EditCommentDialog({
       if (validation) {
         setError(Object.values(validation).flat().join(" "));
       } else {
-        setError(err.message || "Неуспешно зачувување. Обиди се повторно.");
+        setError(userFacingError(err, "Неуспешно зачувување. Обиди се повторно."));
       }
     } finally {
       setSaving(false);
@@ -49,14 +51,14 @@ export default function EditCommentDialog({
           Уреди го коментарот
         </h2>
 
-        <textarea
+        <MentionTextarea
           value={content}
-          onChange={(event) => setContent(event.target.value)}
+          onChange={setContent}
           maxLength={MAX_COMMENT_LENGTH}
           disabled={saving}
           aria-label="Коментар"
           autoFocus
-          className="h-32 resize-none rounded-xl border border-[#CCCCCC] p-4 text-[14px] leading-6 text-black outline-none transition-colors placeholder:text-[#595959] focus:border-[#582FF5] disabled:opacity-60"
+          className="h-32 w-full resize-none rounded-xl border border-[#CCCCCC] p-4 text-[14px] leading-6 text-black outline-none transition-colors placeholder:text-[#595959] focus:border-[#582FF5] disabled:opacity-60"
         />
 
         {error ? (

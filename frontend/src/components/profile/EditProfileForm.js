@@ -14,6 +14,7 @@ import { CITIES } from "@/lib/schools";
 import InfoDialog from "@/components/ui/InfoDialog";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SelectField from "@/components/ui/SelectField";
+import { userFacingError } from "@/lib/api";
 
 const SAVED_TITLE = "Промените на профилот се зачувани.";
 
@@ -196,7 +197,7 @@ export default function EditProfileForm({ user: initialUser }) {
       if (validation) {
         setError(Object.values(validation).flat().join(" "));
       } else {
-        setError(err.message || "Неуспешно зачувување. Обиди се повторно.");
+        setError(userFacingError(err, "Неуспешно зачувување. Обиди се повторно."));
       }
     } finally {
       setSaving(false);

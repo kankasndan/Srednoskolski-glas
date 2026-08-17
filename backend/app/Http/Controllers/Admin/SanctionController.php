@@ -9,9 +9,11 @@ use App\Models\Report;
 use App\Models\Sanction;
 use App\Models\Thread;
 use App\Models\User;
+use App\Notifications\NewReportNotification;
 use App\Support\StaffRoleHierarchy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SanctionController extends Controller
 {
@@ -32,6 +34,11 @@ class SanctionController extends Controller
     public function remove(Sanction $sanction)
     {
         $this->authorize('remove sanctions');
+
+        $sanction->update([
+            'revoked_at' => now(),
+            'revoked_by' => Auth::id(),
+        ]);
 
         $sanction->delete();
 
@@ -72,6 +79,12 @@ class SanctionController extends Controller
                 ->find($validated['report_id']);
 
             if ($report) {
+                if ($report->status !== 'pending') {
+                    return back()
+                        ->withErrors(['report_id' => 'Пријавата е веќе разгледана.'])
+                        ->withInput();
+                }
+
                 $authorId = $this->resolveReportAuthorId($report);
                 if ($authorId === null) {
                     return back()
@@ -99,6 +112,52 @@ class SanctionController extends Controller
             default => null,
         };
 
+        if ($report) {
+            $resolved = DB::transaction(function () use ($report, $request, $validated, $expiresAt, $actor): bool {
+                // Claim every pending report on this target first; if another
+                // moderator got here already, issue no sanction at all.
+                $claimed = Report::query()
+                    ->where('reportable_type', $report->reportable_type)
+                    ->where('reportable_id', $report->reportable_id)
+                    ->where('status', 'pending')
+                    ->update([
+                        'status' => 'approved',
+                        'reviewed_by' => $actor->id,
+                    ]);
+
+                if ($claimed === 0) {
+                    return false;
+                }
+
+                Sanction::create([
+                    'user_id' => $validated['user_id'],
+                    'type' => $validated['type'],
+                    'reason' => $validated['reason'],
+                    'expires_at' => $expiresAt,
+                    'issued_by' => $actor->id,
+                    'report_id' => $report->id,
+                ]);
+
+                if ($request->boolean('content')) {
+                    $this->removeReportableContent($report);
+                }
+
+                return true;
+            });
+
+            if (! $resolved) {
+                return back()
+                    ->withErrors(['report_id' => 'Пријавата е веќе разгледана.'])
+                    ->withInput();
+            }
+
+            NewReportNotification::markTargetRead($report);
+
+            return redirect()
+                ->route('report.index')
+                ->with('success', 'Санкцијата е успешно издадена.');
+        }
+
         Sanction::create([
             'user_id' => $validated['user_id'],
             'type' => $validated['type'],
@@ -106,20 +165,6 @@ class SanctionController extends Controller
             'expires_at' => $expiresAt,
             'issued_by' => $actor->id,
         ]);
-
-        if ($report) {
-            if ($request->boolean('content')) {
-                $this->removeReportableContent($report);
-            }
-
-            $report->update([
-                'status' => 'approved',
-            ]);
-
-            return redirect()
-                ->route('report.index')
-                ->with('success', 'Санкцијата е успешно издадена.');
-        }
 
         if (str_contains(url()->previous(), 'admin/users')) {
             return redirect()

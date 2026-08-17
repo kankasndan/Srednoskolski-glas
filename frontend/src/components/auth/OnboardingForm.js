@@ -198,7 +198,8 @@ export default function OnboardingForm() {
 
       <SelectField
         id="year"
-        label="Година (опционално)"
+        label="Година"
+        required
         value={year}
         onChange={setYear}
         placeholder="Избери година"

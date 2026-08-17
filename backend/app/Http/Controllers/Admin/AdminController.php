@@ -99,8 +99,31 @@ class AdminController extends Controller
         $notification = Auth::user()?->notifications()->where('id', $id)->firstOrFail();
         $notification->markAsRead();
 
-        $url = $notification->data['url'] ?? route('report.index');
+        return redirect($this->safeNotificationUrl($notification->data['url'] ?? null));
+    }
 
-        return redirect($url);
+    /**
+     * Notification payloads are app-generated today, but a stored redirect target
+     * is still data: only ever follow a same-origin URL.
+     */
+    private function safeNotificationUrl(mixed $url): string
+    {
+        $fallback = route('report.index');
+
+        if (! is_string($url) || $url === '') {
+            return $fallback;
+        }
+
+        if (str_starts_with($url, '/') && ! str_starts_with($url, '//')) {
+            return url($url);
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+
+        if ($host !== null && $host === parse_url((string) config('app.url'), PHP_URL_HOST)) {
+            return $url;
+        }
+
+        return $fallback;
     }
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import DialogShell from "@/components/ui/DialogShell";
 import FieldLabel from "@/components/ui/FieldLabel";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { userFacingError } from "@/lib/api";
 
 const REASONS = [
   "Спам",
@@ -40,7 +41,7 @@ export default function ReportDialog({ open, onClose, onSubmit }) {
     try {
       await onSubmit?.({ reason, details: details.trim() });
     } catch (err) {
-      setError(err?.message || "Неуспешна пријава. Обиди се повторно.");
+      setError(userFacingError(err, "Неуспешна пријава. Обиди се повторно."));
     } finally {
       setSubmitting(false);
     }

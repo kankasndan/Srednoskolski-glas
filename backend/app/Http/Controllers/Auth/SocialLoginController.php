@@ -20,17 +20,20 @@ class SocialLoginController extends Controller
     {
         $this->assertAllowedProvider($provider);
 
-        return Socialite::driver($provider)->stateless()->redirect();
+        // Stateful on purpose: Socialite stores a `state` value in the session and
+        // verifies it on callback, which is what stops an attacker from replaying
+        // their own authorization code into a victim's browser (login CSRF).
+        return Socialite::driver($provider)->redirect();
     }
 
     public function callback(string $provider): RedirectResponse
     {
         $this->assertAllowedProvider($provider);
 
-        $frontendUrl = rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'), '/');
+        $frontendUrl = rtrim((string) config('app.frontend_url'), '/');
 
         try {
-            $socialUser = Socialite::driver($provider)->stateless()->user();
+            $socialUser = Socialite::driver($provider)->user();
             $providerId = (string) $socialUser->getId();
             $email = $socialUser->getEmail();
 

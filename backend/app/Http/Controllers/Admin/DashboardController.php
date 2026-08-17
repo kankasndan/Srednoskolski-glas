@@ -17,7 +17,7 @@ class DashboardController extends Controller
     {
         $this->authorize('view dashboard');
 
-        $range = $request->get('range', 30);
+        $range = $this->resolveRange($request);
 
         $totalUsers = User::count();
 
@@ -39,6 +39,20 @@ class DashboardController extends Controller
         //
 
         return view('admin.dashboard.index', compact('totalUsers', 'activeUsers', 'newRegistrations30d', 'usersBySchool', 'usersByCity', 'topForums', 'registrationLabels', 'registrationCounts'));
+    }
+
+    /**
+     * The range drives day-by-day loops and the export cache key, so it has to be
+     * a bounded integer — `?range=999999999` would otherwise build an array that
+     * size and hand every value its own cache entry.
+     */
+    private function resolveRange(Request $request): int
+    {
+        $validated = $request->validate([
+            'range' => ['nullable', 'integer', 'min:1', 'max:365'],
+        ]);
+
+        return (int) ($validated['range'] ?? 30);
     }
 
     private function registrationLabels(int $range): array
@@ -108,7 +122,7 @@ class DashboardController extends Controller
     {
         $this->authorize('export dashboard');
 
-        $range = (int) $request->get('range', 30);
+        $range = $this->resolveRange($request);
 
         $pdf = Pdf::loadView('admin.dashboard.export', $this->getDashboardData($range));
 
