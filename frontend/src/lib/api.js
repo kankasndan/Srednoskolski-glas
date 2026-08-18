@@ -27,10 +27,18 @@ function readCookie(name) {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+function attachCsrfHeader(headers) {
+  const csrfToken = readCookie("XSRF-TOKEN");
+  if (csrfToken) {
+    headers["X-XSRF-TOKEN"] = csrfToken;
+  }
+}
+
 // Ask Laravel to set the XSRF-TOKEN cookie. Sanctum then validates it against
 // the X-XSRF-TOKEN header we send on every state-changing request.
+// Always refresh: OAuth login regenerates the session, and a leftover cookie
+// from before that would 419 as "CSRF token mismatch".
 export async function ensureCsrfCookie() {
-  if (readCookie("XSRF-TOKEN")) return;
   await fetch(`${API_BASE_URL}/sanctum/csrf-cookie`, {
     credentials: "include",
   });
@@ -49,16 +57,23 @@ export async function apiFetch(path, options = {}) {
 
   if (!SAFE_METHODS.has(method)) {
     await ensureCsrfCookie();
-    const csrfToken = readCookie("XSRF-TOKEN");
-    if (csrfToken) {
-      headers["X-XSRF-TOKEN"] = csrfToken;
-    }
+    attachCsrfHeader(headers);
   }
 
-  return fetch(`${API_BASE_URL}${path}`, {
+  const request = {
     ...options,
     method,
     credentials: "include",
     headers,
-  });
+  };
+
+  const response = await fetch(`${API_BASE_URL}${path}`, request);
+
+  if (!SAFE_METHODS.has(method) && response.status === 419) {
+    await ensureCsrfCookie();
+    attachCsrfHeader(headers);
+    return fetch(`${API_BASE_URL}${path}`, request);
+  }
+
+  return response;
 }

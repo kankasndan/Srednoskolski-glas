@@ -77,7 +77,7 @@ function MetaTag({ tag, hiddenOnMobile = false, hiddenOnPhone = false }) {
       ? "hidden md:flex"
       : "flex";
 
-  const className = `relative z-10 ${displayClass} h-6 max-w-[150px] shrink-0 cursor-pointer items-center gap-1 rounded-md bg-[#F5F5F5] px-1.5 text-[11px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB] md:h-7 md:max-w-none md:gap-1.5 md:px-2 md:text-[12px]`;
+  const className = `relative z-10 ${displayClass} h-6 shrink-0 cursor-pointer items-center gap-1 rounded-md bg-[#F5F5F5] px-1.5 text-[11px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB] md:h-7 md:gap-1.5 md:px-2 md:text-[12px]`;
 
   const content = (
     <>
@@ -96,7 +96,7 @@ function MetaTag({ tag, hiddenOnMobile = false, hiddenOnPhone = false }) {
           )}
         </span>
       ) : null}
-      <span className="truncate">{tag.label}</span>
+      <span className="whitespace-nowrap">{tag.label}</span>
     </>
   );
 
@@ -115,20 +115,23 @@ function MetaTag({ tag, hiddenOnMobile = false, hiddenOnPhone = false }) {
   return <span className={className.replace("cursor-pointer ", "")}>{content}</span>;
 }
 
-// Na mobilen karticata gi prikazuva samo forumot i vremeto.
+// Na feed (mobile) samo forumot; vo forum samo avtorot. Desktop gi pokazuva site.
 export default function ThreadMetaTags({
   tags,
   postedAgo,
+  mobileTag = null,
   forumOnlyOnMobile = false,
   hideForumOnPhone = false,
 }) {
+  const visibleOnMobile = mobileTag ?? (forumOnlyOnMobile ? "forum" : null);
+
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-1.5 md:gap-2">
       {tags.map((tag) => (
         <MetaTag
           key={tag.key ?? tag.label}
           tag={tag}
-          hiddenOnMobile={forumOnlyOnMobile && tag.key !== "forum"}
+          hiddenOnMobile={visibleOnMobile != null && tag.key !== visibleOnMobile}
           hiddenOnPhone={hideForumOnPhone && tag.key === "forum"}
         />
       ))}

@@ -8,7 +8,7 @@ import MobileFooter from "@/components/shell/MobileFooter";
 export default function NewDiscussionPage() {
   return (
     <AppShell contentClassName="!flex-col !items-stretch !justify-start !px-0 !pb-0 !pt-0">
-      <div className="-mx-4 flex min-h-full flex-1 flex-col items-stretch px-6 pb-8 lg:-mx-6 lg:px-14">
+      <div className="flex min-h-full flex-1 flex-col items-stretch px-6 pb-8 lg:-mx-6 lg:px-14">
         <div className="self-start">
           <BackButton
             label="Врати се назад"

@@ -13,7 +13,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class ForumResource extends JsonResource
 {
     /**
-     * When false, omit description/banner (sidebar card). Default true for full forum pages.
+     * When false, omit banner and follow/create extras (sidebar card).
+     * Description stays on cards so the compose select can show it.
      */
     public bool $withDetails = true;
 
@@ -54,7 +55,7 @@ class ForumResource extends JsonResource
                 $this->withDetails && $user !== null && $this->type === 'school',
                 fn () => $user->schoolForumId() === (int) $this->id,
             ),
-            'description' => $this->when($this->withDetails, $this->description),
+            'description' => $this->description,
             'bannerUrl' => $this->when($this->withDetails, $this->bannerUrl),
             'school' => $this->when(
                 $this->withDetails && $this->relationLoaded('school'),

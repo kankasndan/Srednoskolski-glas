@@ -12,7 +12,6 @@ use App\Http\Controllers\FollowForumController;
 use App\Http\Controllers\FollowThreadController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MediaController;
-use App\Http\Controllers\NewestController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
@@ -60,7 +59,6 @@ Route::middleware('throttle:api-reads')->group(function () {
     Route::get('/forums', [ForumController::class, 'index'])->name('forums.index');
     Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
     Route::get('/feed', [FeedController::class, 'index'])->name('feed.index');
-    Route::get('/newest', [NewestController::class, 'index'])->name('newest.index');
     Route::get('/explore', [ExploreController::class, 'index'])->name('explore.index');
     Route::get('/p/{forum:slug}', [ForumController::class, 'show'])->name('forums.show');
     Route::get('/p/{forum:slug}/threads', [ThreadController::class, 'index'])->name('forums.threads.index');

@@ -373,14 +373,14 @@ export default function Threads({
 
   if (isTrulyEmptyForum) {
     return (
-      <section className="flex w-full max-w-[990px] flex-col items-center gap-8">
+      <section className="flex w-full max-w-[1100px] flex-col items-center gap-8">
         <ForumEmptyState />
       </section>
     );
   }
 
   return (
-    <section className="flex w-full max-w-[990px] flex-col items-center gap-8">
+    <section className="flex w-full max-w-[1100px] flex-col items-center gap-8">
       {/* Na mobilen mesto dvata dropdown-a stoi kopce Филтри. */}
       <button
         type="button"
@@ -449,7 +449,12 @@ export default function Threads({
           </p>
         ) : (
           threads.map((thread) => (
-            <ThreadCard key={thread.id} thread={thread} highlight={searchQuery} />
+            <ThreadCard
+              key={thread.id}
+              thread={thread}
+              highlight={searchQuery}
+              mobileTag={forum ? "author" : "forum"}
+            />
           ))
         )}
       </div>

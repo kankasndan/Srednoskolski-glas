@@ -37,7 +37,7 @@ export default function ExploreDiscussions() {
 
   return (
     <AppShell>
-      <div className="flex w-[992px] max-w-full flex-col gap-16">
+      <div className="flex w-[1100px] max-w-full flex-col gap-16">
         <div className="flex flex-col">
           <h1 className="font-[family-name:var(--font-manrope)] text-[24px] font-bold tracking-normal text-[#582FF5]">
             Истражи

@@ -11,7 +11,7 @@ export default function CommunityBanner() {
   const showCreate = !loading && canCreateThreads(user);
 
   return (
-    <section className="flex w-[990px] max-w-full flex-col gap-4 rounded-3xl bg-[#CFE9ED] px-6 py-6 lg:min-h-32 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:py-6 lg:pl-6 lg:pr-[22px]">
+    <section className="flex w-[1100px] max-w-full flex-col gap-4 rounded-3xl bg-[#CFE9ED] px-6 py-6 lg:min-h-32 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:py-6 lg:pl-6 lg:pr-[22px]">
       <div className="flex min-w-0 flex-1 items-center gap-[15px]">
         <Image
           src="/logo.svg"

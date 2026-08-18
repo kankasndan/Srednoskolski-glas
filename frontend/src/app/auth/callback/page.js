@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { ensureCsrfCookie } from "@/lib/api";
 import { invalidateSessionUser } from "@/lib/sessionUser";
 import { safeInternalPath } from "@/lib/paths";
 
@@ -38,7 +39,11 @@ export default function AuthCallbackPage() {
         ? "/feed"
         : successRedirect;
 
-    router.replace(nextPath);
+    // OAuth regenerates the Laravel session. Refresh XSRF-TOKEN against that
+    // new session before onboarding (or any other mutating request) runs.
+    ensureCsrfCookie().finally(() => {
+      router.replace(nextPath);
+    });
   }, [router]);
 
   return (

@@ -140,7 +140,7 @@ export default function NewDiscussionForm() {
         }}
         errorMessage={errors.forum}
         widthClassName="w-full lg:w-[310px]"
-        className="!mb-4 lg:!mb-12"
+        className="!mb-4 lg:!mb-6"
       />
       <TitleInput
         value={title}
@@ -168,7 +168,7 @@ export default function NewDiscussionForm() {
           <PrimaryButton
             type="submit"
             disabled={submitting}
-            className="h-10 w-full px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:opacity-60 xl:w-48"
+            className="h-10 w-full px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:opacity-60 lg:w-auto lg:shrink-0 xl:w-48"
           >
             {submitting ? "Се објавува…" : "Објави дискусија"}
           </PrimaryButton>

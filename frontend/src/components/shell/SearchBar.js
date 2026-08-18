@@ -12,6 +12,7 @@ import { useClickOutside } from "@/hooks/useClickOutside";
 import { getForum } from "@/api/forums";
 import { searchContent } from "@/api/search";
 import ForumIcon from "@/components/forum/ForumIcon";
+import HighlightedText from "@/components/search/HighlightedText";
 import { stripHtml } from "@/lib/html";
 
 config.autoAddCss = false;
@@ -22,25 +23,6 @@ const DROPDOWN_PAGE_SIZE = 5;
 function forumSlugFromPath(pathname) {
   const match = pathname?.match(/^\/p\/([^/]+)/);
   return match?.[1] ?? null;
-}
-
-function highlightMatch(text, query) {
-  if (!text) return null;
-  const q = query.trim();
-  if (!q) return text;
-  const lower = text.toLowerCase();
-  const needle = q.toLowerCase();
-  const index = lower.indexOf(needle);
-  if (index < 0) return text;
-  return (
-    <>
-      {text.slice(0, index)}
-      <span className="font-semibold text-black">
-        {text.slice(index, index + q.length)}
-      </span>
-      {text.slice(index + q.length)}
-    </>
-  );
 }
 
 function snippetAround(text, query, max = 90) {
@@ -249,7 +231,6 @@ export default function SearchBar() {
       {showDropdown ? (
         <div
           id={listboxId}
-          role="listbox"
           aria-label="Предлози за пребарување"
           className="absolute left-0 right-0 top-full z-[60] mt-2 overflow-hidden rounded-xl border border-[#CCCCCC] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
         >
@@ -262,7 +243,7 @@ export default function SearchBar() {
               Нема резултати.
             </p>
           ) : (
-            <ul className="flex flex-col py-1">
+            <ul role="listbox" aria-label="Предлози за пребарување" className="flex flex-col py-1">
               {results.forums.map((forum) => (
                 <li key={`forum-${forum.id}`}>
                   <Link
@@ -277,7 +258,7 @@ export default function SearchBar() {
                     <ForumIcon src={forum.imageUrl} className="size-5" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-[family-name:var(--font-manrope)] text-[14px] font-medium text-black">
-                        {highlightMatch(forum.name, query)}
+                        <HighlightedText text={forum.name} query={query} />
                       </p>
                       <p className="font-[family-name:var(--font-manrope)] text-[12px] text-[#595959]">
                         Форум
@@ -302,11 +283,11 @@ export default function SearchBar() {
                       className="flex cursor-pointer flex-col gap-0.5 px-4 py-2.5 hover:bg-[#F5F5F5]"
                     >
                       <p className="truncate font-[family-name:var(--font-manrope)] text-[14px] font-medium text-black">
-                        {highlightMatch(thread.title, query)}
+                        <HighlightedText text={thread.title} query={query} />
                       </p>
                       {preview ? (
                         <p className="line-clamp-1 font-[family-name:var(--font-manrope)] text-[12px] text-[#595959]">
-                          {highlightMatch(preview, query)}
+                          <HighlightedText text={preview} query={query} />
                         </p>
                       ) : null}
                       {thread.forum?.name ? (
@@ -320,6 +301,15 @@ export default function SearchBar() {
               })}
             </ul>
           )}
+
+          {/* Enter vodi do celosnata strana so rezultati; ova e vidliviot ekvivalent. */}
+          <button
+            type="button"
+            onClick={() => goToResults()}
+            className="flex w-full cursor-pointer items-center gap-2 border-t border-[#EBEBEB] px-4 py-2.5 text-left font-[family-name:var(--font-manrope)] text-[13px] font-medium text-[var(--color-primary-200)] hover:bg-[#F5F5F5]"
+          >
+            Прикажи ги сите резултати за „{query.trim()}“
+          </button>
         </div>
       ) : null}
     </div>

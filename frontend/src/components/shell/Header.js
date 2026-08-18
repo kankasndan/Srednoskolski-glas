@@ -6,10 +6,29 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SearchBar, { SearchBarFallback } from "@/components/shell/SearchBar";
 import AuthButtons from "@/components/shell/AuthButtons";
+import Avatar from "@/components/ui/Avatar";
+import { useProfile } from "@/hooks/useProfile";
 
-export default function Header({ onMenuToggle, menuOpen = false }) {
+function MobileAuthControl() {
   const router = useRouter();
+  const { user, loading } = useProfile();
   const [leavingToLogin, setLeavingToLogin] = useState(false);
+
+  if (loading) {
+    return <div className="size-8 shrink-0" aria-hidden />;
+  }
+
+  if (user) {
+    return (
+      <Link
+        href="/profile"
+        aria-label="Профил"
+        className="flex size-8 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full"
+      >
+        <Avatar src={user.imageUrl} size="md" alt={user.username || "Профил"} />
+      </Link>
+    );
+  }
 
   // Kratka animacija pred da se otvori najavata.
   function goToLogin(event) {
@@ -20,8 +39,29 @@ export default function Header({ onMenuToggle, menuOpen = false }) {
   }
 
   return (
+    <Link
+      href="/login"
+      onClick={goToLogin}
+      aria-label="Најави се"
+      className={`flex size-8 shrink-0 cursor-pointer items-center justify-center transition-all duration-200 ease-out ${
+        leavingToLogin ? "scale-90 opacity-40" : "active:scale-90"
+      }`}
+    >
+      <Image
+        src="/mobile version/login icon.svg"
+        alt=""
+        width={32}
+        height={32}
+        className="size-8"
+      />
+    </Link>
+  );
+}
+
+export default function Header({ onMenuToggle, menuOpen = false }) {
+  return (
     <header className="sticky top-0 z-50 flex w-full flex-col bg-white shadow-sm">
-      {/* Mobilna lenta: menu, logo i najava. */}
+      {/* Mobilna lenta: menu, logo i najava / profil. */}
       <div className="flex items-center justify-between px-6 py-2 lg:hidden">
         <button
           type="button"
@@ -61,22 +101,7 @@ export default function Header({ onMenuToggle, menuOpen = false }) {
           />
         </Link>
 
-        <Link
-          href="/login"
-          onClick={goToLogin}
-          aria-label="Најави се"
-          className={`flex size-8 shrink-0 cursor-pointer items-center justify-center transition-all duration-200 ease-out ${
-            leavingToLogin ? "scale-90 opacity-40" : "active:scale-90"
-          }`}
-        >
-          <Image
-            src="/mobile version/login icon.svg"
-            alt=""
-            width={32}
-            height={32}
-            className="size-8"
-          />
-        </Link>
+        <MobileAuthControl />
       </div>
 
       <div className="flex w-full items-center justify-between gap-6 px-6 pb-4 pt-8 md:justify-center lg:justify-between lg:px-14 lg:py-4">

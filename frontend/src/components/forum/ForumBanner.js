@@ -26,7 +26,7 @@ export default function ForumBanner({
   const lockOwnSchool = Boolean(isOwnSchoolForum);
 
   return (
-    <section className="w-[990px] max-w-full overflow-hidden rounded-3xl border border-[#CFE9ED] bg-[#DEDFD9]">
+    <section className="w-[1100px] max-w-full overflow-hidden rounded-3xl border border-[#CFE9ED] bg-[#DEDFD9]">
       <div
         className="h-36 w-full bg-[#DEDFD9] bg-cover bg-center lg:h-[164px]"
         style={{ backgroundImage: `url("${bannerUrl}")` }}

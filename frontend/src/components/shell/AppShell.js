@@ -16,7 +16,6 @@ let sidebarCollapsed = false;
 
 function getSelectedKey(pathname) {
   if (pathname === "/feed") return "nav:home";
-  if (pathname === "/newest") return "nav:latest";
   // Na /search nishto ne e izbrano vo stranichnata lenta.
   if (pathname === "/explore") return "nav:explore";
   if (pathname?.startsWith("/p/")) {
@@ -73,7 +72,7 @@ export default function AppShell({ children, contentClassName = "" }) {
         onSelect={handleSelect}
       />
 
-      <div className="flex min-h-0 min-w-0 flex-1 px-4 lg:px-6">
+      <div className="flex min-h-0 min-w-0 flex-1 px-0 lg:px-6">
         <aside className="box-border hidden min-h-0 shrink-0 flex-col border-r border-[#CCCCCC] bg-white pr-6 pt-1 pl-8 lg:flex">
           <button
             type="button"

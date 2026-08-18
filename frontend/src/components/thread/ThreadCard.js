@@ -54,7 +54,7 @@ function ActionButton({ icon, label, count, onClick, active = false, compact = f
   );
 }
 
-export default function ThreadCard({ thread, highlight = null }) {
+export default function ThreadCard({ thread, highlight = null, mobileTag = "forum" }) {
   const [upvotes, setUpvotes] = useState(thread.upvotes ?? 0);
   const [hasVoted, setHasVoted] = useState(Boolean(thread.has_voted));
   const [voting, setVoting] = useState(false);
@@ -104,7 +104,7 @@ export default function ThreadCard({ thread, highlight = null }) {
           <ThreadMetaTags
             tags={buildThreadMetaTags(thread.forum, thread)}
             postedAgo={formatThreadPostedAgo(thread)}
-            forumOnlyOnMobile
+            mobileTag={mobileTag}
           />
 
           <div className="flex w-full min-w-0 flex-col gap-2">
@@ -113,7 +113,7 @@ export default function ThreadCard({ thread, highlight = null }) {
             </h3>
             {thread.description ? (
               <p className="font-[family-name:var(--font-manrope)] text-[16px] font-normal text-[#595959] md:leading-snug">
-                {stripHtml(thread.description)}
+                <HighlightedText text={stripHtml(thread.description)} query={highlight} />
               </p>
             ) : null}
             <div className="hidden md:block">

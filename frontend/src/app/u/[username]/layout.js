@@ -60,7 +60,7 @@ export default function PublicProfileLayout({ children }) {
 
   return (
     <AppShell>
-      <div className="flex w-247.5 max-w-full flex-col">
+      <div className="flex w-[1100px] max-w-full flex-col">
         <ProfileBanner
           user={user}
           isOwnProfile={false}

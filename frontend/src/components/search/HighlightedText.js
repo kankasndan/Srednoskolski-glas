@@ -3,7 +3,11 @@ function escapeForRegExp(value) {
 }
 
 // Vo rezultatite pobaraniot tekst e vo boja, kako vo dizajnot.
-export default function HighlightedText({ text, query }) {
+export default function HighlightedText({
+  text,
+  query,
+  matchClassName = "text-[var(--color-primary-200)]",
+}) {
   const needle = query?.trim();
   if (!text || !needle) return text;
 
@@ -11,7 +15,7 @@ export default function HighlightedText({ text, query }) {
 
   return parts.map((part, index) =>
     part.toLowerCase() === needle.toLowerCase() ? (
-      <span key={index} className="text-[var(--color-primary-200)]">
+      <span key={index} className={matchClassName}>
         {part}
       </span>
     ) : (

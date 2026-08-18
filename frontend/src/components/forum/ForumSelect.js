@@ -51,7 +51,16 @@ export default function ForumSelect({
     getProfileUser()
       .then((user) => {
         if (!active) return;
-        setSchoolForum(findUserSchoolForum(schoolsByCity, user));
+        const match = findUserSchoolForum(schoolsByCity, user);
+        if (!match) {
+          setSchoolForum(null);
+          return;
+        }
+
+        const listed = schoolsByCity
+          .flatMap((group) => group.forums ?? [])
+          .find((forum) => forum.slug === match.slug);
+        setSchoolForum(listed ? { ...match, ...listed } : match);
       })
       .catch(() => {
         if (active) setSchoolForum(null);
@@ -93,9 +102,16 @@ export default function ForumSelect({
   }
 
   const isLoading = loading || userLoading;
+  const selectedDescription = selected?.description?.trim() || "";
+  const describedBy = [
+    errorMessage ? "forum-error" : null,
+    selectedDescription ? "forum-description" : null,
+  ]
+    .filter(Boolean)
+    .join(" ") || undefined;
 
   return (
-    <div className={`mb-12 flex max-w-full flex-col gap-2 ${widthClassName} ${className}`}>
+    <div className={`mb-6 flex max-w-full flex-col gap-2 ${widthClassName} ${className}`}>
       <FieldLabel htmlFor="forum-select" required>
         Каде сакаш да започнеш дискусија?
       </FieldLabel>
@@ -118,7 +134,7 @@ export default function ForumSelect({
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-invalid={!!errorMessage}
-          aria-describedby={errorMessage ? "forum-error" : undefined}
+          aria-describedby={describedBy}
           onClick={() => setOpen((prev) => !prev)}
           className={`flex h-10 w-full cursor-pointer items-center justify-between gap-4 rounded-xl border px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors ${
             open || selected ? "bg-[#CFE9ED]" : "bg-white hover:bg-[#DCEBED]"
@@ -155,15 +171,23 @@ export default function ForumSelect({
             ))}
           </div>
         )}
+      </div>
+      {errorMessage ? (
         <p
           id="forum-error"
-          className={`absolute left-0 top-full mt-1 w-full truncate font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[var(--color-error)] ${
-            errorMessage ? "" : "invisible"
-          }`}
+          className="font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[var(--color-error)]"
         >
-          {errorMessage || "Нема грешка"}
+          {errorMessage}
         </p>
-      </div>
+      ) : null}
+      {selectedDescription ? (
+        <p
+          id="forum-description"
+          className="font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 text-[#595959]"
+        >
+          {selectedDescription}
+        </p>
+      ) : null}
     </div>
   );
 }

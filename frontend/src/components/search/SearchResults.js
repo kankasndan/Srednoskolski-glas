@@ -10,7 +10,7 @@ export default function SearchResults() {
   const trimmed = q.trim();
 
   return (
-    <div className="flex w-[990px] max-w-full flex-col gap-3 lg:gap-8">
+    <div className="flex w-[1100px] max-w-full flex-col gap-3 lg:gap-8">
       {trimmed ? (
         <h1 className="font-[family-name:var(--font-manrope)] text-[24px] font-bold tracking-normal text-black">
           Пребарување за „
