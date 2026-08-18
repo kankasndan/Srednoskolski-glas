@@ -24,7 +24,9 @@ class SearchController extends Controller
      *        time (day|week|month|six-months|year|all)
      *
      * Empty `q` returns a trending/explore list (same filters as the feed).
-     * Relevance (default when `q` is set): title matches first, then body, then comments.
+     * Relevance (default when `q` is set): earlier title matches first
+     * (prefix of the title, then prefix of a later word, then substring),
+     * then body, then comments.
      */
     public function index(Request $request): JsonResponse
     {
@@ -65,7 +67,8 @@ class SearchController extends Controller
             $query->where('forum_id', $forum->id);
         }
 
-        $like = $q !== '' ? $this->likePattern($q) : null;
+        $patterns = $q !== '' ? $this->likePatterns($q) : null;
+        $like = $patterns['contains'] ?? null;
 
         if ($like !== null) {
             $query->where(function (Builder $inner) use ($like) {
@@ -87,11 +90,9 @@ class SearchController extends Controller
             $sort = 'relevance';
         }
 
-        if ($like !== null && ($sort === 'relevance' || $sort === 'trending')) {
-            $query->orderByRaw(
-                'CASE WHEN title LIKE ? THEN 0 WHEN description LIKE ? THEN 1 ELSE 2 END',
-                [$like, $like],
-            )->orderByDesc('upvotes')->latest();
+        if ($patterns !== null && ($sort === 'relevance' || $sort === 'trending')) {
+            $this->applyRelevanceOrder($query, 'title', 'description', $patterns, $q);
+            $query->orderByDesc('upvotes')->latest();
         } else {
             $this->applyThreadSort($query, $sort);
         }
@@ -106,7 +107,7 @@ class SearchController extends Controller
                     $inner->where('name', 'like', $like)
                         ->orWhere('description', 'like', $like);
                 })
-                ->orderByRaw('CASE WHEN name LIKE ? THEN 0 ELSE 1 END', [$like])
+                ->tap(fn (Builder $forums) => $this->applyRelevanceOrder($forums, 'name', 'description', $patterns, $q))
                 ->orderBy('name')
                 ->limit(3)
                 ->get();
@@ -122,8 +123,38 @@ class SearchController extends Controller
             ->response();
     }
 
-    private function likePattern(string $q): string
+    /**
+     * Prefix-of-title, then prefix-of-a-later-word, then substring, then the secondary field.
+     *
+     * @param  array{starts: string, word_start: string, contains: string}  $patterns
+     */
+    private function applyRelevanceOrder(
+        Builder $query,
+        string $primary,
+        string $secondary,
+        array $patterns,
+        string $q,
+    ): void {
+        $query->orderByRaw(
+            "CASE WHEN {$primary} LIKE ? THEN 0 WHEN {$primary} LIKE ? THEN 1 WHEN {$primary} LIKE ? THEN 2 WHEN {$secondary} LIKE ? THEN 3 ELSE 4 END",
+            [$patterns['starts'], $patterns['word_start'], $patterns['contains'], $patterns['contains']],
+        )->orderByRaw(
+            'CASE WHEN INSTR(LOWER('.$primary.'), LOWER(?)) = 0 THEN 9999 ELSE INSTR(LOWER('.$primary.'), LOWER(?)) END',
+            [$q, $q],
+        );
+    }
+
+    /**
+     * @return array{starts: string, word_start: string, contains: string}
+     */
+    private function likePatterns(string $q): array
     {
-        return LikeEscape::contains($q);
+        $starts = LikeEscape::startsWith($q);
+
+        return [
+            'starts' => $starts,
+            'word_start' => '% '.$starts,
+            'contains' => LikeEscape::contains($q),
+        ];
     }
 }

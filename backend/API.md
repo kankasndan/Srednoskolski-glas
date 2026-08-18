@@ -394,7 +394,7 @@ Used by the header live-search dropdown (`per_page=5`) and the **Истражи*
 | `sort` | `relevance`, `trending`, `top`, `newest`, `discussed` | `relevance` when `q` is set, else `trending` | Order. `trending` with a query is treated as `relevance` |
 | `time` | `day`, `week`, `month`, `six-months`, `year`, `all` | `all` | Only threads created in this window |
 
-**Relevance:** title matches first, then body, then comment hits; then upvotes ↓, then newest.
+**Relevance:** earlier matches in the title rank first — prefix of the title, then prefix of a later word, then a substring anywhere in the title — then body, then comment hits; then upvotes ↓, then newest. So `q=dr` puts “Drzavna matura” above “Something something dren”.
 
 Response is a normal paginated thread list (`data`, `links`, `meta`) plus a `forums` array of up to 3 sidebar-style forum cards whose name or description matches `q`. `forums` is `[]` when `q` is empty or `forum` is set.
 
