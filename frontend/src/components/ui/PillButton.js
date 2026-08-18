@@ -13,7 +13,7 @@ export default function PillButton({
       aria-pressed={selected}
       disabled={disabled}
       onClick={onClick}
-      className={`flex h-10 w-full cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl border px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 transition-colors ${
+      className={`flex h-10 w-full min-w-0 cursor-pointer items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-xl border px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 transition-colors ${
         disabled
           ? "cursor-not-allowed border-[#CCCCCC] bg-[#F5F5F5] text-[#B3B3B3]"
           : selected
@@ -22,7 +22,7 @@ export default function PillButton({
       }`}
     >
       {leading}
-      {label}
+      <span className="min-w-0 truncate">{label}</span>
     </button>
   );
 

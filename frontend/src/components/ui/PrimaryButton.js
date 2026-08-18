@@ -4,7 +4,7 @@ export default function PrimaryButton({ className = "", children, ...props }) {
   return (
     <button
       {...props}
-      className={`cursor-pointer rounded-xl bg-[var(--color-primary-200)] font-bold text-white transition-colors hover:bg-[#4B25E0] disabled:cursor-not-allowed ${className}`}
+      className={`cursor-pointer rounded-xl bg-[var(--color-primary-200)] font-bold text-white transition-colors hover:bg-[var(--color-primary-300)] disabled:cursor-not-allowed ${className}`}
     >
       {children}
     </button>

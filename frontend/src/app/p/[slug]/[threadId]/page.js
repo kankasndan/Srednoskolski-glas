@@ -56,17 +56,19 @@ export default function ThreadPage() {
           />
         </div>
         <ThreadPost forum={forum} thread={thread} onThreadUpdated={patchThread} />
-        <CommentComposer
-          threadId={thread.id}
-          isAnonymousThread={thread.is_anonymous}
-          isThreadOwner={thread.is_owner}
-          onCreated={addComment}
-        />
-        <CommentsHeader
-          count={thread.comments_count}
-          sort={sort}
-          onSortChange={setSort}
-        />
+        <div id="comments" className="flex scroll-mt-24 flex-col gap-6">
+          <CommentComposer
+            threadId={thread.id}
+            isAnonymousThread={thread.is_anonymous}
+            isThreadOwner={thread.is_owner}
+            onCreated={addComment}
+          />
+          <CommentsHeader
+            count={thread.comments_count}
+            sort={sort}
+            onSortChange={setSort}
+          />
+        </div>
         <CommentList
           comments={comments}
           threadId={thread.id}

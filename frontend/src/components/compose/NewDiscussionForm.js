@@ -42,14 +42,10 @@ export default function NewDiscussionForm() {
   const handleAttachmentsChange = useCallback((next) => {
     setAttachments(next);
   }, []);
+  const canSubmitRequiredFields = Boolean(selectedForum && title.trim());
 
   async function handleSubmit(event) {
     event.preventDefault();
-
-    if (!canCreateThreads(user)) {
-      setSubmitError("Немаш дозвола да започнеш дискусија. Потребно е да си дел од училиште.");
-      return;
-    }
 
     const nextErrors = {};
     const formData = new FormData(event.currentTarget);
@@ -63,6 +59,11 @@ export default function NewDiscussionForm() {
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
+
+    if (!canCreateThreads(user)) {
+      setSubmitError("Немаш дозвола да започнеш дискусија. Потребно е да си дел од училиште.");
+      return;
+    }
 
     setSubmitting(true);
     setSubmitError("");
@@ -131,7 +132,11 @@ export default function NewDiscussionForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex w-full flex-col items-start gap-6">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="flex w-full flex-col items-start gap-6"
+    >
       <ForumSelect
         selected={selectedForum}
         onChange={(forum) => {
@@ -167,7 +172,7 @@ export default function NewDiscussionForm() {
         action={
           <PrimaryButton
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !canSubmitRequiredFields}
             className="h-10 w-full px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:opacity-60 lg:w-auto lg:shrink-0 xl:w-48"
           >
             {submitting ? "Се објавува…" : "Објави дискусија"}

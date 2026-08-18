@@ -20,7 +20,7 @@ const DURATION_OPTIONS = [
 ];
 
 const INPUT_CLASS =
-  "h-10 w-full rounded-xl border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 text-black placeholder:text-[#595959] focus:border-[#582FF5] focus:outline-none";
+  "h-10 w-full min-w-0 rounded-xl border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 text-black placeholder:text-[#595959] focus:border-[#582FF5] focus:outline-none";
 
 function seedOptions(initialPoll) {
   const fromPoll = (initialPoll?.options ?? [])
@@ -94,9 +94,9 @@ export default function PollAttachment({ onClose, onChange, initialPoll = null }
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-[#CCCCCC] bg-white p-4">
-      <div className="flex items-center justify-between">
-        <span className="font-[family-name:var(--font-manrope)] text-[14px] font-bold text-black">
+    <div className="flex max-w-full min-w-0 flex-col gap-5 rounded-2xl border border-[#CCCCCC] bg-white p-4">
+      <div className="flex min-w-0 items-center justify-between gap-3">
+        <span className="min-w-0 truncate font-[family-name:var(--font-manrope)] text-[14px] font-bold text-black">
           Анкета
         </span>
         <button
@@ -117,7 +117,7 @@ export default function PollAttachment({ onClose, onChange, initialPoll = null }
         className={INPUT_CLASS}
       />
 
-      <label className="flex flex-col gap-2">
+      <label className="mt-2 flex flex-col gap-3">
         <span className="font-[family-name:var(--font-manrope)] text-[13px] font-medium text-[#595959]">
           Колку долго ќе трае анкетата?
         </span>
@@ -134,9 +134,9 @@ export default function PollAttachment({ onClose, onChange, initialPoll = null }
         </select>
       </label>
 
-      <div className="flex flex-col gap-2">
+      <div className="mt-2 flex flex-col gap-3">
         {options.map((option, index) => (
-          <div key={option.id ?? `new-${index}`} className="flex items-center gap-2">
+          <div key={option.id ?? `new-${index}`} className="flex min-w-0 items-center gap-2">
             <input
               type="text"
               value={option.label}

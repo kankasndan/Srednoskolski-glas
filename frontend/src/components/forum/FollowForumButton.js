@@ -70,8 +70,8 @@ export default function FollowForumButton({
   }
 
   const stateClasses = following
-    ? "bg-[var(--color-primary-200)] text-white"
-    : "bg-[var(--color-primary-300)] text-white hover:bg-[var(--color-primary-200)]";
+    ? "bg-[var(--color-primary-200)] text-white hover:bg-[var(--color-primary-300)]"
+    : "bg-[var(--color-primary-200)] text-white hover:bg-[var(--color-primary-300)]";
 
   return (
     <div className="flex shrink-0 flex-col gap-1 lg:w-[268px]">

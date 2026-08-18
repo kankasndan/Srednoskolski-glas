@@ -39,14 +39,14 @@ export default function CommunityBanner() {
       {incomplete ? (
         <Link
           href="/register/onboarding"
-          className="flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0] lg:w-[268px]"
+          className="flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#3300F5] lg:w-[268px]"
         >
           Заврши регистрација
         </Link>
       ) : showCreate ? (
         <Link
           href="/new"
-          className="flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0] lg:w-[268px]"
+          className="flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#3300F5] lg:w-[268px]"
         >
           <Image src="/plus.svg" alt="" width={24} height={24} className="size-6" />
           <span>Започни нова дискусија</span>

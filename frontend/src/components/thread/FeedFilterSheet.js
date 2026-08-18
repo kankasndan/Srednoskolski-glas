@@ -17,8 +17,10 @@ function FilterGroup({ title, options, selected, onSelect }) {
             key={option.value}
             type="button"
             onClick={() => onSelect(option)}
-            className={`flex h-10 cursor-pointer items-center justify-center rounded-xl p-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-black transition-colors ${
-              selected.value === option.value ? "bg-[#CFE9ED]" : "bg-[#E5E5E5]"
+            className={`flex h-10 cursor-pointer items-center justify-center rounded-xl p-2 font-[family-name:var(--font-manrope)] text-[14px] leading-none text-black transition-colors ${
+              selected.value === option.value
+                ? "bg-[#CFE9ED] font-bold"
+                : "bg-[#E5E5E5] font-normal"
             }`}
           >
             {option.label}
@@ -32,6 +34,7 @@ function FilterGroup({ title, options, selected, onSelect }) {
 export default function FeedFilterSheet({
   open,
   onClose,
+  hiddenFrom = "md",
   sortOptions,
   selectedSort,
   onSelectSort,
@@ -40,13 +43,14 @@ export default function FeedFilterSheet({
   onSelectTime,
 }) {
   useModalDismiss(open, onClose);
+  const hiddenClass = hiddenFrom === "lg" ? "lg:hidden" : "md:hidden";
   const hasSortOptions = Boolean(sortOptions?.length && selectedSort);
   const hasTimeOptions = Boolean(timeOptions?.length && selectedTime);
 
   return (
     <div
       aria-hidden={!open}
-      className={`fixed inset-0 z-[70] md:hidden ${open ? "" : "pointer-events-none"}`}
+      className={`fixed inset-0 z-[70] ${hiddenClass} ${open ? "" : "pointer-events-none"}`}
     >
       <div
         onClick={onClose}
