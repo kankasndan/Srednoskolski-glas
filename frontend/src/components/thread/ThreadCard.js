@@ -11,7 +11,7 @@ import ThreadPoll from "@/components/thread/ThreadPoll";
 import ThreadViewCount from "@/components/thread/ThreadViewCount";
 import { formatCount } from "@/lib/formatCount";
 import { stripHtml } from "@/lib/html";
-import { formatThreadPostedAgo } from "@/lib/time";
+import { formatEditedOrPostedAgo } from "@/lib/time";
 import { nextVoteState } from "@/lib/votes";
 
 function ActionButton({ icon, label, count, onClick, active = false, compact = false }) {
@@ -103,7 +103,7 @@ export default function ThreadCard({ thread, highlight = null, mobileTag = "foru
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <ThreadMetaTags
             tags={buildThreadMetaTags(thread.forum, thread)}
-            postedAgo={formatThreadPostedAgo(thread)}
+            postedAgo={formatEditedOrPostedAgo(thread)}
             mobileTag={mobileTag}
           />
 

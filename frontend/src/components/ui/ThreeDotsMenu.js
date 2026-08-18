@@ -4,7 +4,11 @@ import { useCallback, useId, useRef, useState } from "react";
 import { useClickOutside } from "@/hooks/useClickOutside";
 
 // items: [{ label, onSelect }]
-export default function ThreeDotsMenu({ items }) {
+// triggerClassName go menuva samo kopcheto, za pomali redovi kako kaj komentarite.
+export default function ThreeDotsMenu({
+  items,
+  triggerClassName = "size-9 rounded-lg hover:bg-[#E5E5E5]",
+}) {
   const [open, setOpen] = useState(false);
   const menuId = useId();
   const wrapperRef = useRef(null);
@@ -20,7 +24,7 @@ export default function ThreeDotsMenu({ items }) {
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((current) => !current)}
-        className={`thread-actions-trigger grid size-9 cursor-pointer place-items-center rounded-lg transition-colors hover:bg-[#E5E5E5] ${
+        className={`thread-actions-trigger grid cursor-pointer place-items-center transition-colors ${triggerClassName} ${
           open ? "text-[#582FF5]" : "text-[#333333]"
         }`}
       >

@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 
 // Odjavata se povikuva od hederot i od profilot, pa celata sostojba e tuka.
 export function useLogout({ onLoggedOut } = {}) {
-  const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [loggedOut, setLoggedOut] = useState(false);
@@ -28,11 +26,11 @@ export function useLogout({ onLoggedOut } = {}) {
     }
   }
 
-  // AppShell se remontira pri promena na strana, pa dijalogot bi ischeznal ako
-  // odime na /feed vednash po odjavata.
+  // Tvrda navigacija: /profile pri prazna sesija vodi na /login i bi ja
+  // nadglasalo ova, a celosnoto vchituvanje go chisti i keshot na sesijata.
   function finish() {
     setLoggedOut(false);
-    router.replace("/feed");
+    window.location.assign("/feed");
   }
 
   return {

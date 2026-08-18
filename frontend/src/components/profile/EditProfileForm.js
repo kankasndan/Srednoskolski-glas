@@ -18,11 +18,21 @@ import { userFacingError } from "@/lib/api";
 
 const SAVED_TITLE = "Промените на профилот се зачувани.";
 
+// Mora da odgovara na `avatars.defaults` vo backendot.
 const DEFAULT_AVATARS = [
   "/avatars/default-1.svg",
   "/avatars/default-2.svg",
   "/avatars/default-3.svg",
   "/avatars/default-4.svg",
+];
+
+// Vo izborot na korisnikot gi ima i novite; avtomatskiot izbor ne gi koristi.
+const SELECTABLE_AVATARS = [
+  ...DEFAULT_AVATARS,
+  "/avatars/buv.svg",
+  "/avatars/lisica.svg",
+  "/avatars/slon.svg",
+  "/avatars/zirafa.svg",
 ];
 
 const AREAS = [
@@ -256,7 +266,7 @@ export default function EditProfileForm({ user: initialUser }) {
           </p>
 
           <div className="flex flex-wrap items-center gap-3">
-            {DEFAULT_AVATARS.map((src) => {
+            {SELECTABLE_AVATARS.map((src) => {
               const selected = !pendingFile && imageUrl === src;
 
               return (

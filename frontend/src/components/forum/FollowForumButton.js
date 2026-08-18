@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { followForum, unfollowForum } from "@/api/forums";
+import CheckIcon from "@/components/ui/CheckIcon";
 import { useProfile } from "@/hooks/useProfile";
 import { needsOnboarding, ONBOARDING_REQUIRED_MESSAGE } from "@/lib/capabilities";
 
@@ -70,11 +71,11 @@ export default function FollowForumButton({
   }
 
   const stateClasses = following
-    ? "bg-[var(--color-primary-200)] text-white"
-    : "bg-[var(--color-primary-300)] text-white hover:bg-[var(--color-primary-200)]";
+    ? "bg-[var(--color-primary-300)] text-white"
+    : "bg-[var(--color-primary-200)] text-white hover:bg-[var(--color-primary-300)]";
 
   return (
-    <div className="flex shrink-0 flex-col gap-1 lg:w-[268px]">
+    <div className="flex min-w-0 flex-1 flex-col gap-1 @[680px]:w-[268px] @[680px]:flex-none">
       <button
         type="button"
         aria-pressed={following}
@@ -97,16 +98,3 @@ export default function FollowForumButton({
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M13.5 4.5L6.5 11.5L3 8"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}

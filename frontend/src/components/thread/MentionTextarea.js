@@ -9,6 +9,7 @@ import { getMentionDraft } from "@/lib/mentions";
 const DEBOUNCE_MS = 200;
 
 export default function MentionTextarea({
+  id,
   value,
   onChange,
   maxLength,
@@ -160,6 +161,7 @@ export default function MentionTextarea({
   return (
     <div ref={rootRef} className="relative w-full">
       <textarea
+        id={id}
         ref={textareaRef}
         value={value}
         onChange={handleChange}

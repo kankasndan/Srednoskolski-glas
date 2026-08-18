@@ -20,8 +20,9 @@ export default function DialogShell({
 
   return createPortal(
     // Skrola backdrop-ot, ne kartichkata, za pop-upot da nema svoja lenta.
+    // Nad header (50), mobilnoto meni (60) i filter sheet-ot (70).
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/40 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="fixed inset-0 z-[80] overflow-y-auto bg-black/40 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       onClick={onClose}
     >
       <div

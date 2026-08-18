@@ -11,6 +11,24 @@ import { canCreateComments, needsOnboarding } from "@/lib/capabilities";
 
 const MAX_COMMENT_LENGTH = 1000;
 
+const COMPOSER_ID = "comment-composer";
+const COMPOSER_INPUT_ID = "comment-composer-input";
+
+export function focusCommentComposer() {
+  const input = document.getElementById(COMPOSER_INPUT_ID);
+
+  if (input) {
+    input.scrollIntoView({ behavior: "smooth", block: "center" });
+    input.focus({ preventScroll: true });
+    return;
+  }
+
+  // Bez dozvola za komentiranje nema pole, pa odi do porakata.
+  document
+    .getElementById(COMPOSER_ID)
+    ?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
 export default function CommentComposer({
   threadId,
   parentId = null,
@@ -63,6 +81,7 @@ export default function CommentComposer({
   if (!allowed) {
     return (
       <div
+        id={compact ? undefined : COMPOSER_ID}
         className={
           compact
             ? "rounded-xl border border-[#CCCCCC] bg-[#F7F7F7] px-4 py-3 text-[13px] text-[#595959]"
@@ -92,11 +111,12 @@ export default function CommentComposer({
 
   return (
     <form
+      id={compact ? undefined : COMPOSER_ID}
       onSubmit={handleSubmit}
       className={
         compact
           ? "flex flex-col gap-2"
-          : "flex w-full max-w-[342px] flex-col gap-2 rounded-3xl border border-[#CFE9ED] bg-white p-6 sm:max-w-full md:gap-4"
+          : "flex w-full flex-col gap-2 rounded-3xl border border-[#CFE9ED] bg-white p-6 md:gap-4"
       }
     >
       {compact ? null : (
@@ -113,6 +133,7 @@ export default function CommentComposer({
       ) : null}
 
       <MentionTextarea
+        id={compact ? undefined : COMPOSER_INPUT_ID}
         value={comment}
         onChange={setComment}
         maxLength={MAX_COMMENT_LENGTH}
@@ -161,11 +182,11 @@ export default function CommentComposer({
         <PrimaryButton
           type="submit"
           disabled={isEmpty || busy}
-          className={`flex shrink-0 items-center justify-center gap-4 leading-none disabled:bg-[#CCCCCC] ${
+          className={`flex shrink-0 items-center justify-center gap-4 whitespace-nowrap leading-none disabled:bg-[#CCCCCC] ${
             compact ? "h-9 px-5 text-[12px]" : "h-10 w-full px-4 text-[14px] sm:w-36"
           }`}
         >
-          {busy ? "…" : compact ? "Објави" : "Објави коментар"}
+          {busy ? "…" : "Објави"}
         </PrimaryButton>
       </div>
     </form>

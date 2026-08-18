@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { notFound, useParams } from "next/navigation";
 import AppShell from "@/components/shell/AppShell";
 import BackButton from "@/components/shell/BackButton";
@@ -9,7 +9,9 @@ import CommentList from "@/components/thread/CommentList";
 import CommentsHeader from "@/components/thread/CommentsHeader";
 import MobileFooter from "@/components/shell/MobileFooter";
 import ThreadPost from "@/components/thread/ThreadPost";
+import { useCommentHashId } from "@/hooks/useHashTarget";
 import { useThread } from "@/hooks/useThread";
+import { findCommentPath } from "@/lib/commentPath";
 
 function StatusMessage({ children }) {
   return (
@@ -22,8 +24,35 @@ function StatusMessage({ children }) {
 export default function ThreadPage() {
   const { slug, threadId } = useParams();
   const [sort, setSort] = useState("best");
-  const { forum, thread, comments, loading, error, missing, patchThread, addComment } =
-    useThread(slug, threadId, sort);
+  const {
+    forum,
+    thread,
+    comments,
+    loading,
+    error,
+    missing,
+    patchThread,
+    addComment,
+    markCommentDeleted,
+  } = useThread(slug, threadId, sort);
+  const linkedCommentId = useCommentHashId();
+  const [linkedBranch, setLinkedBranch] = useState(null);
+
+  // Spodelen link kon odgovor: grankata do nego se otvora sama.
+  useEffect(() => {
+    if (!linkedCommentId || comments.length === 0) return undefined;
+    if (comments.some((comment) => comment.id === linkedCommentId)) return undefined;
+
+    let active = true;
+
+    findCommentPath(comments, linkedCommentId).then((found) => {
+      if (active) setLinkedBranch(found?.path?.length ? found : null);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [linkedCommentId, comments]);
 
   if (loading && !thread) {
     return (
@@ -73,6 +102,9 @@ export default function ThreadPage() {
           isAnonymousThread={thread.is_anonymous}
           isThreadOwner={thread.is_owner}
           onCommentCreated={addComment}
+          onCommentDeleted={markCommentDeleted}
+          expandPath={linkedBranch?.path ?? null}
+          preloadedReplies={linkedBranch?.replies ?? null}
         />
 
         {/* Kontejnerot ovde ima gap-8, pa treba pomala margina od feed-ot. */}

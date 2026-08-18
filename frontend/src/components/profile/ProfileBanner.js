@@ -6,6 +6,7 @@ import { mk } from "date-fns/locale";
 import Image from "next/image";
 import Link from "next/link";
 import { followUser, unfollowUser } from "@/api/profile";
+import CheckIcon from "@/components/ui/CheckIcon";
 import LogoutDialogs from "@/components/shell/LogoutDialogs";
 import { useLogout } from "@/hooks/useLogout";
 import { useProfile } from "@/hooks/useProfile";
@@ -182,13 +183,16 @@ export default function ProfileBanner({
               type="button"
               onClick={handleFollowToggle}
               disabled={followBusy}
-              className={`flex h-10 w-full cursor-pointer items-center justify-center rounded-xl px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none transition-colors disabled:opacity-60 ${
+              className={`flex h-10 w-full cursor-pointer items-center justify-center gap-3 rounded-xl px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none transition-colors disabled:opacity-60 ${
                 following
-                  ? "bg-(--color-primary-200) text-white hover:bg-[#3300F5]"
-                  : "border border-(--color-primary-200) text-(--color-primary-200) hover:bg-[#F1EEFE]"
+                  ? "bg-(--color-primary-300) text-white"
+                  : "bg-(--color-primary-200) text-white hover:bg-(--color-primary-300)"
               }`}
             >
-              {followBusy ? "…" : following ? "Отследи" : "Следи"}
+              {following && !followBusy && <CheckIcon />}
+              <span className="flex h-[19px] items-center leading-none">
+                {followBusy ? "…" : following ? "Следиш" : "Следи"}
+              </span>
             </button>
             {followError ? (
               <p className="font-(family-name:--font-manrope) text-[12px] leading-4 text-[#DC2626]">

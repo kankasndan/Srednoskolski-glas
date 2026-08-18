@@ -22,7 +22,8 @@ const SIZES = {
   xl: { px: 56, className: "size-14" },
 };
 
-export default function Avatar({ src, size = "md", alt = "" }) {
+// sizeClassName ja zamenuva goleminata koga taa se menuva po breakpoint.
+export default function Avatar({ src, size = "md", sizeClassName, alt = "" }) {
   const [failed, setFailed] = useState(false);
   const { px, className } = SIZES[size];
 
@@ -33,7 +34,7 @@ export default function Avatar({ src, size = "md", alt = "" }) {
       width={px}
       height={px}
       onError={() => setFailed(true)}
-      className={`${className} shrink-0 rounded-full object-cover`}
+      className={`${sizeClassName ?? className} shrink-0 rounded-full object-cover`}
     />
   );
 }

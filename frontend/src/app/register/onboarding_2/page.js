@@ -8,13 +8,14 @@ export default function OnboardingAvatar() {
     <OnboardingGuard>
       <main className="relative flex min-h-screen w-full items-start justify-center overflow-hidden bg-white px-6 pt-[290px] lg:items-center lg:py-10 lg:pt-10">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          {/* scale-125 e barano dopolnitelno; vo dizajnot slikata ne e zumirana. */}
           <Image
             src="/onboarding2.png"
             alt=""
             fill
             priority
             sizes="100vw"
-            className="scale-[2.3] object-cover object-[48%_46%] opacity-10 lg:scale-100 lg:object-bottom lg:opacity-30"
+            className="scale-125 object-cover object-bottom opacity-30"
           />
         </div>
 
