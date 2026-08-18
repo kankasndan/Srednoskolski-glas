@@ -50,6 +50,20 @@ it('returns a paginated explore list when the query is empty', function () {
         ->assertJsonPath('forums', []);
 });
 
+it('ranks a title that starts with the query above a later substring match', function () {
+    $author = User::factory()->create();
+    $forum = searchForum('Општи дискусии', 'opshti_diskusii');
+
+    searchThread($forum, $author, 'Something something dren', 50);
+    searchThread($forum, $author, 'Drzavna matura', 1);
+
+    $titles = $this->getJson('/api/search?q=dr')
+        ->assertSuccessful()
+        ->json('data.*.title');
+
+    expect($titles)->toBe(['Drzavna matura', 'Something something dren']);
+});
+
 it('ranks title matches above comment-only matches', function () {
     $author = User::factory()->create();
     $forum = searchForum('Општи дискусии', 'opshti_diskusii');
