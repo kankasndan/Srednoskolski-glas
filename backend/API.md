@@ -1208,7 +1208,7 @@ Files are uploaded with `Media::upload($file, "threads/{id}")` → ImageKit, the
 
 Polls expire after `duration_days` (`ends_at`). One poll per thread.
 
-**Success (`201`)** — `ThreadResource` (includes `attachments` + `poll` when present).
+**Success (`201`)** — `ThreadResource` (includes `attachments` + `poll` when present). The author is auto-upvoted (`upvotes` starts at 1, `has_voted` is `true`).
 
 ---
 
@@ -1323,7 +1323,7 @@ POST /api/comments/{id}/upvote
 | `upvotes` | New public counter on the thread/comment |
 | `has_voted` | `true` if this request left a vote; `false` if it removed one |
 
-Unique constraint: one vote per user per thread/comment. Feed/forum/thread responses also include `has_voted` when the session user is known.
+Unique constraint: one vote per user per thread/comment. Creating a thread or comment automatically records an upvote for the author (`upvotes` starts at 1, `has_voted` is `true` for them). Feed/forum/thread responses also include `has_voted` when the session user is known.
 
 ---
 
@@ -1346,7 +1346,7 @@ Omit `parent_id` (or send `null`) for a top-level comment. Pass a comment id to 
 
 `@username` tokens in `content` are parsed on save: existing onboarded users (except the author) are stored in `mentions` and returned for display.
 
-**Success (`201`)** — single `Comment` resource (same shape as in the thread tree; `replies` is `[]` for a freshly created node):
+**Success (`201`)** — single `Comment` resource (same shape as in the thread tree; `replies` is `[]` for a freshly created node). The author is auto-upvoted (`upvotes` starts at 1, `has_voted` is `true`):
 
 ```json
 {
@@ -1354,8 +1354,8 @@ Omit `parent_id` (or send `null`) for a top-level comment. Pass a comment id to 
     "id": 42,
     "content": "Се согласувам @ana_k.",
     "parent_id": null,
-    "upvotes": 0,
-    "has_voted": false,
+    "upvotes": 1,
+    "has_voted": true,
     "created_at": "2026-08-05T12:00:00.000000Z",
     "edited_at": null,
     "deleted_by": null,

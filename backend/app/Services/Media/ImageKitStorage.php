@@ -55,9 +55,31 @@ class ImageKitStorage implements MediaStorage
             throw new RuntimeException($file->getErrorMessage());
         }
 
-        $response = Http::withBasicAuth($this->config['private_key'], '')
-            ->attach('file', $file->getContent(), $fileName)
-            ->post($this->config['upload_endpoint'], $payload);
+        $timeout = str_starts_with((string) $file->getMimeType(), 'video/')
+            ? 120
+            : 30;
+
+        if ($timeout > 30) {
+            // Gemini review already consumed part of the request budget.
+            // Reset so the ImageKit transfer is not killed at 30 seconds.
+            set_time_limit(180);
+        }
+
+        $path = $file->getRealPath();
+        $handle = is_string($path) && is_file($path) ? fopen($path, 'r') : false;
+        $contents = is_resource($handle) ? $handle : $file->getContent();
+
+        try {
+            $response = Http::withBasicAuth($this->config['private_key'], '')
+                ->connectTimeout(10)
+                ->timeout($timeout)
+                ->attach('file', $contents, $fileName)
+                ->post($this->config['upload_endpoint'], $payload);
+        } finally {
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
+        }
 
         if ($response->failed()) {
             throw new RuntimeException('ImageKit upload failed: '.$response->body());

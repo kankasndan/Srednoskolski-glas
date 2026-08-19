@@ -49,7 +49,14 @@ export default function CommentComposer({
       } else if (err.status === 401) {
         setError("Мора да си најавен за да коментираш.");
       } else {
-        setError(userFacingError(err, "Неуспешно објавување. Обиди се повторно."));
+        setError(
+          userFacingError(
+            err,
+            err.status >= 500 || err.status === 0
+              ? "Објавувањето траеше предолго. Ако прикачуваш видео, почекај и обиди се повторно."
+              : "Неуспешно објавување. Обиди се повторно.",
+          ),
+        );
       }
     } finally {
       setBusy(false);

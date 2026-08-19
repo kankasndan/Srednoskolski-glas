@@ -3,6 +3,7 @@
 use App\Contracts\MediaStorage;
 use App\Services\Media\ImageKitStorage;
 use App\Services\Media\MediaManager;
+use App\Services\Media\ModeratedMediaStorage;
 use App\Services\Media\S3Storage;
 use App\Support\Media\StoredMedia;
 use Illuminate\Http\UploadedFile;
@@ -26,12 +27,16 @@ beforeEach(function () {
 });
 
 it('resolves the imagekit driver as the default', function () {
-    expect(app(MediaStorage::class))->toBeInstanceOf(ImageKitStorage::class);
-    expect(app(MediaManager::class)->driver())->toBeInstanceOf(ImageKitStorage::class);
+    $storage = app(MediaStorage::class);
+
+    expect($storage)->toBeInstanceOf(ModeratedMediaStorage::class)
+        ->and($storage->inner())->toBeInstanceOf(ImageKitStorage::class)
+        ->and(app(MediaManager::class)->driver()->inner())->toBeInstanceOf(ImageKitStorage::class);
 });
 
 it('resolves the s3 driver on demand', function () {
-    expect(app(MediaManager::class)->driver('s3'))->toBeInstanceOf(S3Storage::class);
+    expect(app(MediaManager::class)->driver('s3'))->toBeInstanceOf(ModeratedMediaStorage::class)
+        ->and(app(MediaManager::class)->driver('s3')->inner())->toBeInstanceOf(S3Storage::class);
 });
 
 it('uploads a file to imagekit and normalizes the response', function () {

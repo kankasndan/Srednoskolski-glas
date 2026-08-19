@@ -60,7 +60,14 @@ export default function EditThreadDialog({ open, thread, onClose, onSave }) {
       if (validation) {
         setError(Object.values(validation).flat().join(" "));
       } else {
-        setError(userFacingError(err, "Неуспешно зачувување. Обиди се повторно."));
+        setError(
+          userFacingError(
+            err,
+            err.status >= 500 || err.status === 0
+              ? "Зачувувањето траеше предолго. Ако прикачуваш видео, почекај и обиди се повторно."
+              : "Неуспешно зачувување. Обиди се повторно.",
+          ),
+        );
       }
     } finally {
       setSaving(false);

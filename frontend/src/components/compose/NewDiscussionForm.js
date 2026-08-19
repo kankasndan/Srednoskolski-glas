@@ -91,7 +91,14 @@ export default function NewDiscussionForm() {
           userFacingError(error, "Немаш дозвола да започнеш дискусија во овој форум."),
         );
       } else {
-        setSubmitError(userFacingError(error, "Неуспешно објавување. Обиди се повторно."));
+        setSubmitError(
+          userFacingError(
+            error,
+            error.status >= 500 || error.status === 0
+              ? "Објавувањето траеше предолго. Ако прикачуваш видео, почекај и обиди се повторно."
+              : "Неуспешно објавување. Обиди се повторно.",
+          ),
+        );
       }
     } finally {
       setSubmitting(false);

@@ -123,6 +123,16 @@ return [
             'handler' => NullHandler::class,
         ],
 
+        // Upload moderation decisions. Kept apart from the application log so
+        // escalations stay findable and outlive normal debug retention.
+        'moderation' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/moderation.log'),
+            'level' => 'debug',
+            'days' => env('LOG_MODERATION_DAYS', 90),
+            'replace_placeholders' => true,
+        ],
+
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],

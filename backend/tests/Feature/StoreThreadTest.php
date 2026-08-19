@@ -7,6 +7,7 @@ use App\Models\School;
 use App\Models\StudentData;
 use App\Models\Thread;
 use App\Models\User;
+use App\Models\Vote;
 use App\Support\SyncUserContentPermissions;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -107,17 +108,25 @@ it('creates a thread with optional description, link, and poll', function () {
 
     $response->assertCreated()
         ->assertJsonPath('data.title', 'Нова дискусија за матура')
+        ->assertJsonPath('data.upvotes', 1)
+        ->assertJsonPath('data.has_voted', true)
         ->assertJsonPath('data.poll.question', 'Кога ќе полагаш?')
         ->assertJsonCount(3, 'data.poll.options')
         ->assertJsonPath('data.attachments.0.type', 'link');
 
+    $thread = Thread::query()->first();
     $endsAt = Poll::query()->first()->ends_at;
 
     expect(Thread::query()->count())->toBe(1)
         ->and(Poll::query()->count())->toBe(1)
         ->and($forum->fresh()->threads_count)->toBe(1)
         ->and($endsAt->isAfter(now()->addDays(6)))->toBeTrue()
-        ->and($endsAt->isBefore(now()->addDays(8)))->toBeTrue();
+        ->and($endsAt->isBefore(now()->addDays(8)))->toBeTrue()
+        ->and(Vote::query()->where([
+            'user_id' => $user->id,
+            'votable_type' => $thread->getMorphClass(),
+            'votable_id' => $thread->id,
+        ])->exists())->toBeTrue();
 });
 
 it('rejects poll duration longer than one month', function () {

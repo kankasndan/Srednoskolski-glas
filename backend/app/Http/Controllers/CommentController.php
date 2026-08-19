@@ -7,9 +7,11 @@ use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Thread;
+use App\Models\Vote;
 use App\Support\SyncCommentMentions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CommentController extends Controller
 {
@@ -18,16 +20,22 @@ class CommentController extends Controller
         Thread $thread,
         SyncCommentMentions $syncMentions,
     ): JsonResponse {
-        $comment = Comment::forceCreate([
-            'thread_id' => $thread->id,
-            'parent_id' => $request->integer('parent_id') ?: null,
-            'user_id' => $request->user()->id,
-            'content' => $request->string('content')->toString(),
-        ]);
+        $comment = DB::transaction(function () use ($request, $thread): Comment {
+            $comment = Comment::forceCreate([
+                'thread_id' => $thread->id,
+                'parent_id' => $request->integer('parent_id') ?: null,
+                'user_id' => $request->user()->id,
+                'content' => $request->string('content')->toString(),
+            ]);
+
+            Vote::addFor($request->user(), $comment);
+
+            return $comment;
+        });
 
         $syncMentions->handle($comment);
         $comment->load(Comment::authorWith());
-        $comment->setAttribute('has_voted', false);
+        $comment->setAttribute('has_voted', true);
         $comment->setAttribute('replies_count', 0);
 
         return (new CommentResource($comment))
