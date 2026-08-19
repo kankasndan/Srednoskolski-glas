@@ -59,7 +59,7 @@ export default function FollowThreadButton({
   }
 
   const stateClasses = following
-    ? "bg-[var(--color-primary-300)] text-white"
+    ? "bg-[var(--color-primary-200)] text-white hover:bg-[var(--color-primary-300)]"
     : "bg-[var(--color-primary-200)] text-white hover:bg-[var(--color-primary-300)]";
 
   return (

@@ -137,7 +137,7 @@ function FileCard({ url: rawUrl }) {
       className="flex items-center gap-3 rounded-xl border border-[#CCCCCC] bg-white px-4 py-3 transition-colors hover:bg-[#F5F5F5]"
     >
       <img src="/new thread icons/documents.svg" alt="" className="h-5 w-auto" />
-      <span className="flex min-w-0 flex-1 items-center gap-2">
+      <span className="flex min-w-0 flex-1 items-baseline gap-2">
         <span className="truncate font-[family-name:var(--font-manrope)] text-[14px] text-black">
           {fileNameFromUrl(url)}
         </span>

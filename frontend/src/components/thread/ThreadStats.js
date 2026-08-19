@@ -94,7 +94,7 @@ function VoteStat({ threadId, votes: initialVotes = 0, hasVoted: initialHasVoted
         onClick={handleVote}
         className={`group flex h-8 w-[72px] cursor-pointer items-center justify-center gap-2 rounded-xl border font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-none transition-colors disabled:opacity-70 md:h-10 md:w-24 md:gap-4 md:rounded-2xl md:text-[14px] ${
           hasVoted
-            ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white"
+            ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white hover:border-[var(--color-primary-200)] hover:bg-[var(--color-primary-200)]"
             : "border-[#CCCCCC] text-black opacity-80 hover:border-[var(--color-primary-100)] hover:bg-[var(--color-primary-100)] hover:text-white hover:opacity-100"
         }`}
       >

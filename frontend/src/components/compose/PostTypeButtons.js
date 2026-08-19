@@ -339,7 +339,7 @@ export default function PostTypeButtons({
   }
 
   return (
-    <div className={`flex max-w-full flex-col gap-3 ${widthClassName}`}>
+    <div className={`flex max-w-full min-w-0 flex-col gap-3 ${widthClassName}`}>
       {mediaMode && (
         <MediaAttachments
           items={mediaItems}
@@ -373,7 +373,7 @@ export default function PostTypeButtons({
         />
       )}
 
-      <div className="flex max-w-full flex-wrap justify-center gap-2 md:gap-3 xl:justify-start">
+      <div className="grid max-w-full grid-cols-2 gap-2 md:grid-cols-[repeat(auto-fit,minmax(158px,1fr))] md:gap-3">
         {visibleTypes.map((type) => {
           const disabled = isTypeDisabled(type.label);
 
@@ -393,7 +393,7 @@ export default function PostTypeButtons({
                   type.icon && <img src={type.icon} alt="" className="size-5 object-contain" />
                 )
               }
-              className="w-[158px] flex-none md:min-w-[158px] xl:w-auto xl:min-w-0 xl:flex-1"
+              className="min-w-0"
             />
           );
         })}

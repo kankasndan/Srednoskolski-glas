@@ -12,11 +12,11 @@ export default function DocumentAttachment({ file, fileName, onAdd, onClose }) {
   const type = name ? name.split(".").pop()?.toUpperCase() : null;
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-[#CCCCCC] bg-white px-4 py-3">
-      <img src="/new thread icons/documents.svg" alt="" className="h-5 w-auto" />
+    <div className="flex max-w-full min-w-0 items-center gap-3 rounded-xl border border-[#CCCCCC] bg-white px-4 py-3">
+      <img src="/new thread icons/documents.svg" alt="" className="h-5 w-auto shrink-0" />
 
       {name ? (
-        <span className="flex min-w-0 flex-1 items-center gap-2">
+        <span className="flex min-w-0 flex-1 items-baseline gap-2">
           <span className="truncate font-[family-name:var(--font-manrope)] text-[14px] text-black">
             {name}
           </span>
@@ -28,7 +28,7 @@ export default function DocumentAttachment({ file, fileName, onAdd, onClose }) {
         <button
           type="button"
           onClick={onAdd}
-          className="flex-1 cursor-pointer text-left font-[family-name:var(--font-manrope)] text-[14px] text-[#595959]"
+          className="min-w-0 flex-1 cursor-pointer truncate text-left font-[family-name:var(--font-manrope)] text-[14px] text-[#595959]"
         >
           Прикачи документ тука
         </button>

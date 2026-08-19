@@ -56,7 +56,7 @@ export default function AppShell({ children, contentClassName = "" }) {
   }
 
   return (
-    <div className="flex h-full max-h-full flex-col overflow-hidden bg-white">
+    <div className="fixed inset-0 flex flex-col overflow-hidden bg-white">
       <Header
         onMenuToggle={() => setMobileMenuOpen((open) => !open)}
         menuOpen={mobileMenuOpen}
@@ -123,7 +123,7 @@ export default function AppShell({ children, contentClassName = "" }) {
           </div>
         </aside>
         <main
-          className={`flex min-h-0 min-w-0 flex-1 items-start justify-center overflow-x-hidden overflow-y-auto px-6 pb-8 pt-4 [scrollbar-width:none] [-ms-overflow-style:none] lg:px-8 lg:pb-12 lg:pt-12 xl:px-12 [&::-webkit-scrollbar]:hidden ${contentClassName}`}
+          className={`flex min-h-0 min-w-0 flex-1 items-start justify-center overflow-x-hidden overflow-y-auto overscroll-contain px-6 pb-8 pt-4 [scrollbar-width:none] [-ms-overflow-style:none] lg:px-8 lg:pb-12 lg:pt-12 xl:px-12 [&::-webkit-scrollbar]:hidden ${contentClassName}`}
         >
           {children}
         </main>

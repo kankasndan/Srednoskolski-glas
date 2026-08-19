@@ -49,6 +49,7 @@ export default function CommentsHeader({ count, sort = "best", onSortChange }) {
       <FeedFilterSheet
         open={filtersOpen}
         onClose={() => setFiltersOpen(false)}
+        hiddenFrom="lg"
         sortOptions={SORT_OPTIONS}
         selectedSort={selected}
         onSelectSort={(option) => {

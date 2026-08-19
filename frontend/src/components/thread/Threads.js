@@ -117,6 +117,7 @@ export default function Threads({
   searchQuery = null,
   defaultSort = "trending",
   showSort = true,
+  showFilters = true,
   staticThreads = null,
   listPath = null,
 }) {
@@ -280,14 +281,16 @@ export default function Threads({
     Boolean(openSelect),
   );
 
-  snapshotStateRef.current = {
-    hasLoaded,
-    threads,
-    paginationPage,
-    noMoreThreads,
-    selectedSort,
-    selectedTimeFilter,
-  };
+  useEffect(() => {
+    snapshotStateRef.current = {
+      hasLoaded,
+      threads,
+      paginationPage,
+      noMoreThreads,
+      selectedSort,
+      selectedTimeFilter,
+    };
+  }, [hasLoaded, threads, paginationPage, noMoreThreads, selectedSort, selectedTimeFilter]);
 
   useLayoutEffect(() => {
     const top = restoredScrollRef.current;
@@ -381,62 +384,66 @@ export default function Threads({
 
   return (
     <section className="flex w-full max-w-[1100px] flex-col items-center gap-8">
-      {/* Na mobilen mesto dvata dropdown-a stoi kopce Филтри. */}
-      <button
-        type="button"
-        onClick={() => setFiltersOpen(true)}
-        className="flex h-10 cursor-pointer items-center gap-2 self-start rounded-xl p-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black md:hidden"
-      >
-        <Image src="/mobile version/filter.svg" alt="" width={24} height={24} className="size-6" />
-        Филтри
-      </button>
+      {showFilters ? (
+        <>
+          {/* Na mobilen mesto dvata dropdown-a stoi kopce Филтри. */}
+          <button
+            type="button"
+            onClick={() => setFiltersOpen(true)}
+            className="flex h-10 cursor-pointer items-center gap-2 self-start rounded-xl p-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black md:hidden"
+          >
+            <Image src="/mobile version/filter.svg" alt="" width={24} height={24} className="size-6" />
+            Филтри
+          </button>
 
-      <FeedFilterSheet
-        open={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
-        sortOptions={SORT_OPTIONS}
-        selectedSort={selectedSort}
-        onSelectSort={(option) => {
-          selectSortOption(option);
-          setFiltersOpen(false);
-        }}
-        timeOptions={TIME_FILTER_OPTIONS}
-        selectedTime={selectedTimeFilter}
-        onSelectTime={(option) => {
-          selectTimeFilterOption(option);
-          setFiltersOpen(false);
-        }}
-      />
-
-      <div ref={filterContainerRef} className="hidden self-end gap-2 md:flex">
-        {showSort ? (
-          <FeedSelect
-            name="sort"
-            label="Сортирај дискусии"
-            options={SORT_OPTIONS}
-            selected={selectedSort}
-            isOpen={openSelect === "sort"}
-            listboxId={sortListboxId}
-            onToggle={() =>
-              setOpenSelect((current) => (current === "sort" ? null : "sort"))
-            }
-            onSelect={selectSortOption}
+          <FeedFilterSheet
+            open={filtersOpen}
+            onClose={() => setFiltersOpen(false)}
+            sortOptions={SORT_OPTIONS}
+            selectedSort={selectedSort}
+            onSelectSort={(option) => {
+              selectSortOption(option);
+              setFiltersOpen(false);
+            }}
+            timeOptions={TIME_FILTER_OPTIONS}
+            selectedTime={selectedTimeFilter}
+            onSelectTime={(option) => {
+              selectTimeFilterOption(option);
+              setFiltersOpen(false);
+            }}
           />
-        ) : null}
 
-        <FeedSelect
-          name="timeFilter"
-          label="Филтрирај по време"
-          options={TIME_FILTER_OPTIONS}
-          selected={selectedTimeFilter}
-          isOpen={openSelect === "time"}
-          listboxId={timeListboxId}
-          onToggle={() =>
-            setOpenSelect((current) => (current === "time" ? null : "time"))
-          }
-          onSelect={selectTimeFilterOption}
-        />
-      </div>
+          <div ref={filterContainerRef} className="hidden self-end gap-2 md:flex">
+            {showSort ? (
+              <FeedSelect
+                name="sort"
+                label="Сортирај дискусии"
+                options={SORT_OPTIONS}
+                selected={selectedSort}
+                isOpen={openSelect === "sort"}
+                listboxId={sortListboxId}
+                onToggle={() =>
+                  setOpenSelect((current) => (current === "sort" ? null : "sort"))
+                }
+                onSelect={selectSortOption}
+              />
+            ) : null}
+
+            <FeedSelect
+              name="timeFilter"
+              label="Филтрирај по време"
+              options={TIME_FILTER_OPTIONS}
+              selected={selectedTimeFilter}
+              isOpen={openSelect === "time"}
+              listboxId={timeListboxId}
+              onToggle={() =>
+                setOpenSelect((current) => (current === "time" ? null : "time"))
+              }
+              onSelect={selectTimeFilterOption}
+            />
+          </div>
+        </>
+      ) : null}
 
       <div className="flex w-full flex-col" aria-label="Дискусии">
         {!hasLoaded ? (
