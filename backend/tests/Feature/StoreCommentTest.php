@@ -4,6 +4,7 @@ use App\Models\Comment;
 use App\Models\Forum;
 use App\Models\Thread;
 use App\Models\User;
+use App\Models\Vote;
 use App\Support\SyncUserContentPermissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -68,17 +69,25 @@ it('creates a top-level comment on a thread', function () {
     $response->assertCreated()
         ->assertJsonPath('data.content', 'Се согласувам со темата.')
         ->assertJsonPath('data.parent_id', null)
-        ->assertJsonPath('data.has_voted', false)
+        ->assertJsonPath('data.has_voted', true)
         ->assertJsonPath('data.author.id', $user->id)
         ->assertJsonPath('data.replies_count', 0);
 
-    expect((int) $response->json('data.upvotes'))->toBe(0);
+    expect((int) $response->json('data.upvotes'))->toBe(1);
 
-    expect(Comment::query()->where([
+    $comment = Comment::query()->where([
         'thread_id' => $thread->id,
         'user_id' => $user->id,
         'parent_id' => null,
-    ])->exists())->toBeTrue();
+    ])->first();
+
+    expect($comment)->not->toBeNull()
+        ->and((int) $comment->upvotes)->toBe(1)
+        ->and(Vote::query()->where([
+            'user_id' => $user->id,
+            'votable_type' => $comment->getMorphClass(),
+            'votable_id' => $comment->id,
+        ])->exists())->toBeTrue();
 });
 
 it('creates a child comment under a parent on the same thread', function () {

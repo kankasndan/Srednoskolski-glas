@@ -13,6 +13,7 @@ use App\Models\Forum;
 use App\Models\Poll;
 use App\Models\Thread;
 use App\Models\ThreadView;
+use App\Models\Vote;
 use App\Support\HtmlSanitizer;
 use App\Support\ViewThrottle;
 use Illuminate\Http\JsonResponse;
@@ -92,6 +93,8 @@ class ThreadController extends Controller
                     ]);
                 }
             }
+
+            Vote::addFor($user, $thread);
 
             return $thread;
         });

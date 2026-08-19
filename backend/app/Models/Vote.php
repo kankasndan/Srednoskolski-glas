@@ -17,6 +17,22 @@ class Vote extends Model
         'votable_id',
     ];
 
+    /**
+     * Record an upvote and bump the denormalized counter.
+     *
+     * @param  Thread|Comment  $votable
+     */
+    public static function addFor(User $user, Model $votable): void
+    {
+        static::query()->create([
+            'user_id' => $user->id,
+            'votable_type' => $votable->getMorphClass(),
+            'votable_id' => $votable->getKey(),
+        ]);
+
+        $votable->increment('upvotes');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
