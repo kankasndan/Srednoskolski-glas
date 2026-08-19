@@ -39,7 +39,7 @@ export default function ProfileLayout({ children }) {
     <AppShell>
       <div className="flex w-[1100px] max-w-full flex-col">
         <ProfileBanner user={user} isOwnProfile />
-        <div className="mt-8 flex flex-col gap-8">
+        <div className="mt-10 flex flex-col gap-10 md:mt-8 md:gap-8">
           <ProfileTabs counts={counts} basePath="/profile" isOwnProfile />
           {children}
         </div>

@@ -21,22 +21,21 @@ const GRADE_LABELS = {
   4: "4та",
 };
 
-function Chip({ children, href }) {
-  const className =
-    "flex items-center gap-2 rounded-md border-[0.5px] border-(--color-grays-300) bg-(--color-grays-200) px-2 py-1 font-(family-name:--font-roboto) text-[12px] leading-4 text-[#404040]";
+function Chip({ children, href, className = "" }) {
+  const base = `flex items-center gap-2 rounded-md border-[0.5px] border-(--color-grays-300) bg-(--color-grays-200) px-2 py-1 font-(family-name:--font-roboto) text-[12px] leading-4 text-[#404040] ${className}`;
 
   if (href) {
     return (
       <Link
         href={href}
-        className={`${className} cursor-pointer transition-colors hover:border-(--color-primary-200) hover:bg-[#F1EEFE] hover:text-(--color-primary-200)`}
+        className={`${base} cursor-pointer transition-colors hover:border-(--color-primary-200) hover:bg-[#F1EEFE] hover:text-(--color-primary-200) active:border-(--color-primary-200) active:bg-[#F1EEFE] active:text-(--color-primary-200)`}
       >
         {children}
       </Link>
     );
   }
 
-  return <span className={className}>{children}</span>;
+  return <span className={base}>{children}</span>;
 }
 
 function joinedLabel(createdAt) {
@@ -123,15 +122,16 @@ export default function ProfileBanner({
   }
 
   return (
-    <section className="flex items-center justify-between gap-6 rounded-3xl border border-[#CFE9ED] bg-white p-6">
-      <div className="flex min-w-0 items-center gap-6">
+    <section className="flex flex-col gap-6 rounded-3xl border border-[#CFE9ED] bg-white p-6 md:flex-row md:items-center md:justify-between">
+      {/* Na telefon avatarot i imeto se vo prv red, a tagovite pod niv. */}
+      <div className="grid min-w-0 grid-cols-[auto_1fr] items-center gap-x-6 gap-y-4">
         {/^https?:\/\//i.test(user.imageUrl || "") ? (
           <img
             src={user.imageUrl}
             alt={user.username}
             width={88}
             height={88}
-            className="size-22 shrink-0 rounded-full object-cover"
+            className="size-22 shrink-0 rounded-full object-cover md:row-span-2"
           />
         ) : (
           <Image
@@ -139,69 +139,74 @@ export default function ProfileBanner({
             alt={user.username}
             width={88}
             height={88}
-            className="size-22 shrink-0 rounded-full object-cover"
+            className="size-22 shrink-0 rounded-full object-cover md:row-span-2"
           />
         )}
 
-        <div className="flex min-w-0 flex-col gap-4">
+        <div className="flex min-w-0 flex-col gap-1">
           <h1 className="font-(family-name:--font-oswald) text-[20px] font-bold leading-none text-black">
             {user.username}
           </h1>
+          {joined ? (
+            <p className="font-(family-name:--font-manrope) text-[12px] leading-none text-(--color-grays-700) md:hidden">
+              {joined}
+            </p>
+          ) : null}
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {schoolLabel ? <Chip href={schoolHref}>{schoolLabel}</Chip> : null}
-            {gradeLabel ? <Chip>{gradeLabel}</Chip> : null}
-            {vocation ? <Chip>{vocation}</Chip> : null}
-            {joined ? <Chip>{joined}</Chip> : null}
-          </div>
+        <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-2 md:col-span-1 md:col-start-2">
+          {schoolLabel ? <Chip href={schoolHref}>{schoolLabel}</Chip> : null}
+          {gradeLabel ? <Chip>{gradeLabel}</Chip> : null}
+          {vocation ? <Chip className="hidden md:flex">{vocation}</Chip> : null}
+          {joined ? <Chip className="hidden md:flex">{joined}</Chip> : null}
         </div>
       </div>
 
-      <div className="flex shrink-0 flex-col gap-2">
-        {isOwnProfile ? (
-          <>
-            <Link
-              href="/profile/edit"
-              className="flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-primary-200) transition-colors hover:bg-[#F1EEFE]"
-            >
-              Уреди профил
-            </Link>
+      {isOwnProfile ? (
+        <>
+          <div className="flex shrink-0 gap-2 md:flex-col-reverse">
             <button
               type="button"
               onClick={logout.ask}
               disabled={logout.loggingOut}
-              className="flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-primary-200) transition-colors hover:bg-[#F1EEFE] disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex h-10 flex-1 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#F1EEFE] active:bg-(--color-primary-200) active:text-white disabled:cursor-not-allowed md:active:bg-[#F1EEFE] md:active:text-(--color-primary-200) disabled:opacity-60 md:w-36 md:flex-none md:text-(--color-primary-200)"
             >
               {logout.loggingOut ? "Се одјавува…" : "Одјави се"}
             </button>
-
-            <LogoutDialogs logout={logout} />
-          </>
-        ) : (
-          <div className="flex w-36 flex-col gap-1">
-            <button
-              type="button"
-              onClick={handleFollowToggle}
-              disabled={followBusy}
-              className={`flex h-10 w-full cursor-pointer items-center justify-center gap-3 rounded-xl px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none transition-colors disabled:opacity-60 ${
-                following
-                  ? "bg-(--color-primary-300) text-white"
-                  : "bg-(--color-primary-200) text-white hover:bg-(--color-primary-300)"
-              }`}
+            <Link
+              href="/profile/edit"
+              className="flex h-10 flex-1 cursor-pointer items-center justify-center rounded-xl bg-(--color-primary-200) px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-white transition-colors hover:bg-(--color-primary-300) active:bg-(--color-primary-300) md:w-36 md:flex-none md:border md:border-(--color-primary-200) md:bg-transparent md:text-(--color-primary-200) md:hover:bg-[#F1EEFE] md:active:bg-[#F1EEFE]"
             >
-              {following && !followBusy && <CheckIcon />}
-              <span className="flex h-[19px] items-center leading-none">
-                {followBusy ? "…" : following ? "Следиш" : "Следи"}
-              </span>
-            </button>
-            {followError ? (
-              <p className="font-(family-name:--font-manrope) text-[12px] leading-4 text-[#DC2626]">
-                {followError}
-              </p>
-            ) : null}
+              Уреди профил
+            </Link>
           </div>
-        )}
-      </div>
+
+          <LogoutDialogs logout={logout} />
+        </>
+      ) : (
+        <div className="flex w-full shrink-0 flex-col gap-1 md:w-36">
+          <button
+            type="button"
+            onClick={handleFollowToggle}
+            disabled={followBusy}
+            className={`flex h-10 w-full cursor-pointer items-center justify-center gap-3 rounded-xl px-4 font-(family-name:--font-manrope) text-[14px] font-bold leading-none transition-colors disabled:opacity-60 ${
+              following
+                ? "bg-(--color-primary-300) text-white"
+                : "bg-(--color-primary-200) text-white hover:bg-(--color-primary-300) active:bg-(--color-primary-300)"
+            }`}
+          >
+            {following && !followBusy && <CheckIcon />}
+            <span className="flex h-[19px] items-center leading-none">
+              {followBusy ? "…" : following ? "Следиш" : "Следи"}
+            </span>
+          </button>
+          {followError ? (
+            <p className="font-(family-name:--font-manrope) text-[12px] leading-4 text-[#DC2626]">
+              {followError}
+            </p>
+          ) : null}
+        </div>
+      )}
     </section>
   );
 }

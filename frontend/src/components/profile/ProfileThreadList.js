@@ -46,7 +46,7 @@ export default function ProfileThreadList({
     );
   } else {
     content = (
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-10 md:gap-0">
         {threads.map((thread) => (
           <ProfileThreadItem
             key={thread.id}
@@ -60,8 +60,8 @@ export default function ProfileThreadList({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {isOwnProfile ? <StartDiscussionButton /> : null}
+    <div className="flex flex-col gap-10 md:gap-6">
+      {isOwnProfile ? <StartDiscussionButton full className="md:max-w-[268px]" /> : null}
       {content}
     </div>
   );

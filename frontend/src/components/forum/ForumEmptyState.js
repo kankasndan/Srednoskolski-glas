@@ -22,7 +22,7 @@ export default function ForumEmptyState() {
           </p>
         </div>
       </div>
-      <StartDiscussionButton full />
+      <StartDiscussionButton full className="max-w-[268px]" />
     </section>
   );
 }

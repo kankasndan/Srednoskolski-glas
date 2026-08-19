@@ -16,8 +16,8 @@ export function useProfileCounts() {
         setCounts({
           threads: data.threads ?? 0,
           comments: data.comments ?? 0,
-          follows: data.followed_forums ?? 0,
-          followedThreads: data.followed_threads ?? 0,
+          // Tabot "Sledis" gi sobira i forumite i diskusiite.
+          follows: (data.followed_forums ?? 0) + (data.followed_threads ?? 0),
           followingUsers: data.following_users ?? 0,
         });
       })

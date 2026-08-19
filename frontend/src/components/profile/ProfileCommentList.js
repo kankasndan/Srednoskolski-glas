@@ -67,72 +67,86 @@ function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = tr
   }
 
   return (
-    <article className="relative flex cursor-pointer items-center justify-between gap-8 rounded-3xl border-b border-b-[#CFE9ED] px-4 py-5 transition-colors hover:bg-[#DCEBED]">
+    <article className="relative flex cursor-pointer flex-col gap-4 rounded-3xl border-b border-b-[#CFE9ED] px-2 pb-6 transition-colors active:bg-[#DCEBED] hover:bg-[#DCEBED] md:px-4 md:py-5">
       <Link
         href={threadHref}
         aria-label={thread.title}
         className="absolute inset-0 rounded-3xl"
       />
 
-      <div className="flex min-w-0 flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <ProfileForumTag forum={thread.forum} />
-          <span className="font-(family-name:--font-roboto) text-[12px] leading-4 text-[#595959]">
-            {postedAgoLabel(comment)}
-          </span>
-        </div>
-
-          <CommentBody
-            text={comment.content}
-            mentions={comment.mentions}
-            className="font-(family-name:--font-manrope) text-[16px] leading-none"
-          />
-
-        <div className="flex items-center gap-1.5 font-(family-name:--font-manrope) text-[12px] leading-none text-(--color-grays-700)">
-          <span aria-hidden>↳</span>
-          <span className="truncate">{thread.title}</span>
-        </div>
-
-        {canManage ? (
-          <div className="relative z-10 flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setEditing(true)}
-                className="cursor-pointer rounded-xl border border-(--color-primary-200) bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-(--color-primary-200) transition-colors hover:bg-[#EDE9FE] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Измени
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => {
-                  setActionError("");
-                  setConfirmingDelete(true);
-                }}
-                className="cursor-pointer rounded-xl border border-[#DC2626] bg-white px-4 py-2.5 font-(family-name:--font-manrope) text-[14px] font-bold text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Избриши
-              </button>
-            </div>
-            {actionError ? (
-              <p className="font-(family-name:--font-manrope) text-[13px] text-[#DC2626]">
-                {actionError}
-              </p>
-            ) : null}
+      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between md:gap-8">
+        <div className="flex min-w-0 flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <ProfileForumTag forum={thread.forum} />
+            <span className="font-(family-name:--font-roboto) text-[12px] leading-4 text-[#595959]">
+              {postedAgoLabel(comment)}
+            </span>
           </div>
-        ) : null}
+
+          <div className="flex min-w-0 flex-col gap-2 md:gap-4">
+            <h3 className="break-words font-(family-name:--font-manrope) text-[16px] leading-snug text-black">
+              {thread.title}
+            </h3>
+
+            <div className="flex min-w-0 items-start gap-1.5">
+              <span
+                aria-hidden
+                className="font-(family-name:--font-manrope) text-[12px] leading-snug text-(--color-grays-700)"
+              >
+                ↳
+              </span>
+              <CommentBody
+                text={comment.content}
+                mentions={comment.mentions}
+                muted
+                className="min-w-0 flex-1 font-(family-name:--font-manrope) text-[12px] leading-snug"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="relative z-10 flex shrink-0">
+          <ThreadActionButton
+            compact
+            icon="/Chevrons up.svg"
+            label="Гласови"
+            count={comment.upvotes ?? 0}
+            href={threadHref}
+          />
+        </div>
       </div>
 
-      <div className="relative z-10 flex shrink-0">
-        <ThreadActionButton
-          icon="/Chevrons up.svg"
-          label="Гласови"
-          count={comment.upvotes ?? 0}
-          href={threadHref}
-        />
-      </div>
+      {canManage ? (
+        <div className="relative z-10 flex flex-col gap-2">
+          {/* Na telefon se obichen tekst, na pogolem ekran se kopcinja so ramka. */}
+          <div className="flex flex-wrap items-center gap-4 md:gap-3">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setEditing(true)}
+              className="cursor-pointer font-(family-name:--font-manrope) text-[12px] font-medium text-(--color-grays-400) transition-colors active:text-(--color-primary-200) disabled:cursor-not-allowed disabled:opacity-50 md:rounded-xl md:border md:border-(--color-primary-200) md:bg-white md:px-4 md:py-2.5 md:text-[14px] md:font-bold md:text-(--color-primary-200) md:hover:bg-[#EDE9FE] md:active:bg-[#EDE9FE]"
+            >
+              Измени
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setActionError("");
+                setConfirmingDelete(true);
+              }}
+              className="cursor-pointer font-(family-name:--font-manrope) text-[12px] font-medium text-(--color-grays-400) transition-colors active:text-[#DC2626] disabled:cursor-not-allowed disabled:opacity-50 md:rounded-xl md:border md:border-[#DC2626] md:bg-white md:px-4 md:py-2.5 md:text-[14px] md:font-bold md:text-[#DC2626] md:hover:bg-[#FEF2F2] md:active:bg-[#FEF2F2]"
+            >
+              Избриши
+            </button>
+          </div>
+          {actionError ? (
+            <p className="font-(family-name:--font-manrope) text-[13px] text-[#DC2626]">
+              {actionError}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {canManage && editing && (
         <EditCommentDialog
@@ -214,7 +228,7 @@ export default function ProfileCommentList({
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-10 md:gap-0">
       {comments.map((comment) => (
         <ProfileCommentItem
           key={comment.id}

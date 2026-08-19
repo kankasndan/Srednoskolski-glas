@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { labelClass, fieldClass } from "@/lib/fieldStyles";
+import { labelClass, fieldClass, compactFieldClass } from "@/lib/fieldStyles";
 import { useClickOutside } from "@/hooks/useClickOutside";
 
 const rowClass =
@@ -59,6 +59,7 @@ export default function SelectField({
   options,
   groups,
   disabled = false,
+  compact = false,
 }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
@@ -87,7 +88,9 @@ export default function SelectField({
       {/* Otvorenata lista mora da e nad polinjata pod nea. */}
       <div
         ref={wrapperRef}
-        className={`group relative h-14 ${open ? "z-30" : ""}`}
+        className={`group relative ${compact ? "h-10 md:h-12" : "h-14"} ${
+          open ? "z-30" : ""
+        }`}
       >
         <input
           type="text"
@@ -110,13 +113,19 @@ export default function SelectField({
             aria-expanded={open}
             aria-disabled={disabled}
             onClick={(event) => disabled && event.preventDefault()}
-            className={`${fieldClass} ${summaryClass} ${triggerTone} flex items-center justify-between gap-3 transition-colors duration-300 ease-out group-open/field:rounded-b-none group-open/field:bg-[#CFE9ED]`}
+            className={`${
+              compact ? compactFieldClass : fieldClass
+            } ${summaryClass} ${triggerTone} flex items-center justify-between gap-3 transition-colors duration-300 ease-out group-open/field:rounded-b-none group-open/field:bg-[#CFE9ED]`}
           >
             <span className="truncate">{selectedLabel || placeholder}</span>
             <Chevron className="group-open/field:rotate-180" />
           </summary>
 
-          <div className="flex max-h-70 flex-col divide-y divide-[#CCCCCC] overflow-y-auto rounded-b-2xl border-x border-b border-[#CCCCCC] bg-white">
+          <div
+            className={`flex max-h-70 flex-col divide-y divide-[#CCCCCC] overflow-y-auto border-x border-b border-[#CCCCCC] bg-white ${
+              compact ? "rounded-b-xl" : "rounded-b-2xl"
+            }`}
+          >
             {groups
               ? groups.map(({ city, schools }) => (
                   <CityGroup
