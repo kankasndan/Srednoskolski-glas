@@ -9,15 +9,40 @@ import { ONBOARDING_REQUIRED_MESSAGE } from "@/lib/capabilities";
 import { formatCount } from "@/lib/formatCount";
 import { nextVoteState } from "@/lib/votes";
 
-function Stat({ icon, label, count }) {
-  return (
-    <div className="flex h-8 w-[72px] items-center justify-center gap-2 rounded-xl border border-[#CCCCCC] font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-none text-black opacity-80 md:h-10 md:w-24 md:gap-4 md:rounded-2xl md:text-[14px]">
-      <Image src={icon} alt="" width={24} height={24} className="size-4 md:size-6" />
+function Stat({ icon, label, count, onClick }) {
+  const className =
+    "flex h-8 w-[72px] items-center justify-center gap-2 rounded-xl border border-[#CCCCCC] font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-none text-black opacity-80 md:h-10 md:w-24 md:gap-4 md:rounded-2xl md:text-[14px]";
+  const inner = (
+    <>
+      <Image
+        src={icon}
+        alt=""
+        width={24}
+        height={24}
+        className={`size-4 transition md:size-6 ${
+          onClick ? "group-hover:brightness-0 group-hover:invert" : ""
+        }`}
+      />
       <span>
         <span className="sr-only">{label}: </span>
         {formatCount(count)}
       </span>
-    </div>
+    </>
+  );
+
+  if (!onClick) {
+    return <div className={className}>{inner}</div>;
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      className={`group cursor-pointer transition-colors hover:border-[var(--color-primary-100)] hover:bg-[var(--color-primary-100)] hover:text-white hover:opacity-100 ${className}`}
+    >
+      {inner}
+    </button>
   );
 }
 
@@ -67,18 +92,24 @@ function VoteStat({ threadId, votes: initialVotes = 0, hasVoted: initialHasVoted
         aria-pressed={hasVoted}
         aria-label="Гласај нагоре"
         onClick={handleVote}
-        className={`flex h-8 w-[72px] cursor-pointer items-center justify-center gap-2 rounded-xl border font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-none transition-colors disabled:opacity-70 md:h-10 md:w-24 md:gap-4 md:rounded-2xl md:text-[14px] ${
+        className={`group flex h-8 w-[72px] cursor-pointer items-center justify-center gap-2 rounded-xl border font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-none transition-colors disabled:opacity-70 md:h-10 md:w-24 md:gap-4 md:rounded-2xl md:text-[14px] ${
           hasVoted
-            ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white"
+            ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white hover:border-[var(--color-primary-200)] hover:bg-[var(--color-primary-200)]"
             : "border-[#CCCCCC] text-black opacity-80 hover:border-[var(--color-primary-100)] hover:bg-[var(--color-primary-100)] hover:text-white hover:opacity-100"
         }`}
       >
+        {/* Na purpurna podloga ednobojnata ikona se gubi: brightness-0 ja pravi
+            crna, invert potoa bela — isto kako kaj ThreadActionButton. */}
         <Image
           src="/Chevrons up.svg"
           alt=""
           width={24}
           height={24}
-          className={`size-4 md:size-6 ${hasVoted ? "-scale-y-100 brightness-0 invert" : ""}`}
+          className={`size-4 transition md:size-6 ${
+            hasVoted
+              ? "-scale-y-100 brightness-0 invert"
+              : "group-hover:brightness-0 group-hover:invert"
+          }`}
         />
         <span>
           <span className="sr-only">Гласови: </span>
@@ -103,6 +134,7 @@ export default function ThreadStats({
   isFollowing = false,
   onVoted,
   onFollowingChange,
+  onCommentsClick,
   children,
 }) {
   return (
@@ -115,11 +147,17 @@ export default function ThreadStats({
             hasVoted={hasVoted}
             onVoted={onVoted}
           />
-          <Stat icon="/chat-1-line.svg" label="Коментари" count={comments} />
+          <Stat
+            icon="/chat-1-line.svg"
+            label="Коментари"
+            count={comments}
+            onClick={onCommentsClick}
+          />
           <ThreadViewCount views={views} className="w-auto md:hidden" />
         </div>
+        {/* 20px pomegju share i meni/prijava: 8px gi pravi celite preblisku. */}
         {children ? (
-          <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <div className="ml-auto flex items-center gap-5 md:ml-0">
             {children}
           </div>
         ) : null}

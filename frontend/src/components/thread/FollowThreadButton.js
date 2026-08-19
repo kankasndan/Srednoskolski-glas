@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { followThread, unfollowThread } from "@/api/threads";
+import CheckIcon from "@/components/ui/CheckIcon";
 import { useProfile } from "@/hooks/useProfile";
 
 const GUEST_ERROR = "Мора да си најавен за да следиш дискусија.";
@@ -58,8 +59,8 @@ export default function FollowThreadButton({
   }
 
   const stateClasses = following
-    ? "bg-[var(--color-primary-200)] text-white"
-    : "bg-[var(--color-primary-300)] text-white hover:bg-[var(--color-primary-200)]";
+    ? "bg-[var(--color-primary-200)] text-white hover:bg-[var(--color-primary-300)]"
+    : "bg-[var(--color-primary-200)] text-white hover:bg-[var(--color-primary-300)]";
 
   return (
     <div className={`flex shrink-0 flex-col gap-1 ${wrapperClassName}`}>
@@ -84,16 +85,3 @@ export default function FollowThreadButton({
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M13.5 4.5L6.5 11.5L3 8"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}

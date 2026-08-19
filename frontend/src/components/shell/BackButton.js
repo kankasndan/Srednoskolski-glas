@@ -12,6 +12,7 @@ config.autoAddCss = false;
 const LABEL_TONES = {
   primary: "text-[#582FF5]",
   muted: "text-[#595959]",
+  black: "text-black",
 };
 
 export default function BackButton({

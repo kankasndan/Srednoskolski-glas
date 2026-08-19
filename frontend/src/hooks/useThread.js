@@ -91,6 +91,23 @@ export function useThread(forumSlug, threadId, sort = "best") {
     [sort],
   );
 
+  // Komentarot ostanuva vo listata; brojachot sledi shto vrakja backendot.
+  const markCommentDeleted = useCallback((commentId) => {
+    if (!commentId) return;
+
+    setData((prev) => {
+      if (!prev?.thread) return prev;
+
+      return {
+        ...prev,
+        thread: {
+          ...prev.thread,
+          comments_count: Math.max(0, (prev.thread.comments_count ?? 0) - 1),
+        },
+      };
+    });
+  }, []);
+
   return {
     forum: data?.thread?.forum ?? null,
     thread: data?.thread ?? null,
@@ -101,5 +118,6 @@ export function useThread(forumSlug, threadId, sort = "best") {
     reload,
     patchThread,
     addComment,
+    markCommentDeleted,
   };
 }

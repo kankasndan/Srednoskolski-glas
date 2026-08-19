@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Avatar from "@/components/ui/Avatar";
 import CommentActions from "@/components/thread/CommentActions";
 import CommentAuthor from "@/components/thread/CommentAuthor";
 import CommentBody from "@/components/thread/CommentBody";
 import CommentComposer from "@/components/thread/CommentComposer";
-import { getCommentReplies } from "@/api/comments";
+import EditCommentDialog from "@/components/thread/EditCommentDialog";
+import { deleteComment, getCommentReplies, updateComment } from "@/api/comments";
 import { reportComment, reportErrorMessage } from "@/api/moderation";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ReportDialog from "@/components/ui/ReportDialog";
-import { formatPostedAgo } from "@/lib/time";
+import { useHashTarget } from "@/hooks/useHashTarget";
+import { useProfile } from "@/hooks/useProfile";
+import { userFacingError } from "@/lib/api";
+import { formatEditedOrPostedAgo } from "@/lib/time";
 
 export default function Comment({
   comment,
@@ -18,8 +23,25 @@ export default function Comment({
   isAnonymousThread = false,
   isThreadOwner = false,
   onCommentCreated,
+  onCommentDeleted,
+  onCommentUpdated,
+  expandPath = null,
+  preloadedReplies = null,
   depth = 0,
 }) {
+  const { user } = useProfile();
+  const elementId = `comment-${comment.id}`;
+  const containerRef = useRef(null);
+  const autoExpandedRef = useRef(false);
+  const linked = useHashTarget(elementId);
+  // Patekata do spodeleniot odgovor: ako pochnuva so mene, ostatokot odi podolu.
+  const onPath = expandPath?.[0] === comment.id;
+  const childExpandPath = onPath ? expandPath.slice(1) : null;
+  const [content, setContent] = useState(comment.content ?? "");
+  const [mentions, setMentions] = useState(comment.mentions ?? []);
+  const [editedAt, setEditedAt] = useState(comment.edited_at ?? null);
+  // Prazna sodrzhina znachi izbrishan komentar shto ostanal zaradi odgovorite.
+  const [deleted, setDeleted] = useState(!comment.content);
   const [expanded, setExpanded] = useState(false);
   const [replies, setReplies] = useState([]);
   const [repliesCount, setRepliesCount] = useState(comment.replies_count ?? 0);
@@ -27,18 +49,58 @@ export default function Comment({
   const [replying, setReplying] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [reported, setReported] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleteDone, setDeleteDone] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState("");
   const hasReplies = repliesCount > 0;
   const showThread = expanded && (replies.length > 0 || loadingReplies);
   const showLine = hasReplies || depth > 0 || showThread;
+  // Na anonimna diskusija avtorot e skrien, pa nejziniot sopstvenik gi
+  // prepoznava svoite komentari preku is_owner na samata diskusija.
+  const isOwn = comment.author
+    ? user != null && comment.author.id === user.id
+    : isAnonymousThread && isThreadOwner;
+  const canManage = isOwn && !deleted;
 
-  async function loadReplies() {
+  useEffect(() => {
+    if (!linked) return;
+
+    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [linked]);
+
+  useEffect(() => {
+    if (!onPath || autoExpandedRef.current) return;
+
+    autoExpandedRef.current = true;
+    setExpanded(true);
+    loadReplies({ allowPreloaded: true });
+    // Se izvrshuva ednash po pateka, pa ostanatite vrednosti ne se zavisnosti.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onPath]);
+
+  // allowPreloaded: baranjeto na spodeleniot komentar gi vchita ovie odgovori
+  // po pat, pa nema potreba povtorno da se zemaat od serverot.
+  async function loadReplies({ allowPreloaded = false } = {}) {
+    const preloaded = allowPreloaded ? preloadedReplies?.[comment.id] : null;
+
+    if (preloaded) {
+      setReplies(preloaded);
+      setRepliesCount(preloaded.length);
+      return preloaded.length;
+    }
+
     setLoadingReplies(true);
     try {
       const next = await getCommentReplies(comment.id);
       setReplies(next);
       setRepliesCount(next.length);
+      return next.length;
     } catch {
       setReplies([]);
+      return null;
     } finally {
       setLoadingReplies(false);
     }
@@ -63,7 +125,62 @@ export default function Comment({
     setReplying(false);
     setRepliesCount((count) => count + 1);
     setExpanded(true);
-    await loadReplies();
+
+    const total = await loadReplies();
+    if (total !== null) {
+      onCommentUpdated?.(comment.id, { replies_count: total });
+    }
+  }
+
+  // "Сокриј одговори" gi unmount-ira decata, pa promenite mora da se zachuvaat
+  // ovde — inache pri povtorno otvoranje se vrakja starata sodrzhina.
+  function patchReply(replyId, patch) {
+    setReplies((prev) =>
+      prev.map((reply) => (reply.id === replyId ? { ...reply, ...patch } : reply)),
+    );
+  }
+
+  function handleReplyDeleted(replyId) {
+    patchReply(replyId, { content: "", mentions: [] });
+    onCommentDeleted?.(replyId);
+  }
+
+  async function handleSave({ content: next }) {
+    const updated = await updateComment(comment.id, { content: next });
+    const patch = {
+      content: updated.content,
+      mentions: updated.mentions ?? [],
+      edited_at: updated.edited_at ?? null,
+    };
+
+    setContent(patch.content);
+    setMentions(patch.mentions);
+    setEditedAt(patch.edited_at);
+    setEditing(false);
+    setSaved(true);
+    onCommentUpdated?.(comment.id, patch);
+  }
+
+  async function handleConfirmDelete() {
+    if (busy) return;
+
+    setBusy(true);
+    setActionError("");
+
+    try {
+      await deleteComment(comment.id);
+      setConfirmingDelete(false);
+      setDeleted(true);
+      setContent("");
+      setMentions([]);
+      setDeleteDone(true);
+      onCommentDeleted?.(comment.id);
+    } catch (err) {
+      setActionError(userFacingError(err, "Неуспешно бришење. Обиди се повторно."));
+      setConfirmingDelete(false);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function handleReport({ reason, details }) {
@@ -80,7 +197,7 @@ export default function Comment({
   }
 
   return (
-    <div id={`comment-${comment.id}`} className="flex min-w-0 gap-2 scroll-mt-24">
+    <div id={elementId} ref={containerRef} className="flex min-w-0 gap-2 scroll-mt-24">
       <div className="flex shrink-0 flex-col items-center">
         <Avatar src={comment.author?.imageUrl} size="md" />
         {showLine ? (
@@ -89,19 +206,84 @@ export default function Comment({
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-3">
-        <CommentAuthor author={comment.author} />
-        <CommentBody text={comment.content} mentions={comment.mentions} muted={depth === 0} />
-        <CommentActions
-          commentId={comment.id}
-          votes={comment.upvotes}
-          hasVoted={comment.has_voted}
-          repliesCount={repliesCount}
-          expanded={expanded}
-          loadingReplies={loadingReplies}
-          onToggle={toggleReplies}
-          onReply={() => setReplying(!replying)}
-          onReport={() => setReporting(true)}
-          createdAtLabel={formatPostedAgo(comment.created_at)}
+        {/* Osvetluvanjeto go fakja samo ovoj komentar — odgovorite se nadvor od
+            ovoj blok. Negativnata margina go ponishtuva paddingot, bez skok. */}
+        <div
+          className={`flex min-w-0 flex-col gap-3 transition-colors ${
+            linked ? "-m-2 rounded-2xl bg-[#F1EEFE] p-2 ring-1 ring-[#582FF5]/25" : ""
+          }`}
+        >
+          <CommentAuthor author={comment.author} />
+          {deleted ? (
+            <p className="text-[14px] italic leading-[22px] text-[#999999]">
+              Коментарот е избришан.
+            </p>
+          ) : (
+            <CommentBody text={content} mentions={mentions} muted={depth === 0} />
+          )}
+          <CommentActions
+            commentId={comment.id}
+            votes={comment.upvotes}
+            hasVoted={comment.has_voted}
+            repliesCount={repliesCount}
+            expanded={expanded}
+            loadingReplies={loadingReplies}
+            deleted={deleted}
+            isOwner={canManage}
+            onToggle={toggleReplies}
+            onReply={() => setReplying(!replying)}
+            onReport={() => setReporting(true)}
+            onEdit={() => {
+              setActionError("");
+              setEditing(true);
+            }}
+            onDelete={() => {
+              setActionError("");
+              setConfirmingDelete(true);
+            }}
+            onVoted={(next) => onCommentUpdated?.(comment.id, next)}
+            createdAtLabel={formatEditedOrPostedAgo({
+              created_at: comment.created_at,
+              edited_at: editedAt,
+            })}
+          />
+        </div>
+
+        {actionError ? (
+          <p className="font-[family-name:var(--font-manrope)] text-[12px] leading-4 text-[#DC2626]">
+            {actionError}
+          </p>
+        ) : null}
+
+        {editing && (
+          <EditCommentDialog
+            open
+            comment={{ ...comment, content }}
+            onClose={() => setEditing(false)}
+            onSave={handleSave}
+          />
+        )}
+
+        <InfoDialog
+          open={saved}
+          title="Промените беа успешно зачувани."
+          onClose={() => setSaved(false)}
+        />
+
+        <ConfirmDialog
+          open={confirmingDelete}
+          title="Дали си сигурен дека сакаш да го избришеш овој коментар?"
+          confirmLabel={busy ? "Се брише…" : "Избриши"}
+          onCancel={() => {
+            if (!busy) setConfirmingDelete(false);
+          }}
+          onConfirm={handleConfirmDelete}
+        />
+
+        <InfoDialog
+          open={deleteDone}
+          title="Коментарот беше успешно избришан."
+          onClose={() => setDeleteDone(false)}
         />
 
         {reporting && (
@@ -143,6 +325,10 @@ export default function Comment({
                   isAnonymousThread={isAnonymousThread}
                   isThreadOwner={isThreadOwner}
                   onCommentCreated={onCommentCreated}
+                  onCommentDeleted={handleReplyDeleted}
+                  onCommentUpdated={patchReply}
+                  expandPath={childExpandPath}
+                  preloadedReplies={preloadedReplies}
                   depth={depth + 1}
                 />
               ))

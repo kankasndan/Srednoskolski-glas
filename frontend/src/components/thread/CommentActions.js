@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { toggleCommentVote } from "@/api/comments";
 import ThreadShareButton from "@/components/thread/ThreadShareButton";
+import ThreeDotsMenu from "@/components/ui/ThreeDotsMenu";
 import { ONBOARDING_REQUIRED_MESSAGE } from "@/lib/capabilities";
 import { nextVoteState } from "@/lib/votes";
 
@@ -20,6 +21,29 @@ function IconButton({ icon, iconClassName, label, onClick }) {
   );
 }
 
+function RepliesToggle({ repliesCount, expanded, loadingReplies, onToggle }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex cursor-pointer items-center gap-1 font-[family-name:var(--font-manrope)] text-[12px] leading-[18px] text-[#595959] transition-colors hover:text-black"
+    >
+      <Image
+        src="/comments icon/show less arroew.svg"
+        alt=""
+        width={13}
+        height={13}
+        className={`size-[13px] ${expanded ? "" : "rotate-180"}`}
+      />
+      {loadingReplies
+        ? "Се вчитува…"
+        : expanded
+          ? "Сокриј одговори"
+          : `Прикажи одговори (${repliesCount})`}
+    </button>
+  );
+}
+
 export default function CommentActions({
   commentId,
   votes: initialVotes = 0,
@@ -30,6 +54,11 @@ export default function CommentActions({
   onToggle,
   onReply,
   onReport,
+  onEdit,
+  onDelete,
+  onVoted,
+  isOwner = false,
+  deleted = false,
   createdAtLabel,
 }) {
   const [votes, setVotes] = useState(initialVotes);
@@ -52,6 +81,10 @@ export default function CommentActions({
       const data = await toggleCommentVote(commentId);
       setVotes(data.upvotes ?? nextVotes);
       setHasVoted(Boolean(data.has_voted));
+      onVoted?.({
+        upvotes: data.upvotes ?? nextVotes,
+        has_voted: Boolean(data.has_voted),
+      });
     } catch (err) {
       setVotes(previousVotes);
       setHasVoted(previousHasVoted);
@@ -67,6 +100,22 @@ export default function CommentActions({
     const url = new URL(window.location.href);
     url.hash = `comment-${commentId}`;
     return url.toString();
+  }
+
+  // Izbrishaniot ostanuva samo kako nosach na odgovorite.
+  if (deleted) {
+    return (
+      <div className="flex flex-col gap-4">
+        {repliesCount > 0 ? (
+          <RepliesToggle
+            repliesCount={repliesCount}
+            expanded={expanded}
+            loadingReplies={loadingReplies}
+            onToggle={onToggle}
+          />
+        ) : null}
+      </div>
+    );
   }
 
   return (
@@ -92,20 +141,31 @@ export default function CommentActions({
           {votes}
         </button>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+        {/* 20px pomegju akciite: 8px gi pravi celite premnogu blisku (a11y). */}
+        <div className="flex items-center gap-5">
+          <div className="flex items-center gap-5">
             <IconButton
               icon="/comments icon/comment.svg"
               iconClassName="size-5"
               label="Одговори"
               onClick={onReply}
             />
-            <IconButton
-              icon="/comments icon/report.svg"
-              iconClassName="size-[18px]"
-              label="Пријави"
-              onClick={onReport}
-            />
+            {isOwner ? (
+              <ThreeDotsMenu
+                triggerClassName="size-5 rounded-md opacity-80 hover:opacity-100"
+                items={[
+                  { label: "Измени", onSelect: () => onEdit?.() },
+                  { label: "Избриши", onSelect: () => onDelete?.() },
+                ]}
+              />
+            ) : (
+              <IconButton
+                icon="/comments icon/report.svg"
+                iconClassName="size-[18px]"
+                label="Пријави"
+                onClick={onReport}
+              />
+            )}
             <ThreadShareButton
               className="size-[18px] rounded-none opacity-80 hover:bg-transparent hover:opacity-100"
               getUrl={commentUrl}
@@ -123,24 +183,12 @@ export default function CommentActions({
       </div>
 
       {repliesCount > 0 ? (
-        <button
-            type="button"
-            onClick={onToggle}
-            className="flex cursor-pointer items-center gap-1 font-[family-name:var(--font-manrope)] text-[12px] leading-[18px] text-[#595959] transition-colors hover:text-black"
-          >
-            <Image
-              src="/comments icon/show less arroew.svg"
-              alt=""
-              width={13}
-              height={13}
-              className={`size-[13px] ${expanded ? "" : "rotate-180"}`}
-            />
-            {loadingReplies
-              ? "Се вчитува…"
-              : expanded
-                ? "Сокриј одговори"
-                : `Прикажи одговори (${repliesCount})`}
-        </button>
+        <RepliesToggle
+          repliesCount={repliesCount}
+          expanded={expanded}
+          loadingReplies={loadingReplies}
+          onToggle={onToggle}
+        />
       ) : null}
       {error ? (
         <p className="font-[family-name:var(--font-manrope)] text-[12px] leading-4 text-[#DC2626]">

@@ -7,8 +7,9 @@ import ThreadPoll from "@/components/thread/ThreadPoll";
 import ThreadShareButton from "@/components/thread/ThreadShareButton";
 import ThreadStats from "@/components/thread/ThreadStats";
 import ThreadViewCount from "@/components/thread/ThreadViewCount";
+import { focusCommentComposer } from "@/components/thread/CommentComposer";
 import { renderHtmlProps } from "@/lib/html";
-import { formatThreadPostedAgo } from "@/lib/time";
+import { formatEditedOrPostedAgo } from "@/lib/time";
 
 export default function ThreadPost({ forum, thread, onThreadUpdated }) {
   const isOwner = Boolean(thread?.is_owner);
@@ -18,17 +19,19 @@ export default function ThreadPost({ forum, thread, onThreadUpdated }) {
       <div className="flex items-start justify-between gap-3 md:gap-4">
         <ThreadMetaTags
           tags={buildThreadMetaTags(thread.forum ?? forum, thread)}
-          postedAgo={formatThreadPostedAgo(thread)}
+          postedAgo={formatEditedOrPostedAgo(thread)}
           hideForumOnPhone
         />
 
+        {/* Na telefon akciite se dolu vo redot so statistikite. */}
         {isOwner ? (
           <ThreadActionsMenu
             thread={thread}
             onUpdated={onThreadUpdated}
+            className="hidden md:block"
           />
         ) : (
-          <div className="hidden items-center gap-1 md:flex">
+          <div className="hidden items-center gap-5 md:flex">
             <ThreadShareButton />
             <ThreadActionsMenu thread={thread} onUpdated={onThreadUpdated} />
           </div>
@@ -61,6 +64,7 @@ export default function ThreadPost({ forum, thread, onThreadUpdated }) {
         isFollowing={thread.is_following}
         onVoted={(vote) => onThreadUpdated?.(vote)}
         onFollowingChange={(is_following) => onThreadUpdated?.({ is_following })}
+        onCommentsClick={focusCommentComposer}
       >
         {isOwner ? (
           <>

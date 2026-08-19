@@ -6,6 +6,9 @@ export default function CommentList({
   isAnonymousThread = false,
   isThreadOwner = false,
   onCommentCreated,
+  onCommentDeleted,
+  expandPath = null,
+  preloadedReplies = null,
 }) {
   return (
     <div className="flex flex-col">
@@ -20,6 +23,9 @@ export default function CommentList({
             isAnonymousThread={isAnonymousThread}
             isThreadOwner={isThreadOwner}
             onCommentCreated={onCommentCreated}
+            onCommentDeleted={onCommentDeleted}
+            expandPath={expandPath}
+            preloadedReplies={preloadedReplies}
           />
         </article>
       ))}

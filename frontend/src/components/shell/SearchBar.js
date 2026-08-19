@@ -38,6 +38,35 @@ function snippetAround(text, query, max = 90) {
   return slice;
 }
 
+function SectionLabel({ children }) {
+  return (
+    <li
+      role="presentation"
+      className="px-4 pb-1 pt-2 font-[family-name:var(--font-manrope)] text-[11px] font-bold uppercase tracking-wide text-[#8A8A8A]"
+    >
+      {children}
+    </li>
+  );
+}
+
+function ForumOption({ forum, query, onSelect }) {
+  return (
+    <li>
+      <Link
+        href={`/p/${forum.slug}`}
+        role="option"
+        onClick={onSelect}
+        className="flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-[#F5F5F5]"
+      >
+        <ForumIcon src={forum.imageUrl} className="size-5" />
+        <p className="min-w-0 flex-1 truncate font-[family-name:var(--font-manrope)] text-[14px] font-medium text-black">
+          <HighlightedText text={forum.name} query={query} />
+        </p>
+      </Link>
+    </li>
+  );
+}
+
 export default function SearchBar() {
   const router = useRouter();
   const pathname = usePathname();
@@ -178,6 +207,13 @@ export default function SearchBar() {
   }
 
   const hasHits = results.forums.length > 0 || results.threads.length > 0;
+  const generalForums = results.forums.filter((forum) => forum.type !== "school");
+  const schoolForums = results.forums.filter((forum) => forum.type === "school");
+
+  const closeDropdown = useCallback(() => {
+    setDropdownOpen(false);
+    setFocused(false);
+  }, []);
   const showDropdown = focused && dropdownOpen && query.trim().length > 0;
 
   return (
@@ -244,29 +280,33 @@ export default function SearchBar() {
             </p>
           ) : (
             <ul role="listbox" aria-label="Предлози за пребарување" className="flex flex-col py-1">
-              {results.forums.map((forum) => (
-                <li key={`forum-${forum.id}`}>
-                  <Link
-                    href={`/p/${forum.slug}`}
-                    role="option"
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      setFocused(false);
-                    }}
-                    className="flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-[#F5F5F5]"
-                  >
-                    <ForumIcon src={forum.imageUrl} className="size-5" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-[family-name:var(--font-manrope)] text-[14px] font-medium text-black">
-                        <HighlightedText text={forum.name} query={query} />
-                      </p>
-                      <p className="font-[family-name:var(--font-manrope)] text-[12px] text-[#595959]">
-                        Форум
-                      </p>
-                    </div>
-                  </Link>
-                </li>
+              {generalForums.length > 0 ? (
+                <SectionLabel>Општи форуми</SectionLabel>
+              ) : null}
+              {generalForums.map((forum) => (
+                <ForumOption
+                  key={`forum-${forum.id}`}
+                  forum={forum}
+                  query={query}
+                  onSelect={closeDropdown}
+                />
               ))}
+
+              {schoolForums.length > 0 ? (
+                <SectionLabel>Училишни форуми</SectionLabel>
+              ) : null}
+              {schoolForums.map((forum) => (
+                <ForumOption
+                  key={`forum-${forum.id}`}
+                  forum={forum}
+                  query={query}
+                  onSelect={closeDropdown}
+                />
+              ))}
+
+              {results.threads.length > 0 ? (
+                <SectionLabel>Дискусии</SectionLabel>
+              ) : null}
               {results.threads.map((thread) => {
                 const slug = thread.forum?.slug;
                 const href = slug ? `/p/${slug}/${thread.id}` : "/search";
@@ -276,10 +316,7 @@ export default function SearchBar() {
                     <Link
                       href={href}
                       role="option"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        setFocused(false);
-                      }}
+                      onClick={closeDropdown}
                       className="flex cursor-pointer flex-col gap-0.5 px-4 py-2.5 hover:bg-[#F5F5F5]"
                     >
                       <p className="truncate font-[family-name:var(--font-manrope)] text-[14px] font-medium text-black">

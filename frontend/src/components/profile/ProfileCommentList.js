@@ -14,9 +14,19 @@ import ThreadActionButton from "@/components/thread/ThreadActionButton";
 import { getMyComments, getUserComments } from "@/api/profile";
 import { userFacingError } from "@/lib/api";
 
+function postedAgoLabel(comment) {
+  const ago = formatDistanceToNow(new Date(comment.edited_at ?? comment.created_at), {
+    addSuffix: true,
+    locale: mk,
+  });
+
+  return comment.edited_at ? `Изменето ${ago}` : ago;
+}
+
 function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = true }) {
   const [comment, setComment] = useState(initialComment);
   const [editing, setEditing] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleted, setDeleted] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -35,6 +45,7 @@ function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = tr
       mentions: updated.mentions ?? prev.mentions,
     }));
     setEditing(false);
+    setSaved(true);
   }
 
   async function handleConfirmDelete() {
@@ -67,10 +78,7 @@ function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = tr
         <div className="flex items-center gap-2">
           <ProfileForumTag forum={thread.forum} />
           <span className="font-(family-name:--font-roboto) text-[12px] leading-4 text-[#595959]">
-            {formatDistanceToNow(new Date(comment.created_at), {
-              addSuffix: true,
-              locale: mk,
-            })}
+            {postedAgoLabel(comment)}
           </span>
         </div>
 
@@ -134,6 +142,12 @@ function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = tr
           onSave={handleSave}
         />
       )}
+
+      <InfoDialog
+        open={saved}
+        title="Промените беа успешно зачувани."
+        onClose={() => setSaved(false)}
+      />
 
       <ConfirmDialog
         open={canManage && confirmingDelete}

@@ -33,7 +33,7 @@ export default function CommentsHeader({ count, sort = "best", onSortChange }) {
       <button
         type="button"
         onClick={() => setFiltersOpen(true)}
-        className="flex h-10 cursor-pointer items-center gap-2 self-start font-[family-name:var(--font-manrope)] text-[14px] leading-none text-black lg:hidden"
+        className="flex h-10 cursor-pointer items-center gap-2 self-start font-[family-name:var(--font-manrope)] text-[14px] leading-none text-black md:hidden"
       >
         <Image
           src="/mobile version/filter.svg"
@@ -42,13 +42,14 @@ export default function CommentsHeader({ count, sort = "best", onSortChange }) {
           height={24}
           className="size-6"
         />
-        <span className="font-bold">Филтери</span>
+        <span className="font-bold">Филтри</span>
         <span className="text-[12px] text-[#595959]">({count} коментари)</span>
       </button>
 
       <FeedFilterSheet
         open={filtersOpen}
         onClose={() => setFiltersOpen(false)}
+        hiddenFrom="lg"
         sortOptions={SORT_OPTIONS}
         selectedSort={selected}
         onSelectSort={(option) => {
@@ -57,7 +58,8 @@ export default function CommentsHeader({ count, sort = "best", onSortChange }) {
         }}
       />
 
-      <div className="hidden items-center justify-between gap-3 lg:flex">
+      {/* Tabletot go sledi desktopot — kratenjeto e na md, kako i drugade. */}
+      <div className="hidden items-center justify-between gap-3 md:flex">
         <h2 className="flex h-10 items-center text-[16px] font-bold leading-[19.5px] text-black">
           {count} коментари
         </h2>

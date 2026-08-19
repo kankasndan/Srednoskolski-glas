@@ -3,7 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --color-primary-100: #6b47f5;
+  --color-primary-100: #582ff5;
   --color-primary-200: #582ff5;
   --color-primary-300: #3300f5;
   --color-secondary-100: #dcebed;
@@ -75,11 +75,4 @@ body::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
-}
-
-/* Hide the thread filter controls when an ancestor wrapper requests it.
-   This keeps the shared Threads component unchanged while allowing
-   specific pages (e.g. explore) to hide the UI. */
-.explore-hide-filters section > .flex.self-end.gap-2 {
-  display: none !important;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -30,8 +30,44 @@ export default function MediaAttachments({
   function scrollByFrame(direction) {
     const track = trackRef.current;
     if (!track) return;
-    track.scrollBy({ left: direction * track.clientWidth, behavior: "smooth" });
+
+    const slides = Array.from(track.children);
+    if (slides.length === 0) return;
+
+    const firstOffset = slides[0].offsetLeft;
+    const currentIndex = slides.reduce((nearest, slide, index) => {
+      const nearestDistance = Math.abs(slides[nearest].offsetLeft - firstOffset - track.scrollLeft);
+      const distance = Math.abs(slide.offsetLeft - firstOffset - track.scrollLeft);
+      return distance < nearestDistance ? index : nearest;
+    }, 0);
+    const nextIndex = Math.max(0, Math.min(slides.length - 1, currentIndex + direction));
+
+    track.scrollTo({
+      left: slides[nextIndex].offsetLeft - firstOffset,
+      behavior: "auto",
+    });
   }
+
+  useEffect(() => {
+    if (items.length <= 1) return undefined;
+
+    function handleKeyDown(event) {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+
+      const activeElement = document.activeElement;
+      const isTyping =
+        activeElement instanceof HTMLElement &&
+        (activeElement.matches("input, textarea, select") || activeElement.isContentEditable);
+
+      if (isTyping) return;
+
+      event.preventDefault();
+      scrollByFrame(event.key === "ArrowRight" ? 1 : -1);
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [items.length]);
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-[#CCCCCC] bg-white p-4">
@@ -115,30 +151,29 @@ export default function MediaAttachments({
                   >
                     <FontAwesomeIcon icon={faXmark} className="h-4 w-4" />
                   </button>
+                  {items.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        aria-label="Претходен прилог"
+                        onClick={() => scrollByFrame(-1)}
+                        className="absolute left-2 top-[calc(50%-16px)] z-20 flex size-8 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+                      >
+                        <FontAwesomeIcon icon={faChevronLeft} className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Следен прилог"
+                        onClick={() => scrollByFrame(1)}
+                        className="absolute right-2 top-[calc(50%-16px)] z-20 flex size-8 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+                      >
+                        <FontAwesomeIcon icon={faChevronRight} className="h-4 w-4" />
+                      </button>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
-
-            {items.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  aria-label="Претходен прилог"
-                  onClick={() => scrollByFrame(-1)}
-                  className="absolute left-2 top-1/2 z-30 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
-                >
-                  <FontAwesomeIcon icon={faChevronLeft} className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Следен прилог"
-                  onClick={() => scrollByFrame(1)}
-                  className="absolute right-2 top-1/2 z-30 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
-                >
-                  <FontAwesomeIcon icon={faChevronRight} className="h-4 w-4" />
-                </button>
-              </>
-            )}
           </div>
 
           {canAddPhoto ? (

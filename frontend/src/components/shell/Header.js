@@ -14,8 +14,9 @@ function MobileAuthControl() {
   const { user, loading } = useProfile();
   const [leavingToLogin, setLeavingToLogin] = useState(false);
 
+  // Profilnata go sledi logoto po golemina, ne ikonata za meni.
   if (loading) {
-    return <div className="size-8 shrink-0" aria-hidden />;
+    return <div className="size-12 shrink-0 md:size-14" aria-hidden />;
   }
 
   if (user) {
@@ -23,9 +24,14 @@ function MobileAuthControl() {
       <Link
         href="/profile"
         aria-label="Профил"
-        className="flex size-8 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full"
+        className="flex size-12 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full md:size-14"
       >
-        <Avatar src={user.imageUrl} size="md" alt={user.username || "Профил"} />
+        <Avatar
+          src={user.imageUrl}
+          size="xl"
+          sizeClassName="size-12 md:size-14"
+          alt={user.username || "Профил"}
+        />
       </Link>
     );
   }
