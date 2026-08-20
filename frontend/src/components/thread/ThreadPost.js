@@ -44,12 +44,12 @@ export default function ThreadPost({ forum, thread, onThreadUpdated }) {
         </h1>
         {thread.description ? (
           <div
-            className="whitespace-pre-line break-words text-[15px] leading-[22px] text-[#595959] md:text-[16px] [&_p]:mb-2 [&_p:last-child]:mb-0"
+            className="whitespace-pre-line break-words text-[15px] leading-[22px] text-[#595959] md:text-[16px] [&_p]:mb-2 [&_p:last-child]:mb-0 [&_a]:text-[#582FF5] [&_a]:underline [&_a]:underline-offset-2"
             {...renderHtmlProps(thread.description)}
           />
         ) : null}
         <ThreadViewCount views={thread.views} className="hidden w-24 md:flex" />
-        <ThreadAttachments attachments={thread.attachments} />
+        <ThreadAttachments attachments={thread.attachments} description={thread.description} />
         <ThreadPoll poll={thread.poll} />
       </div>
 

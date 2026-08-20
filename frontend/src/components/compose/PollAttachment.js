@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
 
 config.autoAddCss = false;
 
@@ -88,9 +88,7 @@ export default function PollAttachment({ onClose, onChange, initialPoll = null }
   }
 
   function removeOption(index) {
-    setOptions((prev) =>
-      prev.length > MIN_OPTIONS ? prev.filter((_, i) => i !== index) : prev,
-    );
+    setOptions((prev) => prev.filter((_, i) => i !== index));
   }
 
   return (
@@ -121,20 +119,26 @@ export default function PollAttachment({ onClose, onChange, initialPoll = null }
         <span className="font-[family-name:var(--font-manrope)] text-[13px] font-medium text-[#595959]">
           Колку долго ќе трае анкетата?
         </span>
-        <select
-          value={durationDays}
-          onChange={(event) => setDurationDays(Number(event.target.value))}
-          className={`${INPUT_CLASS} cursor-pointer bg-white`}
-        >
-          {DURATION_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            value={durationDays}
+            onChange={(event) => setDurationDays(Number(event.target.value))}
+            className={`${INPUT_CLASS} cursor-pointer appearance-none bg-white pr-10`}
+          >
+            {DURATION_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <FontAwesomeIcon
+            icon={faChevronDown}
+            className="pointer-events-none absolute top-1/2 right-1 h-4 w-4 -translate-y-1/2 text-[#595959]"
+          />
+        </div>
       </label>
 
-      <div className="mt-2 flex flex-col gap-3">
+      <div className="flex flex-col gap-3 border-t border-[#CCCCCC] pt-5">
         {options.map((option, index) => (
           <div key={option.id ?? `new-${index}`} className="flex min-w-0 items-center gap-2">
             <input
@@ -144,7 +148,7 @@ export default function PollAttachment({ onClose, onChange, initialPoll = null }
               placeholder={`Опција ${index + 1}`}
               className={INPUT_CLASS}
             />
-            {options.length > MIN_OPTIONS && (
+            {index >= MIN_OPTIONS && (
               <button
                 type="button"
                 aria-label={`Отстрани ја опцијата ${index + 1}`}

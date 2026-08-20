@@ -12,7 +12,7 @@ import ThreadAttachments from "@/components/thread/ThreadAttachments";
 import ThreadPoll from "@/components/thread/ThreadPoll";
 import ThreadStatButtons from "@/components/thread/ThreadStatButtons";
 import ThreadViewCount from "@/components/thread/ThreadViewCount";
-import { stripHtml } from "@/lib/html";
+import { linkUrls, stripHtml } from "@/lib/html";
 import { userFacingError } from "@/lib/api";
 
 const EditThreadDialog = dynamic(
@@ -34,9 +34,10 @@ export default function ProfileThreadItem({
   const [actionError, setActionError] = useState("");
 
   const href = `/p/${thread.forum.slug}/${thread.id}`;
-  const hasAttachments = (thread.attachments?.length ?? 0) > 0;
+  const showsAttachments =
+    (thread.attachments?.length ?? 0) > 0 || linkUrls(thread.description).length > 0;
   const hasPoll = Boolean(thread.poll);
-  const hasExtras = hasAttachments || hasPoll;
+  const hasExtras = showsAttachments || hasPoll;
 
   async function handleSave({ title, content, files, link, removeAttachmentIds }) {
     const updated = await updateThread(thread.id, {
@@ -115,8 +116,8 @@ export default function ProfileThreadItem({
           className="relative z-10 flex w-full flex-col gap-4"
           onClick={(event) => event.stopPropagation()}
         >
-          {hasAttachments ? (
-            <ThreadAttachments attachments={thread.attachments} />
+          {showsAttachments ? (
+            <ThreadAttachments attachments={thread.attachments} description={thread.description} />
           ) : null}
           {hasPoll ? <ThreadPoll poll={thread.poll} /> : null}
         </div>

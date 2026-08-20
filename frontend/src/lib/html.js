@@ -62,6 +62,14 @@ export function sanitizeHtml(html) {
   });
 }
 
+/** Links written inside the description, without duplicates. */
+export function linkUrls(html) {
+  const links = sanitizeHtml(html).matchAll(/<a [^>]*href="([^"]*)"/gi);
+  const hrefs = [...links].map((link) => link[1].replaceAll("&amp;", "&"));
+
+  return [...new Set(hrefs)];
+}
+
 export function renderHtmlProps(html) {
   return { dangerouslySetInnerHTML: { __html: sanitizeHtml(html) } };
 }

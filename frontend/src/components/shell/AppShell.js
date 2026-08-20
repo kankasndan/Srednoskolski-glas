@@ -33,9 +33,14 @@ export default function AppShell({ children, contentClassName = "" }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    sidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+    if (pathname === "/new") {
+      sidebarCollapsed = true;
+      localStorage.setItem("sidebarCollapsed", "true");
+    } else {
+      sidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+    }
     setCollapsed(sidebarCollapsed);
-  }, []);
+  }, [pathname]);
 
   function toggleCollapsed() {
     sidebarCollapsed = !collapsed;
@@ -56,7 +61,7 @@ export default function AppShell({ children, contentClassName = "" }) {
   }
 
   return (
-    <div className="fixed inset-0 flex flex-col overflow-hidden bg-white">
+    <div className="fixed inset-0 flex flex-col overflow-clip bg-white">
       <Header
         onMenuToggle={() => setMobileMenuOpen((open) => !open)}
         menuOpen={mobileMenuOpen}

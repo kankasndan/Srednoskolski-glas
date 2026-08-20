@@ -10,7 +10,7 @@ import ThreadMetaTags, { buildThreadMetaTags } from "@/components/thread/ThreadM
 import ThreadPoll from "@/components/thread/ThreadPoll";
 import ThreadViewCount from "@/components/thread/ThreadViewCount";
 import { formatCount } from "@/lib/formatCount";
-import { stripHtml } from "@/lib/html";
+import { linkUrls, stripHtml } from "@/lib/html";
 import { formatEditedOrPostedAgo } from "@/lib/time";
 import { nextVoteState } from "@/lib/votes";
 
@@ -61,7 +61,8 @@ export default function ThreadCard({ thread, highlight = null, mobileTag = "foru
   const [opening, setOpening] = useState(false);
   const router = useRouter();
   const threadHref = `/p/${thread.forum.slug}/${thread.id}`;
-  const hasAttachments = (thread.attachments?.length ?? 0) > 0;
+  const showsAttachments =
+    (thread.attachments?.length ?? 0) > 0 || linkUrls(thread.description).length > 0;
   const hasPoll = Boolean(thread.poll);
 
   async function upvote() {
@@ -139,13 +140,13 @@ export default function ThreadCard({ thread, highlight = null, mobileTag = "foru
         </div>
       </div>
 
-      {hasAttachments || hasPoll ? (
+      {showsAttachments || hasPoll ? (
         <div
           className="relative z-10 flex w-full flex-col gap-4"
           onClick={(event) => event.stopPropagation()}
         >
-          {hasAttachments ? (
-            <ThreadAttachments attachments={thread.attachments} />
+          {showsAttachments ? (
+            <ThreadAttachments attachments={thread.attachments} description={thread.description} />
           ) : null}
           {hasPoll ? <ThreadPoll poll={thread.poll} /> : null}
         </div>

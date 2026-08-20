@@ -63,15 +63,14 @@ const TOOLBAR_BUTTONS = [
     label: "Наводници",
     icon: faQuoteLeft,
     onClick: (editor) => {
-      const { from, to, empty } = editor.state.selection;
+      const { from, to } = editor.state.selection;
+      const selected = editor.state.doc.textBetween(from, to, " ");
 
-      if (empty) {
-        editor.chain().focus().insertContent("„“").run();
+      editor.chain().focus().insertContent(`„${selected}“`).run();
+
+      if (!selected) {
         editor.commands.setTextSelection(editor.state.selection.from - 1);
-        return;
       }
-
-      editor.chain().focus().insertContentAt(to, "“").insertContentAt(from, "„").run();
     },
   },
 ];
@@ -82,6 +81,7 @@ function ToolbarButton({ editor, button, active, onClick }) {
       type="button"
       aria-label={button.label}
       aria-pressed={active}
+      onMouseDown={(event) => event.preventDefault()}
       onClick={() => (onClick ?? button.onClick)(editor)}
       className={`flex size-6 cursor-pointer items-center justify-center rounded-md text-[16px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] lg:size-9 lg:rounded-lg ${
         active
@@ -174,7 +174,7 @@ function LinkPopover({ initialText, initialUrl, onSubmit, onClose }) {
   return (
     <div
       ref={popoverRef}
-      className="absolute bottom-full left-0 z-20 mb-2 flex w-64 flex-col gap-2 rounded-xl border border-[#CCCCCC] bg-white p-2 shadow-lg"
+      className="absolute bottom-full left-4 right-4 z-20 mb-2 flex flex-col gap-2 rounded-xl border border-[#CCCCCC] bg-white p-2 shadow-lg lg:right-auto lg:w-64"
     >
       <input
         autoFocus
@@ -206,6 +206,10 @@ function LinkPopover({ initialText, initialUrl, onSubmit, onClose }) {
   );
 }
 
+function showsPlaceholder(editor) {
+  return editor.isEmpty && !editor.isActive("bulletList") && !editor.isActive("orderedList");
+}
+
 export default function RichTextEditor({
   name = "content",
   placeholder = "Напиши сè што сакаш да кажеш...",
@@ -219,14 +223,14 @@ export default function RichTextEditor({
   action,
 }) {
   const [html, setHtml] = useState(initialContent);
-  const [isEmpty, setIsEmpty] = useState(!initialContent);
+  const [showPlaceholder, setShowPlaceholder] = useState(!initialContent);
   const [characterCount, setCharacterCount] = useState(0);
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
 
   function syncEditorState(editor) {
     const nextHtml = editor.getHTML();
     setHtml(nextHtml);
-    setIsEmpty(editor.isEmpty);
+    setShowPlaceholder(showsPlaceholder(editor));
     setCharacterCount(editor.state.doc.textContent.length);
     onContentChange?.(nextHtml, editor.isEmpty);
   }
@@ -239,12 +243,12 @@ export default function RichTextEditor({
         horizontalRule: false,
         link: false,
       }),
-      Link.configure({
+      Link.extend({ inclusive: () => false }).configure({
         openOnClick: false,
         autolink: true,
         defaultProtocol: "https",
         HTMLAttributes: {
-          class: "cursor-pointer text-[#A6E4ED] underline underline-offset-2",
+          class: "cursor-pointer text-[#582FF5] underline underline-offset-2",
           rel: "noopener noreferrer",
           target: "_blank",
         },
@@ -297,7 +301,7 @@ export default function RichTextEditor({
       syncEditorState(editor);
     },
     onSelectionUpdate: ({ editor }) => {
-      setIsEmpty(editor.isEmpty);
+      setShowPlaceholder(showsPlaceholder(editor));
     },
     onBlur: ({ editor }) => {
       onBlur?.(editor.getHTML(), editor.isEmpty);
@@ -330,7 +334,7 @@ export default function RichTextEditor({
         }`}
       >
         <div className="relative h-[263px] min-h-[263px] lg:h-auto lg:min-h-[195px]">
-          {isEmpty && (
+          {showPlaceholder && (
             <span className="pointer-events-none absolute left-4 top-4 font-[family-name:var(--font-manrope)] text-[14px] leading-6 text-[#595959]">
               {placeholder}
             </span>
@@ -347,32 +351,19 @@ export default function RichTextEditor({
           </span>
         </div>
 
-        <div className="flex h-16 min-h-16 items-center justify-between gap-4 border-t border-[#CCCCCC] px-4 py-2 lg:h-auto lg:flex-wrap lg:gap-3 lg:border-[#D9D9D9] lg:px-4 lg:py-3">
+        <div className="relative flex h-16 min-h-16 items-center justify-between gap-4 border-t border-[#CCCCCC] px-4 py-2 lg:h-auto lg:flex-wrap lg:gap-3 lg:border-[#D9D9D9] lg:px-4 lg:py-3">
           <div className="flex min-w-0 flex-nowrap items-center gap-4 lg:flex-wrap lg:gap-1.5">
             {editor &&
               TOOLBAR_BUTTONS.map((button) => {
                 if (button.key === "link") {
                   return (
-                    <div key={button.key} className="relative">
-                      <ToolbarButton
-                        editor={editor}
-                        button={button}
-                        active={activeStates?.link ?? false}
-                        onClick={() => {
-                          setLinkPopoverOpen((prev) => !prev);
-                        }}
-                      />
-                      {linkPopoverOpen && (
-                        <LinkPopover
-                          {...getCurrentLinkInfo(editor)}
-                          onSubmit={(text, url) => {
-                            applyLink(editor, text, url);
-                            setLinkPopoverOpen(false);
-                          }}
-                          onClose={() => setLinkPopoverOpen(false)}
-                        />
-                      )}
-                    </div>
+                    <ToolbarButton
+                      key={button.key}
+                      editor={editor}
+                      button={button}
+                      active={activeStates?.link ?? false}
+                      onClick={() => setLinkPopoverOpen((prev) => !prev)}
+                    />
                   );
                 }
 
@@ -386,6 +377,16 @@ export default function RichTextEditor({
                 );
               })}
           </div>
+          {editor && linkPopoverOpen && (
+            <LinkPopover
+              {...getCurrentLinkInfo(editor)}
+              onSubmit={(text, url) => {
+                applyLink(editor, text, url);
+                setLinkPopoverOpen(false);
+              }}
+              onClose={() => setLinkPopoverOpen(false)}
+            />
+          )}
           <div className="flex shrink-0 items-center gap-3 sm:gap-4">
             <span
               className={`hidden font-[family-name:var(--font-manrope)] text-[12px] leading-none lg:inline ${counterTextColor}`}

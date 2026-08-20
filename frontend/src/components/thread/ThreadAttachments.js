@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight, faLink } from "@fortawesome/free-solid-svg-icons";
 import ImageLightbox from "@/components/thread/ImageLightbox";
 import { parseEmbed as parseEmbedPaste, toEmbedUrl } from "@/lib/embeds";
+import { linkUrls } from "@/lib/html";
 import { safeExternalUrl } from "@/lib/paths";
 
 config.autoAddCss = false;
@@ -206,12 +207,13 @@ function LinkDisplay({ url: rawUrl }) {
  *
  * Images and videos share one carousel, preserving create order.
  */
-export default function ThreadAttachments({ attachments = [] }) {
-  if (!attachments.length) return null;
-
+export default function ThreadAttachments({ attachments = [], description = "" }) {
   const media = attachments.filter((a) => a.type === "image" || a.type === "video");
   const files = attachments.filter((a) => a.type === "file");
-  const links = attachments.filter((a) => a.type === "link");
+  const attached = attachments.filter((a) => a.type === "link").map((a) => a.url);
+  const links = [...new Set([...attached, ...linkUrls(description)])];
+
+  if (!media.length && !files.length && !links.length) return null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -219,8 +221,8 @@ export default function ThreadAttachments({ attachments = [] }) {
       {files.map((file) => (
         <FileCard key={file.url} url={file.url} />
       ))}
-      {links.map((link) => (
-        <LinkDisplay key={link.url} url={link.url} />
+      {links.map((url) => (
+        <LinkDisplay key={url} url={url} />
       ))}
     </div>
   );
