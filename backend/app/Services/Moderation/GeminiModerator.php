@@ -215,35 +215,51 @@ class GeminiModerator implements ContentModerator
      */
     private function generate(array $parts, int $timeout): array
     {
-        $response = $this->request($timeout)
-            ->retry(2, 250, function (Throwable $exception): bool {
-                if ($exception instanceof ConnectionException) {
-                    return true;
-                }
+        $payload = [
+            'systemInstruction' => [
+                'parts' => [['text' => self::POLICY]],
+            ],
+            'contents' => [[
+                'role' => 'user',
+                'parts' => $parts,
+            ]],
+            'generationConfig' => [
+                // A moderation gate that answers differently on identical input is
+                // a support problem, so leave no room for sampling.
+                'temperature' => 0,
+                'responseMimeType' => 'application/json',
+                'responseSchema' => self::RESPONSE_SCHEMA,
+            ],
+            // Without this the configurable filters refuse to classify borderline
+            // files at all, which would reach us as a failure instead of a verdict
+            // and make explicit content indistinguishable from prohibited content.
+            'safetySettings' => $this->safetySettings(),
+        ];
 
-                return $exception instanceof RequestException
-                    && $exception->response->serverError();
-            }, throw: false)
-            ->post($this->modelUrl(), [
-                'systemInstruction' => [
-                    'parts' => [['text' => self::POLICY]],
-                ],
-                'contents' => [[
-                    'role' => 'user',
-                    'parts' => $parts,
-                ]],
-                'generationConfig' => [
-                    // A moderation gate that answers differently on identical input is
-                    // a support problem, so leave no room for sampling.
-                    'temperature' => 0,
-                    'responseMimeType' => 'application/json',
-                    'responseSchema' => self::RESPONSE_SCHEMA,
-                ],
-                // Without this the configurable filters refuse to classify borderline
-                // files at all, which would reach us as a failure instead of a verdict
-                // and make explicit content indistinguishable from prohibited content.
-                'safetySettings' => $this->safetySettings(),
-            ]);
+        $response = null;
+
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            $response = $this->request($timeout)
+                ->retry(2, 250, function (Throwable $exception): bool {
+                    if ($exception instanceof ConnectionException) {
+                        return true;
+                    }
+
+                    return $exception instanceof RequestException
+                        && $exception->response->serverError();
+                }, throw: false)
+                ->post($this->modelUrl(), $payload);
+
+            // throw: false means 503 is a returned response, not an exception,
+            // so Laravel's retry() never sees it. Wait and try again.
+            if ($response->status() !== 503) {
+                break;
+            }
+
+            if ($attempt < 2 && ! app()->runningUnitTests()) {
+                sleep($attempt + 1);
+            }
+        }
 
         if ($response->failed()) {
             throw new RuntimeException('Gemini moderation request failed: '.$response->body());
