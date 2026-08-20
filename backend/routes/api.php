@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\MeController;
+use App\Http\Controllers\Auth\OnboardingAvatarController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CommentController;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\Route;
 
 // Save onboarding profile (and auto-follow the student's school forum).
 Route::middleware(['auth:sanctum', 'not_banned', 'throttle:api-writes'])->put('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
+Route::middleware(['auth:sanctum', 'not_banned', 'onboarding', 'throttle:media-upload'])->post('/onboarding/avatar', [OnboardingAvatarController::class, 'store'])->name('onboarding.avatar');
 // Return the current authenticated user.
 Route::middleware('auth:sanctum')->get('/me', MeController::class)->name('me.show');
 Route::middleware(['auth:sanctum', 'not_banned', 'onboarding', 'throttle:api-writes'])->put('/me', [ProfileController::class, 'update'])->name('me.update');

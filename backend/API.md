@@ -890,6 +890,29 @@ PUT /api/onboarding
 
 `user` is the same full model shape as `/api/me`.
 
+```
+POST /api/onboarding/avatar
+```
+
+**Auth required. Onboarding must already be complete** (step 1). `multipart/form-data` (not JSON).
+
+Sends the uploaded photo to Gemini, stores only the generated image, and sets `users.imageUrl`. The original photo is not kept.
+
+| Field | Type | Rules |
+|-------|------|--------|
+| `file` | file | required; jpeg/png/webp; same size cap as other images |
+
+**Success (`201`)**
+
+```json
+{
+  "url": "https://ik.imagekit.io/…/avatar.png",
+  "user": { }
+}
+```
+
+The generation prompt lives in `config/avatars.php` under `generation.prompt`.
+
 ---
 
 ## Cities & schools (onboarding dropdown)
@@ -1510,6 +1533,7 @@ DELETE /api/media
 | `DELETE` | `/api/u/{username}/follow` | yes | Unfollow user |
 | `POST` | `/api/logout` | yes | End session |
 | `PUT` | `/api/onboarding` | yes | Save profile |
+| `POST` | `/api/onboarding/avatar` | yes | Generate and save onboarding avatar |
 | `GET` | `/api/cities` | — | Cities + schools |
 | `GET` | `/api/forums` | — | Sidebar forums |
 | `GET` | `/api/feed` | optional | Paginated personalized / site-wide feed (5/page) |
