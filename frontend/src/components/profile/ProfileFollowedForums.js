@@ -25,7 +25,7 @@ function FollowCard({ forum, canUnfollow, onUnfollowed }) {
   }
 
   return (
-    <article className="relative flex flex-col gap-4 rounded-3xl border border-[#CFE9ED] px-2 py-6 transition-colors active:bg-gray-50 hover:bg-gray-50 md:flex-row md:items-center md:justify-between md:gap-6 md:rounded-2xl md:p-6">
+    <article className="relative flex flex-col gap-4 rounded-3xl border border-[#CFE9ED] px-4 py-6 transition-colors active:bg-gray-50 hover:bg-gray-50 md:flex-row md:items-center md:justify-between md:gap-6 md:rounded-2xl md:p-6">
       <Link
         href={`/p/${forum.slug}`}
         aria-label={forum.name}
