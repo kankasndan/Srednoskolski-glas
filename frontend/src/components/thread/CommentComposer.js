@@ -2,12 +2,19 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { config } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { createComment } from "@/api/comments";
+import GifPicker from "@/components/thread/GifPicker";
 import MentionTextarea from "@/components/thread/MentionTextarea";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { useProfile } from "@/hooks/useProfile";
 import { userFacingError } from "@/lib/api";
 import { canCreateComments, needsOnboarding } from "@/lib/capabilities";
+
+config.autoAddCss = false;
 
 const MAX_COMMENT_LENGTH = 1000;
 
@@ -40,9 +47,11 @@ export default function CommentComposer({
 }) {
   const { user, loading: profileLoading } = useProfile();
   const [comment, setComment] = useState("");
+  const [gif, setGif] = useState(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const isEmpty = comment.trim() === "";
+  const isEmpty = comment.trim() === "" && gif === null;
   const allowed = canCreateComments(user);
 
   async function handleSubmit(event) {
@@ -56,9 +65,11 @@ export default function CommentComposer({
       const created = await createComment(threadId, {
         content: comment.trim(),
         parentId,
+        gifUrl: gif?.url,
       });
 
       setComment("");
+      setGif(null);
       onCreated?.(created);
       onClose?.();
     } catch (err) {
@@ -157,6 +168,30 @@ export default function CommentComposer({
         }`}
       />
 
+      {pickerOpen ? (
+        <GifPicker
+          onSelect={(picked) => {
+            setGif(picked);
+            setPickerOpen(false);
+          }}
+          onClose={() => setPickerOpen(false)}
+        />
+      ) : null}
+
+      {gif ? (
+        <div className="relative w-fit">
+          <img src={gif.url} alt={gif.title} className="max-w-40 rounded-xl" />
+          <button
+            type="button"
+            aria-label="Отстрани го GIF-от"
+            onClick={() => setGif(null)}
+            className="absolute right-2 top-2 flex size-8 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+          >
+            <FontAwesomeIcon icon={faXmark} className="h-4 w-4" />
+          </button>
+        </div>
+      ) : null}
+
       {error ? (
         <p className="text-[13px] text-[#DC2626]">{error}</p>
       ) : null}
@@ -164,7 +199,7 @@ export default function CommentComposer({
       <div
         className={`flex gap-4 ${
           compact
-            ? "items-center justify-end"
+            ? "flex-wrap items-center justify-end"
             : "flex-col items-start justify-between sm:flex-row sm:items-center"
         }`}
       >
@@ -186,15 +221,33 @@ export default function CommentComposer({
           </Link>
         )}
 
-        <PrimaryButton
-          type="submit"
-          disabled={isEmpty || busy}
-          className={`flex shrink-0 items-center justify-center gap-4 whitespace-nowrap leading-none disabled:bg-[#CCCCCC] ${
-            compact ? "h-9 px-5 text-[12px]" : "h-10 w-full px-4 text-[14px] sm:w-36"
-          }`}
-        >
-          {busy ? "…" : "Објави"}
-        </PrimaryButton>
+        <div className={`flex items-center gap-3 ${compact ? "" : "w-full sm:w-auto"}`}>
+          <button
+            type="button"
+            aria-pressed={pickerOpen}
+            onClick={() => setPickerOpen((open) => !open)}
+            disabled={busy}
+            className={`flex shrink-0 cursor-pointer items-center rounded-xl border font-[family-name:var(--font-manrope)] leading-5 transition-colors disabled:opacity-50 ${
+              compact ? "h-9 px-3 text-[12px]" : "h-10 px-4 text-[14px]"
+            } ${
+              pickerOpen
+                ? "border-[#582FF5] bg-[#CFE9ED] text-black"
+                : "border-[#CCCCCC] bg-white text-[#595959] hover:bg-[#DCEBED] hover:text-black"
+            }`}
+          >
+            GIF
+          </button>
+
+          <PrimaryButton
+            type="submit"
+            disabled={isEmpty || busy}
+            className={`flex shrink-0 items-center justify-center gap-4 whitespace-nowrap leading-none disabled:bg-[#CCCCCC] ${
+              compact ? "h-9 px-5 text-[12px]" : "h-10 flex-1 px-4 text-[14px] sm:w-36 sm:flex-none"
+            }`}
+          >
+            {busy ? "…" : "Објави"}
+          </PrimaryButton>
+        </div>
       </div>
     </form>
   );

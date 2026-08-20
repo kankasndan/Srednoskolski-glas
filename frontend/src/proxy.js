@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 
 const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+// Giphy: the search endpoint is called from the browser, the GIFs come off its CDN.
+const GIPHY_API = "https://api.giphy.com";
+const GIPHY_MEDIA = "https://*.giphy.com";
+
 /**
  * Content-Security-Policy.
  *
@@ -16,7 +20,7 @@ function contentSecurityPolicy(nonce, isDev) {
     ? "'self' 'unsafe-inline' 'unsafe-eval'"
     : `'self' 'nonce-${nonce}' 'strict-dynamic'`;
 
-  const connectSrc = ["'self'", API_ORIGIN, isDev ? "ws: http://localhost:*" : ""]
+  const connectSrc = ["'self'", API_ORIGIN, GIPHY_API, isDev ? "ws: http://localhost:*" : ""]
     .filter(Boolean)
     .join(" ");
 
@@ -25,7 +29,7 @@ function contentSecurityPolicy(nonce, isDev) {
     `script-src ${scriptSrc}`,
     // Tailwind and next/font emit inline <style> blocks that carry no nonce.
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://ik.imagekit.io",
+    `img-src 'self' data: blob: https://ik.imagekit.io ${GIPHY_MEDIA}`,
     "media-src 'self' blob: https://ik.imagekit.io",
     "font-src 'self' data:",
     `connect-src ${connectSrc}`,

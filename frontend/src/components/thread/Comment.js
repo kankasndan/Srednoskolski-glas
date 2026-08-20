@@ -263,7 +263,12 @@ export default function Comment({
               Коментарот е избришан.
             </p>
           ) : (
-            <CommentBody text={content} mentions={mentions} muted={depth === 0} />
+            <>
+              <CommentBody text={content} mentions={mentions} muted={depth === 0} />
+              {comment.gif_url ? (
+                <img src={comment.gif_url} alt="GIF" className="max-w-60 rounded-xl" />
+              ) : null}
+            </>
           )}
           <CommentActions
             commentId={comment.id}

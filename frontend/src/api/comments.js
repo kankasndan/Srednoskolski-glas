@@ -43,6 +43,7 @@ export async function createComment(threadId, payload) {
     body: JSON.stringify({
       content: payload.content,
       parent_id: payload.parentId ?? null,
+      gif_url: payload.gifUrl ?? null,
     }),
   });
 
