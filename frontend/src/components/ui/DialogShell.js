@@ -11,6 +11,7 @@ export default function DialogShell({
   onClose,
   widthClassName = "max-w-md",
   fullScreenOnMobile = false,
+  autoHeight = false,
   children,
 }) {
   useModalDismiss(open, onClose);
@@ -38,7 +39,9 @@ export default function DialogShell({
           className={`relative flex w-full flex-col items-center overflow-hidden bg-white shadow-[0_12px_24px_rgba(0,0,0,0.12)] ${
             fullScreenOnMobile
               ? "gap-6 rounded-none px-6 pb-10 md:gap-8 md:rounded-xl md:p-10"
-              : "gap-8 rounded-xl p-10"
+              : `gap-8 rounded-xl p-10 ${
+                  autoHeight ? "" : "h-[182px] justify-center"
+                }`
           } ${widthClassName}`}
         >
           {/* Sharata e vekje pecatena siva vo samiot PNG, bez CSS filter. */}
@@ -56,11 +59,11 @@ export default function DialogShell({
             <button
               type="button"
               onClick={onClose}
-              className="relative flex w-full shrink-0 cursor-pointer items-end pb-3 pt-12 md:hidden"
+              className="group relative flex w-full shrink-0 cursor-pointer items-end pb-3 pt-12 md:hidden"
             >
               <span className="flex h-8 items-center gap-2">
                 <ChevronLeftIcon />
-                <span className="font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[#595959]">
+                <span className="font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[#595959] transition-colors group-active:text-black">
                   Назад
                 </span>
               </span>
@@ -71,7 +74,7 @@ export default function DialogShell({
             type="button"
             aria-label="Затвори"
             onClick={onClose}
-            className={`absolute right-8 top-4 cursor-pointer p-2 text-[#595959] ${
+            className={`absolute right-8 top-4 cursor-pointer p-2 text-[#595959] transition-colors hover:text-black active:text-black ${
               fullScreenOnMobile ? "hidden md:block" : ""
             }`}
           >

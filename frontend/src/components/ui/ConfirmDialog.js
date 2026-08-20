@@ -20,7 +20,7 @@ export default function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="h-10 w-36 cursor-pointer rounded-xl border border-[var(--color-primary-200)] bg-white font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#F1EEFE]"
+            className="h-10 w-36 cursor-pointer rounded-xl border border-[var(--color-primary-200)] bg-white font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors hover:bg-[#F1EEFE] active:bg-[var(--color-primary-200)] active:text-white md:active:bg-[#F1EEFE] md:active:text-black"
           >
             {cancelLabel}
           </button>

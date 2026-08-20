@@ -29,20 +29,25 @@ function UserCard({ user, onUnfollowed }) {
   }
 
   return (
-    <article className="relative flex items-center justify-between gap-6 rounded-2xl border border-[#CFE9ED] p-6 transition-colors hover:bg-gray-50">
+    <article className="relative flex flex-col gap-4 rounded-3xl border border-[#CFE9ED] px-3 py-6 transition-colors active:bg-gray-50 hover:bg-gray-50 md:flex-row md:items-center md:justify-between md:gap-6 md:rounded-2xl md:p-6">
       {href ? (
-        <Link href={href} aria-label={user.username} className="absolute inset-0 rounded-2xl" />
+        <Link
+          href={href}
+          aria-label={user.username}
+          className="absolute inset-0 rounded-3xl md:rounded-2xl"
+        />
       ) : null}
 
-      <div className="flex min-w-0 items-center gap-5">
-        <span className="relative size-16 shrink-0 overflow-hidden rounded-full">
+      {/* Na telefon avatarot stoi vo red so imeto, a uchilishteto pagja pod niv. */}
+      <div className="grid min-w-0 grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2 md:flex md:items-center md:gap-5">
+        <span className="relative size-10 shrink-0 overflow-hidden rounded-full md:size-16">
           {/^https?:\/\//i.test(user.imageUrl || "") ? (
             <img
               src={user.imageUrl}
               alt=""
               width={64}
               height={64}
-              className="size-16 object-cover"
+              className="size-10 object-cover md:size-16"
             />
           ) : (
             <Image
@@ -50,17 +55,17 @@ function UserCard({ user, onUnfollowed }) {
               alt=""
               width={64}
               height={64}
-              className="size-16 object-cover"
+              className="size-10 object-cover md:size-16"
             />
           )}
         </span>
 
-        <div className="flex min-w-0 flex-col gap-2">
-          <h3 className="font-(family-name:--font-oswald) text-[14px] font-bold uppercase leading-none text-(--color-grays-900)">
+        <div className="contents md:flex md:min-w-0 md:flex-col md:gap-2">
+          <h3 className="truncate font-(family-name:--font-oswald) text-[14px] font-bold uppercase leading-none text-(--color-grays-900)">
             {user.username}
           </h3>
           {schoolLabel ? (
-            <p className="truncate font-(family-name:--font-manrope) text-[16px] leading-none text-(--color-grays-700)">
+            <p className="col-span-2 truncate font-(family-name:--font-manrope) text-[14px] leading-none text-(--color-grays-700) md:col-span-1 md:text-[16px]">
               {schoolLabel}
             </p>
           ) : null}
@@ -71,7 +76,7 @@ function UserCard({ user, onUnfollowed }) {
         type="button"
         disabled={busy}
         onClick={handleUnfollow}
-        className="relative z-10 flex h-10 w-36 shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-(--color-primary-200) px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-grays-100) transition-colors hover:bg-[#3300F5] disabled:opacity-60"
+        className="relative z-10 flex h-10 w-36 shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-(--color-primary-200) px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-(--color-grays-100) transition-colors active:bg-[#3300F5] hover:bg-[#3300F5] disabled:opacity-60"
       >
         {busy ? "…" : "Отследи"}
       </button>

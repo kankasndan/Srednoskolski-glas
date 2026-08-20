@@ -26,7 +26,7 @@ export default function StartDiscussionButton({
     return (
       <Link
         href="/new"
-        className={`flex h-10 w-full max-w-[268px] shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#582FF5] px-4 py-2 text-white transition-colors hover:bg-[#3300F5] ${className}`}
+        className={`flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#582FF5] px-4 py-2 text-white transition-colors hover:bg-[#3300F5] active:bg-[#3300F5] ${className}`}
       >
         <Image src="/plus.svg" alt="" width={24} height={24} className="size-6" />
         <span className="flex h-[19px] items-center whitespace-nowrap leading-none">

@@ -5,6 +5,7 @@ export default function InfoDialog({
   open,
   title,
   message,
+  note,
   messageWidthClassName = "max-w-[330px]",
   onClose,
 }) {
@@ -19,6 +20,11 @@ export default function InfoDialog({
             className={`font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-snug text-black ${messageWidthClassName}`}
           >
             {message}
+          </p>
+        )}
+        {note && (
+          <p className="max-w-[304px] font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-snug text-[#595959]">
+            {note}
           </p>
         )}
       </div>

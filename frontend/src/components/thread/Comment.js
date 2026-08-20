@@ -12,10 +12,37 @@ import { reportComment, reportErrorMessage } from "@/api/moderation";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ReportDialog from "@/components/ui/ReportDialog";
+import { useCommentShift } from "@/hooks/useCommentShift";
 import { useHashTarget } from "@/hooks/useHashTarget";
 import { useProfile } from "@/hooks/useProfile";
 import { userFacingError } from "@/lib/api";
 import { formatEditedOrPostedAgo } from "@/lib/time";
+
+// Tailwind gi chita klasite staticki, pa sekoja varijanta e cela niza.
+// "phone" vazhi samo pod md, "tablet" pod lg, "all" na sekoj ekran.
+const REPLIES = {
+  nested: "col-start-2",
+  phone: "col-start-1 col-end-3 md:col-start-2",
+  tablet: "col-start-1 col-end-3 lg:col-start-2",
+  all: "col-start-1 col-end-3",
+};
+
+// Povlecheniot komentar ne ja crta linijata — ja ima veke od najgorniot vo
+// kolonata — a prstenot vo bojata na karticata mu pravi mesto na avatarot.
+const PULLED = {
+  phone: {
+    line: "max-md:hidden",
+    avatar: "max-md:rounded-full max-md:ring-4 max-md:ring-white max-md:group-hover:ring-gray-50",
+  },
+  tablet: {
+    line: "max-lg:hidden",
+    avatar: "max-lg:rounded-full max-lg:ring-4 max-lg:ring-white max-lg:group-hover:ring-gray-50",
+  },
+  all: {
+    line: "hidden",
+    avatar: "rounded-full ring-4 ring-white group-hover:ring-gray-50",
+  },
+};
 
 export default function Comment({
   comment,
@@ -58,6 +85,11 @@ export default function Comment({
   const hasReplies = repliesCount > 0;
   const showThread = expanded && (replies.length > 0 || loadingReplies);
   const showLine = hasReplies || depth > 0 || showThread;
+  // Nivoata shto ispadnale od prozorecot ja delat kolonata so roditelot —
+  // komentarot si ostanuva, samo veke ne se vleche nadesno. Linijata na
+  // kolonata ja crta najgorniot, pa povlechenite ne ja povtoruvaat.
+  const { merged, pulled } = useCommentShift(depth, showThread);
+  const pulledStyle = pulled ? PULLED[pulled] : null;
   // Na anonimna diskusija avtorot e skrien, pa nejziniot sopstvenik gi
   // prepoznava svoite komentari preku is_owner na samata diskusija.
   const isOwn = comment.author
@@ -197,15 +229,27 @@ export default function Comment({
   }
 
   return (
-    <div id={elementId} ref={containerRef} className="flex min-w-0 gap-2 scroll-mt-24">
-      <div className="flex shrink-0 flex-col items-center">
-        <Avatar src={comment.author?.imageUrl} size="md" />
+    <div
+      id={elementId}
+      ref={containerRef}
+      className="grid min-w-0 scroll-mt-24 grid-cols-[auto_minmax(0,1fr)] gap-x-2"
+    >
+      {/* Avatarot ja drzhi prvata kolona, pa vlekata na odgovorite doagja od
+          samata reshetka — povlechenite prosto sedat vo dvete koloni. */}
+      <div className="col-start-1 row-start-1 row-end-3 flex flex-col items-center">
+        <div className={pulledStyle?.avatar ?? ""}>
+          <Avatar src={comment.author?.imageUrl} size="md" />
+        </div>
         {showLine ? (
-          <div className="mt-1 w-0.5 flex-1 rounded-xs bg-[#CFE9ED]" />
+          <div
+            className={`mt-1 w-0.5 flex-1 rounded-xs bg-[#CFE9ED] ${
+              pulledStyle?.line ?? ""
+            }`}
+          />
         ) : null}
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-3">
+      <div className="col-start-2 row-start-1 flex min-w-0 flex-col gap-3">
         {/* Osvetluvanjeto go fakja samo ovoj komentar — odgovorite se nadvor od
             ovoj blok. Negativnata margina go ponishtuva paddingot, bez skok. */}
         <div
@@ -311,31 +355,35 @@ export default function Comment({
             onCreated={handleReplyCreated}
           />
         ) : null}
-
-        {showThread ? (
-          <div className="flex min-w-0 flex-col gap-4 pt-1">
-            {loadingReplies && replies.length === 0 ? (
-              <p className="text-[13px] text-[#999999]">Се вчитуваат одговорите…</p>
-            ) : (
-              replies.map((reply) => (
-                <Comment
-                  key={reply.id}
-                  comment={reply}
-                  threadId={threadId}
-                  isAnonymousThread={isAnonymousThread}
-                  isThreadOwner={isThreadOwner}
-                  onCommentCreated={onCommentCreated}
-                  onCommentDeleted={handleReplyDeleted}
-                  onCommentUpdated={patchReply}
-                  expandPath={childExpandPath}
-                  preloadedReplies={preloadedReplies}
-                  depth={depth + 1}
-                />
-              ))
-            )}
-          </div>
-        ) : null}
       </div>
+
+      {showThread ? (
+        <div
+          className={`row-start-2 flex min-w-0 flex-col gap-4 pt-4 ${
+            REPLIES[merged ?? "nested"]
+          }`}
+        >
+          {loadingReplies && replies.length === 0 ? (
+            <p className="text-[13px] text-[#999999]">Се вчитуваат одговорите…</p>
+          ) : (
+            replies.map((reply) => (
+              <Comment
+                key={reply.id}
+                comment={reply}
+                threadId={threadId}
+                isAnonymousThread={isAnonymousThread}
+                isThreadOwner={isThreadOwner}
+                onCommentCreated={onCommentCreated}
+                onCommentDeleted={handleReplyDeleted}
+                onCommentUpdated={patchReply}
+                expandPath={childExpandPath}
+                preloadedReplies={preloadedReplies}
+                depth={depth + 1}
+              />
+            ))
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

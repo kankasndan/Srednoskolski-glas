@@ -45,6 +45,7 @@ export default function EditCommentDialog({
       label="Уреди го коментарот"
       onClose={saving ? undefined : onClose}
       widthClassName="max-w-xl"
+      autoHeight
     >
       <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
         <h2 className="font-(family-name:--font-manrope) text-[18px] font-bold text-black">

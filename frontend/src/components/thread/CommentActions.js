@@ -120,29 +120,31 @@ export default function CommentActions({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={handleVote}
-          className={`flex h-6 w-[58px] cursor-pointer items-center justify-center gap-2 rounded-lg border px-4 py-2 font-[family-name:var(--font-manrope)] text-[12px] leading-none transition-colors disabled:opacity-70 ${
-            hasVoted
-              ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white"
-              : "border-[#CCCCCC] text-black opacity-80 hover:border-[var(--color-primary-100)]"
-          }`}
-        >
-          <Image
-            src="/Chevrons up.svg"
-            alt=""
-            width={16}
-            height={16}
-            className={`size-4 ${hasVoted ? "brightness-0 invert" : ""}`}
-          />
-          {votes}
-        </button>
+      {/* Vo najdlabokite odgovori nema mesto za se vo eden red, pa vremeto pagja
+          pod akciite — kopcheto i ikonite sekogash ostanuvaat zaedno. */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={handleVote}
+            className={`flex h-6 w-[58px] shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg border px-4 py-2 font-[family-name:var(--font-manrope)] text-[12px] leading-none transition-colors disabled:opacity-70 ${
+              hasVoted
+                ? "border-[var(--color-primary-100)] bg-[var(--color-primary-100)] text-white"
+                : "border-[#CCCCCC] text-black opacity-80 hover:border-[var(--color-primary-100)]"
+            }`}
+          >
+            <Image
+              src="/Chevrons up.svg"
+              alt=""
+              width={16}
+              height={16}
+              className={`size-4 ${hasVoted ? "brightness-0 invert" : ""}`}
+            />
+            {votes}
+          </button>
 
-        {/* 20px pomegju akciite: 8px gi pravi celite premnogu blisku (a11y). */}
-        <div className="flex items-center gap-5">
+          {/* 20px pomegju akciite: 8px gi pravi celite premnogu blisku (a11y). */}
           <div className="flex items-center gap-5">
             <IconButton
               icon="/comments icon/comment.svg"
@@ -173,13 +175,13 @@ export default function CommentActions({
               errorMessage="Линкот до коментарот не успеа да се копира."
             />
           </div>
-
-          {createdAtLabel ? (
-            <span className="font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-[18px] text-[#999999]">
-              {createdAtLabel}
-            </span>
-          ) : null}
         </div>
+
+        {createdAtLabel ? (
+          <span className="shrink-0 font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-[18px] text-[#999999]">
+            {createdAtLabel}
+          </span>
+        ) : null}
       </div>
 
       {repliesCount > 0 ? (

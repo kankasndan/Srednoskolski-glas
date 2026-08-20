@@ -216,149 +216,162 @@ export default function EditProfileForm({ user: initialUser }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex w-full flex-col gap-6">
-      <section className="flex flex-col gap-8 rounded-3xl border border-[#E5E5E5] bg-white p-8">
-        <h2 className="font-[family-name:var(--font-manrope)] text-[20px] font-bold leading-none text-black">
+      {/* Na telefon naslovot e vo lenta so linija pod nego. */}
+      <section className="flex flex-col rounded-3xl border border-[#CFE9ED] bg-white md:border-[#E5E5E5]">
+        <h2 className="border-b border-[#CFE9ED] px-6 py-5 font-[family-name:var(--font-manrope)] text-[16px] font-bold leading-none text-black md:border-b-0 md:px-8 md:pb-0 md:pt-8 md:text-[20px]">
           Профил
         </h2>
 
-        <div className="flex flex-col gap-4">
-          <p className="font-[family-name:var(--font-manrope)] text-[14px] font-bold text-black">
-            Слика на профилот
-          </p>
+        <div className="flex flex-col gap-7 p-6 md:gap-8 md:p-8">
+          <div className="flex flex-col gap-4">
+            <p className="font-[family-name:var(--font-manrope)] text-[14px] font-bold text-[#595959] md:text-black">
+              Слика на профилот
+            </p>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <img
-              src={previewUrl}
-              alt=""
-              width={96}
-              height={96}
-              className="size-24 shrink-0 rounded-full object-cover"
+            <div className="flex flex-wrap items-center gap-5 md:gap-4">
+              <img
+                src={previewUrl}
+                alt=""
+                width={96}
+                height={96}
+                className="size-18 shrink-0 rounded-full object-cover md:size-24"
+              />
+
+              <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                <PrimaryButton
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex h-10 w-24 items-center justify-center font-[family-name:var(--font-manrope)] text-[14px] md:w-auto md:px-4"
+                >
+                  <span className="md:hidden">Прикачи</span>
+                  <span className="hidden md:inline">Прикачи слика</span>
+                </PrimaryButton>
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  className="flex h-10 w-24 cursor-pointer items-center justify-center rounded-xl border border-[#582FF5] bg-white font-[family-name:var(--font-manrope)] text-[14px] font-bold text-[#582FF5] transition-colors active:bg-[#F1EEFE] hover:bg-[#F1EEFE] md:w-auto md:px-4"
+                >
+                  Отстрани
+                </button>
+              </div>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={handleFileChange}
             />
 
+            <p className="font-[family-name:var(--font-manrope)] text-[13px] leading-[19.5px] text-[#595959] md:text-[14px]">
+              Или избери стандарден аватар:
+            </p>
+
             <div className="flex flex-wrap items-center gap-3">
-              <PrimaryButton
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex h-10 items-center justify-center px-4 font-[family-name:var(--font-manrope)] text-[14px]"
-              >
-                Прикачи слика
-              </PrimaryButton>
-              <button
-                type="button"
-                onClick={handleRemoveAvatar}
-                className="flex h-10 cursor-pointer items-center justify-center rounded-xl border border-[#582FF5] bg-white px-4 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-[#582FF5] transition-colors hover:bg-[#F1EEFE]"
-              >
-                Отстрани
-              </button>
+              {SELECTABLE_AVATARS.map((src) => {
+                const selected = !pendingFile && imageUrl === src;
+
+                return (
+                  <button
+                    key={src}
+                    type="button"
+                    onClick={() => selectDefaultAvatar(src)}
+                    aria-label="Избери стандарден аватар"
+                    aria-pressed={selected}
+                    className="relative size-10 cursor-pointer rounded-full md:size-14"
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      className="size-10 rounded-full object-cover md:size-14"
+                    />
+                    {selected ? (
+                      <span className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border border-black bg-white text-black md:-top-0.5 md:bottom-auto md:size-5 md:border-0 md:bg-[#582FF5] md:text-white">
+                        <FontAwesomeIcon icon={faCheck} className="text-[8px] md:text-[10px]" />
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-
-          <p className="font-[family-name:var(--font-manrope)] text-[14px] text-[#595959]">
-            Или избери стандарден аватар:
-          </p>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {SELECTABLE_AVATARS.map((src) => {
-              const selected = !pendingFile && imageUrl === src;
-
-              return (
-                <button
-                  key={src}
-                  type="button"
-                  onClick={() => selectDefaultAvatar(src)}
-                  aria-label="Избери стандарден аватар"
-                  aria-pressed={selected}
-                  className="relative size-14 cursor-pointer rounded-full"
-                >
-                  <img src={src} alt="" className="size-14 rounded-full object-cover" />
-                  {selected ? (
-                    <span className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-[#582FF5] text-white">
-                      <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
-                    </span>
-                  ) : null}
-                </button>
-              );
-            })}
+          <div className="flex flex-col gap-2 border-t border-[#E5E5E5] pt-7 md:border-t-0 md:pt-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <label
+                htmlFor="pseudonym"
+                className="font-[family-name:var(--font-manrope)] text-[14px] font-bold text-[#595959] md:text-black"
+              >
+                Псевдоним
+              </label>
+              <span className="flex items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 py-1 font-[family-name:var(--font-manrope)] text-[12px] leading-none text-[#595959]">
+                <FontAwesomeIcon icon={faLock} className="text-[10px]" />
+                Не може да се промени
+              </span>
+            </div>
+            <input
+              id="pseudonym"
+              type="text"
+              readOnly
+              value={initialUser.username ?? ""}
+              className="h-10 w-full cursor-not-allowed rounded-xl border border-[#CCCCCC] bg-[#F5F5F5] px-4 font-[family-name:var(--font-manrope)] text-[14px] text-[#595959] md:h-12"
+            />
+            <p className="font-[family-name:var(--font-manrope)] text-[12px] leading-5 text-[#595959]">
+              Псевдонимот е постојан и не може да биде изменет по регистрацијата.
+            </p>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <label
-              htmlFor="pseudonym"
-              className="font-[family-name:var(--font-manrope)] text-[14px] font-bold text-black"
-            >
-              Псевдоним
-            </label>
-            <span className="flex items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 py-1 font-[family-name:var(--font-manrope)] text-[12px] leading-none text-[#595959]">
-              <FontAwesomeIcon icon={faLock} className="text-[10px]" />
-              Не може да се промени
-            </span>
-          </div>
-          <input
-            id="pseudonym"
-            type="text"
-            readOnly
-            value={initialUser.username ?? ""}
-            className="h-12 w-full cursor-not-allowed rounded-xl border border-[#CCCCCC] bg-[#F5F5F5] px-4 font-[family-name:var(--font-manrope)] text-[14px] text-[#595959]"
-          />
-          <p className="font-[family-name:var(--font-manrope)] text-[12px] leading-5 text-[#595959]">
-            Псевдонимот е постојан и не може да биде изменет по регистрацијата.
-          </p>
         </div>
       </section>
 
-      <section className="flex flex-col gap-6 rounded-3xl border border-[#E5E5E5] bg-white p-8">
-        <h2 className="font-[family-name:var(--font-manrope)] text-[20px] font-bold leading-none text-black">
+      <section className="flex flex-col rounded-3xl border border-[#CFE9ED] bg-white md:border-[#E5E5E5]">
+        <h2 className="border-b border-[#CFE9ED] px-6 py-5 font-[family-name:var(--font-manrope)] text-[16px] font-bold leading-none text-black md:border-b-0 md:px-8 md:pb-0 md:pt-8 md:text-[20px]">
           Информации за училиште
         </h2>
 
-        <div className="flex flex-col gap-2">
-          {!canChangeSchool ? (
-            <span className="flex w-fit items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 py-1 font-[family-name:var(--font-manrope)] text-[12px] leading-none text-[#595959]">
-              <FontAwesomeIcon icon={faLock} className="text-[10px]" />
-              Заклучено до септември
-            </span>
-          ) : null}
+        <div className="flex flex-col gap-6 p-6 md:p-8">
+          <div className="flex flex-col gap-2">
+            {!canChangeSchool ? (
+              <span className="flex w-fit items-center gap-1.5 rounded-md bg-[#F5F5F5] px-2 py-1 font-[family-name:var(--font-manrope)] text-[12px] leading-none text-[#595959]">
+                <FontAwesomeIcon icon={faLock} className="text-[10px]" />
+                Заклучено до септември
+              </span>
+            ) : null}
+            <SelectField
+              compact
+              id="school"
+              label="Училиште"
+              value={school}
+              onChange={setSchool}
+              placeholder="Избери училиште"
+              groups={schoolGroups}
+              disabled={!canChangeSchool}
+            />
+            {schoolLockMessage ? (
+              <p className="font-[family-name:var(--font-manrope)] text-[12px] leading-5 text-[#595959]">
+                {schoolLockMessage}
+              </p>
+            ) : null}
+          </div>
           <SelectField
-            id="school"
-            label="Училиште"
-            value={school}
-            onChange={setSchool}
-            placeholder="Избери училиште"
-            groups={schoolGroups}
-            disabled={!canChangeSchool}
+            compact
+            id="area"
+            label="Подрачје на образование"
+            value={area}
+            onChange={setArea}
+            placeholder="Избери подрачје"
+            options={area && !AREAS.includes(area) ? [area, ...AREAS] : AREAS}
           />
-          {schoolLockMessage ? (
-            <p className="font-[family-name:var(--font-manrope)] text-[12px] leading-5 text-[#595959]">
-              {schoolLockMessage}
-            </p>
-          ) : null}
+          <SelectField
+            compact
+            id="year"
+            label="Година"
+            value={year}
+            onChange={setYear}
+            placeholder="Избери година"
+            options={yearOptions}
+          />
         </div>
-        <SelectField
-          id="area"
-          label="Подрачје на образование"
-          value={area}
-          onChange={setArea}
-          placeholder="Избери подрачје"
-          options={area && !AREAS.includes(area) ? [area, ...AREAS] : AREAS}
-        />
-        <SelectField
-          id="year"
-          label="Година"
-          value={year}
-          onChange={setYear}
-          placeholder="Избери година"
-          options={yearOptions}
-        />
       </section>
 
       {error ? (
@@ -367,18 +380,18 @@ export default function EditProfileForm({ user: initialUser }) {
         </p>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-end gap-3">
+      <div className="flex flex-wrap items-center justify-end gap-2 md:gap-3">
         <button
           type="button"
           onClick={() => router.push("/profile")}
-          className="flex h-10 cursor-pointer items-center justify-center rounded-xl border border-[#582FF5] bg-white px-5 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-[#582FF5] transition-colors hover:bg-[#F1EEFE]"
+          className="flex h-10 w-36 cursor-pointer items-center justify-center rounded-xl border border-[#582FF5] bg-white font-[family-name:var(--font-manrope)] text-[14px] font-bold text-black transition-colors active:bg-[#F1EEFE] hover:bg-[#F1EEFE] md:w-auto md:px-5"
         >
           Откажи
         </button>
         <PrimaryButton
           type="submit"
           disabled={saving}
-          className="flex h-10 items-center justify-center px-5 font-[family-name:var(--font-manrope)] text-[14px] disabled:opacity-60"
+          className="flex h-10 w-36 items-center justify-center font-[family-name:var(--font-manrope)] text-[14px] disabled:opacity-60 md:w-auto md:px-5"
         >
           {saving ? "Се зачувува…" : "Зачувај промени"}
         </PrimaryButton>
