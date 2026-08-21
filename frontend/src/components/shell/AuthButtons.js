@@ -2,18 +2,22 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import Avatar from "@/components/ui/Avatar";
 import LogoutDialogs from "@/components/shell/LogoutDialogs";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useLogout } from "@/hooks/useLogout";
 import { useProfile } from "@/hooks/useProfile";
 
+const HEADER_AVATAR_SIZE_CLASS =
+  "h-[56px] w-[56px] min-h-[56px] min-w-[56px] max-h-[56px] max-w-[56px]";
+
 export default function AuthButtons() {
   // Zaednichka sesija, za da reagira i na odjava od druga strana.
   const { user } = useProfile();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const menuId = useId();
   const logout = useLogout({ onLoggedOut: () => setMenuOpen(false) });
 
   useClickOutside(menuRef, useCallback(() => setMenuOpen(false), []), menuOpen);
@@ -25,57 +29,76 @@ export default function AuthButtons() {
   return (
     <>
       {user ? (
-        <div ref={menuRef} className="relative flex shrink-0 items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            className="flex items-center gap-1 rounded-full transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] focus-visible:ring-offset-2 cursor-pointer group"
+        <div ref={menuRef} className="flex shrink-0 items-center gap-1">
+          <Link
+            href="/profile"
+            aria-label="Профил"
+            onClick={() => setMenuOpen(false)}
+            className={`flex ${HEADER_AVATAR_SIZE_CLASS} shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] focus-visible:ring-offset-2`}
           >
-            <Avatar src={avatarUrl} size="xl" alt={displayName} />
-
-            <span className="font-(family-name:--font-manrope) text-[18px] font-medium leading-none text-[#0A0A0A] group-hover:text-[#582FF5] transition">
-              {displayName}
-            </span>
-
-            <Image
-              src="/chevron-down.svg"
-              alt=""
-              width={16}
-              height={16}
-              className={`size-4`}
+            <Avatar
+              src={avatarUrl}
+              size="xl"
+              sizeClassName={HEADER_AVATAR_SIZE_CLASS}
+              alt={displayName}
             />
-          </button>
+          </Link>
 
-          {menuOpen && (
-            <div
-              role="menu"
-              className="absolute top-full right-0 z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-[#E5E5E5] bg-white py-2 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+          <div className="relative h-10 w-fit max-w-[180px] shrink-0">
+            <button
+              type="button"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-controls={menuId}
+              title={displayName}
+              className={`flex h-10 w-fit max-w-[180px] cursor-pointer items-center justify-center gap-1 p-1 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] focus-visible:ring-offset-2 ${
+                menuOpen ? "rounded-t-xl bg-[#CFE9ED]" : "rounded-xl bg-white hover:bg-[#CFE9ED]"
+              }`}
             >
-              <Link
-                href="/profile"
-                role="menuitem"
-                onClick={() => setMenuOpen(false)}
-                className="flex w-full cursor-pointer items-center gap-3 px-5 py-3 text-left font-(family-name:--font-manrope) text-[15px] font-medium leading-none text-[#0A0A0A] transition-colors hover:bg-[#F5F5F5]"
-              >
-                Профил
-              </Link>
+              <span className="flex min-w-0 max-w-[140px] items-center truncate font-[family-name:var(--font-roboto)] text-[16px] font-normal leading-4 tracking-normal">
+                {displayName}
+              </span>
 
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  logout.ask();
-                }}
-                disabled={logout.loggingOut}
-                className="flex w-full cursor-pointer items-center gap-3 px-5 py-3 text-left font-(family-name:--font-manrope) text-[15px] font-medium leading-none text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-60"
+              <Image
+                src="/chevron-down.svg"
+                alt=""
+                width={16}
+                height={16}
+                className={`size-4 shrink-0 transition-transform ${menuOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {menuOpen && (
+              <div
+                id={menuId}
+                role="menu"
+                className="absolute left-0 top-10 z-50 flex min-w-full flex-col overflow-hidden rounded-b-xl bg-white shadow-[0_12px_24px_rgba(0,0,0,0.12)]"
               >
-                {logout.loggingOut ? "Се одјавува…" : "Одјави се"}
-              </button>
-            </div>
-          )}
+                <Link
+                  href="/profile"
+                  role="menuitem"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex h-10 w-full cursor-pointer items-center justify-center whitespace-nowrap border-t border-[#CCCCCC] p-1 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-black transition-colors hover:bg-[#E5E5E5]"
+                >
+                  Профил
+                </Link>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    logout.ask();
+                  }}
+                  disabled={logout.loggingOut}
+                  className="flex h-10 w-full cursor-pointer items-center justify-center whitespace-nowrap border-t border-[#CCCCCC] p-1 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[#DC2626] transition-colors hover:bg-[#E5E5E5] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {logout.loggingOut ? "Се одјавува…" : "Одјави се"}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <div className="ml-auto flex h-10 w-75 shrink-0 items-center gap-3">

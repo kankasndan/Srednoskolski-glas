@@ -5,13 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { generateOnboardingAvatar } from "@/api/onboarding";
 import { userFacingError } from "@/lib/api";
-import { loadSessionUser } from "@/lib/sessionUser";
-
-function finishOnboarding(router) {
-  localStorage.removeItem("onboarding_pending");
-  // Ensure /api/me capabilities (create threads, etc.) are fresh on the feed.
-  loadSessionUser({ force: true }).finally(() => router.push("/feed"));
-}
+import { finishOnboarding, rememberGeneratedAvatar } from "@/lib/onboardingFlow";
+import { setSessionUser } from "@/lib/sessionUser";
 
 export default function AvatarUploadCard() {
   const router = useRouter();
@@ -64,8 +59,10 @@ export default function AvatarUploadCard() {
     setError("");
 
     try {
-      await generateOnboardingAvatar(file);
-      finishOnboarding(router);
+      const data = await generateOnboardingAvatar(file);
+      rememberGeneratedAvatar(data?.url);
+      if (data?.user) setSessionUser(data.user);
+      router.push("/register/onboarding_3");
     } catch (err) {
       setError(
         userFacingError(
@@ -130,15 +127,18 @@ export default function AvatarUploadCard() {
 
           {previewUrl ? (
             <span className="flex size-[92px] items-center justify-center overflow-hidden rounded-full sm:size-[clamp(92px,16.2vw,166px)] lg:size-[166px]">
-              <img
+              <Image
                 src={previewUrl}
                 alt="Преглед на фотографијата"
+                width={166}
+                height={166}
+                unoptimized
                 className="size-full object-cover"
               />
             </span>
           ) : (
             <Image
-              src="/Generic_avatar_onboarding.svg"
+              src="/add-line.svg"
               alt=""
               width={166}
               height={166}
@@ -148,8 +148,14 @@ export default function AvatarUploadCard() {
           )}
 
           <p className="max-w-[280px] text-center font-(family-name:--font-manrope) text-[14px] font-normal leading-none text-black sm:max-w-[clamp(280px,49vw,502px)] sm:text-[clamp(14px,1.95vw,20px)] sm:leading-[1.13] lg:max-w-[502px] lg:text-[20px] lg:leading-[22.595px]">
-            Прикачи своја фотографија. Ќе направиме стилизиран аватар за твојот
-            профил — оригиналната слика не се зачувува.
+            <span className="sm:hidden">
+              Прикачи фотографија за дополнителна персонализација на твојот
+              профил.
+            </span>
+            <span className="hidden sm:inline">
+              Прикачи своја фотографија за дополнителна персонализација на
+              твојот профил.
+            </span>
           </p>
         </div>
       </button>
@@ -164,14 +170,14 @@ export default function AvatarUploadCard() {
         <button
           type="button"
           onClick={handleContinue}
-          disabled={submitting}
-          className="h-10 w-full cursor-pointer rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[16px] font-bold text-white transition-colors hover:bg-[#3300F5] disabled:cursor-wait disabled:opacity-70 lg:h-14 lg:max-w-[400px]"
+          disabled={!file || submitting}
+          className="h-10 w-full cursor-pointer rounded-2xl bg-[#582FF5] font-(family-name:--font-manrope) text-[16px] font-bold text-white transition-colors hover:bg-[#3300F5] disabled:cursor-not-allowed disabled:bg-[var(--color-grays-300)] disabled:hover:bg-[var(--color-grays-300)] lg:h-14 lg:max-w-[400px]"
         >
           {submitting
             ? "Се создава аватарот…"
             : previewUrl
               ? "Продолжи"
-              : "Прикачи фотографија"}
+              : "Претвори во личен аватар"}
         </button>
 
         <button

@@ -17,6 +17,7 @@ export default function OnboardingGuard({ children }) {
 
     async function check() {
       const pending = localStorage.getItem("onboarding_pending");
+
       if (pending) {
         if (!cancelled) setAllowed(true);
         return;

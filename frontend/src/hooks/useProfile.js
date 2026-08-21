@@ -21,13 +21,14 @@ export function useProfile() {
     });
 
     let active = true;
+    const currentUser = getCachedSessionUser();
 
     // Refetch when the cached user is missing capability flags (stale session).
     const needsCapabilities =
-      cached != null &&
-      (cached.capabilities == null ||
-        typeof cached.capabilities?.can_create_threads !== "boolean" ||
-        typeof cached.capabilities?.can_change_school !== "boolean");
+      currentUser != null &&
+      (currentUser.capabilities == null ||
+        typeof currentUser.capabilities?.can_create_threads !== "boolean" ||
+        typeof currentUser.capabilities?.can_change_school !== "boolean");
 
     loadSessionUser({ force: Boolean(needsCapabilities) })
       .then((data) => {

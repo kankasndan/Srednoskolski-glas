@@ -120,6 +120,7 @@ export default function Threads({
   showFilters = true,
   staticThreads = null,
   listPath = null,
+  leadingMetaTags = [],
 }) {
   const isSearch = searchQuery !== null;
   const hasStaticThreads = Array.isArray(staticThreads);
@@ -461,6 +462,7 @@ export default function Threads({
               thread={thread}
               highlight={searchQuery}
               mobileTag={forum ? "author" : "forum"}
+              leadingMetaTags={leadingMetaTags}
             />
           ))
         )}
