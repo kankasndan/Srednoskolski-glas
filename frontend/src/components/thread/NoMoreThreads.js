@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function NoMoreThreads() {
   return (
-    <div className="flex h-[175px] w-[388px] max-w-full flex-col items-center justify-center gap-6 text-center">
+    <div className="flex h-[175px] w-full max-w-[340px] flex-col items-center justify-center gap-6 text-center min-[440px]:max-w-[388px]">
       <Image
         src="/gray-logo.svg"
         alt=""
@@ -12,10 +12,10 @@ export default function NoMoreThreads() {
         className="object-contain"
       />
       <div className="flex flex-col items-center gap-4">
-        <h1 className="font-[family-name:var(--font-oswald)] text-[20px] font-bold uppercase leading-[27px] text-black">
+        <h1 className="font-[family-name:var(--font-oswald)] text-[20px] font-bold uppercase leading-[27px] text-black min-[440px]:max-w-[388px]">
           Нема веќе дискусии
         </h1>
-        <p className="w-[388px] max-w-full font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
+        <p className="w-full max-w-[340px] font-[family-name:var(--font-manrope)] text-[16px] font-normal leading-[22px] text-[#595959]">
           Ги прегледа сите дискусии што ги имаме за тебе засега.
         </p>
       </div>
