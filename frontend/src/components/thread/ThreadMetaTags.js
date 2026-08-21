@@ -77,7 +77,10 @@ function MetaTag({ tag, hiddenOnMobile = false, hiddenOnPhone = false }) {
       ? "hidden md:flex"
       : "flex";
 
-  const className = `relative z-10 ${displayClass} h-6 shrink-0 cursor-pointer items-center gap-1 rounded-md bg-[#F5F5F5] px-1.5 text-[11px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB] md:h-7 md:gap-1.5 md:px-2 md:text-[12px]`;
+  const className =
+    tag.variant === "featured"
+      ? `relative z-10 ${displayClass} h-4 w-[60px] shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border-[0.5px] border-[#CCCCCC] bg-[#F0E92F] px-2 font-['Roboto'] text-[12px] font-normal leading-4 tracking-normal text-black`
+      : `relative z-10 ${displayClass} h-6 shrink-0 cursor-pointer items-center gap-1 rounded-md bg-[#F5F5F5] px-1.5 text-[11px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB] md:h-7 md:gap-1.5 md:px-2 md:text-[12px]`;
 
   const content = (
     <>
@@ -131,7 +134,9 @@ export default function ThreadMetaTags({
         <MetaTag
           key={tag.key ?? tag.label}
           tag={tag}
-          hiddenOnMobile={visibleOnMobile != null && tag.key !== visibleOnMobile}
+          hiddenOnMobile={
+            !tag.alwaysVisible && visibleOnMobile != null && tag.key !== visibleOnMobile
+          }
           hiddenOnPhone={hideForumOnPhone && tag.key === "forum"}
         />
       ))}

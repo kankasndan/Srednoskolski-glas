@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { followForum, getExplore, unfollowForum } from "@/api/forums";
 import AppShell from "@/components/shell/AppShell";
 import BackButton from "@/components/shell/BackButton";
@@ -92,6 +92,14 @@ export default function ExploreDiscussions() {
               staticThreads={threads}
               showSort={false}
               showFilters={false}
+              leadingMetaTags={[
+                {
+                  key: "featured",
+                  label: "Истакнато",
+                  variant: "featured",
+                  alwaysVisible: true,
+                },
+              ]}
             />
           )}
         </ExploreSection>
@@ -117,7 +125,16 @@ function FeaturedForumCard({ forum, onForumChange }) {
   const { user, loading: profileLoading } = useProfile();
   const [following, setFollowing] = useState(Boolean(forum.is_following));
   const [pending, setPending] = useState(false);
+  const [opening, setOpening] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
+  const forumHref = `/p/${forum.slug}`;
+
+  // Ostanuva sino se dodeka ne se otvori novata strana.
+  function openForum() {
+    setOpening(true);
+    router.push(forumHref);
+  }
 
   async function toggleFollow(event) {
     event.preventDefault();
@@ -170,12 +187,14 @@ function FeaturedForumCard({ forum, onForumChange }) {
   const followButtonLabel = following ? "Следиш" : "Следи";
 
   return (
-    <article className="flex min-h-[198px] flex-col justify-between rounded-[40px] border border-[#CFE9ED] bg-white p-6 md:min-h-[141px] md:rounded-3xl">
+    <article
+      onClick={openForum}
+      className={`flex min-h-[198px] cursor-pointer flex-col justify-between rounded-[40px] border border-[#CFE9ED] p-6 transition-colors active:bg-[#DCEBED] md:min-h-[141px] md:rounded-3xl md:hover:bg-[#DCEBED] ${
+        opening ? "bg-[#DCEBED]" : "bg-white"
+      }`}
+    >
       <div className="flex items-start justify-between gap-4">
-        <Link
-          href={`/p/${forum.slug}`}
-          className="flex min-w-0 max-w-full items-center gap-3 md:gap-4"
-        >
+        <div className="flex min-w-0 max-w-full items-center gap-3 md:gap-4">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#DCEBED] md:size-14">
             <Image
               src={icon}
@@ -196,7 +215,7 @@ function FeaturedForumCard({ forum, onForumChange }) {
               <span className="hidden min-[430px]:inline md:inline">членови</span>
             </p>
           </div>
-        </Link>
+        </div>
 
         <button
           type="button"
