@@ -8,7 +8,7 @@ import OnboardingForm from "@/components/auth/OnboardingForm";
 export default function Onboarding() {
   return (
     <OnboardingGuard>
-      <main className="relative flex min-h-dvh w-full overflow-x-hidden bg-white lg:min-h-screen">
+      <main className="relative flex min-h-dvh w-full overflow-x-hidden bg-white lg:h-dvh lg:min-h-0 lg:overflow-hidden">
         <Image
           src="/login-hero.png"
           alt=""
@@ -20,7 +20,7 @@ export default function Onboarding() {
         />
         <AuthHero />
 
-        <div className="v-stack relative z-10 w-full px-6 py-8 lg:min-h-screen lg:w-1/2 lg:px-16">
+        <div className="v-stack relative z-10 w-full px-6 py-8 lg:min-h-0 lg:w-1/2 lg:overflow-y-auto lg:px-16 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div className="lg:hidden">
             <BackButton href="/register" label={null} tone="muted" />
           </div>

@@ -19,7 +19,7 @@ export default function OnboardingMasthead() {
           priority
           className="shrink-0 object-contain"
         />
-        <h1 className="font-(family-name:--font-oswald) text-left text-[30px] font-normal leading-[34px] tracking-[0%] text-[#000000]">
+        <h1 className="font-(family-name:--font-oswald) text-left text-[34px] font-normal leading-[34px] tracking-[0%] text-[#000000]">
           ДОЗВОЛИ НИ ДА ТЕ ЗАПОЗНАЕМЕ
         </h1>
       </div>

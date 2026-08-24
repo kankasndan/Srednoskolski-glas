@@ -12,15 +12,12 @@ config.autoAddCss = false;
 const LABEL_TONES = {
   primary: "text-[#582FF5]",
   muted: "text-[#595959]",
-  black: "text-black",
 };
 
 export default function BackButton({
   href,
   label = "Назад кон почетна",
   tone = "primary",
-  className = "",
-  iconClassName = "h-4",
 }) {
   const router = useRouter();
 
@@ -41,11 +38,11 @@ export default function BackButton({
       type="button"
       onClick={handleBack}
       aria-label={label ? undefined : "Назад"}
-      className={`inline-flex h-10 shrink-0 cursor-pointer items-center self-start rounded-full font-[family-name:var(--font-manrope)] text-[14px] leading-none font-medium transition-colors hover:text-black ${
+      className={`h-stack h-10 cursor-pointer items-center rounded-full font-[family-name:var(--font-manrope)] text-[14px] leading-none font-medium transition-colors hover:text-black ${
         label ? "gap-2" : "w-10 justify-center"
-      } ${LABEL_TONES[tone]} ${className}`}
+      } ${LABEL_TONES[tone]}`}
     >
-      <FontAwesomeIcon icon={faChevronLeft} className={iconClassName} />
+      <FontAwesomeIcon icon={faChevronLeft} className="h-4" />
       {label}
     </button>
   );
