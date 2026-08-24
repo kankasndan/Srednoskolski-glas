@@ -50,7 +50,7 @@ export default function ForumPage() {
   }, [slug]);
 
   return (
-    <AppShell>
+    <AppShell contentClassName="!px-4 sm:!px-6 lg:!px-8 xl:!px-12">
       <div className="flex w-[1100px] max-w-full flex-col gap-3 lg:gap-8">
         {forumError ? (
           <p className="font-(family-name:--font-manrope) text-[16px] text-[#595959]">

@@ -33,6 +33,9 @@ const roboto = Roboto({
 export const metadata = {
   title: "Средношколски глас",
   description: "Форум за средношколци — дискусии, форуми и заедница.",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({ children }) {

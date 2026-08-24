@@ -110,7 +110,7 @@ export default function Header({ onMenuToggle, menuOpen = false }) {
         <MobileAuthControl />
       </div>
 
-      <div className="flex w-full items-center justify-between gap-6 px-6 pb-4 pt-8 md:justify-center lg:justify-between lg:px-14 lg:py-4">
+      <div className="flex w-full items-center justify-center gap-6 px-6 pb-4 pt-8 lg:justify-between lg:px-14 lg:py-4">
         <Link
           href="/feed"
           className="hidden h-14 w-60 shrink-0 cursor-pointer items-center justify-center gap-3 overflow-hidden lg:flex"
