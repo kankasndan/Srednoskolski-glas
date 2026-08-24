@@ -351,7 +351,7 @@
                     return;
                 }
 
-                fetch(`${liveSearchUrl}?q=${encodeURIComponent(query)}&only_without_sanctions=1`)
+                fetch(`${liveSearchUrl}?q=${encodeURIComponent(query)}`)
                     .then(res => res.json())
                     .then(users => renderResults(users))
                     .catch(err => console.error(err));

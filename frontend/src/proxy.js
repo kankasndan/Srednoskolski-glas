@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 
 const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-// Giphy: the search endpoint is called from the browser, the GIFs come off its CDN.
-const GIPHY_API = "https://api.giphy.com";
+// GIF search goes through our API; only the CDN still needs to be in img-src.
 const GIPHY_MEDIA = "https://*.giphy.com";
 
 /**
@@ -20,7 +19,7 @@ function contentSecurityPolicy(nonce, isDev) {
     ? "'self' 'unsafe-inline' 'unsafe-eval'"
     : `'self' 'nonce-${nonce}' 'strict-dynamic'`;
 
-  const connectSrc = ["'self'", API_ORIGIN, GIPHY_API, isDev ? "ws: http://localhost:*" : ""]
+  const connectSrc = ["'self'", API_ORIGIN, isDev ? "ws: http://localhost:*" : ""]
     .filter(Boolean)
     .join(" ");
 

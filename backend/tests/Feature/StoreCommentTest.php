@@ -162,7 +162,7 @@ it('rejects a parent_id from another thread', function () {
         ->assertJsonValidationErrors(['parent_id']);
 });
 
-it('requires content', function () {
+it('requires content when no gif is attached', function () {
     $user = onboardedCommenter();
     $thread = commentThread(commentForum(), $user);
 
@@ -170,6 +170,76 @@ it('requires content', function () {
         'content' => '',
     ])->assertUnprocessable()
         ->assertJsonValidationErrors(['content']);
+});
+
+it('creates a comment with only a gif', function () {
+    $user = onboardedCommenter();
+    $thread = commentThread(commentForum(), $user);
+    $gifUrl = 'https://media.giphy.com/media/abc123/200w.gif';
+
+    $response = $this->actingAs($user)->postJson("/api/threads/{$thread->id}/comments", [
+        'content' => '',
+        'gif_url' => $gifUrl,
+    ]);
+
+    $response->assertCreated()
+        ->assertJsonPath('data.content', '')
+        ->assertJsonPath('data.gif_url', $gifUrl)
+        ->assertJsonPath('data.parent_id', null);
+
+    $comment = Comment::query()->where([
+        'thread_id' => $thread->id,
+        'user_id' => $user->id,
+        'parent_id' => null,
+    ])->first();
+
+    expect($comment)->not->toBeNull()
+        ->and($comment->content)->toBe('')
+        ->and($comment->gif_url)->toBe($gifUrl);
+});
+
+it('creates a comment with text and a gif', function () {
+    $user = onboardedCommenter();
+    $thread = commentThread(commentForum(), $user);
+    $gifUrl = 'https://media1.giphy.com/media/abc123/200w.gif';
+
+    $this->actingAs($user)->postJson("/api/threads/{$thread->id}/comments", [
+        'content' => 'Ова е смешно.',
+        'gif_url' => $gifUrl,
+    ])->assertCreated()
+        ->assertJsonPath('data.content', 'Ова е смешно.')
+        ->assertJsonPath('data.gif_url', $gifUrl);
+});
+
+it('rejects an invalid gif url', function () {
+    $user = onboardedCommenter();
+    $thread = commentThread(commentForum(), $user);
+
+    $this->actingAs($user)->postJson("/api/threads/{$thread->id}/comments", [
+        'content' => '',
+        'gif_url' => 'not-a-url',
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors(['gif_url']);
+});
+
+it('allows clearing comment text when a gif remains', function () {
+    $user = onboardedCommenter();
+    $thread = commentThread(commentForum(), $user);
+    $gifUrl = 'https://media.giphy.com/media/abc123/200w.gif';
+
+    $comment = Comment::forceCreate([
+        'thread_id' => $thread->id,
+        'parent_id' => null,
+        'user_id' => $user->id,
+        'content' => 'Ќе го трнам текстот.',
+        'gif_url' => $gifUrl,
+    ]);
+
+    $this->actingAs($user)->putJson("/api/comments/{$comment->id}", [
+        'content' => '',
+    ])->assertSuccessful()
+        ->assertJsonPath('data.content', '')
+        ->assertJsonPath('data.gif_url', $gifUrl);
 });
 
 it('hides the author when the anonymous thread owner comments', function () {

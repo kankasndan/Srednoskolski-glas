@@ -253,7 +253,7 @@
                     <input type="radio" name="type" value="custom" class="sanction-radio text-my-purple">
                     <div class="flex-1">
                         <div class="text-sm font-medium text-slate-800">Прилагодено траење</div>
-                        <input id="customDaysInput" type="number" placeholder="Денови"
+                        <input id="customDaysInput" type="number" name="days" min="1" placeholder="Денови"
                             class="hidden mt-2 w-24 rounded-lg border-slate-300 text-sm p-1.5 border">
                     </div>
                 </label>

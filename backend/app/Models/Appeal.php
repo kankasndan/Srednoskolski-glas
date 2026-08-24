@@ -17,7 +17,7 @@ class Appeal extends Model
 
     public function sanction()
     {
-        return $this->belongsTo(Sanction::class);
+        return $this->belongsTo(Sanction::class)->withTrashed();
     }
 
     public function user()

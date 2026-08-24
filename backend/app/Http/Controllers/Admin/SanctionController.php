@@ -9,6 +9,7 @@ use App\Models\Report;
 use App\Models\Sanction;
 use App\Models\Thread;
 use App\Models\User;
+use App\Notifications\NewAppealNotification;
 use App\Notifications\NewReportNotification;
 use App\Support\StaffRoleHierarchy;
 use Illuminate\Http\Request;
@@ -42,7 +43,11 @@ class SanctionController extends Controller
             'revoked_by' => Auth::id(),
         ]);
 
-        $sanction->appeal?->delete();
+        $appeal = $sanction->appeal;
+        if ($appeal !== null) {
+            NewAppealNotification::markTargetRead($appeal);
+            $appeal->delete();
+        }
 
         $sanction->delete();
 
@@ -55,7 +60,7 @@ class SanctionController extends Controller
 
         $validated = $request->validate([
             'user_id' => ['required', 'exists:users,id'],
-            'type' => ['required', 'in:warning,7-day,permanent_ban'],
+            'type' => ['required', 'in:warning,7-day,custom,permanent_ban'],
             'days' => ['required_if:type,custom', 'nullable', 'integer', 'min:1'],
             'reason' => ['required', 'string', 'max:1000'],
             'report_id' => ['nullable', 'exists:reports,id'],
@@ -101,9 +106,7 @@ class SanctionController extends Controller
 
         $sanctionedUser = User::findOrFail($validated['user_id']);
 
-        // Both halves matter: `role` is the column, `hasRole` is the assigned
-        // Spatie role. Checking only one leaves a staff account sanctionable.
-        if (StaffRoleHierarchy::isStaff($sanctionedUser->role) || ! $sanctionedUser->hasRole('user')) {
+        if (StaffRoleHierarchy::isStaffAccount($sanctionedUser)) {
             return back()
                 ->withErrors(['user_id' => 'Санкции може да се издадат само на обични корисници.'])
                 ->withInput();

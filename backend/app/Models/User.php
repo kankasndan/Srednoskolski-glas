@@ -132,14 +132,94 @@ class User extends Authenticatable
      */
     public function isBanned(): bool
     {
+        return $this->sanctions()->bans()->active()->exists();
+    }
+
+    public function activeBan(): ?Sanction
+    {
         return $this->sanctions()
-            ->where('type', '!=', 'warning')
+            ->bans()
+            ->active()
+            ->latest('id')
+            ->first();
+    }
+
+    /**
+     * Active ban the client needs for hover/click on create actions, or null.
+     *
+     * @return array{
+     *     id: int,
+     *     type: string,
+     *     expires_at: string|null,
+     *     reason: string|null,
+     *     content: array{type: string, title: ?string, body: ?string, gif_url: ?string}|null,
+     *     can_appeal: bool,
+     *     has_pending_appeal: bool
+     * }|null
+     */
+    public function activeBanPayload(?Sanction $activeBan = null): ?array
+    {
+        $ban = $activeBan ?? $this->activeBan();
+
+        if ($ban === null) {
+            return null;
+        }
+
+        return $ban->clientNoticePayload();
+    }
+
+    /**
+     * Popup the client should show on the next app open, or null.
+     *
+     * @return array{
+     *     id: int,
+     *     type: string,
+     *     expires_at: string|null,
+     *     reason: string|null,
+     *     content: array{type: string, title: ?string, body: ?string, gif_url: ?string}|null,
+     *     can_appeal: bool,
+     *     has_pending_appeal: bool
+     * }|null
+     */
+    public function pendingSanctionNotice(?Sanction $activeBan = null): ?array
+    {
+        $activeBan ??= $this->activeBan();
+
+        if ($activeBan !== null) {
+            if ($activeBan->acknowledged_at !== null) {
+                return null;
+            }
+
+            return $activeBan->clientNoticePayload();
+        }
+
+        $endedBan = $this->sanctions()
+            ->withTrashed()
+            ->bans()
+            ->ended()
+            ->latest('id')
+            ->first();
+
+        if ($endedBan !== null) {
+            $endedAt = $endedBan->endedAt();
+
+            if ($endedAt !== null && ($endedBan->acknowledged_at === null || $endedBan->acknowledged_at->lt($endedAt))) {
+                return $endedBan->clientNoticePayload('ban_ended');
+            }
+        }
+
+        $warning = $this->sanctions()
+            ->where('type', 'warning')
             ->whereNull('revoked_at')
-            ->where(function ($query): void {
-                $query->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now());
-            })
-            ->exists();
+            ->whereNull('acknowledged_at')
+            ->latest('id')
+            ->first();
+
+        if ($warning !== null) {
+            return $warning->clientNoticePayload();
+        }
+
+        return null;
     }
 
     public function appeals()

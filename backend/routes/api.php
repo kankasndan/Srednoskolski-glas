@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Auth\AcknowledgeSanctionController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\MeController;
 use App\Http\Controllers\Auth\OnboardingAvatarController;
 use App\Http\Controllers\Auth\OnboardingController;
+use App\Http\Controllers\Auth\StoreAppealController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ExploreController;
@@ -12,6 +14,7 @@ use App\Http\Controllers\FeedHideController;
 use App\Http\Controllers\FollowForumController;
 use App\Http\Controllers\FollowThreadController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\GifController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\ProfileController;
@@ -32,6 +35,12 @@ Route::middleware(['auth:sanctum', 'not_banned', 'throttle:api-writes'])->put('/
 Route::middleware(['auth:sanctum', 'not_banned', 'onboarding', 'throttle:media-upload'])->post('/onboarding/avatar', [OnboardingAvatarController::class, 'store'])->name('onboarding.avatar');
 // Return the current authenticated user.
 Route::middleware('auth:sanctum')->get('/me', MeController::class)->name('me.show');
+// Dismiss the current-user sanction popup (banned users must still be able to call this).
+Route::middleware(['auth:sanctum', 'throttle:api-writes'])->post('/me/sanctions/{sanction}/acknowledge', AcknowledgeSanctionController::class)
+    ->withTrashed()
+    ->name('me.sanctions.acknowledge');
+Route::middleware(['auth:sanctum', 'throttle:api-writes'])->post('/me/sanctions/{sanction}/appeals', StoreAppealController::class)
+    ->name('me.sanctions.appeals.store');
 Route::middleware(['auth:sanctum', 'not_banned', 'onboarding', 'throttle:api-writes'])->put('/me', [ProfileController::class, 'update'])->name('me.update');
 // Profile activity lists for the authenticated user.
 Route::middleware('auth:sanctum')->get('/me/counts', [ProfileController::class, 'counts'])->name('me.counts');
@@ -79,6 +88,11 @@ Route::middleware(['auth:sanctum', 'not_banned', 'onboarding'])->group(function 
     Route::get('/users/search', [UserSearchController::class, 'index'])
         ->middleware('throttle:api-search')
         ->name('users.search');
+
+    // Giphy search/trending proxy so the API key never ships to the browser.
+    Route::get('/gifs', [GifController::class, 'index'])
+        ->middleware('throttle:api-search')
+        ->name('gifs.search');
 
     // Follow / unfollow another user.
     Route::post('/u/{username}/follow', [UserProfileController::class, 'follow'])

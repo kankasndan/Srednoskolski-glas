@@ -1,3 +1,5 @@
+import { isActivelyBanned } from "@/lib/ban";
+
 export function getCapabilities(user) {
   return user?.capabilities ?? null;
 }
@@ -27,7 +29,7 @@ function schoolIdOf(user) {
 }
 
 export function canCreateComments(user) {
-  if (!user || !hasCompletedOnboarding(user)) return false;
+  if (!user || !hasCompletedOnboarding(user) || isActivelyBanned(user)) return false;
 
   const fromCapabilities = getCapabilities(user)?.can_create_comments;
   if (typeof fromCapabilities === "boolean") {

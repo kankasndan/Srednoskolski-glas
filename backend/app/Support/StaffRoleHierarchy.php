@@ -58,4 +58,15 @@ class StaffRoleHierarchy
     {
         return self::rank($role) >= self::RANKS['moderator'];
     }
+
+    /**
+     * Staff if either the users.role column or an assigned Spatie staff role
+     * says so. Checking only one leaves an inconsistent staff account
+     * treatable as a regular user.
+     */
+    public static function isStaffAccount(User $user): bool
+    {
+        return self::isStaff($user->role)
+            || $user->hasAnyRole(['moderator', 'admin', 'super_admin']);
+    }
 }

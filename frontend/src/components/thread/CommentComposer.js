@@ -12,6 +12,7 @@ import MentionTextarea from "@/components/thread/MentionTextarea";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { useProfile } from "@/hooks/useProfile";
 import { userFacingError } from "@/lib/api";
+import { isActivelyBanned } from "@/lib/ban";
 import { canCreateComments, needsOnboarding } from "@/lib/capabilities";
 
 config.autoAddCss = false;
@@ -113,6 +114,8 @@ export default function CommentComposer({
             </Link>{" "}
             за да коментираш.
           </>
+        ) : isActivelyBanned(user) ? (
+          "Не можеш да коментираш додека трае банот."
         ) : needsOnboarding(user) ? (
           <>
             <Link href="/register/onboarding" className="font-bold text-[#582FF5] hover:underline">

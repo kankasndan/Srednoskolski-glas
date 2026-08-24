@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Report extends Model
@@ -19,9 +21,12 @@ class Report extends Model
         return $this->belongsTo(User::class, 'reporter_id');
     }
 
-    public function reportable()
+    public function reportable(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo()->constrain([
+            Comment::class => fn (Builder $query) => $query->withTrashed(),
+            Thread::class => fn (Builder $query) => $query->withTrashed(),
+        ]);
     }
 
     public function reviewer()

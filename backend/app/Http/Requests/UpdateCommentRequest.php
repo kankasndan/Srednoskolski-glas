@@ -21,8 +21,12 @@ class UpdateCommentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $hasGif = filled($this->route('comment')?->gif_url);
+
         return [
-            'content' => ['required', 'string', 'min:1', 'max:1000'],
+            'content' => $hasGif
+                ? ['nullable', 'string', 'max:1000']
+                : ['required', 'string', 'min:1', 'max:1000'],
         ];
     }
 }

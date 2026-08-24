@@ -52,6 +52,9 @@ export async function getProfileUser() {
   if (user && typeof user === "object") {
     user.capabilities = payload.capabilities ?? user.capabilities ?? null;
     user.permissions = payload.permissions ?? user.permissions ?? [];
+    user.sanction_notice =
+      payload.sanction_notice === undefined ? (user.sanction_notice ?? null) : payload.sanction_notice;
+    user.active_ban = payload.active_ban === undefined ? (user.active_ban ?? null) : payload.active_ban;
   }
 
   return user;

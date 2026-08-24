@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appeal;
+use App\Notifications\NewAppealNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,7 @@ class AppealController extends Controller
 
         $appeal->load([
             'sanction.issuedBy',
+            'sanction.report' => fn ($query) => $query->withTrashed(),
             'sanction.report.reportable',
             'user.studentData.school',
             'admin',
@@ -63,8 +65,15 @@ class AppealController extends Controller
 
             $locked->loadMissing('sanction.report');
 
-            $locked->sanction?->report?->delete();
-            $locked->sanction?->delete();
+            $sanction = $locked->sanction;
+            if ($sanction !== null) {
+                $sanction->update([
+                    'revoked_at' => now(),
+                    'revoked_by' => Auth::id(),
+                ]);
+                $sanction->report?->delete();
+                $sanction->delete();
+            }
 
             $locked->update($this->resolution('accepted'));
         });
@@ -72,6 +81,8 @@ class AppealController extends Controller
         if ($appeal->fresh()?->status !== 'accepted') {
             return redirect()->route('appeal.index')->withErrors(['status' => self::ALREADY_RESOLVED]);
         }
+
+        NewAppealNotification::markTargetRead($appeal);
 
         return redirect()->route('appeal.index')->with(['success' => 'Жалбата е успешно прифатена.']);
     }
@@ -88,6 +99,8 @@ class AppealController extends Controller
         if ($updated === 0) {
             return redirect()->route('appeal.index')->withErrors(['status' => self::ALREADY_RESOLVED]);
         }
+
+        NewAppealNotification::markTargetRead($appeal);
 
         return redirect()->route('appeal.index')->with(['success' => 'Жалбата е успешно одбиена.']);
     }

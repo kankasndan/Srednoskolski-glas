@@ -69,17 +69,8 @@ class UserController extends Controller
 
         $query = mb_substr(trim((string) $request->get('q', '')), 0, 100);
 
-        $usersQuery = User::where('username', 'like', LikeEscape::contains($query))
-            ->where('role', 'user');
-
-        if ($request->boolean('only_without_sanctions')) {
-            $usersQuery->whereDoesntHave('sanctions', function ($q) {
-                // adjust this to your active-sanction definition
-                $q->whereNull('revoked_at');
-            });
-        }
-
-        $users = $usersQuery
+        $users = User::where('username', 'like', LikeEscape::contains($query))
+            ->where('role', 'user')
             ->limit(10)
             ->get(['id', 'username', 'email', 'role']);
 

@@ -1,27 +1,23 @@
-const GIPHY_URL = "https://api.giphy.com/v1/gifs";
+import { apiFetch } from "@/lib/api";
 
 /**
  * Trending GIFs when `q` is empty, search results otherwise.
- * `rating=g` keeps the results safe for a school audience.
+ * The backend keeps the Giphy key server-side and forces `rating=g`.
  */
 export async function searchGifs(q = "") {
-  const params = new URLSearchParams({
-    api_key: process.env.NEXT_PUBLIC_GIPHY_API_KEY ?? "",
-    limit: "24",
-    rating: "g",
-  });
+  const params = new URLSearchParams();
   if (q) params.set("q", q);
 
-  const res = await fetch(`${GIPHY_URL}/${q ? "search" : "trending"}?${params}`);
-  if (!res.ok) {
-    throw new Error(`Failed to load GIFs (${res.status})`);
+  const query = params.toString();
+  const response = await apiFetch(`/api/gifs${query ? `?${query}` : ""}`);
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Failed to load GIFs (${response.status})`);
+    error.status = response.status;
+    error.body = body;
+    throw error;
   }
 
-  const body = await res.json();
-
-  return (body.data ?? []).map((gif) => ({
-    id: gif.id,
-    url: gif.images.fixed_width.url,
-    title: gif.title,
-  }));
+  return Array.isArray(body.data) ? body.data : [];
 }

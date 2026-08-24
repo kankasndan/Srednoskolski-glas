@@ -26,7 +26,7 @@ class CommentController extends Controller
                 'parent_id' => $request->integer('parent_id') ?: null,
                 'user_id' => $request->user()->id,
                 'content' => $request->string('content')->toString(),
-                'gif_url' => $request->input('gif_url'),
+                'gif_url' => $request->validated('gif_url'),
             ]);
 
             Vote::addFor($request->user(), $comment);
