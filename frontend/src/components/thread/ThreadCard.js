@@ -54,13 +54,21 @@ function ActionButton({ icon, label, count, onClick, active = false, compact = f
   );
 }
 
-export default function ThreadCard({ thread, highlight = null, mobileTag = "forum" }) {
+export default function ThreadCard({
+  thread,
+  highlight = null,
+  mobileTag = "forum",
+  leadingMetaTags = [],
+}) {
   const [upvotes, setUpvotes] = useState(thread.upvotes ?? 0);
   const [hasVoted, setHasVoted] = useState(Boolean(thread.has_voted));
   const [voting, setVoting] = useState(false);
   const [opening, setOpening] = useState(false);
   const router = useRouter();
   const threadHref = `/p/${thread.forum.slug}/${thread.id}`;
+  const hasFeaturedMetaTag = leadingMetaTags.some(
+    (tag) => tag.key === "featured" || tag.variant === "featured",
+  );
   const showsAttachments =
     (thread.attachments?.length ?? 0) > 0 || linkUrls(thread.description).length > 0;
   const hasPoll = Boolean(thread.poll);
@@ -103,9 +111,10 @@ export default function ThreadCard({ thread, highlight = null, mobileTag = "foru
       <div className="flex w-full items-start justify-between gap-8">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <ThreadMetaTags
-            tags={buildThreadMetaTags(thread.forum, thread)}
+            tags={[...leadingMetaTags, ...buildThreadMetaTags(thread.forum, thread)]}
             postedAgo={formatEditedOrPostedAgo(thread)}
-            mobileTag={mobileTag}
+            mobileTag={hasFeaturedMetaTag ? "author" : mobileTag}
+            progressiveMobileTags={hasFeaturedMetaTag}
           />
 
           <div className="flex w-full min-w-0 flex-col gap-2">

@@ -62,7 +62,12 @@ export function buildThreadMetaTags(forum, thread) {
   return tags;
 }
 
-function MetaTag({ tag, hiddenOnMobile = false, hiddenOnPhone = false }) {
+function MetaTag({
+  tag,
+  hiddenOnMobile = false,
+  hiddenOnPhone = false,
+  progressiveMobileTags = false,
+}) {
   const remoteIcon = isRemoteAssetUrl(tag.icon);
   const iconBoxClass = tag.avatar
     ? "size-5 shrink-0 overflow-hidden rounded-full md:size-6"
@@ -71,13 +76,26 @@ function MetaTag({ tag, hiddenOnMobile = false, hiddenOnPhone = false }) {
     ? "size-full object-cover"
     : "size-full object-contain";
   const iconSize = tag.avatar ? 24 : 20;
-  const displayClass = hiddenOnMobile
-    ? "hidden lg:flex"
-    : hiddenOnPhone
-      ? "hidden md:flex"
-      : "flex";
+  const progressiveDisplayClass =
+    tag.key === "featured" || tag.key === "author"
+      ? "flex"
+      : tag.key === "forum"
+        ? "hidden min-[520px]:flex"
+        : tag.key === "school"
+          ? "hidden min-[680px]:flex"
+          : "hidden lg:flex";
+  const displayClass = progressiveMobileTags
+    ? progressiveDisplayClass
+    : hiddenOnMobile
+      ? "hidden lg:flex"
+      : hiddenOnPhone
+        ? "hidden md:flex"
+        : "flex";
 
-  const className = `relative z-10 ${displayClass} h-6 shrink-0 cursor-pointer items-center gap-1 rounded-md bg-[#F5F5F5] px-1.5 text-[11px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB] md:h-7 md:gap-1.5 md:px-2 md:text-[12px]`;
+  const className =
+    tag.variant === "featured"
+      ? `relative z-10 ${displayClass} h-6 w-[76px] shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[6px] border-[0.5px] border-[#CCCCCC] bg-[#F0E92F] px-2 py-1 font-['Roboto'] text-[12px] font-normal leading-4 tracking-normal text-black`
+      : `relative z-10 ${displayClass} h-6 shrink-0 cursor-pointer items-center gap-1 rounded-md bg-[#F5F5F5] px-1.5 text-[11px] font-bold leading-none text-black transition-colors hover:bg-[#EBEBEB] md:h-7 md:gap-1.5 md:px-2 md:text-[12px]`;
 
   const content = (
     <>
@@ -122,21 +140,26 @@ export default function ThreadMetaTags({
   mobileTag = null,
   forumOnlyOnMobile = false,
   hideForumOnPhone = false,
+  progressiveMobileTags = false,
 }) {
   const visibleOnMobile = mobileTag ?? (forumOnlyOnMobile ? "forum" : null);
+  const visibleTags = tags.slice(0, 4);
 
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-1.5 md:gap-2">
-      {tags.map((tag) => (
+      {visibleTags.map((tag) => (
         <MetaTag
           key={tag.key ?? tag.label}
           tag={tag}
-          hiddenOnMobile={visibleOnMobile != null && tag.key !== visibleOnMobile}
+          hiddenOnMobile={
+            !tag.alwaysVisible && visibleOnMobile != null && tag.key !== visibleOnMobile
+          }
           hiddenOnPhone={hideForumOnPhone && tag.key === "forum"}
+          progressiveMobileTags={progressiveMobileTags}
         />
       ))}
       {postedAgo ? (
-        <span className="shrink-0 text-[11px] leading-none text-[#595959] md:text-[12px]">
+        <span className="shrink-0 text-[11px] leading-none text-black md:text-[12px]">
           {postedAgo}
         </span>
       ) : null}

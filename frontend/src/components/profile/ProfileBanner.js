@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { format } from "date-fns";
 import { mk } from "date-fns/locale";
-import Image from "next/image";
 import Link from "next/link";
 import { followUser, unfollowUser } from "@/api/profile";
 import CheckIcon from "@/components/ui/CheckIcon";
+import Avatar from "@/components/ui/Avatar";
 import LogoutDialogs from "@/components/shell/LogoutDialogs";
 import { useLogout } from "@/hooks/useLogout";
 import { useProfile } from "@/hooks/useProfile";
@@ -58,9 +58,14 @@ export default function ProfileBanner({
 }) {
   const { user: viewer, loading: viewerLoading } = useProfile();
   const logout = useLogout();
-  const [following, setFollowing] = useState(Boolean(isFollowing));
+  const [followState, setFollowState] = useState(null);
   const [followBusy, setFollowBusy] = useState(false);
   const [followError, setFollowError] = useState("");
+
+  const following =
+    followState?.username === user?.username
+      ? followState.isFollowing
+      : Boolean(isFollowing);
 
   const studentData = readStudentData(user);
   const school = studentData?.school ?? null;
@@ -72,10 +77,6 @@ export default function ProfileBanner({
   const schoolHref = schoolForumSlug ? `/p/${schoolForumSlug}` : null;
   const schoolLabel = [school?.name, city].filter(Boolean).join(", ");
   const joined = user.created_at ? joinedLabel(user.created_at) : null;
-
-  useEffect(() => {
-    setFollowing(Boolean(isFollowing));
-  }, [isFollowing]);
 
   async function handleFollowToggle() {
     if (!user?.username || followBusy) return;
@@ -93,7 +94,7 @@ export default function ProfileBanner({
     }
 
     const nextFollowing = !following;
-    setFollowing(nextFollowing);
+    setFollowState({ username: user.username, isFollowing: nextFollowing });
     setFollowBusy(true);
 
     try {
@@ -104,13 +105,13 @@ export default function ProfileBanner({
       const resolvedFollowing =
         typeof data?.is_following === "boolean" ? data.is_following : nextFollowing;
 
-      setFollowing(resolvedFollowing);
+      setFollowState({ username: user.username, isFollowing: resolvedFollowing });
       onFollowChange?.({
         is_following: resolvedFollowing,
         followers: data?.followers,
       });
     } catch (err) {
-      setFollowing(!nextFollowing);
+      setFollowState({ username: user.username, isFollowing: !nextFollowing });
       if (err?.status === 401) {
         setFollowError(GUEST_FOLLOW_ERROR);
       } else if (err?.status === 403) {
@@ -125,23 +126,12 @@ export default function ProfileBanner({
     <section className="flex flex-col gap-6 rounded-3xl border border-[#CFE9ED] bg-white p-6 md:flex-row md:items-center md:justify-between">
       {/* Na telefon avatarot i imeto se vo prv red, a tagovite pod niv. */}
       <div className="grid min-w-0 grid-cols-[auto_1fr] items-center gap-x-6 gap-y-4">
-        {/^https?:\/\//i.test(user.imageUrl || "") ? (
-          <img
-            src={user.imageUrl}
-            alt={user.username}
-            width={88}
-            height={88}
-            className="size-22 shrink-0 rounded-full object-cover md:row-span-2"
-          />
-        ) : (
-          <Image
-            src={user.imageUrl || "/Generic-avatar-profile.svg"}
-            alt={user.username}
-            width={88}
-            height={88}
-            className="size-22 shrink-0 rounded-full object-cover md:row-span-2"
-          />
-        )}
+        <Avatar
+          src={user.imageUrl}
+          alt={user.username}
+          size="2xl"
+          sizeClassName="size-22 md:row-span-2"
+        />
 
         <div className="flex min-w-0 flex-col gap-1">
           <h1 className="font-(family-name:--font-oswald) text-[20px] font-bold leading-none text-black">

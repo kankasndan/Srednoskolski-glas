@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import AuthHero from "@/components/auth/AuthHero";
 import BackButton from "@/components/shell/BackButton";
 import AuthMasthead from "@/components/auth/AuthMasthead";
@@ -35,13 +34,6 @@ export default function Register() {
             className="lg:mt-0"
           />
         </div>
-
-        <p className="hidden text-center font-(family-name:--font-manrope) text-sm leading-none font-normal text-[#737373] lg:absolute lg:left-1/2 lg:top-[874px] lg:block lg:w-[487px] lg:-translate-x-1/2">
-          Веќе имаш профил?{" "}
-          <Link href="/login" className="font-bold text-[#582FF5]">
-            Најави се
-          </Link>
-        </p>
       </div>
     </main>
   );
