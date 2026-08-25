@@ -9,7 +9,7 @@ import PostTypeButtons from "@/components/compose/PostTypeButtons";
 import RichTextEditor from "@/components/compose/RichTextEditor";
 import TitleInput from "@/components/compose/TitleInput";
 import InfoDialog from "@/components/ui/InfoDialog";
-import PrimaryButton from "@/components/ui/PrimaryButton";
+import SubmitButton from "@/components/ui/SubmitButton";
 import { createThread } from "@/api/threads";
 import { useProfile } from "@/hooks/useProfile";
 import { userFacingError } from "@/lib/api";
@@ -177,13 +177,12 @@ export default function NewDiscussionForm() {
         checked={isAnonymous}
         onChange={setIsAnonymous}
         action={
-          <PrimaryButton
-            type="submit"
+          <SubmitButton
+            label={submitting ? "Се објавува…" : "Објави дискусија"}
             disabled={submitting || !canSubmitRequiredFields}
-            className="h-10 w-full px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:opacity-60 lg:w-auto lg:shrink-0 xl:w-48"
-          >
-            {submitting ? "Се објавува…" : "Објави дискусија"}
-          </PrimaryButton>
+            disabledTooltip="Ве молиме потполнете ги задолжителните полиња за да продолжите."
+            className="h-10 w-full cursor-pointer rounded-xl bg-[var(--color-primary-200)] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold text-white transition-colors hover:bg-[var(--color-primary-300)] active:bg-[var(--color-primary-300)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-200)] disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto lg:shrink-0 xl:w-48"
+          />
         }
       />
       {submitError ? (

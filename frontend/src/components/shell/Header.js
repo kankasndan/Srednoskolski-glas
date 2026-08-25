@@ -16,7 +16,7 @@ function MobileAuthControl() {
 
   // Profilnata go sledi logoto po golemina, ne ikonata za meni.
   if (loading) {
-    return <div className="size-12 shrink-0 md:size-14" aria-hidden />;
+    return <div className="size-11 shrink-0 md:size-13" aria-hidden />;
   }
 
   if (user) {
@@ -24,12 +24,12 @@ function MobileAuthControl() {
       <Link
         href="/profile"
         aria-label="Профил"
-        className="flex size-12 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full md:size-14"
+        className="flex size-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full md:size-13"
       >
         <Avatar
           src={user.imageUrl}
           size="xl"
-          sizeClassName="size-12 md:size-14"
+          sizeClassName="size-11 md:size-13"
           alt={user.username || "Профил"}
         />
       </Link>

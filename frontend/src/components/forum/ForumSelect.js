@@ -167,7 +167,12 @@ export default function ForumSelect({
             className="absolute left-0 top-11 z-10 flex max-h-72 w-full flex-col overflow-y-auto overflow-x-hidden rounded-xl border border-[#CCCCCC] bg-white py-1"
           >
             {options.map((forum) => (
-              <ForumOption key={forum.slug} forum={forum} onSelect={handleSelect} />
+              <ForumOption
+                key={forum.slug}
+                forum={forum}
+                selected={forum.slug === selected?.slug}
+                onSelect={handleSelect}
+              />
             ))}
           </div>
         )}

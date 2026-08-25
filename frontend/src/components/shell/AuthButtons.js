@@ -9,8 +9,8 @@ import { useClickOutside } from "@/hooks/useClickOutside";
 import { useLogout } from "@/hooks/useLogout";
 import { useProfile } from "@/hooks/useProfile";
 
-const HEADER_AVATAR_SIZE_CLASS =
-  "h-[56px] w-[56px] min-h-[56px] min-w-[56px] max-h-[56px] max-w-[56px]";
+const menuItemClass =
+  "flex h-12 w-full cursor-pointer items-center gap-3 px-4 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none transition-colors hover:bg-[#E5E5E5]";
 
 export default function AuthButtons() {
   // Zaednichka sesija, za da reagira i na odjava od druga strana.
@@ -29,76 +29,87 @@ export default function AuthButtons() {
   return (
     <>
       {user ? (
-        <div ref={menuRef} className="flex shrink-0 items-center gap-1">
-          <Link
-            href="/profile"
-            aria-label="Профил"
-            onClick={() => setMenuOpen(false)}
-            className={`flex ${HEADER_AVATAR_SIZE_CLASS} shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] focus-visible:ring-offset-2`}
+        <div ref={menuRef} className="relative h-14 w-fit shrink-0">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            aria-controls={menuId}
+            title={displayName}
+            className={`flex h-14 w-full cursor-pointer items-center gap-3 px-3 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] focus-visible:ring-offset-2 ${
+              menuOpen ? "rounded-t-xl bg-[#CFE9ED]" : "rounded-xl bg-white hover:bg-[#DCEBED]"
+            }`}
           >
-            <Avatar
-              src={avatarUrl}
-              size="xl"
-              sizeClassName={HEADER_AVATAR_SIZE_CLASS}
-              alt={displayName}
+            <Avatar src={avatarUrl} size="lg" alt={displayName} />
+
+            <span className="min-w-0 max-w-[140px] truncate text-left font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black">
+              {displayName}
+            </span>
+
+            <Image
+              src="/chevron-down.svg"
+              alt=""
+              width={16}
+              height={16}
+              className={`size-4 shrink-0 transition-transform ${menuOpen ? "rotate-180" : ""}`}
             />
-          </Link>
+          </button>
 
-          <div className="relative h-10 w-fit max-w-[180px] shrink-0">
-            <button
-              type="button"
-              onClick={() => setMenuOpen((open) => !open)}
-              aria-haspopup="menu"
-              aria-expanded={menuOpen}
-              aria-controls={menuId}
-              title={displayName}
-              className={`flex h-10 w-fit max-w-[180px] cursor-pointer items-center justify-center gap-1 p-1 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#582FF5] focus-visible:ring-offset-2 ${
-                menuOpen ? "rounded-t-xl bg-[#CFE9ED]" : "rounded-xl bg-white hover:bg-[#CFE9ED]"
-              }`}
+          {menuOpen && (
+            <div
+              id={menuId}
+              role="menu"
+              className="absolute left-0 top-14 z-50 flex w-full flex-col overflow-hidden rounded-b-xl border-x border-b border-[#CCCCCC] bg-white"
             >
-              <span className="flex min-w-0 max-w-[140px] items-center truncate font-[family-name:var(--font-roboto)] text-[16px] font-normal leading-4 tracking-normal">
-                {displayName}
-              </span>
-
-              <Image
-                src="/chevron-down.svg"
-                alt=""
-                width={16}
-                height={16}
-                className={`size-4 shrink-0 transition-transform ${menuOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            {menuOpen && (
-              <div
-                id={menuId}
-                role="menu"
-                className="absolute left-0 top-10 z-50 flex min-w-full flex-col overflow-hidden rounded-b-xl bg-white shadow-[0_12px_24px_rgba(0,0,0,0.12)]"
+              <Link
+                href="/profile"
+                role="menuitem"
+                onClick={() => setMenuOpen(false)}
+                className={`${menuItemClass} text-black`}
               >
-                <Link
-                  href="/profile"
-                  role="menuitem"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex h-10 w-full cursor-pointer items-center justify-center whitespace-nowrap border-t border-[#CCCCCC] p-1 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-black transition-colors hover:bg-[#E5E5E5]"
-                >
-                  Профил
-                </Link>
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="size-4 shrink-0">
+                  <circle cx="8" cy="5.5" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+                  <path
+                    d="M3 13.5C3 11.29 5.24 9.5 8 9.5C10.76 9.5 13 11.29 13 13.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                Профил
+              </Link>
 
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    logout.ask();
-                  }}
-                  disabled={logout.loggingOut}
-                  className="flex h-10 w-full cursor-pointer items-center justify-center whitespace-nowrap border-t border-[#CCCCCC] p-1 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-none text-[#DC2626] transition-colors hover:bg-[#E5E5E5] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {logout.loggingOut ? "Се одјавува…" : "Одјави се"}
-                </button>
-              </div>
-            )}
-          </div>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  logout.ask();
+                }}
+                disabled={logout.loggingOut}
+                className={`${menuItemClass} border-t border-[#CCCCCC] text-[var(--color-error)] disabled:cursor-not-allowed disabled:opacity-60`}
+              >
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="size-4 shrink-0">
+                  <path
+                    d="M6 2.5H3.5C2.95 2.5 2.5 2.95 2.5 3.5V12.5C2.5 13.05 2.95 13.5 3.5 13.5H6"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M10 11L13.5 8L10 5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path d="M13.5 8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                {logout.loggingOut ? "Се одјавува…" : "Одјави се"}
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="ml-auto flex h-10 w-75 shrink-0 items-center gap-3">

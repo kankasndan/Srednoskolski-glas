@@ -1,4 +1,12 @@
-export default function SubmitButton({ label, disabled, disabledTooltip }) {
+const defaultClass =
+  "h-14 w-full cursor-pointer rounded-[16px] bg-[#582FF5] font-(family-name:--font-manrope) text-[16px] font-bold text-white transition-colors hover:bg-[#3300F5] active:bg-[#3300F5] disabled:cursor-not-allowed disabled:bg-[#CCCCCC] disabled:text-white disabled:hover:bg-[#CCCCCC] disabled:active:bg-[#CCCCCC] lg:h-12 2xl:h-14 2xl:text-[18px]";
+
+export default function SubmitButton({
+  label,
+  disabled,
+  disabledTooltip,
+  className = defaultClass,
+}) {
   return (
     <div className="group relative">
       {disabled && disabledTooltip && (
@@ -7,11 +15,7 @@ export default function SubmitButton({ label, disabled, disabledTooltip }) {
           <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#0A0A0A]" />
         </div>
       )}
-      <button
-        type="submit"
-        disabled={disabled}
-        className="h-14 w-full cursor-pointer rounded-[16px] bg-[#582FF5] font-(family-name:--font-manrope) text-[16px] font-bold text-white transition-colors hover:bg-[#3300F5] active:bg-[#3300F5] disabled:cursor-not-allowed disabled:bg-[#CCCCCC] disabled:text-white disabled:hover:bg-[#CCCCCC] disabled:active:bg-[#CCCCCC] lg:h-12 2xl:h-14 2xl:text-[18px]"
-      >
+      <button type="submit" disabled={disabled} className={className}>
         {label}
       </button>
     </div>

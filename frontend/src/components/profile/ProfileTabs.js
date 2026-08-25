@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 function buildTabs(basePath, isOwnProfile) {
   const tabs = [
@@ -96,35 +96,31 @@ export default function ProfileTabs({
   isOwnProfile = true,
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const tabs = buildTabs(basePath, isOwnProfile);
   const rowRef = useRef(null);
-  const [edges, setEdges] = useState({ start: true, end: true });
+  const activeIndex = tabs.findIndex((tab) => tab.href === pathname);
 
-  function readEdges(row) {
-    if (!row) return;
+  // Strelkata go otvora sosedniot tab i go doveduva vo vidno pole.
+  function goToTab(direction) {
+    const index = activeIndex + direction;
+    const next = tabs[index];
+    if (!next) return;
 
-    setEdges({
-      start: row.scrollLeft <= 0,
-      end: row.scrollLeft + row.clientWidth >= row.scrollWidth - 1,
+    router.push(next.href);
+    rowRef.current?.children[index]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
     });
-  }
-
-  // Edno lizganje pokazuva sledniot komplet od tri taba.
-  function scroll(direction) {
-    const row = rowRef.current;
-    row?.scrollBy({ left: direction * row.clientWidth, behavior: "smooth" });
   }
 
   return (
     <nav className="flex h-12 items-center gap-1 rounded-xl border border-[#CCCCCC] px-1.5 md:h-auto md:gap-8 md:rounded-none md:border-0 md:border-b md:border-(--color-grays-300) md:px-0">
-      <ScrollArrow direction="left" disabled={edges.start} onClick={() => scroll(-1)} />
+      <ScrollArrow direction="left" disabled={activeIndex <= 0} onClick={() => goToTab(-1)} />
 
       <div
-        ref={(node) => {
-          rowRef.current = node;
-          readEdges(node);
-        }}
-        onScroll={(event) => readEdges(event.currentTarget)}
+        ref={rowRef}
         className="flex min-w-0 flex-1 snap-x snap-mandatory items-center overflow-x-auto [scrollbar-width:none] md:contents [&::-webkit-scrollbar]:hidden"
       >
         {tabs.map((tab) => (
@@ -139,7 +135,11 @@ export default function ProfileTabs({
         ))}
       </div>
 
-      <ScrollArrow direction="right" disabled={edges.end} onClick={() => scroll(1)} />
+      <ScrollArrow
+        direction="right"
+        disabled={activeIndex >= tabs.length - 1}
+        onClick={() => goToTab(1)}
+      />
     </nav>
   );
 }
