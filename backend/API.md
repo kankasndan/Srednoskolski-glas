@@ -590,11 +590,54 @@ GET /api/me
     "can_create_comments": true,
     "can_create_threads": true,
     "school_forum_id": 40
-  }
+  },
+  "sanction_notice": null,
+  "active_ban": null
 }
 ```
 
 `student_data` may be `null` for non-students. `onboarding_completed_at` is `null` until onboarding is finished. `school.forum` is included so the profile can link to that school’s forum (`/p/{slug}`).
+
+`sanction_notice` is the popup the client should show on the next app open, or `null`. Shape:
+
+```json
+{
+  "id": 12,
+  "type": "7-day",
+  "expires_at": "…",
+  "reason": "Навредувачки коментар.",
+  "content": {
+    "type": "comment",
+    "title": null,
+    "body": "Текстот на коментарот",
+    "gif_url": null
+  },
+  "can_appeal": true,
+  "has_pending_appeal": false
+}
+```
+
+`expires_at` is set for timed bans (`7-day`, `custom`) so the popup can show remaining time. `content` is `null` when the sanction is not tied to a comment or thread (admin-issued). `content.type` is `"comment"` or `"thread"`.
+
+| `type` | When |
+|--------|------|
+| `7-day` | Active 7-day ban, not yet dismissed |
+| `custom` | Active custom-duration ban, not yet dismissed |
+| `permanent_ban` | Active permanent ban, not yet dismissed |
+| `warning` | Unacknowledged warning (only if there is no ban notice) |
+| `ban_ended` | The latest ban expired or was lifted, and the “ban ended” popup has not been dismissed |
+
+`active_ban` is present for the whole duration of a ban (even after the popup is dismissed) and uses the same shape as `sanction_notice`. `expires_at` is `null` for a permanent ban. The create-thread button uses this for remaining time and to reopen the popup.
+
+Dismiss with `POST /api/me/sanctions/{id}/acknowledge` (banned users can still call this). After a timed ban that was already dismissed while active expires, `/api/me` returns `ban_ended` for the same sanction.
+
+Banned users (and warned users) can appeal with `POST /api/me/sanctions/{id}/appeals`:
+
+```json
+{ "explanation": "Коментарот беше сарказам, не навреда." }
+```
+
+`explanation` is required, max 2000 characters. One appeal per sanction. Staff review appeals in the admin panel; accepting an appeal revokes the ban.
 
 **Content permissions (Spatie)**
 
@@ -1520,6 +1563,7 @@ DELETE /api/media
 | `GET` | `/api/auth/{provider}/callback` | — | Browser redirect + session cookie |
 | `GET` | `/api/me` | yes | Current user |
 | `PUT` | `/api/me` | yes | Update avatar / school info |
+| `POST` | `/api/me/sanctions/{id}/acknowledge` | yes | Dismiss sanction popup |
 | `GET` | `/api/me/counts` | yes | Profile tab badge counts |
 | `GET` | `/api/me/threads` | yes | Current user’s threads |
 | `GET` | `/api/me/comments` | yes | Current user’s comments (+ thread context) |

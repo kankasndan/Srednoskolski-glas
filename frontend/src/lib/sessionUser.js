@@ -53,7 +53,11 @@ export async function loadSessionUser({ force = false } = {}) {
       (caps == null ||
         typeof caps.can_create_threads !== "boolean" ||
         typeof caps.can_change_school !== "boolean");
-    if (!missingCaps) {
+    const missingNotice =
+      cachedUser != null && !Object.prototype.hasOwnProperty.call(cachedUser, "sanction_notice");
+    const missingBan =
+      cachedUser != null && !Object.prototype.hasOwnProperty.call(cachedUser, "active_ban");
+    if (!missingCaps && !missingNotice && !missingBan) {
       return cachedUser;
     }
   }
@@ -85,6 +89,10 @@ export async function loadSessionUser({ force = false } = {}) {
       if (nextUser && typeof nextUser === "object") {
         nextUser.capabilities = data.capabilities ?? nextUser.capabilities ?? null;
         nextUser.permissions = data.permissions ?? nextUser.permissions ?? [];
+        nextUser.sanction_notice =
+          data.sanction_notice === undefined ? (nextUser.sanction_notice ?? null) : data.sanction_notice;
+        nextUser.active_ban =
+          data.active_ban === undefined ? (nextUser.active_ban ?? null) : data.active_ban;
       }
 
       cachedUser = nextUser;

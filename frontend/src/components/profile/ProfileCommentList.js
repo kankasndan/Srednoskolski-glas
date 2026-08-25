@@ -95,12 +95,23 @@ function ProfileCommentItem({ comment: initialComment, onDeleted, canManage = tr
               >
                 ↳
               </span>
-              <CommentBody
-                text={comment.content}
-                mentions={comment.mentions}
-                muted
-                className="min-w-0 flex-1 font-(family-name:--font-manrope) text-[12px] leading-snug"
-              />
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                {comment.content ? (
+                  <CommentBody
+                    text={comment.content}
+                    mentions={comment.mentions}
+                    muted
+                    className="min-w-0 font-(family-name:--font-manrope) text-[12px] leading-snug"
+                  />
+                ) : null}
+                {comment.gif_url ? (
+                  <img
+                    src={comment.gif_url}
+                    alt="GIF"
+                    className="max-w-40 rounded-xl"
+                  />
+                ) : null}
+              </div>
             </div>
           </div>
         </div>

@@ -21,6 +21,7 @@ class ProfileCommentResource extends JsonResource
         return [
             'id' => $this->id,
             'content' => $this->content,
+            'gif_url' => $this->gif_url,
             'parent_id' => $this->parent_id,
             'upvotes' => $this->upvotes,
             'has_voted' => (bool) ($this->has_voted ?? false),

@@ -16,7 +16,7 @@ export default function EditCommentDialog({
   const [content, setContent] = useState(comment?.content ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const isEmpty = content.trim() === "";
+  const isEmpty = content.trim() === "" && !comment?.gif_url;
 
   async function handleSubmit(event) {
     event.preventDefault();

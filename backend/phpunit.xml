@@ -34,5 +34,6 @@
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="CONTENT_MODERATION_ENABLED" value="false"/>
         <env name="GEMINI_API_KEY" value="test-gemini-key"/>
+        <env name="GIPHY_API_KEY" value="test-giphy-key"/>
     </php>
 </phpunit>

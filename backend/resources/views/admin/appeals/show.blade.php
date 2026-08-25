@@ -136,7 +136,7 @@
                                 Пријавена ставка
                             @endif
                         </p>
-                        <p class="text-sm text-gray-700">
+                        <p className="text-sm text-gray-700">
                             @if ($reportableType === 'Comment')
                                 {{ $reportable?->content }}
                             @elseif ($reportableType === 'Thread')
@@ -145,6 +145,9 @@
                                 {{ $report->reason }}
                             @endif
                         </p>
+                        @if ($reportableType === 'Comment' && $reportable?->gif_url)
+                            <img src="{{ $reportable->gif_url }}" alt="GIF" class="mt-3 max-h-40 rounded-lg">
+                        @endif
                     @else
                         <p class="text-sm text-gray-500">Нема поврзана пријава за оваа санкција.</p>
                     @endif

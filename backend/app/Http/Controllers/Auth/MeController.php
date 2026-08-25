@@ -23,10 +23,14 @@ class MeController extends Controller
 
         $syncPermissions->ensureFresh($user);
 
+        $activeBan = $user->activeBan();
+
         return response()->json([
             'user' => (new MeResource($user))->resolve(),
             'permissions' => $user->getAllPermissions()->pluck('name')->values(),
             'capabilities' => $enrollment->allCapabilities($user),
+            'sanction_notice' => $user->pendingSanctionNotice($activeBan),
+            'active_ban' => $user->activeBanPayload($activeBan),
         ]);
     }
 }

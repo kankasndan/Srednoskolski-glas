@@ -36,7 +36,8 @@ class StoreCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'content' => ['required', 'string', 'min:1', 'max:1000'],
+            'content' => ['required_without:gif_url', 'nullable', 'string', 'max:1000'],
+            'gif_url' => ['required_without:content', 'nullable', 'url', 'max:255'],
             'parent_id' => ['nullable', 'integer', 'exists:comments,id'],
         ];
     }

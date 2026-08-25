@@ -2,13 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { BanRemainingTip, useCreateThreadAction } from "@/hooks/useCreateThreadAction";
 import { useProfile } from "@/hooks/useProfile";
-import { canCreateThreads, needsOnboarding } from "@/lib/capabilities";
+import { needsOnboarding } from "@/lib/capabilities";
 
 export default function CommunityBanner() {
   const { user, loading } = useProfile();
   const incomplete = !loading && needsOnboarding(user);
-  const showCreate = !loading && canCreateThreads(user);
+  const { allowed, remaining, onClick } = useCreateThreadAction();
+  const showCreate = !loading && allowed;
 
   // Merkata e shirinata na banerot: so sidebar na tablet ostanuva samo ~590px.
   return (
@@ -46,13 +48,16 @@ export default function CommunityBanner() {
             Заврши регистрација
           </Link>
         ) : showCreate ? (
-          <Link
-            href="/new"
-            className="flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0] @[760px]:w-[268px]"
-          >
-            <Image src="/plus.svg" alt="" width={24} height={24} className="size-6" />
-            <span>Започни нова дискусија</span>
-          </Link>
+          <BanRemainingTip remaining={remaining} className="w-full @[760px]:w-[268px]">
+            <Link
+              href="/new"
+              onClick={onClick}
+              className="flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#582FF5] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-white transition-colors hover:bg-[#4B25E0] @[760px]:w-[268px]"
+            >
+              <Image src="/plus.svg" alt="" width={24} height={24} className="size-6" />
+              <span>Започни нова дискусија</span>
+            </Link>
+          </BanRemainingTip>
         ) : null}
       </section>
     </div>

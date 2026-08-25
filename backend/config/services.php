@@ -46,4 +46,12 @@ return [
         'redirect' => env('FACEBOOK_REDIRECT_URI'),
     ],
 
+    'giphy' => [
+        'key' => env('GIPHY_API_KEY'),
+        'base_url' => env('GIPHY_BASE_URL', 'https://api.giphy.com/v1'),
+        'limit' => 24,
+        'rating' => 'g',
+        'timeout' => 5,
+    ],
+
 ];

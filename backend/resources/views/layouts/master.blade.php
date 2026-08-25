@@ -84,7 +84,7 @@
                                 <div class="text-[12px] text-[#595959]">
                                     {{ $data['message'] ?? '' }}
                                 </div>
-                                @if (($data['count'] ?? 1) > 1)
+                                @if (isset($data['report_id']) && ($data['count'] ?? 1) > 1)
                                     <div class="mt-1 text-[11px] font-semibold text-my-purple">
                                         {{ $data['count'] }} пријави
                                     </div>

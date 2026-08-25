@@ -213,3 +213,24 @@ it('explains when gemini image quota is not available', function () {
         ->assertUnprocessable()
         ->assertJsonPath('errors.file.0', 'Генерирањето аватари бара платена Gemini квота за слики. Провери billing за проектот на API клучот.');
 });
+
+it('explains when gemini_image_model cannot draw images', function () {
+    Http::fake([
+        'generativelanguage.googleapis.com/*' => Http::response([
+            'error' => [
+                'code' => 400,
+                'message' => 'This model only supports text output.',
+                'status' => 'INVALID_ARGUMENT',
+            ],
+        ], 400),
+    ]);
+
+    $user = User::factory()->create(['onboarding_completed_at' => now()]);
+
+    $this->actingAs($user)
+        ->post('/api/onboarding/avatar', [
+            'file' => UploadedFile::fake()->image('me.jpg', 40, 40),
+        ])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.file.0', 'GEMINI_IMAGE_MODEL мора да биде модел што црта слики (на пр. gemini-2.5-flash-image), не flash-lite.');
+});

@@ -151,6 +151,13 @@ class GeminiAvatarGenerator
             );
         }
 
+        if ($status === 400 && str_contains($body, 'only supports text output')) {
+            return new AvatarGenerationFailed(
+                'GEMINI_IMAGE_MODEL мора да биде модел што црта слики (на пр. gemini-2.5-flash-image), не flash-lite.',
+                'Gemini avatar generation failed ('.$status.'): '.$body,
+            );
+        }
+
         return new AvatarGenerationFailed(
             'Не успеавме да го создадеме аватарот. Обиди се повторно.',
             'Gemini avatar generation failed ('.$status.'): '.$body,

@@ -52,6 +52,7 @@ export default function CommentActions({
   expanded,
   loadingReplies = false,
   onToggle,
+  canReply = true,
   onReply,
   onReport,
   onEdit,
@@ -146,12 +147,14 @@ export default function CommentActions({
 
           {/* 20px pomegju akciite: 8px gi pravi celite premnogu blisku (a11y). */}
           <div className="flex items-center gap-5">
-            <IconButton
-              icon="/comments icon/comment.svg"
-              iconClassName="size-5"
-              label="Одговори"
-              onClick={onReply}
-            />
+            {canReply ? (
+              <IconButton
+                icon="/comments icon/comment.svg"
+                iconClassName="size-5"
+                label="Одговори"
+                onClick={onReply}
+              />
+            ) : null}
             {isOwner ? (
               <ThreeDotsMenu
                 triggerClassName="size-5 rounded-md opacity-80 hover:opacity-100"

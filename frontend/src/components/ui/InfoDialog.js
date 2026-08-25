@@ -10,7 +10,13 @@ export default function InfoDialog({
   onClose,
 }) {
   return (
-    <DialogShell open={open} label={title} onClose={onClose} widthClassName="max-w-[400px]">
+    <DialogShell
+      open={open}
+      label={title}
+      onClose={onClose}
+      widthClassName="max-w-[400px]"
+      autoHeight={Boolean(note)}
+    >
       <div className="flex flex-col items-center gap-3 text-center">
         <p className="max-w-[288px] font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-snug text-[var(--color-primary-200)]">
           {title}

@@ -2,8 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useProfile } from "@/hooks/useProfile";
-import { canCreateThreads } from "@/lib/capabilities";
+import { BanRemainingTip, useCreateThreadAction } from "@/hooks/useCreateThreadAction";
 
 // Vo banerot merkata e shirinata na banerot, inaku shirinata na ekranot.
 const EXPAND_ON_VIEWPORT =
@@ -16,62 +15,68 @@ export default function StartDiscussionButton({
   full = false,
   inContainer = false,
 }) {
-  const { user, loading } = useProfile();
+  const { loading, allowed, remaining, onClick } = useCreateThreadAction();
 
-  if (loading || !canCreateThreads(user)) {
+  if (loading || !allowed) {
     return null;
   }
 
   if (full) {
     return (
-      <Link
-        href="/new"
-        className={`flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#582FF5] px-4 py-2 text-white transition-colors hover:bg-[#3300F5] active:bg-[#3300F5] ${className}`}
-      >
-        <Image src="/plus.svg" alt="" width={24} height={24} className="size-6" />
-        <span className="flex h-[19px] items-center whitespace-nowrap leading-none">
-          Започни нова дискусија
-        </span>
-      </Link>
+      <BanRemainingTip remaining={remaining} className="w-full">
+        <Link
+          href="/new"
+          onClick={onClick}
+          className={`flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#582FF5] px-4 py-2 text-white transition-colors hover:bg-[#3300F5] active:bg-[#3300F5] ${className}`}
+        >
+          <Image src="/plus.svg" alt="" width={24} height={24} className="size-6" />
+          <span className="flex h-[19px] items-center whitespace-nowrap leading-none">
+            Започни нова дискусија
+          </span>
+        </Link>
+      </BanRemainingTip>
     );
   }
 
   return (
-    <Link
-      href="/new"
-      className={`flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) bg-white transition-colors hover:bg-[#F5F5F5] ${
-        inContainer ? EXPAND_ON_CONTAINER : EXPAND_ON_VIEWPORT
-      } ${className}`}
-    >
-      {inContainer ? (
-        <>
-          <Image
-            src="/plus-black.svg"
-            alt=""
-            width={24}
-            height={24}
-            className="size-6 @[680px]:hidden"
-          />
-          <Image
-            src="/plus.svg"
-            alt=""
-            width={24}
-            height={24}
-            className="hidden size-6 @[680px]:block"
-          />
-          <span className="sr-only flex h-[19px] items-center leading-none @[680px]:not-sr-only @[680px]:w-[168px] @[680px]:whitespace-nowrap!">
-            Започни нова дискусија
-          </span>
-        </>
-      ) : (
-        <>
-          <Image src="/plus-black.svg" alt="" width={24} height={24} className="size-6 lg:hidden" />
-          <Image src="/plus.svg" alt="" width={24} height={24} className="hidden size-6 lg:block" />
-          <span className="sr-only flex h-[19px] items-center leading-none lg:not-sr-only lg:w-[168px] lg:whitespace-nowrap!">
-            Започни нова дискусија
-          </span>
-        </>
-      )}
-    </Link>
+    <BanRemainingTip remaining={remaining} className="shrink-0">
+      <Link
+        href="/new"
+        onClick={onClick}
+        className={`flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-(--color-primary-200) bg-white transition-colors hover:bg-[#F5F5F5] ${
+          inContainer ? EXPAND_ON_CONTAINER : EXPAND_ON_VIEWPORT
+        } ${className}`}
+      >
+        {inContainer ? (
+          <>
+            <Image
+              src="/plus-black.svg"
+              alt=""
+              width={24}
+              height={24}
+              className="size-6 @[680px]:hidden"
+            />
+            <Image
+              src="/plus.svg"
+              alt=""
+              width={24}
+              height={24}
+              className="hidden size-6 @[680px]:block"
+            />
+            <span className="sr-only flex h-[19px] items-center leading-none @[680px]:not-sr-only @[680px]:w-[168px] @[680px]:whitespace-nowrap!">
+              Започни нова дискусија
+            </span>
+          </>
+        ) : (
+          <>
+            <Image src="/plus-black.svg" alt="" width={24} height={24} className="size-6 lg:hidden" />
+            <Image src="/plus.svg" alt="" width={24} height={24} className="hidden size-6 lg:block" />
+            <span className="sr-only flex h-[19px] items-center leading-none lg:not-sr-only lg:w-[168px] lg:whitespace-nowrap!">
+              Започни нова дискусија
+            </span>
+          </>
+        )}
+      </Link>
+    </BanRemainingTip>
   );
 }

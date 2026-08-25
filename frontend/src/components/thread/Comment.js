@@ -16,6 +16,7 @@ import { useCommentShift } from "@/hooks/useCommentShift";
 import { useHashTarget } from "@/hooks/useHashTarget";
 import { useProfile } from "@/hooks/useProfile";
 import { userFacingError } from "@/lib/api";
+import { isActivelyBanned } from "@/lib/ban";
 import { formatEditedOrPostedAgo } from "@/lib/time";
 
 // Tailwind gi chita klasite staticki, pa sekoja varijanta e cela niza.
@@ -67,8 +68,8 @@ export default function Comment({
   const [content, setContent] = useState(comment.content ?? "");
   const [mentions, setMentions] = useState(comment.mentions ?? []);
   const [editedAt, setEditedAt] = useState(comment.edited_at ?? null);
-  // Prazna sodrzhina znachi izbrishan komentar shto ostanal zaradi odgovorite.
-  const [deleted, setDeleted] = useState(!comment.content);
+  // Prazna sodrzhina bez GIF znachi izbrishan komentar shto ostanal zaradi odgovorite.
+  const [deleted, setDeleted] = useState(!comment.content && !comment.gif_url);
   const [expanded, setExpanded] = useState(false);
   const [replies, setReplies] = useState([]);
   const [repliesCount, setRepliesCount] = useState(comment.replies_count ?? 0);
@@ -96,6 +97,7 @@ export default function Comment({
     ? user != null && comment.author.id === user.id
     : isAnonymousThread && isThreadOwner;
   const canManage = isOwn && !deleted;
+  const canReply = !isActivelyBanned(user);
 
   useEffect(() => {
     if (!linked) return;
@@ -173,7 +175,7 @@ export default function Comment({
   }
 
   function handleReplyDeleted(replyId) {
-    patchReply(replyId, { content: "", mentions: [] });
+    patchReply(replyId, { content: "", mentions: [], gif_url: null });
     onCommentDeleted?.(replyId);
   }
 
@@ -264,7 +266,9 @@ export default function Comment({
             </p>
           ) : (
             <>
-              <CommentBody text={content} mentions={mentions} muted={depth === 0} />
+              {content ? (
+                <CommentBody text={content} mentions={mentions} muted={depth === 0} />
+              ) : null}
               {comment.gif_url ? (
                 <img src={comment.gif_url} alt="GIF" className="max-w-60 rounded-xl" />
               ) : null}
@@ -279,8 +283,12 @@ export default function Comment({
             loadingReplies={loadingReplies}
             deleted={deleted}
             isOwner={canManage}
+            canReply={canReply}
             onToggle={toggleReplies}
-            onReply={() => setReplying(!replying)}
+            onReply={() => {
+              if (!canReply) return;
+              setReplying((open) => !open);
+            }}
             onReport={() => setReporting(true)}
             onEdit={() => {
               setActionError("");
@@ -349,7 +357,7 @@ export default function Comment({
           onClose={() => setReported(false)}
         />
 
-        {replying ? (
+        {replying && canReply ? (
           <CommentComposer
             compact
             threadId={threadId}
