@@ -104,7 +104,7 @@ export default function AuthButtons() {
         <div className="ml-auto flex h-10 w-75 shrink-0 items-center gap-3">
           <Link
             href="/login"
-            className="flex h-10 w-36 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#CCCCCC] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[#CCCCCC] hover:bg-[#E5E5E5] hover:text-(--color-grays-900)"
+            className="flex h-10 w-36 cursor-pointer items-center justify-center gap-4 rounded-xl border border-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-[14px] font-bold leading-none text-[#0A0A0A] transition-colors hover:border-[#582FF5] hover:bg-[#E5E5E5] hover:text-(--color-grays-900)"
           >
             Најави се
           </Link>

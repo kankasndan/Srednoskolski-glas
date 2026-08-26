@@ -75,7 +75,7 @@ export default function ThreadPage() {
   }
 
   return (
-    <AppShell>
+    <AppShell contentClassName="!px-2 sm:!px-6 lg:!px-8 xl:!px-12">
       <div className="flex w-full max-w-[1100px] flex-col gap-6 font-(family-name:--font-manrope) lg:gap-8">
         <div className="self-start">
           <BackButton

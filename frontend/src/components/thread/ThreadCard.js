@@ -66,6 +66,9 @@ export default function ThreadCard({
   const [opening, setOpening] = useState(false);
   const router = useRouter();
   const threadHref = `/p/${thread.forum.slug}/${thread.id}`;
+  const hasFeaturedMetaTag = leadingMetaTags.some(
+    (tag) => tag.key === "featured" || tag.variant === "featured",
+  );
   const showsAttachments =
     (thread.attachments?.length ?? 0) > 0 || linkUrls(thread.description).length > 0;
   const hasPoll = Boolean(thread.poll);
@@ -110,7 +113,8 @@ export default function ThreadCard({
           <ThreadMetaTags
             tags={[...leadingMetaTags, ...buildThreadMetaTags(thread.forum, thread)]}
             postedAgo={formatEditedOrPostedAgo(thread)}
-            mobileTag={mobileTag}
+            mobileTag={hasFeaturedMetaTag ? "author" : mobileTag}
+            progressiveMobileTags={hasFeaturedMetaTag}
           />
 
           <div className="flex w-full min-w-0 flex-col gap-2">

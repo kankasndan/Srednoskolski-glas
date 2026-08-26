@@ -167,7 +167,7 @@ export default function CommentComposer({
         autoFocus={compact}
         disabled={busy}
         className={`w-full resize-none rounded-[14px] border border-[#CCCCCC] p-3 text-[14px] leading-6 text-black outline-none transition-colors placeholder:text-[#595959] focus:border-[#582FF5] disabled:opacity-60 ${
-          compact ? "h-20" : "h-20 md:h-32"
+          compact ? "h-20" : "h-[180px] md:h-32"
         }`}
       />
 

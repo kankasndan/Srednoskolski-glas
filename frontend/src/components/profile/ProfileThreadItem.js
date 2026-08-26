@@ -86,7 +86,7 @@ export default function ProfileThreadItem({
         <div className="flex min-w-0 flex-col gap-4">
           <div className="flex items-center gap-2">
             <ProfileForumTag forum={thread.forum} />
-            <span className="font-(family-name:--font-roboto) text-[12px] leading-4 text-[#595959]">
+            <span className="font-(family-name:--font-roboto) text-[12px] leading-4 text-black">
               {formatEditedOrPostedAgo(thread)}
             </span>
           </div>

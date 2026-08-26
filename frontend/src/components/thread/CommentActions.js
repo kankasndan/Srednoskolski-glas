@@ -181,7 +181,7 @@ export default function CommentActions({
         </div>
 
         {createdAtLabel ? (
-          <span className="shrink-0 font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-[18px] text-[#999999]">
+          <span className="shrink-0 font-[family-name:var(--font-manrope)] text-[12px] font-normal leading-[18px] text-black">
             {createdAtLabel}
           </span>
         ) : null}
