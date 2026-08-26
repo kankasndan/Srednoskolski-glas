@@ -43,7 +43,7 @@ export default function AuthButtons() {
           >
             <Avatar src={avatarUrl} size="lg" alt={displayName} />
 
-            <span className="min-w-0 max-w-[140px] truncate text-left font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black">
+            <span className="min-w-0 max-w-[140px] text-left font-[family-name:var(--font-manrope)] text-[14px] font-bold leading-none text-black">
               {displayName}
             </span>
 
