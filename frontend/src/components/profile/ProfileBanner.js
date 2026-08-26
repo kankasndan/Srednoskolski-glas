@@ -123,14 +123,14 @@ export default function ProfileBanner({
   }
 
   return (
-    <section className="flex flex-col gap-6 rounded-3xl border border-[#CFE9ED] bg-white p-6 md:flex-row md:items-center md:justify-between">
+    <section className="flex flex-col gap-6 rounded-2xl border border-[#CFE9ED] bg-white p-4 md:flex-row md:items-center md:justify-between">
       {/* Na telefon avatarot i imeto se vo prv red, a tagovite pod niv. */}
-      <div className="grid min-w-0 grid-cols-[auto_1fr] items-center gap-x-6 gap-y-4">
+      <div className="grid min-w-0 grid-cols-[auto_1fr] items-center gap-x-3 gap-y-4">
         <Avatar
           src={user.imageUrl}
           alt={user.username}
-          size="2xl"
-          sizeClassName="size-22 md:row-span-2"
+          size="3xl"
+          sizeClassName="size-24 md:row-span-2"
         />
 
         <div className="flex min-w-0 flex-col gap-1">

@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
+import SelectField from "@/components/ui/SelectField";
+import { compactFieldClass } from "@/lib/fieldStyles";
 
 config.autoAddCss = false;
 
@@ -19,8 +21,7 @@ const DURATION_OPTIONS = [
   { value: 30, label: "1 месец" },
 ];
 
-const INPUT_CLASS =
-  "h-10 w-full min-w-0 rounded-xl border border-[#CCCCCC] px-4 py-2 font-[family-name:var(--font-manrope)] text-[14px] font-normal leading-5 text-black placeholder:text-[#595959] focus:border-[#582FF5] focus:outline-none";
+const inputClass = `${compactFieldClass} min-w-0 text-[#000000] placeholder:text-[#595959]`;
 
 function seedOptions(initialPoll) {
   const fromPoll = (initialPoll?.options ?? [])
@@ -91,6 +92,16 @@ export default function PollAttachment({ onClose, onChange, initialPoll = null }
     setOptions((prev) => prev.filter((_, i) => i !== index));
   }
 
+  // Traenjeto se prikažuva kako tekst, pa go mapirame nazad kon denovi.
+  const selectedDuration = DURATION_OPTIONS.find(
+    (option) => option.value === durationDays,
+  );
+
+  function selectDuration(label) {
+    const match = DURATION_OPTIONS.find((option) => option.label === label);
+    if (match) setDurationDays(match.value);
+  }
+
   return (
     <div className="flex max-w-full min-w-0 flex-col gap-5 rounded-2xl border border-[#CCCCCC] bg-white p-4">
       <div className="flex min-w-0 items-center justify-between gap-3">
@@ -112,31 +123,17 @@ export default function PollAttachment({ onClose, onChange, initialPoll = null }
         value={title}
         onChange={(event) => setTitle(event.target.value)}
         placeholder="Прашање за анкетата"
-        className={INPUT_CLASS}
+        className={inputClass}
       />
 
-      <label className="mt-2 flex flex-col gap-3">
-        <span className="font-[family-name:var(--font-manrope)] text-[13px] font-medium text-[#595959]">
-          Колку долго ќе трае анкетата?
-        </span>
-        <div className="relative">
-          <select
-            value={durationDays}
-            onChange={(event) => setDurationDays(Number(event.target.value))}
-            className={`${INPUT_CLASS} cursor-pointer appearance-none bg-white pr-10`}
-          >
-            {DURATION_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <FontAwesomeIcon
-            icon={faChevronDown}
-            className="pointer-events-none absolute top-1/2 right-1 h-4 w-4 -translate-y-1/2 text-[#595959]"
-          />
-        </div>
-      </label>
+      <SelectField
+        compact
+        id="poll-duration"
+        label="Колку долго ќе трае анкетата?"
+        value={selectedDuration?.label ?? ""}
+        onChange={selectDuration}
+        options={DURATION_OPTIONS.map((option) => option.label)}
+      />
 
       <div className="flex flex-col gap-3 border-t border-[#CCCCCC] pt-5">
         {options.map((option, index) => (
@@ -146,7 +143,7 @@ export default function PollAttachment({ onClose, onChange, initialPoll = null }
               value={option.label}
               onChange={(event) => updateOption(index, event.target.value)}
               placeholder={`Опција ${index + 1}`}
-              className={INPUT_CLASS}
+              className={inputClass}
             />
             {index >= MIN_OPTIONS && (
               <button
@@ -166,7 +163,7 @@ export default function PollAttachment({ onClose, onChange, initialPoll = null }
         <button
           type="button"
           onClick={addOption}
-          className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#CCCCCC] font-[family-name:var(--font-manrope)] text-[14px] text-[#595959] transition-colors hover:bg-[#DCEBED] hover:text-black"
+          className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#CCCCCC] font-[family-name:var(--font-manrope)] text-[14px] text-[#595959] transition-colors hover:bg-[#DCEBED] hover:text-black md:h-12"
         >
           <FontAwesomeIcon icon={faPlus} className="h-4 w-4" />
           Додади опција

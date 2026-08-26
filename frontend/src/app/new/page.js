@@ -24,7 +24,7 @@ export default function NewDiscussionPage() {
 
           <div
             aria-hidden="true"
-            className="pointer-events-none hidden select-none xl:flex xl:items-start xl:justify-center"
+            className="pointer-events-none hidden select-none xl:flex xl:items-start xl:justify-center xl:self-stretch xl:pt-22"
           >
             <Image
               src="/avatar.svg"
@@ -32,7 +32,7 @@ export default function NewDiscussionPage() {
               width={395}
               height={366}
               priority
-              className="h-[366px] w-[395px]"
+              className="sticky top-38 h-[366px] w-[395px]"
             />
           </div>
         </div>

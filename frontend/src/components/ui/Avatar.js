@@ -21,6 +21,7 @@ const SIZES = {
   lg: { px: 40, className: "size-10" },
   xl: { px: 56, className: "size-14" },
   "2xl": { px: 88, className: "size-22" },
+  "3xl": { px: 128, className: "size-32" },
 };
 
 // sizeClassName ja zamenuva goleminata koga taa se menuva po breakpoint.
