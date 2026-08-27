@@ -14,6 +14,9 @@ import { useForums } from "@/hooks/useForums";
 let sidebarScrollTop = 0;
 let sidebarCollapsed = false;
 
+// Rutite kade stranichnata lenta se sobira avtomatski.
+const AUTO_COLLAPSE_ROUTES = ["/new", "/about"];
+
 function getSelectedKey(pathname) {
   if (pathname === "/feed") return "nav:home";
   // Na /search nishto ne e izbrano vo stranichnata lenta.
@@ -33,7 +36,7 @@ export default function AppShell({ children, contentClassName = "" }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (pathname === "/new") {
+    if (AUTO_COLLAPSE_ROUTES.includes(pathname)) {
       sidebarCollapsed = true;
       localStorage.setItem("sidebarCollapsed", "true");
     } else {

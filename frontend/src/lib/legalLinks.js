@@ -4,4 +4,5 @@ export const LEGAL_LINKS = {
   terms: { href: "/terms", label: "Услови за користење" },
   privacy: { href: "/privacy", label: "Приватност" },
   rules: { href: "/rules", label: "Правила" },
+  about: { href: "/about", label: "За Нас" },
 };
