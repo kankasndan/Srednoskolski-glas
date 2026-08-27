@@ -3,18 +3,14 @@
 @section('title', 'Училишта')
 
 @section('content')
-    <div class="max-w-7xl mx-auto w-full px-4 py-6 space-y-6">
-
-        {{-- Header + Create button --}}
-        <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold text-gray-900">Училишта</h1>
-            @can('create schools')
-                <button type="button" onclick="openSchoolModal()"
-                    class="px-4 py-2 rounded-md bg-my-purple text-white text-sm font-medium hover:bg-my-purple/90">
-                    + Креирај училиште
-                </button>
-            @endcan
-        </div>
+    <x-admin.page-header title="Училишта" subtitle="Прегледај училишта и нивните градови.">
+        @can('create schools')
+            <button type="button" onclick="openSchoolModal()"
+                class="rounded-lg bg-my-purple px-4 py-2 text-sm font-medium text-white hover:bg-my-purple/90">
+                + Креирај училиште
+            </button>
+        @endcan
+    </x-admin.page-header>
 
         {{-- Filters: type (topic / school), city, search --}}
         <form action="{{ route('school.index') }}" method="GET" class="flex flex-wrap items-center gap-3 mb-6 w-full"
@@ -48,21 +44,7 @@
             @endif
         </form>
 
-        @if (session('success'))
-            <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
-                <ul class="list-disc pl-5 space-y-1">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+        <x-admin.flash />
 
         {{-- Shcools table --}}
         <div class="bg-white rounded-xl shadow overflow-x-auto">
@@ -120,34 +102,7 @@
             </table>
         </div>
 
-    </div>
-
-    {{-- Pagination --}}
-    <div class="flex justify-center mb-10">
-        <nav class="flex gap-1 text-sm">
-            @if ($schools->onFirstPage())
-                <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                    Претходна
-                </button>
-            @else
-                <a href="{{ $schools->previousPageUrl() }}"
-                    class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                    Претходна
-                </a>
-            @endif
-
-            @if ($schools->hasMorePages())
-                <a href="{{ $schools->nextPageUrl() }}"
-                    class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                    Следна
-                </a>
-            @else
-                <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                    Следна
-                </button>
-            @endif
-        </nav>
-    </div>
+        <x-admin.pagination :paginator="$schools" />
 
     {{-- Create --}}
     <div class="fixed inset-0 bg-black/40 hidden items-center justify-center" id="schoolModal">
@@ -167,7 +122,7 @@
                         id="schoolName" required>
                 </div>
 
-                <div id="schoolModal">
+                <div id="schoolCityField">
                     <label class="text-sm text-gray-600">Град</label>
                     <select class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="city"
                         id="schoolModalSelect">

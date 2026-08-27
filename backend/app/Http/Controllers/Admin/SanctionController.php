@@ -22,16 +22,28 @@ class SanctionController extends Controller
     {
         $this->authorize('view sanctions');
 
-        $expiredSanctions = Sanction::onlyTrashed()->with('user')->paginate(10);
-        $activeSanctions = Sanction::with('user')->whereNull('deleted_at')->paginate(10);
+        $tab = $request->get('tab') === 'history' ? 'history' : 'active';
+
+        $expiredSanctions = Sanction::onlyTrashed()->with('user')->paginate(10, ['*'], 'history_page')->withQueryString();
+        $activeSanctions = Sanction::with(['user', 'issuedBy'])->whereNull('deleted_at')->paginate(10)->withQueryString();
         $permanentBansCount = Sanction::where('type', 'permanent_ban')->count();
         $warnings30Days = Sanction::where('type', 'warning')->where('created_at', '>=', now()->subDays(30))->count();
+        $activeBansCount = Sanction::query()->bans()->active()->count();
 
         $appeals = Appeal::where('status', 'pending')->count();
 
         $sanctionId = $request->query('sanction');
 
-        return view('admin.sanctions.index', compact('expiredSanctions', 'activeSanctions', 'appeals', 'permanentBansCount', 'warnings30Days', 'sanctionId'));
+        return view('admin.sanctions.index', compact(
+            'expiredSanctions',
+            'activeSanctions',
+            'appeals',
+            'permanentBansCount',
+            'warnings30Days',
+            'activeBansCount',
+            'sanctionId',
+            'tab',
+        ));
     }
 
     public function remove(Sanction $sanction)

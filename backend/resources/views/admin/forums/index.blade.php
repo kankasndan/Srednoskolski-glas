@@ -3,18 +3,14 @@
 @section('title', 'Форуми')
 
 @section('content')
-    <div class="max-w-7xl mx-auto w-full px-4 py-6 space-y-6">
-
-        {{-- Header + Create button --}}
-        <div class="flex items-center justify-between">
-            <h1 class="text-xl font-semibold text-gray-900">Форуми</h1>
-            @can('create forums')
-                <button type="button" onclick="openForumModal()"
-                    class="px-4 py-2 rounded-md bg-my-purple text-white text-sm font-medium hover:bg-my-purple/90">
-                    + Креирај форум
-                </button>
-            @endcan
-        </div>
+    <x-admin.page-header title="Форуми" subtitle="Прегледај општи и училишни форуми.">
+        @can('create forums')
+            <button type="button" onclick="openForumModal()"
+                class="rounded-lg bg-my-purple px-4 py-2 text-sm font-medium text-white hover:bg-my-purple/90">
+                + Креирај форум
+            </button>
+        @endcan
+    </x-admin.page-header>
 
         {{-- Filters: type (topic / school), city, search --}}
         <form action="{{ route('forum.index') }}" method="GET" class="flex flex-wrap items-center gap-3 mb-6 w-full">
@@ -53,21 +49,7 @@
             @endif
         </form>
 
-        @if (session('success'))
-            <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
-                <ul class="list-disc pl-5 space-y-1">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+        <x-admin.flash />
 
         {{-- Forums table --}}
         <div class="bg-white rounded-xl shadow overflow-x-auto">
@@ -83,24 +65,21 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
 
-                    {{-- Single forum row (repeat per forum) --}}
-                    @foreach ($forums as $forum)
-                        <tr class="hover:cursor-pointer hover:bg-gray-100"
-                            onclick="window.location='{{ route('forum.show', $forum->id) }}'">
+                    @forelse ($forums as $forum)
+                        <tr class="hover:bg-gray-50">
                             <td class="px-4 py-3">
-                                <div class="flex items-center gap-3">
-                                    {{-- Forum icon --}}
+                                <a href="{{ route('forum.show', $forum) }}" class="flex items-center gap-3">
                                     @if ($forum->imageUrl)
                                         <img src="{{ $forum->imageUrl }}" alt=""
-                                            class="w-8 h-8 rounded-lg object-cover bg-gray-100">
+                                            class="h-8 w-8 rounded-lg bg-gray-100 object-cover">
                                     @else
-                                        <div class="w-8 h-8 rounded-lg bg-gray-200"></div>
+                                        <div class="h-8 w-8 rounded-lg bg-gray-200"></div>
                                     @endif
                                     <div>
-                                        <div class="font-medium text-gray-900">{{ $forum->name }}</div>
+                                        <div class="font-medium text-gray-900 hover:text-my-purple">{{ $forum->name }}</div>
                                         <div class="text-xs text-gray-400">{{ $forum->description }}</div>
                                     </div>
-                                </div>
+                                </a>
                             </td>
                             <td class="px-4 py-3">
                                 <span
@@ -115,41 +94,19 @@
                             <td class="px-4 py-3 text-right">{{ $forum->members_count }}</td>
 
                         </tr>
-                    @endforeach
-                    {{-- End single forum row --}}
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-400">
+                                Нема совпаѓачки форуми.
+                            </td>
+                        </tr>
+                    @endforelse
 
                 </tbody>
             </table>
         </div>
 
-    </div>
-
-    {{-- Pagination --}}
-    <div class="flex justify-center mb-10">
-        <nav class="flex gap-1 text-sm">
-            @if ($forums->onFirstPage())
-                <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                    Претходна
-                </button>
-            @else
-                <a href="{{ $forums->previousPageUrl() }}"
-                    class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                    Претходна
-                </a>
-            @endif
-
-            @if ($forums->hasMorePages())
-                <a href="{{ $forums->nextPageUrl() }}"
-                    class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                    Следна
-                </a>
-            @else
-                <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                    Следна
-                </button>
-            @endif
-        </nav>
-    </div>
+        <x-admin.pagination :paginator="$forums" />
 
     {{-- Create --}}
     <div class="fixed inset-0 bg-black/40 hidden items-center justify-center" id="forumModal">
@@ -172,8 +129,7 @@
                     <label class="text-sm text-gray-600">Слаг</label>
                     <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" name="slug"
                         placeholder="Опционално — се генерира од името ако е празно" id="shcoolSlug">
-                    <p class="text-xs text-gray-400 mt-1">Остави празно за автоматско генерирање from the name. Must match frontend
-                        slug rules.</p>
+                    <p class="text-xs text-gray-400 mt-1">Остави празно за автоматско генерирање од името.</p>
                 </div>
 
                 <div>
@@ -189,15 +145,13 @@
                         <label class="text-sm text-gray-600">Икона</label>
                         <input type="file" accept="image/*"
                             class="w-full text-sm border border-gray-300 p-2 rounded-md" name="icon">
-                        <p class="text-xs text-gray-400 mt-1">Опционално. Се прикачува на ImageKit. Otherwise uses
-                            /icons/&#123;slug&#125;.svg</p>
+                        <p class="text-xs text-gray-400 mt-1">Опционално. Се прикачува на ImageKit, инаку се користи /icons/{slug}.svg</p>
                     </div>
                     <div>
                         <label class="text-sm text-gray-600">Банер</label>
                         <input type="file" accept="image/*"
                             class="w-full text-sm border border-gray-300 p-2 rounded-md" name="banner">
-                        <p class="text-xs text-gray-400 mt-1">Опционално. Се прикачува на ImageKit. Otherwise uses
-                            /banners/&#123;slug&#125;.svg</p>
+                        <p class="text-xs text-gray-400 mt-1">Опционално. Се прикачува на ImageKit, инаку се користи /banners/{slug}.svg</p>
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-2">

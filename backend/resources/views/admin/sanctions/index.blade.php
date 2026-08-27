@@ -4,72 +4,47 @@
 @section('title', 'Санкции')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 py-8">
-
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Санкции</h1>
-                <p class="text-sm text-gray-500 mt-1">Управувај со предупредувања, забрани и жалби на корисници</p>
-            </div>
-            <button onclick="document.getElementById('newSanctionModal').classList.remove('hidden')"
-                class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition">
+    <x-admin.page-header title="Санкции" subtitle="Управувај со предупредувања, забрани и жалби на корисници.">
+            <button type="button" onclick="document.getElementById('newSanctionModal').classList.remove('hidden')"
+                class="inline-flex items-center gap-2 rounded-lg bg-my-purple px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-my-purple/90">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 Нова санкција
             </button>
-        </div>
+    </x-admin.page-header>
 
-        <!-- Stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white rounded-xl border border-gray-200 p-4">
+        <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-4">
+            <a href="{{ route('sanction.index', ['tab' => 'active']) }}" class="rounded-xl border border-gray-200 bg-white p-4 hover:border-my-purple/40">
                 <p class="text-xs text-gray-500">Активни забрани</p>
-                <p class="text-2xl font-bold text-gray-900 mt-1">{{ $activeSanctions->total() }}</p>
-            </div>
-            <div class="bg-white rounded-xl border border-gray-200 p-4">
+                <p class="mt-1 text-2xl font-bold text-gray-900">{{ number_format($activeBansCount) }}</p>
+            </a>
+            <div class="rounded-xl border border-gray-200 bg-white p-4">
                 <p class="text-xs text-gray-500">Предупредувања (30 дена)</p>
-                <p class="text-2xl font-bold text-gray-900 mt-1">
-                    {{ $warnings30Days }}</p>
+                <p class="mt-1 text-2xl font-bold text-gray-900">{{ $warnings30Days }}</p>
             </div>
-            <div class="bg-white rounded-xl border border-gray-200 p-4">
+            <a href="{{ route('appeal.index') }}" class="rounded-xl border border-gray-200 bg-white p-4 hover:border-my-purple/40">
                 <p class="text-xs text-gray-500">Чекаат жалба</p>
-                <p class="text-2xl font-bold text-amber-600 mt-1">{{ $appeals }}</p>
-            </div>
-            <div class="bg-white rounded-xl border border-gray-200 p-4">
+                <p class="mt-1 text-2xl font-bold text-amber-600">{{ $appeals }}</p>
+            </a>
+            <div class="rounded-xl border border-gray-200 bg-white p-4">
                 <p class="text-xs text-gray-500">Трајни забрани</p>
-                <p class="text-2xl font-bold text-gray-900 mt-1">
-                    {{ $permanentBansCount }}</p>
+                <p class="mt-1 text-2xl font-bold text-gray-900">{{ $permanentBansCount }}</p>
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="border-b border-gray-200 mb-6">
+        <div class="mb-6 border-b border-gray-200">
             <nav class="flex gap-6 -mb-px">
-                <button onclick="showTab('active')" id="tab-active"
-                    class="tab-btn border-b-2 border-red-600 text-red-600 font-medium text-sm pb-3">Активни санкции</button>
-                <button onclick="showTab('history')" id="tab-history"
-                    class="tab-btn border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm pb-3">Историја</button>
+                <a href="{{ route('sanction.index', ['tab' => 'active']) }}"
+                    class="border-b-2 pb-3 text-sm font-medium {{ $tab === 'active' ? 'border-my-purple text-my-purple' : 'border-transparent text-gray-500 hover:text-gray-700' }}">Активни санкции</a>
+                <a href="{{ route('sanction.index', ['tab' => 'history']) }}"
+                    class="border-b-2 pb-3 text-sm font-medium {{ $tab === 'history' ? 'border-my-purple text-my-purple' : 'border-transparent text-gray-500 hover:text-gray-700' }}">Историја</a>
             </nav>
         </div>
 
-        <!-- ACTIVE SANCTIONS TAB -->
-        @if (session('success'))
-            <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
-                <ul class="list-disc pl-5 space-y-1">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-        <div id="panel-active" class="tab-panel">
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <x-admin.flash />
+        @if ($tab === 'active')
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
                         <tr>
@@ -83,15 +58,17 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @foreach ($activeSanctions as $sanction)
+                        @forelse ($activeSanctions as $sanction)
                         @if($sanctionId && $sanction->id == $sanctionId)
                             <tr class="bg-gray-100">
                         @else
                             <tr class="hover:bg-gray-50">
                         @endif
-                                <td class="px-4 py-3 flex items-center gap-2">
-                                    <img src="{{ $sanction->user->imageUrl }}" class="w-8 h-8 rounded-full">
-                                    <span class="font-medium text-gray-900">{{ $sanction->user->username }}</span>
+                                <td class="px-4 py-3">
+                                    <a href="{{ route('user.show', $sanction->user) }}" class="flex items-center gap-2">
+                                        <x-admin.avatar :user="$sanction->user" size="sm" />
+                                        <span class="font-medium text-gray-900 hover:text-my-purple">{{ $sanction->user->username }}</span>
+                                    </a>
                                 </td>
                                 <td class="px-4 py-3">
                                     <span
@@ -111,7 +88,7 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-gray-600">{{ $sanction->reason }}</td>
-                                <td class="px-4 py-3 text-gray-600">{{ $sanction->issuedBy->username }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ $sanction->issuedBy?->username ?? '—' }}</td>
                                 @if ($sanction->expires_at != null)
                                     <td class="px-4 py-3 text-gray-600">{{ $sanction->expires_at->diffForHumans() }}</td>
                                 @else
@@ -122,62 +99,37 @@
                                     @if ($sanction->type == 'permanent_ban')
                                         @can('remove permanent sanctions')
                                             <form action="{{ route('sanction.remove', ['sanction' => $sanction->id]) }}"
-                                                method="POST">
+                                                method="POST" data-confirm="Отстрани ја оваа санкција?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="text-blue-600 hover:underline font-medium">Тргни
+                                                <button class="font-medium text-my-purple hover:underline">Тргни
                                                     санкција</button>
                                             </form>
                                         @endcan
                                     @else
                                         @can('remove sanctions')
                                             <form action="{{ route('sanction.remove', ['sanction' => $sanction->id]) }}"
-                                                method="POST">
+                                                method="POST" data-confirm="Отстрани ја оваа санкција?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="text-blue-600 hover:underline font-medium">Тргни
+                                                <button class="font-medium text-my-purple hover:underline">Тргни
                                                     санкција</button>
                                             </form>
                                         @endcan
                                     @endif
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="7" class="px-4 py-10 text-center text-sm text-gray-400">Нема активни санкции.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
-            <div class="flex justify-center mt-6">
-                <nav class="flex gap-1 text-sm">
-                    @if ($activeSanctions->onFirstPage())
-                        <button disabled
-                            class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Претходна
-                        </button>
-                    @else
-                        <a href="{{ $activeSanctions->previousPageUrl() }}"
-                            class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Претходна
-                        </a>
-                    @endif
-
-                    @if ($activeSanctions->hasMorePages())
-                        <a href="{{ $activeSanctions->nextPageUrl() }}"
-                            class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Следна
-                        </a>
-                    @else
-                        <button disabled
-                            class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Следна
-                        </button>
-                    @endif
-                </nav>
-            </div>
-        </div>
-
-        <!-- HISTORY TAB -->
-        <div id="panel-history" class="tab-panel hidden">
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <x-admin.pagination :paginator="$activeSanctions" />
+        @else
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
                         <tr>
@@ -188,9 +140,21 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @foreach ($expiredSanctions as $sanction)
+                        @forelse ($expiredSanctions as $sanction)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-medium text-gray-900">{{ $sanction->user->username }}</td>
+                                <td class="px-4 py-3">
+                                    @if ($sanction->user?->role === 'user')
+                                        <a href="{{ route('user.show', $sanction->user) }}" class="flex items-center gap-2">
+                                            <x-admin.avatar :user="$sanction->user" size="sm" />
+                                            <span class="font-medium text-gray-900 hover:text-my-purple">{{ $sanction->user->username }}</span>
+                                        </a>
+                                    @else
+                                        <div class="flex items-center gap-2">
+                                            <x-admin.avatar :user="$sanction->user" size="sm" />
+                                            <span class="font-medium text-gray-900">{{ $sanction->user?->username ?? '—' }}</span>
+                                        </div>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3"><span
                                         class="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">{{ match ($sanction->type) {
                                             'warning' => 'Предупредување',
@@ -204,40 +168,16 @@
                                 </td>
                                 <td class="px-4 py-3 text-gray-500">{{ $sanction->deleted_at?->format('d.m.Y') }}</td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-10 text-center text-sm text-gray-400">Нема историја на санкции.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
-            <div class="flex justify-center mt-6">
-                <nav class="flex gap-1 text-sm">
-                    @if ($expiredSanctions->onFirstPage())
-                        <button disabled
-                            class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Претходна
-                        </button>
-                    @else
-                        <a href="{{ $expiredSanctions->previousPageUrl() }}"
-                            class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Претходна
-                        </a>
-                    @endif
-
-                    @if ($expiredSanctions->hasMorePages())
-                        <a href="{{ $expiredSanctions->nextPageUrl() }}"
-                            class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Следна
-                        </a>
-                    @else
-                        <button disabled
-                            class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Следна
-                        </button>
-                    @endif
-                </nav>
-            </div>
-        </div>
-
-    </div>
+            <x-admin.pagination :paginator="$expiredSanctions" />
+        @endif
 
     <!-- NEW SANCTION MODAL -->
     <div id="newSanctionModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
@@ -307,7 +247,7 @@
                             class="text-sm font-medium text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-100">Откажи</button>
 
                         <button type="submit"
-                            class="text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg">Потврди
+                            class="text-sm font-medium text-white bg-my-purple hover:bg-my-purple/90 px-4 py-2 rounded-lg">Потврди
                             санкција</button>
                     </div>
                 </form>
@@ -318,17 +258,6 @@
 
     @push('scripts-sanctions')
         <script>
-            function showTab(name) {
-                document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
-                document.querySelectorAll('.tab-btn').forEach(b => {
-                    b.classList.remove('border-red-600', 'text-red-600');
-                    b.classList.add('border-transparent', 'text-gray-500');
-                });
-                document.getElementById('panel-' + name).classList.remove('hidden');
-                document.getElementById('tab-' + name).classList.add('border-red-600', 'text-red-600');
-                document.getElementById('tab-' + name).classList.remove('border-transparent', 'text-gray-500');
-            }
-
             document.querySelectorAll('input[name="type"]').forEach((radio) => {
                 radio.addEventListener('change', function() {
                     const isCustom = this.value === 'custom' && this.checked;

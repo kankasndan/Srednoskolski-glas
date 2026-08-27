@@ -3,32 +3,22 @@
 @section('title', 'Персонал: '.($user->username ?? 'Профил'))
 
 @section('content')
-    {{-- Page header --}}
-    <div class="flex flex-col items-start justify-between mb-6">
-        <div class="mb-6">
-            <a href="{{ route('role.index') }}" class="text-sm text-gray-500 hover:text-my-purple flex items-center gap-1">
-                &larr; Назад кон корисници
-            </a>
-        </div>
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Профил на персонал</h1>
-            <p class="text-sm text-gray-500">Прегледај и управувај со улогата и пермисиите на овој член од персоналот</p>
-        </div>
-        
+    <div class="mb-6">
+        <a href="{{ route('role.index') }}" class="text-sm text-gray-500 hover:text-my-purple flex items-center gap-1">
+            &larr; Назад кон персонал
+        </a>
     </div>
 
-    @if (session('success'))
-        <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
+    <x-admin.page-header title="Профил на персонал" subtitle="Прегледај и управувај со улогата на овој член од персоналот." />
+
+    <x-admin.flash />
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {{-- Left: Profile overview card --}}
         <div class="lg:col-span-1">
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 text-center">
-                <img src="https://via.placeholder.com/96" class="w-24 h-24 rounded-full mx-auto mb-4">
+                <x-admin.avatar :user="$user" size="2xl" class="mx-auto mb-4" />
                 <h2 class="text-lg font-bold text-gray-800">{{ $user->username }}</h2>
                 <p class="text-sm text-gray-500 mb-3">{{ $user->email }}</p>
 
@@ -138,7 +128,8 @@
                             </button>
                         </form>
 
-                        <form action="{{ route('role.destroy', ['user' => $user->id]) }}" method="POST">
+                        <form action="{{ route('role.destroy', ['user' => $user->id]) }}" method="POST"
+                            data-confirm="Одземи го пристапот на овој член од персоналот?">
                             @csrf
                             @method('DELETE')
                             <button

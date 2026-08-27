@@ -3,28 +3,11 @@
 @section('title', 'Детали за форум')
 
 @section('content')
-<div class="max-w-7xl mx-auto w-full px-4 py-6 space-y-6">
-
-    {{-- Back link --}}
-    <a href="{{ route('forum.index') }}" class="text-sm text-my-purple hover:underline mb-6">
+    <a href="{{ route('forum.index') }}" class="mb-6 inline-block text-sm text-my-purple hover:underline">
         &larr; Назад кон форуми
     </a>
 
-    @if (session('success'))
-        <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
-            <ul class="list-disc pl-5 space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    <x-admin.flash />
 
     {{-- Forum Header: banner, icon, name, description, type, city, slug --}}
     <div class="bg-white rounded-xl shadow overflow-hidden">
@@ -104,7 +87,7 @@
             @forelse ($threads as $thread)
             <div class="flex items-center justify-between px-5 py-4 shadow-sm shadow-gray-300/50">
                 <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-full bg-gray-200 shrink-0"></div>
+                    <x-admin.avatar :user="$thread->user" size="sm" />
 
                     <div>
                         <div class="flex items-center gap-2">
@@ -143,35 +126,10 @@
 
         </div>
 
-        {{-- Pagination for threads --}}
-        <div class="flex justify-center p-3">
-            <nav class="flex gap-1 text-sm">
-                @if ($threads->onFirstPage())
-                    <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                        Претходна
-                    </button>
-                @else
-                    <a href="{{ $threads->previousPageUrl() }}"
-                        class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                        Претходна
-                    </a>
-                @endif
-
-                @if ($threads->hasMorePages())
-                    <a href="{{ $threads->nextPageUrl() }}"
-                        class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                        Следна
-                    </a>
-                @else
-                    <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                        Следна
-                    </button>
-                @endif
-            </nav>
+        <div class="p-3">
+            <x-admin.pagination :paginator="$threads" />
         </div>
     </div>
-
-</div>
 
 {{-- Уреди форум Modal --}}
 <div class="fixed inset-0 bg-black/40 hidden items-center justify-center" id="forumModal">
@@ -255,7 +213,7 @@
     <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
         <h2 class="text-lg font-semibold text-gray-900">Избриши дискусија</h2>
         <p class="text-sm text-gray-600">
-            Ова трајно ќе избрише <span class="font-medium text-gray-900" id="deleteThreadName"></span>. You may also sanction the author in the same action.
+            Ова трајно ќе избрише <span class="font-medium text-gray-900" id="deleteThreadName"></span>. Можеш исто така да го санкционираш авторот.
         </p>
 
         <form method="POST" id="deleteThreadForm" action="">

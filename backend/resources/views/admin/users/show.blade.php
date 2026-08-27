@@ -9,16 +9,11 @@
         </a>
     </div>
 
-    @if (session('success'))
-        <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
+    <x-admin.flash />
 
     {{-- Profile header --}}
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-6 flex items-center gap-5">
-        <img src="{{ $user->imageUrl ?? 'https://via.placeholder.com/80' }}"
-            class="w-20 h-20 rounded-full object-cover border border-gray-200">
+        <x-admin.avatar :user="$user" size="xl" class="border border-gray-200" />
 
         <div class="flex-1">
             <div class="flex items-center gap-3">

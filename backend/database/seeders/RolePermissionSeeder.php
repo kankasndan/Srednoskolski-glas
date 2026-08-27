@@ -49,6 +49,11 @@ class RolePermissionSeeder extends Seeder
             'accept appeals',
             'reject appeals',
 
+            // Feedback (about-page ratings)
+            'view feedback',
+            'review feedback',
+            'delete feedback',
+
             // Users
             'view users',
             'search users',
@@ -127,6 +132,9 @@ class RolePermissionSeeder extends Seeder
             'search appeals',
             'view appeal details',
 
+            'view feedback',
+            'review feedback',
+
             'view users',
             'search users',
             'view user details',
@@ -152,6 +160,9 @@ class RolePermissionSeeder extends Seeder
 
             'accept appeals',
             'reject appeals',
+
+            'review feedback',
+            'delete feedback',
 
             'export user as pdf',
 

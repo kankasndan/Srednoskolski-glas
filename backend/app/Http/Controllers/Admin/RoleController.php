@@ -17,15 +17,20 @@ class RoleController extends Controller
     {
         $this->authorize('view roles page');
 
-        $users = User::orderBy('role')->with('forum')->get();
+        $staffByRole = User::query()
+            ->whereIn('role', ['super_admin', 'admin', 'moderator'])
+            ->orderBy('username')
+            ->with('forum')
+            ->get()
+            ->groupBy('role');
 
-        $roles = User::distinct()->get('role');
+        $roleOrder = ['super_admin', 'admin', 'moderator'];
 
         $forums = Forum::get();
 
         $assignableRoles = StaffRoleHierarchy::assignableRoles(Auth::user());
 
-        return view('admin.roles.index', compact('users', 'forums', 'roles', 'assignableRoles'));
+        return view('admin.roles.index', compact('staffByRole', 'roleOrder', 'forums', 'assignableRoles'));
     }
 
     public function update(User $user, Request $request)

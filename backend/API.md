@@ -958,6 +958,40 @@ The generation prompt lives in `config/avatars.php` under `generation.prompt`.
 
 ---
 
+## Feedback (about page)
+
+```
+POST /api/feedback
+```
+
+**Public.** Guests, logged-in users, and banned users can submit. CSRF cookie still required. Throttled to 5 submissions per hour per user (or IP for guests).
+
+```json
+{
+  "rating": 4,
+  "message": "Сакам повеќе теми за матура."
+}
+```
+
+| Field | Type | Rules |
+|-------|------|--------|
+| `rating` | integer | required, `1`–`5` |
+| `message` | string \| null | optional, max 2000 characters; blank strings are stored as `null` |
+
+**Success** `201`:
+
+```json
+{
+  "data": {
+    "id": 1
+  }
+}
+```
+
+Staff review submissions in the admin panel (`/admin/feedback`). Logged-in submissions store `user_id`; guests store `null`.
+
+---
+
 ## Cities & schools (onboarding dropdown)
 
 ```
@@ -1576,6 +1610,7 @@ DELETE /api/media
 | `POST` | `/api/u/{username}/follow` | yes | Follow user |
 | `DELETE` | `/api/u/{username}/follow` | yes | Unfollow user |
 | `POST` | `/api/logout` | yes | End session |
+| `POST` | `/api/feedback` | optional | About-page rating + optional message |
 | `PUT` | `/api/onboarding` | yes | Save profile |
 | `POST` | `/api/onboarding/avatar` | yes | Generate and save onboarding avatar |
 | `GET` | `/api/cities` | — | Cities + schools |

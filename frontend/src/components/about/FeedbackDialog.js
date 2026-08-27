@@ -5,7 +5,7 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as faStarFilled } from "@fortawesome/free-solid-svg-icons";
 import { faStar as faStarEmpty } from "@fortawesome/free-regular-svg-icons";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import DialogShell from "@/components/ui/DialogShell";
 import FieldLabel from "@/components/ui/FieldLabel";
 import PrimaryButton from "@/components/ui/PrimaryButton";
@@ -14,6 +14,7 @@ import { userFacingError } from "@/lib/api";
 config.autoAddCss = false;
 
 const RATINGS = [1, 2, 3, 4, 5];
+const MESSAGE_MAX = 2000;
 
 export default function FeedbackDialog({ open, onClose, onSubmit }) {
   const [rating, setRating] = useState(0);
@@ -22,6 +23,15 @@ export default function FeedbackDialog({ open, onClose, onSubmit }) {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const messageId = useId();
+
+  useEffect(() => {
+    if (open) return;
+
+    setRating(0);
+    setHovered(0);
+    setMessage("");
+    setError("");
+  }, [open]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -96,13 +106,17 @@ export default function FeedbackDialog({ open, onClose, onSubmit }) {
               id={messageId}
               value={message}
               disabled={submitting}
+              maxLength={MESSAGE_MAX}
               onChange={(event) => setMessage(event.target.value)}
               placeholder="Напиши ни што мислиш..."
               className="h-full w-full resize-none p-4 font-[family-name:var(--font-manrope)] text-[14px] leading-6 text-black outline-none placeholder:text-[#595959] disabled:opacity-60"
             />
           </div>
 
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-between gap-3">
+            <p className="font-[family-name:var(--font-manrope)] text-[11px] leading-4 text-[#9598A6]">
+              {message.length}/{MESSAGE_MAX}
+            </p>
             <PrimaryButton
               type="submit"
               disabled={submitting}

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AppealController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Admin\ForumController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RoleController;
@@ -46,6 +47,9 @@ Route::prefix('admin')
         // NOTIFICATIONS
 
         // MARK AS READ
+        Route::get('notifications', [AdminController::class, 'notifications'])
+            ->name('admin.notifications.index');
+
         Route::post('notifications/read-all', [AdminController::class, 'readAllNotifications'])
             ->name('admin.notifications.readAll');
         // POST: marking a notification read changes state, so it must not be
@@ -131,6 +135,35 @@ Route::prefix('admin')
             ->name('appeal.reject')
             ->middleware('permission:reject appeals');
 
+        // FEEDBACK
+        Route::get('feedback', [FeedbackController::class, 'index'])
+            ->name('feedback.index')
+            ->middleware('permission:view feedback');
+
+        Route::get('feedback/export', [FeedbackController::class, 'export'])
+            ->name('feedback.export')
+            ->middleware('permission:view feedback');
+
+        Route::get('feedback/{feedback}/show', [FeedbackController::class, 'show'])
+            ->name('feedback.show')
+            ->middleware('permission:view feedback');
+
+        Route::patch('feedback/{feedback}/review', [FeedbackController::class, 'review'])
+            ->name('feedback.review')
+            ->middleware('permission:review feedback');
+
+        Route::patch('feedback/{feedback}/unreview', [FeedbackController::class, 'unreview'])
+            ->name('feedback.unreview')
+            ->middleware('permission:review feedback');
+
+        Route::patch('feedback/{feedback}/note', [FeedbackController::class, 'note'])
+            ->name('feedback.note')
+            ->middleware('permission:review feedback');
+
+        Route::delete('feedback/{feedback}', [FeedbackController::class, 'destroy'])
+            ->name('feedback.destroy')
+            ->middleware('permission:delete feedback');
+
         // COMUNITY
 
         // USERS
@@ -182,7 +215,9 @@ Route::prefix('admin')
             ->middleware('permission:view forum details');
 
         // SCHOOLS
-        Route::get('shools', [SchoolController::class, 'index'])
+        Route::redirect('shools', '/admin/schools');
+
+        Route::get('schools', [SchoolController::class, 'index'])
             ->name('school.index')
             ->middleware('permission:view schools');
 

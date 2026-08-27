@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { submitFeedback } from "@/api/feedback";
 import AboutSectionTitle from "@/components/about/AboutSectionTitle";
 import FeedbackDialog from "@/components/about/FeedbackDialog";
 import InfoDialog from "@/components/ui/InfoDialog";
@@ -17,8 +18,8 @@ export default function AboutCta({ className = "" }) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [sent, setSent] = useState(false);
 
-  async function handleFeedback() {
-    // TODO: prakjanje na backend - endpointot ushte ne postoi.
+  async function handleFeedback({ rating, message }) {
+    await submitFeedback({ rating, message });
     setFeedbackOpen(false);
     setSent(true);
   }

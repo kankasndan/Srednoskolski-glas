@@ -20,6 +20,7 @@ use App\Http\Controllers\PollController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\StoreFeedbackController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserSearchController;
@@ -82,6 +83,11 @@ Route::middleware('throttle:api-reads')->group(function () {
 Route::get('/search', [SearchController::class, 'index'])
     ->middleware('throttle:api-search')
     ->name('search.index');
+
+// About-page feedback. Guests and banned users can submit; CSRF still applies.
+Route::post('/feedback', StoreFeedbackController::class)
+    ->middleware('throttle:feedback')
+    ->name('feedback.store');
 
 Route::middleware(['auth:sanctum', 'not_banned', 'onboarding'])->group(function () {
     // Username autocomplete for @mentions in comments.

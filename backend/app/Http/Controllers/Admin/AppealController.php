@@ -17,6 +17,8 @@ class AppealController extends Controller
     {
         $this->authorize('view appeals');
 
+        $tab = $request->get('tab') === 'history' ? 'history' : 'queue';
+
         $appeals = Appeal::query()
             ->with('sanction', 'user')
             ->where('status', 'pending')
@@ -25,11 +27,12 @@ class AppealController extends Controller
             ->withQueryString();
 
         $resolvedAppeals = Appeal::whereIn('status', ['accepted', 'rejected'])
-            ->with('sanction', 'user')
-            ->paginate(10)
+            ->with('sanction', 'user', 'admin')
+            ->latest('resolved_at')
+            ->paginate(10, ['*'], 'history_page')
             ->withQueryString();
 
-        return view('admin.appeals.index', compact('appeals', 'resolvedAppeals'));
+        return view('admin.appeals.index', compact('appeals', 'resolvedAppeals', 'tab'));
     }
 
     public function show(Appeal $appeal)
@@ -84,7 +87,7 @@ class AppealController extends Controller
 
         NewAppealNotification::markTargetRead($appeal);
 
-        return redirect()->route('appeal.index')->with(['success' => 'Жалбата е успешно прифатена.']);
+        return redirect()->route('appeal.index', ['tab' => 'queue'])->with(['success' => 'Жалбата е успешно прифатена.']);
     }
 
     public function reject(Appeal $appeal)
@@ -102,7 +105,7 @@ class AppealController extends Controller
 
         NewAppealNotification::markTargetRead($appeal);
 
-        return redirect()->route('appeal.index')->with(['success' => 'Жалбата е успешно одбиена.']);
+        return redirect()->route('appeal.index', ['tab' => 'queue'])->with(['success' => 'Жалбата е успешно одбиена.']);
     }
 
     /**

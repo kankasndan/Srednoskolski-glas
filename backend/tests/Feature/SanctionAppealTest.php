@@ -234,7 +234,7 @@ it('lets admin accept an appeal and lift the ban', function () {
     $this->actingAs($actor)
         ->from(route('appeal.show', $appeal))
         ->patch(route('appeal.accept', $appeal))
-        ->assertRedirect(route('appeal.index'))
+        ->assertRedirect(route('appeal.index', ['tab' => 'queue']))
         ->assertSessionHas('success');
 
     expect($user->fresh()->isBanned())->toBeFalse()
@@ -304,7 +304,7 @@ it('marks appeal notifications read when the appeal is accepted', function () {
     $this->actingAs($staff)
         ->from(route('appeal.show', $appeal))
         ->patch(route('appeal.accept', $appeal))
-        ->assertRedirect(route('appeal.index'));
+        ->assertRedirect(route('appeal.index', ['tab' => 'queue']));
 
     expect($staff->fresh()->unreadNotifications)->toHaveCount(0);
 });

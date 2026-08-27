@@ -33,8 +33,8 @@ class UserController extends Controller
                     $q->where('school_id', $request->get('school'));
                 });
             })
-            ->when($request->filled('sign_in_method'), function ($query) use ($request) {
-                $query->where('provider', $request->get('sign_in_method'));
+            ->when($request->filled('provider'), function ($query) use ($request) {
+                $query->where('provider', $request->get('provider'));
             })
             ->when($request->get('status') === 'banned', function ($query) {
                 $query->whereHas('sanctions', function ($q) {
@@ -80,7 +80,11 @@ class UserController extends Controller
     public function show(User $user)
     {
         $this->authorize('view user details');
-        abort_unless($user->role === 'user', 404);
+        abort_unless(in_array($user->role, ['user', 'moderator', 'admin', 'super_admin'], true), 404);
+
+        if ($user->role !== 'user') {
+            return redirect()->route('role.show', $user);
+        }
 
         $user->load(['studentData.school.city', 'sanctions', 'forums', 'threads', 'topics']);
 

@@ -3,6 +3,7 @@
 namespace App\View\Composers;
 
 use App\Models\Appeal;
+use App\Models\Feedback;
 use App\Models\Report;
 use Illuminate\View\View;
 
@@ -17,6 +18,7 @@ class AdminLayoutComposer
             'currentAdminRole' => $admin?->getRoleNames()->first() ?? 'Guest',
             'pendingReportsCount' => Report::pendingTargetCount(),
             'pendingAppealsCount' => Appeal::query()->where('status', 'pending')->count(),
+            'unreviewedFeedbackCount' => Feedback::unreviewedCount(),
         ]);
     }
 }

@@ -30,13 +30,11 @@
         };
     @endphp
 
-    <div class="p-6">
-
-        <div class="max-w-4xl mx-auto">
+    <div>
 
             <!-- Back link -->
             <a href="{{ route('appeal.index') }}"
-                class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
+                class="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
@@ -46,8 +44,7 @@
             <!-- Header -->
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-4">
-                    <img src="{{ $appealUser?->imageUrl }}" alt="{{ $appealUser?->username }}"
-                        class="w-14 h-14 rounded-full object-cover bg-gray-100">
+                    <x-admin.avatar :user="$appealUser" size="lg" />
                     <div>
                         <h1 class="text-xl font-bold text-gray-800">{{ $appealUser?->username }}</h1>
                         <p class="text-sm text-gray-500">
@@ -61,7 +58,8 @@
             </div>
 
             <!-- Ban Info Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6 hover:bg-gray-100 cursor-pointer" onclick="window.location='{{ route('sanction.index', ['sanction' => $sanction->id]) }}'">
+            <a href="{{ $sanction ? route('sanction.index', ['tab' => 'active', 'sanction' => $sanction->id]) : route('sanction.index') }}"
+                class="mb-6 block rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:border-my-purple/40">
                 <h2 class="text-sm font-semibold text-gray-500 uppercase mb-4">Детали за санкција</h2>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -93,24 +91,23 @@
                     <div>
                         <p class="text-xs text-gray-500 mb-1">Истекува</p>
                         <p class="text-sm font-medium text-gray-800">
-                            {{ $sanction?->expires_at ? ($sanction->expires_at->isPast() ? 'Expired' : $sanction->expires_at->diffForHumans()) : 'Permanent' }}
+                            {{ $sanction?->expires_at ? ($sanction->expires_at->isPast() ? 'Истечена' : $sanction->expires_at->diffForHumans()) : 'Трајна' }}
                         </p>
                     </div>
                     <div>
                         <p class="text-xs text-gray-500 mb-1">Решено на</p>
                         <p class="text-sm font-medium text-gray-800">
-                            {{ $appeal->resolved_at?->format('M d, Y · H:i') ?? 'Сè уште не е решено' }}
+                            {{ $appeal->resolved_at?->format('d.m.Y · H:i') ?? 'Сè уште не е решено' }}
                         </p>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Appeal Message -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
                 <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Жалба на членот</h2>
                 <div class="flex items-start gap-3">
-                    <img src="{{ $appealUser?->imageUrl }}" alt="{{ $appealUser?->username }}"
-                        class="size-10 rounded-full object-cover bg-gray-100">
+                    <x-admin.avatar :user="$appealUser" />
                     <div class="bg-gray-50 rounded-lg p-4 flex-1">
                         <p class="text-sm text-gray-700">
                             {{ $appeal->explanation }}
@@ -136,7 +133,7 @@
                                 Пријавена ставка
                             @endif
                         </p>
-                        <p className="text-sm text-gray-700">
+                        <p class="text-sm text-gray-700">
                             @if ($reportableType === 'Comment')
                                 {{ $reportable?->content }}
                             @elseif ($reportableType === 'Thread')
@@ -189,8 +186,5 @@
                         Жалбата е решена на: {{ $appeal->resolved_at->format('d.m.Y') }}
                 @endif
             </div>
-
-        </div>
-
     </div>
 @endsection

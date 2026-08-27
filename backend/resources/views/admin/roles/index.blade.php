@@ -1,107 +1,96 @@
 @extends('layouts.master')
 
-@section('title', 'Управување со персонал')
+@section('title', 'Персонал')
 
 @section('content')
-    {{-- Page header --}}
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Управување со персонал</h1>
-            <p class="text-sm text-gray-500">Додели или одземи улоги Админ и Модератор</p>
-        </div>
-        <button type="button" onclick="document.getElementById('grant-role-modal').classList.remove('hidden')"
-            class="bg-my-purple text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-my-purple/90">
-            + Додели улога
-        </button>
-    </div>
+    <x-admin.page-header title="Персонал" subtitle="Додели или одземи улоги Админ и Модератор.">
+        @can('grant roles')
+            <button type="button" onclick="document.getElementById('grant-role-modal').classList.remove('hidden')"
+                class="rounded-lg bg-my-purple px-4 py-2 text-sm font-medium text-white hover:bg-my-purple/90">
+                + Додели улога
+            </button>
+        @endcan
+    </x-admin.page-header>
 
-    {{-- Search bar --}}
-    <div class="flex items-center gap-3 mb-6 relative">
+    <div class="relative mb-6">
         <input type="text" id="staff-search" placeholder="Пребарај персонал по корисничко име..."
-            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
+            class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
 
         <div id="search-results"
-            class="absolute left-0 top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg hidden z-50">
+            class="absolute top-full left-0 z-50 mt-1 hidden w-full rounded-lg border border-gray-200 bg-white shadow-lg">
         </div>
     </div>
 
-    @if (session('success'))
-        <span class="text-green-400 text-sm">{{ session('success') }}</span>
-    @endif
+    <x-admin.flash />
 
-    <section class="mb-8 space-y-6">
-        @foreach ($roles as $role)
-            @if ($role->role != 'user')
-                <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{{ match ($role->role) {
+    <section class="mb-8 space-y-8">
+        @foreach ($roleOrder as $roleKey)
+            @php
+                $staff = $staffByRole->get($roleKey, collect());
+                $roleLabel = match ($roleKey) {
                     'super_admin' => 'Супер админи',
                     'admin' => 'Админи',
                     'moderator' => 'Модератори',
-                    default => $role->role,
-                } }}</h2>
-                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm ">
+                    default => $roleKey,
+                };
+            @endphp
+            <div>
+                <h2 class="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase">{{ $roleLabel }}</h2>
+                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                     <table class="w-full text-sm">
-                        <thead class="bg-gray-50 text-gray-500 text-left">
+                        <thead class="bg-gray-50 text-left text-gray-500">
                             <tr>
                                 <th class="px-4 py-3">Корисник</th>
                                 <th class="px-4 py-3">Е-пошта</th>
                                 <th class="px-4 py-3">Улога</th>
-                                @if ($role->role == 'moderator')
+                                @if ($roleKey === 'moderator')
                                     <th class="px-4 py-3">Форум</th>
                                 @endif
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 text-left">
-                            @foreach ($users as $user)
-                                @if ($user->role == $role->role)                                
-                                    <tr class="cursor-pointer"  onclick="window.location='{{ route('role.show', ['user' => $user->id]) }}'">
-                                            <td class="px-4 py-3 flex items-center gap-3">
-                                                <img src="https://via.placeholder.com/32" class="w-8 h-8 rounded-full">
-                                                <span class="font-medium text-gray-800">{{ $user->username }}</span>
-                                            </td>
-                                            <td class="px-4 py-3 text-gray-500">{{ $user->email }}</td>
-                                            <td class="px-4 py-3">
-                                                <span
-                                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{{ match ($user->role) {
-                                                        'super_admin' => 'Супер админ',
-                                                        'admin' => 'Админ',
-                                                        'moderator' => 'Модератор',
-                                                        default => $user->role,
-                                                    } }}</span>
-                                            </td>
-                                            @if ($user->role == 'moderator')
-                                                <td class="px-4 py-3 text-left">
-                                                    <div class="inline-flex gap-2">
-                                                        <div class="flex justify-between items-center gap-5">
-                                                            @if ($user->forum)
-                                                                <span
-                                                                    class="py-3 text-gray-800">{{ $user->forum->name }}</span>
-                                                            @else
-                                                                <span
-                                                                    class="py-3 text-gray-400">Нема избран форум</span>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            @endif
-                                        </tr>
-                                @endif
-                            @endforeach
+                            @forelse ($staff as $user)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3">
+                                        <a href="{{ route('role.show', $user) }}" class="flex items-center gap-3">
+                                            <x-admin.avatar :user="$user" size="sm" />
+                                            <span class="font-medium text-gray-800 hover:text-my-purple">{{ $user->username }}</span>
+                                        </a>
+                                    </td>
+                                    <td class="px-4 py-3 text-gray-500">{{ $user->email }}</td>
+                                    <td class="px-4 py-3">
+                                        <span
+                                            class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">{{ match ($user->role) {
+                                                'super_admin' => 'Супер админ',
+                                                'admin' => 'Админ',
+                                                'moderator' => 'Модератор',
+                                                default => $user->role,
+                                            } }}</span>
+                                    </td>
+                                    @if ($roleKey === 'moderator')
+                                        <td class="px-4 py-3 text-gray-800">
+                                            {{ $user->forum?->name ?? 'Нема избран форум' }}
+                                        </td>
+                                    @endif
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="{{ $roleKey === 'moderator' ? 4 : 3 }}"
+                                        class="px-4 py-8 text-center text-sm text-gray-400">
+                                        Нема членови во оваа улога.
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
-            @endif
+            </div>
         @endforeach
     </section>
 
-
-
-    </div>
-
-    {{-- Додели улога Modal --}}
-    {{-- Додели улога Modal --}}
-    <div id="grant-role-modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
-            <div class="flex items-center justify-between mb-4">
+    <div id="grant-role-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+        <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-lg">
+            <div class="mb-4 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-800">Додели улога на персонал</h3>
                 <button type="button" onclick="document.getElementById('grant-role-modal').classList.add('hidden')"
                     class="text-gray-400 hover:text-gray-600">✕</button>
@@ -110,21 +99,21 @@
             <form action="{{ route('role.grant') }}" method="POST">
                 @csrf
 
-                <div class="mb-4 relative">
+                <div class="relative mb-4">
                     <label class="text-sm font-medium text-gray-700">Пребарај корисник по корисничко име</label>
                     <input type="text" id="grant-search" autocomplete="off" placeholder="Внеси корисничко име..."
-                        class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-my-purple/40 focus:outline-none">
 
                     <input type="hidden" name="user_id" id="grant-selected-user-id">
 
                     <div id="grant-search-results"
-                        class="absolute left-0 top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg hidden z-50 max-h-40 overflow-y-auto">
+                        class="absolute top-full left-0 z-50 mt-1 hidden max-h-40 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
                     </div>
                 </div>
 
                 <div class="mb-6">
                     <label class="text-sm font-medium text-gray-700">Додели улога</label>
-                    <select name="role" required class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <select name="role" required class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
                         <option value="">Избери улога</option>
                         @foreach ($assignableRoles as $assignableRole)
                             <option value="{{ $assignableRole }}">{{ match ($assignableRole) {
@@ -141,12 +130,11 @@
                     <button type="button" onclick="document.getElementById('grant-role-modal').classList.add('hidden')"
                         class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Откажи</button>
                     <button type="submit"
-                        class="px-4 py-2 text-sm bg-my-purple text-white rounded-lg hover:bg-my-purple/90">Додели улога</button>
+                        class="rounded-lg bg-my-purple px-4 py-2 text-sm text-white hover:bg-my-purple/90">Додели улога</button>
                 </div>
             </form>
         </div>
     </div>
-
 
     @push('scripts')
         <script>
@@ -194,8 +182,6 @@
 
     @push('scripts1')
         <script>
-            // ... your existing staff-search JS stays here ...
-
             const grantSearchUrl = "{{ route('role.grantSearch') }}";
             const grantSearchInput = document.getElementById('grant-search');
             const grantResultsBox = document.getElementById('grant-search-results');
@@ -203,7 +189,7 @@
 
             grantSearchInput.addEventListener('input', function() {
                 const query = this.value.trim();
-                grantSelectedUserId.value = ''; // clear selection if user types again
+                grantSelectedUserId.value = '';
 
                 if (query.length < 2) {
                     grantResultsBox.classList.add('hidden');

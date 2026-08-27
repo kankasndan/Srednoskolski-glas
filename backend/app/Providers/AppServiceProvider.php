@@ -75,5 +75,17 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api-search', function (Request $request) {
             return Limit::perMinute(30)->by((string) $request->ip());
         });
+
+        RateLimiter::for('feedback', function (Request $request) {
+            $userKey = optional($request->user())->getAuthIdentifier() ?? $request->ip();
+
+            return Limit::perHour(5)
+                ->by((string) $userKey)
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'message' => 'Испрати премногу повратни информации. Обиди се повторно подоцна.',
+                    ], 429, $headers);
+                });
+        });
     }
 }

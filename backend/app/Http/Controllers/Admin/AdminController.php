@@ -94,6 +94,13 @@ class AdminController extends Controller
         return back();
     }
 
+    public function notifications()
+    {
+        $notifications = Auth::user()->notifications()->latest('updated_at')->paginate(20);
+
+        return view('admin.notifications.index', compact('notifications'));
+    }
+
     public function readNotification(string $id)
     {
         $notification = Auth::user()?->notifications()->where('id', $id)->firstOrFail();

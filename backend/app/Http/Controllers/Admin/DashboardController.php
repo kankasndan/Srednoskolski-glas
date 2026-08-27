@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appeal;
 use App\Models\City;
+use App\Models\Feedback;
 use App\Models\Forum;
+use App\Models\Report;
+use App\Models\Sanction;
 use App\Models\StudentData;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -36,9 +40,26 @@ class DashboardController extends Controller
 
         $registrationLabels = $this->registrationLabels($range);
         $registrationCounts = $this->registrationCounts($range);
-        //
 
-        return view('admin.dashboard.index', compact('totalUsers', 'activeUsers', 'newRegistrations30d', 'usersBySchool', 'usersByCity', 'topForums', 'registrationLabels', 'registrationCounts'));
+        $pendingReports = Report::pendingTargetCount();
+        $pendingAppeals = Appeal::query()->where('status', 'pending')->count();
+        $unreviewedFeedback = Feedback::unreviewedCount();
+        $activeBans = Sanction::query()->bans()->active()->count();
+
+        return view('admin.dashboard.index', compact(
+            'totalUsers',
+            'activeUsers',
+            'newRegistrations30d',
+            'usersBySchool',
+            'usersByCity',
+            'topForums',
+            'registrationLabels',
+            'registrationCounts',
+            'pendingReports',
+            'pendingAppeals',
+            'unreviewedFeedback',
+            'activeBans',
+        ));
     }
 
     /**

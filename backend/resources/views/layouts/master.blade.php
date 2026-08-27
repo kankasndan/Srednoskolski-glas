@@ -1,37 +1,40 @@
 <!DOCTYPE html>
-<html lang="mk">
+<html lang="mk" class="h-full">
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Админ Панел') — Средношколски Глас</title>
     <script src="https://kit.fontawesome.com/75475ebc14.js" crossorigin="anonymous"></script>
     <link rel="icon" type="image/svg" href="{{ asset('images/logo.svg') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="h-full overflow-hidden p-8">
-
+<body class="h-full overflow-hidden bg-[#f4f5f9] p-0 sm:p-4 lg:p-8">
 
     <header
-        class="grid h-[72px] w-full grid-cols-[auto_1fr_auto] items-center border-b border-[#E6E8F0] bg-white px-8 gap-6">
+        class="grid h-[72px] w-full grid-cols-[auto_1fr_auto] items-center gap-4 border-b border-[#E6E8F0] bg-[#f4f5f9] px-4 sm:gap-6 sm:px-8">
 
-        <!-- Brand (col 1) -->
         <div class="flex items-center gap-3">
-            <img src="{{ asset('images/logo.svg') }}" class="w-16" />
+            <button type="button" id="sidebarToggle"
+                class="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E6E8F0] text-[#595959] hover:bg-my-purple/5 lg:hidden"
+                aria-label="Отвори мени" aria-controls="sidebar" aria-expanded="false">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <img src="{{ asset('images/logo.svg') }}" alt="" class="w-12 sm:w-16" />
             <span class="whitespace-nowrap text-[16px] font-bold tracking-wide text-[#1F2333]">Админ Панел</span>
         </div>
 
-        <!-- Right side (col 3) -->
         <div class="flex items-center gap-4 justify-self-end">
 
             @php
                 $unreadCount = auth()->user()?->unreadNotifications()->count() ?? 0;
             @endphp
 
-            <!-- Notification bell -->
             <div class="relative">
-                <button id="bellBtn"
-                    class="relative flex h-9 w-9 items-center justify-center rounded-full border border-[#E6E8F0] text-[#595959] hover:bg-my-purple/5">
+                <button type="button" id="bellBtn"
+                    class="relative flex h-9 w-9 items-center justify-center rounded-full border border-[#E6E8F0] text-[#595959] hover:bg-my-purple/5"
+                    aria-label="Нотификации">
                     <i class="fa-regular fa-bell"></i>
 
                     @if ($unreadCount > 0)
@@ -42,9 +45,8 @@
                     @endif
                 </button>
 
-                <!-- Notifications dropdown -->
                 <div id="notifMenu"
-                    class="absolute right-0 top-[52px] hidden w-[320px] rounded-[10px] border border-[#E6E8F0] bg-white p-2 shadow-lg z-50">
+                    class="absolute right-0 top-[52px] z-50 hidden w-[min(320px,calc(100vw-2rem))] rounded-[10px] border border-[#E6E8F0] bg-white p-2 shadow-lg">
 
                     <div class="mb-2 flex items-center justify-between px-2">
                         <span class="text-[13px] font-bold text-[#1F2333]">Нотификации</span>
@@ -59,59 +61,61 @@
                         @endif
                     </div>
 
-                    @php
-                        $notifications = auth()->user()?->notifications()->latest('updated_at')->take(10)->get();
-                    @endphp
-
-                    @forelse($notifications as $notification)
+                    <div class="max-h-80 overflow-y-auto">
                         @php
-                            $data = $notification->data;
-                            $isUnread = is_null($notification->read_at);
+                            $notifications = auth()->user()?->notifications()->latest('updated_at')->take(30)->get();
                         @endphp
 
-                        <form method="POST" action="{{ route('admin.notifications.read', $notification->id) }}">
-                            @csrf
-                            <button type="submit"
-                                class="block w-full cursor-pointer rounded-[8px] px-3 py-2 text-left text-[13px] hover:bg-my-purple/5 {{ $isUnread ? 'bg-my-purple/10' : '' }}">
-                                <div class="flex items-center justify-between gap-2">
-                                    <span class="font-bold text-[#1F2333]">
-                                        {{ $data['title'] ?? 'Нотификација' }}
-                                    </span>
-                                    @if ($isUnread)
-                                        <span class="ml-2 h-2 w-2 shrink-0 rounded-full bg-my-purple"></span>
-                                    @endif
-                                </div>
-                                <div class="text-[12px] text-[#595959]">
-                                    {{ $data['message'] ?? '' }}
-                                </div>
-                                @if (isset($data['report_id']) && ($data['count'] ?? 1) > 1)
-                                    <div class="mt-1 text-[11px] font-semibold text-my-purple">
-                                        {{ $data['count'] }} пријави
+                        @forelse($notifications as $notification)
+                            @php
+                                $data = $notification->data;
+                                $isUnread = is_null($notification->read_at);
+                            @endphp
+
+                            <form method="POST" action="{{ route('admin.notifications.read', $notification->id) }}">
+                                @csrf
+                                <button type="submit"
+                                    class="block w-full cursor-pointer rounded-[8px] px-3 py-2 text-left text-[13px] hover:bg-my-purple/5 {{ $isUnread ? 'bg-my-purple/10' : '' }}">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="font-bold text-[#1F2333]">
+                                            {{ $data['title'] ?? 'Нотификација' }}
+                                        </span>
+                                        @if ($isUnread)
+                                            <span class="ml-2 h-2 w-2 shrink-0 rounded-full bg-my-purple"></span>
+                                        @endif
                                     </div>
-                                @endif
-                                <div class="mt-1 text-[11px] text-[#9598A6]">
-                                    {{ $notification->created_at?->diffForHumans() }}
-                                </div>
-                            </button>
-                        </form>
-                    @empty
-                        <div class="px-3 py-2 text-[13px] text-[#9598A6]">
-                            Нема нотификации.
-                        </div>
-                    @endforelse
+                                    <div class="text-[12px] text-[#595959]">
+                                        {{ $data['message'] ?? '' }}
+                                    </div>
+                                    @if (isset($data['report_id']) && ($data['count'] ?? 1) > 1)
+                                        <div class="mt-1 text-[11px] font-semibold text-my-purple">
+                                            {{ $data['count'] }} пријави
+                                        </div>
+                                    @endif
+                                    <div class="mt-1 text-[11px] text-[#9598A6]">
+                                        {{ $notification->created_at?->diffForHumans() }}
+                                    </div>
+                                </button>
+                            </form>
+                        @empty
+                            <div class="px-3 py-2 text-[13px] text-[#9598A6]">
+                                Нема нотификации.
+                            </div>
+                        @endforelse
+                    </div>
+
+                    <a href="{{ route('admin.notifications.index') }}"
+                        class="mt-1 block rounded-[8px] px-3 py-2 text-center text-[12px] font-medium text-my-purple hover:bg-my-purple/5">
+                        Види ги сите
+                    </a>
                 </div>
             </div>
 
             <div class="h-8 w-px bg-[#E6E8F0]"></div>
 
-            <!-- Admin dropdown (unchanged) -->
             <div class="relative">
-                <button id="userMenuBtn" class="flex items-center gap-2 rounded-[10px] px-2 py-1 hover:bg-my-purple/5">
-                    @if ($currentAdmin->imageUrl)
-                        <img src="{{ $currentAdmin->imageUrl }} " alt="" class="w-8 h-8 rounded-full">
-                    @else
-                        <img src="https://via.placeholder.com/32" class="w-8 h-8 rounded-full">
-                    @endif
+                <button type="button" id="userMenuBtn" class="flex items-center gap-2 rounded-[10px] px-2 py-1 hover:bg-my-purple/5">
+                    <x-admin.avatar :user="$currentAdmin" size="sm" />
                     <div class="hidden text-left sm:block">
                         <div class="whitespace-nowrap text-[13px] font-bold text-[#1F2333]">
                             {{ $currentAdmin->username }}</div>
@@ -131,7 +135,7 @@
                 </button>
 
                 <div id="userMenu"
-                    class="absolute right-0 top-[52px] hidden w-[200px] rounded-[10px] border border-[#E6E8F0] bg-white p-2 shadow-lg z-50">
+                    class="absolute right-0 top-[52px] z-50 hidden w-[200px] rounded-[10px] border border-[#E6E8F0] bg-white p-2 shadow-lg">
                     <a href="{{ route('admin.profile', ['user' => $currentAdmin->id]) }}"
                         class="block rounded-[8px] px-3 py-2 text-[14px] text-[#595959] hover:bg-my-purple/5">Мој
                         профил</a>
@@ -147,14 +151,16 @@
         </div>
     </header>
 
-    <main class="flex h-[calc(100vh-72px)] justify-center overflow-hidden">
+    <main class="relative flex h-[calc(100vh-72px)] overflow-hidden sm:h-[calc(100vh-72px-2rem)] lg:h-[calc(100vh-72px-4rem)]">
+
+        <div id="sidebarOverlay" class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden"></div>
 
         <nav id="sidebar"
-            class="flex h-full shrink-0 flex-col gap-0 overflow-y-auto border-r border-[#CCCCCC] pr-4 pl-4 pt-4 space-y-3">
+            class="fixed inset-y-0 left-0 z-40 flex h-full w-[260px] shrink-0 -translate-x-full flex-col gap-0 space-y-3 overflow-y-auto border-r border-[#CCCCCC] bg-white px-4 pt-4 transition-transform lg:static lg:z-0 lg:translate-x-0 lg:bg-transparent">
 
             @can('view dashboard')
                 <div class="px-1 pt-4 pb-1 text-[12px] font-bold uppercase tracking-wide text-[#9598A6]">
-                    Пoчетна табла
+                    Почетна табла
                 </div>
 
                 <a href="{{ route('admin.dashboard') }}" data-nav-key="nav:dashboard">
@@ -162,7 +168,7 @@
                 </a>
             @endcan
 
-            @if (auth()->user()?->can('view reports') || auth()->user()?->can('view sanctions') || auth()->user()?->can('view appeals'))
+            @if (auth()->user()?->can('view reports') || auth()->user()?->can('view sanctions') || auth()->user()?->can('view appeals') || auth()->user()?->can('view feedback'))
                 <div class="px-1 pt-4 pb-1 text-[12px] font-bold uppercase tracking-wide text-[#9598A6]">
                     Модерација
                 </div>
@@ -186,7 +192,13 @@
                 </a>
             @endcan
 
-            @if (auth()->user()?->can('view users') || auth()->user()?->can('view forums'))
+            @can('view feedback')
+                <a href="{{ route('feedback.index') }}" data-nav-key="nav:feedback" @if ($unreviewedFeedbackCount > 0) data-badge="{{ $unreviewedFeedbackCount }}" @endif>
+                    Мислења
+                </a>
+            @endcan
+
+            @if (auth()->user()?->can('view users') || auth()->user()?->can('view forums') || auth()->user()?->can('view schools'))
                 <div class="px-1 pt-4 pb-1 text-[12px] font-bold uppercase tracking-wide text-[#9598A6]">
                     Заедница
                 </div>
@@ -216,17 +228,35 @@
                 </div>
 
                 <a href="{{ route('role.index') }}" data-nav-key="nav:roles">
-                    Улоги и пермисии
+                    Персонал
                 </a>
             @endcan
 
         </nav>
 
-        <div class="h-full flex-1 overflow-y-auto max-w-6xl mx-auto w-full px-8 py-8">
-            @yield('content')
+        <div class="h-full w-full flex-1 overflow-y-auto">
+            <div class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+                @yield('content')
+            </div>
         </div>
 
     </main>
+
+    <dialog id="adminConfirmDialog"
+        class="w-full max-w-md rounded-xl border border-gray-200 bg-white p-0 shadow-xl backdrop:bg-black/40">
+        <form method="dialog" class="space-y-4 p-6">
+            <p id="adminConfirmMessage" class="text-sm text-gray-800">Дали си сигурен?</p>
+            <div class="flex justify-end gap-2">
+                <button value="cancel" class="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100">
+                    Откажи
+                </button>
+                <button value="confirm"
+                    class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">
+                    Потврди
+                </button>
+            </div>
+        </form>
+    </dialog>
 
     <script>
         function adminText(value, fallback = '') {
@@ -277,9 +307,7 @@
     @stack('scripts-appeals')
     @stack('scripts-user-show')
     @stack('scripts-school')
-
-
-
+    @stack('scripts-feedback')
 
 </body>
 

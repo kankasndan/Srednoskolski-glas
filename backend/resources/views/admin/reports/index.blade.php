@@ -3,52 +3,31 @@
 @section('title', 'Пријави')
 
 @section('content')
-    <div class="min-h-screen p-6 space-y-6">
+    <div class="space-y-6">
 
-        {{-- Header --}}
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-900">Пријави</h1>
-                <p class="text-sm text-slate-500">Прегледај содржина означена од AI и пријавена од корисници.</p>
-            </div>
-        </div>
+        <x-admin.page-header title="Пријави" subtitle="Прегледај содржина означена од AI и пријавена од корисници." />
 
-        {{-- Tabs --}}
-        <div class="flex gap-6 border-b border-slate-200">
-            <button data-tab-btn="queue"
-                class="tab-btn pb-3 border-b-2 text-sm font-medium
-               {{ ($activeTab ?? 'queue') === 'queue' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
+        <div class="flex gap-6 border-b border-gray-200">
+            <a href="{{ route('report.index', array_merge(request()->except(['page', 'tab']), ['tab' => 'queue'])) }}"
+                class="pb-3 border-b-2 text-sm font-medium {{ ($activeTab ?? 'queue') === 'queue' ? 'border-my-purple text-my-purple' : 'border-transparent text-gray-500' }}">
                 Пријави
-            </button>
-            <button data-tab-btn="history"
-                class="tab-btn pb-3 border-b-2 text-sm font-medium
-               {{ ($activeTab ?? 'queue') === 'history' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
+            </a>
+            <a href="{{ route('report.index', ['tab' => 'history']) }}"
+                class="pb-3 border-b-2 text-sm font-medium {{ ($activeTab ?? 'queue') === 'history' ? 'border-my-purple text-my-purple' : 'border-transparent text-gray-500' }}">
                 Историја
-            </button>
+            </a>
         </div>
 
-        @if (session('success'))
-            <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
-                {{ session('success') }}
-            </div>
-        @endif
+        <x-admin.flash />
 
-        @if ($errors->any())
-            <div class="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
-                <ul class="list-disc pl-5 space-y-1">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+        {{-- =========================== REPORTS QUEUE TAB =========================== --}}
 
         {{-- =========================== REPORTS QUEUE TAB =========================== --}}
         <div class="tab-panel space-y-4 {{ ($activeTab ?? 'queue') === 'queue' ? '' : 'hidden' }}" data-tab-panel="queue">
 
             {{-- Filters --}}
             <form action="{{ route('report.index') }}" method="GET"
-                class="bg-white rounded-xl border border-slate-200 p-4 flex justify-start items-center gap-4">
+                class="bg-white rounded-xl border border-gray-200 p-4 flex justify-start items-center gap-4">
                 <input type="hidden" name="tab" value="queue">
 
 
@@ -88,7 +67,7 @@
 
                 @if (request()->anyFilled(['source', 'type', 'reason']))
                     <a href="{{ route('report.index', ['tab' => 'queue']) }}" class="text-sm text-gray-500 hover:underline">
-                        Clear filters
+                        Исчисти филтри
                     </a>
                 @endif
             </form>
@@ -111,7 +90,7 @@
                         $type = 'user';
                     @endphp
                 @endif
-                <div class="report-card bg-white rounded-xl border border-slate-200 p-5 space-y-4">
+                <div class="report-card bg-white rounded-xl border border-gray-200 p-5 space-y-4">
                     <div class="flex items-start justify-between">
                         <div class="flex flex-col items-start space-y-3">
                             <div class="flex items-center gap-3">
@@ -154,34 +133,34 @@
                                     } }}
                                 </span>
 
-                                <span class="text-xs text-slate-400">Пријавено
+                                <span class="text-xs text-gray-400">Пријавено
                                     {{ $report->created_at->diffForHumans() }}</span>
                                 @if ((int) ($report->reports_count ?? 1) > 1)
                                     <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-800 text-white text-xs font-semibold">
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-800 text-white text-xs font-semibold">
                                         {{ $report->reports_count }} пријави
                                     </span>
                                 @endif
                             </div>
-                            <span class="text-xs text-slate-500">Пријавено од
+                            <span class="text-xs text-gray-500">Пријавено од
                                 @if (isset($report->group_reporters) && $report->group_reporters->isNotEmpty())
                                     {{ $report->group_reporters->pluck('username')->filter()->join(', ') }}
                                 @else
                                     {{ $report->reporter->username }}
                                 @endif
                             </span>
-                            <span class="text-xs text-slate-400">{{ $report->other_reason }}</span>
+                            <span class="text-xs text-gray-400">{{ $report->other_reason }}</span>
                         </div>
                         @if ($report->source == 'ai')
                             <div class="flex flex-col items-start">
                                 <div class="text-right">
-                                    <div class="text-xs text-slate-500">AI доверба</div>
+                                    <div class="text-xs text-gray-500">AI доверба</div>
                                     <div class="text-lg font-bold text-red-600">{{ $report->ai_confidence }}%</div>
                                 </div>
                                 <div class="">
-                                    <span class="text-xs text-slate-500">Причина:</span>
+                                    <span class="text-xs text-gray-500">Причина:</span>
                                     <span
-                                        class="text-sm font-semibold text-slate-700">{{ match ($report->reason) {
+                                        class="text-sm font-semibold text-gray-700">{{ match ($report->reason) {
                                             'spam' => 'Спам',
                                             'insulting_content' => 'Навредлива содржина',
                                             'misinformation' => 'Дезинформација',
@@ -193,9 +172,9 @@
                             </div>
                         @else
                             <div class="">
-                                <span class="text-xs text-slate-500">Причина:</span>
+                                <span class="text-xs text-gray-500">Причина:</span>
                                 <span
-                                    class="text-sm font-semibold text-slate-700">{{ match ($report->reason) {
+                                    class="text-sm font-semibold text-gray-700">{{ match ($report->reason) {
                                         'spam' => 'Спам',
                                         'insulting_content' => 'Навредлива содржина',
                                         'misinformation' => 'Дезинформација',
@@ -207,37 +186,37 @@
                         @endif
                     </div>
 
-                    <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
                         @if ($type == 'comment')
-                            <div class="text-sm font-semibold text-slate-800 mb-1">"{{ $content }}"</div>
-                            <div class="flex items-center gap-2 mt-3 text-xs text-slate-500">
+                            <div class="text-sm font-semibold text-gray-800 mb-1">"{{ $content }}"</div>
+                            <div class="flex items-center gap-2 mt-3 text-xs text-gray-500">
                                 <span>Објавено од</span>
-                                <span class="font-medium text-slate-700">{{ $report->reportable->user->username }}</span>
+                                <span class="font-medium text-gray-700">{{ $report->reportable->user->username }}</span>
                                 <span>·</span>
                                 <span>Форум:
                                     {{ $report->reportable->thread()->withTrashed()->first()->forum->name }}</span>
                             </div>
                         @elseif($type == 'thread')
-                            <div class="text-sm font-semibold text-slate-800 mb-1">"{{ $content }}"</div>
-                            <p class="text-sm text-slate-600 leading-relaxed">
+                            <div class="text-sm font-semibold text-gray-800 mb-1">"{{ $content }}"</div>
+                            <p class="text-sm text-gray-600 leading-relaxed">
                                 {{ $description }}
                             </p>
-                            <div class="flex items-center gap-2 mt-3 text-xs text-slate-500">
+                            <div class="flex items-center gap-2 mt-3 text-xs text-gray-500">
                                 <span>Објавено од</span>
-                                <span class="font-medium text-slate-700">{{ $report->reportable->user->username }}</span>
+                                <span class="font-medium text-gray-700">{{ $report->reportable->user->username }}</span>
                                 <span>·</span>
                                 <span>Форум: {{ $report->reportable->forum->name }}</span>
                             </div>
                         @elseif($type == 'user')
                             <a href="{{ route('user.show', ['user' => $report->reportable->id]) }}"
                                 class="hover:cursor-pointer">
-                                <div class="flex items-center gap-3 bg-slate-50 rounded-lg p-4 border border-slate-100">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500">
+                                <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-my-purple to-[#3300F5]">
                                     </div>
                                     <div>
-                                        <div class="text-sm font-semibold text-slate-800">
+                                        <div class="text-sm font-semibold text-gray-800">
                                             {{ $report->reportable->username }}</div>
-                                        <div class="text-xs text-slate-500">
+                                        <div class="text-xs text-gray-500">
                                             {{ $report->reportable->studentData->school->city->name }} ·
                                             {{ $report->reportable->studentData->school->name }}</div>
                                     </div>
@@ -255,7 +234,7 @@
                         </div>
                     @endif
 
-                    <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-gray-100">
                         <div class="flex gap-2">
                             <form action="{{ route('report.approve', ['report' => $report->id]) }}" method="POST">
                                 @csrf
@@ -295,9 +274,9 @@
                     class="modal hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div class="modal-box bg-white rounded-xl w-full max-w-md p-6 space-y-5">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-lg font-bold text-slate-900">Санкционирај</h2>
+                            <h2 class="text-lg font-bold text-gray-900">Санкционирај</h2>
                             <button data-close-modal="sanctionModal-{{ $report->id }}"
-                                class="text-slate-400 hover:text-slate-600">✕</button>
+                                class="text-gray-400 hover:text-gray-600">✕</button>
                         </div>
 
                         <form action="{{ route('sanction.create') }}" method="POST" class="space-y-2">
@@ -309,57 +288,57 @@
                             <input type="hidden" name="report_id" value="{{ $report->id }}">
 
                             <label
-                                class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
+                                class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50">
                                 <input type="radio" name="type" value="warning"
-                                    class="sanction-radio text-indigo-600">
+                                    class="sanction-radio text-my-purple">
                                 <div>
-                                    <div class="text-sm font-medium text-slate-800">Предупредување</div>
-                                    <div class="text-xs text-slate-500">Корисникот е известен, без ограничувања</div>
+                                    <div class="text-sm font-medium text-gray-800">Предупредување</div>
+                                    <div class="text-xs text-gray-500">Корисникот е известен, без ограничувања</div>
                                 </div>
                             </label>
                             <label
-                                class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-indigo-300 bg-indigo-50 cursor-pointer">
+                                class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-my-purple/40 bg-my-purple/10 cursor-pointer">
                                 <input type="radio" name="type" value="7-day"
-                                    class="sanction-radio text-indigo-600" checked>
+                                    class="sanction-radio text-my-purple" checked>
                                 <div>
-                                    <div class="text-sm font-medium text-slate-800">7 дневна санкција</div>
-                                    <div class="text-xs text-slate-500">Сметката е заклучена една недела</div>
+                                    <div class="text-sm font-medium text-gray-800">7 дневна санкција</div>
+                                    <div class="text-xs text-gray-500">Сметката е заклучена една недела</div>
                                 </div>
                             </label>
                             @if (auth()->user()
                                     ?->hasAnyRole(['admin', 'super_admin']))
                                 <label
-                                    class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
+                                    class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50">
                                     <input type="radio" name="type" value="permanent_ban"
-                                        class="sanction-radio text-indigo-600">
+                                        class="sanction-radio text-my-purple">
                                     <div>
-                                        <div class="text-sm font-medium text-slate-800">Трајна забрана</div>
-                                        <div class="text-xs text-slate-500">Сметката е трајно оневозможена</div>
+                                        <div class="text-sm font-medium text-gray-800">Трајна забрана</div>
+                                        <div class="text-xs text-gray-500">Сметката е трајно оневозможена</div>
                                     </div>
                                 </label>
                             @endif
                             <label
-                                class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
+                                class="sanction-option flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50">
                                 <input type="radio" name="type" value="custom"
-                                    class="sanction-radio text-indigo-600">
+                                    class="sanction-radio text-my-purple">
                                 <div class="flex-1">
-                                    <div class="text-sm font-medium text-slate-800">Прилагодено траење</div>
+                                    <div class="text-sm font-medium text-gray-800">Прилагодено траење</div>
                                     <input id="customDaysInput" type="number" name="days" min="1" placeholder="Денови"
-                                        class="hidden mt-2 w-24 rounded-lg border-slate-300 text-sm p-1.5 border">
+                                        class="hidden mt-2 w-24 rounded-lg border-gray-300 text-sm p-1.5 border">
                                 </div>
                             </label>
                             <textarea rows="3" placeholder="Причина..." name="reason"
-                                class="w-full rounded-lg text-sm p-3 border border-slate-200 "></textarea>
+                                class="w-full rounded-lg text-sm p-3 border border-gray-200 "></textarea>
 
                             @if ($type == 'comment' || $type == 'thread')
                                 <label class="flex items-center gap-2">
                                     <input type="checkbox" name="content" checked class="rounded text-red-600">
-                                    <span class="text-sm text-slate-700">Избриши ја содржината веднаш</span>
+                                    <span class="text-sm text-gray-700">Избриши ја содржината веднаш</span>
                                 </label>
                             @endif
                             <div class="flex gap-2 pt-2">
                                 <button data-close-modal="sanctionModal-{{ $report->id }}"
-                                    class="flex-1 px-4 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                                    class="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">
                                     Откажи
                                 </button>
                                 <button data-action="confirm-sanction"
@@ -372,38 +351,12 @@
                     </div>
                 </div>
             @empty
-                <div id="emptyState" class="text-center py-16 text-slate-400">
+                <div id="emptyState" class="text-center py-16 text-gray-400">
                     <p class="text-sm">Нема пријави што одговараат.</p>
                 </div>
             @endforelse
 
-            <div class="flex justify-center p-3">
-                <nav class="flex gap-1 text-sm">
-                    @if ($reports->onFirstPage())
-                        <button disabled
-                            class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Претходна
-                        </button>
-                    @else
-                        <a href="{{ $reports->previousPageUrl() }}"
-                            class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Претходна
-                        </a>
-                    @endif
-
-                    @if ($reports->hasMorePages())
-                        <a href="{{ $reports->nextPageUrl() }}"
-                            class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                            Следна
-                        </a>
-                    @else
-                        <button disabled
-                            class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                            Следна
-                        </button>
-                    @endif
-                </nav>
-            </div>
+            <x-admin.pagination :paginator="$reports" />
 
         </div>
 
@@ -412,7 +365,7 @@
             data-tab-panel="history">
 
             <form action="{{ route('report.index') }}" method="GET"
-                class="bg-white rounded-xl border border-slate-200 p-4 flex justify-start items-center gap-4">
+                class="bg-white rounded-xl border border-gray-200 p-4 flex justify-start items-center gap-4">
                 <input type="hidden" name="tab" value="history">
 
                 <select class="rounded-lg border border-gray-300 text-sm p-1.5" name="status">
@@ -436,13 +389,13 @@
                 @if (request()->anyFilled(['status', 'type']))
                     <a href="{{ route('report.index', ['tab' => 'history']) }}"
                         class="text-sm text-gray-500 hover:underline">
-                        Clear filters
+                        Исчисти филтри
                     </a>
                 @endif
             </form>
 
             @forelse ($resolvedReports as $historyReport)
-                <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between gap-4">
+                <div class="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between gap-4">
                     <div class="flex flex-col gap-1">
                         <div class="flex items-center gap-2">
                             @if ($historyReport->status === 'approved')
@@ -457,14 +410,14 @@
                                 </span>
                             @endif
                             <span
-                                class="text-xs text-slate-400">{{ match (class_basename($historyReport->reportable_type)) {
+                                class="text-xs text-gray-400">{{ match (class_basename($historyReport->reportable_type)) {
                                     'Comment' => 'Коментар',
                                     'Thread' => 'Дискусија',
                                     'User' => 'Корисник',
                                     default => class_basename($historyReport->reportable_type),
                                 } }}</span>
                         </div>
-                        <span class="text-sm text-slate-700">Пријавено од {{ $historyReport->reporter->username }} ·
+                        <span class="text-sm text-gray-700">Пријавено од {{ $historyReport->reporter->username }} ·
                             Причина:
                             {{ match ($historyReport->reason) {
                                 'spam' => 'Спам',
@@ -474,18 +427,18 @@
                                 'other' => 'Друго',
                                 default => $historyReport->reason,
                             } }}</span>
-                        <span class="text-xs text-slate-400">Решено
+                        <span class="text-xs text-gray-400">Решено
                             {{ $historyReport->updated_at->diffForHumans() }}</span>
                     </div>
                 </div>
             @empty
-                <div class="text-center py-16 text-slate-400">
+                <div class="text-center py-16 text-gray-400">
                     <p class="text-sm">Сè уште нема решени пријави.</p>
                 </div>
             @endforelse
 
             <div class="flex justify-center p-3">
-                {{ $resolvedReports->links() }}
+                <x-admin.pagination :paginator="$resolvedReports" class="w-full" />
             </div>
 
         </div>
@@ -495,31 +448,6 @@
     @push('scripts-reports')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-
-                // ---------- Tabs ----------
-                var tabButtons = document.querySelectorAll('.tab-btn');
-                var tabPanels = document.querySelectorAll('.tab-panel');
-
-                tabButtons.forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        var target = btn.getAttribute('data-tab-btn');
-
-                        tabButtons.forEach(function(b) {
-                            b.classList.remove('border-indigo-600', 'text-indigo-600');
-                            b.classList.add('border-transparent', 'text-slate-500');
-                        });
-                        btn.classList.remove('border-transparent', 'text-slate-500');
-                        btn.classList.add('border-indigo-600', 'text-indigo-600');
-
-                        tabPanels.forEach(function(panel) {
-                            if (panel.getAttribute('data-tab-panel') === target) {
-                                panel.classList.remove('hidden');
-                            } else {
-                                panel.classList.add('hidden');
-                            }
-                        });
-                    });
-                });
 
                 // ---------- Modals ----------
                 document.querySelectorAll('[data-open-modal]').forEach(function(btn) {
@@ -557,12 +485,12 @@
                     radio.addEventListener('change', function() {
                         var group = radio.closest('form').querySelectorAll('.sanction-option');
                         group.forEach(function(label) {
-                            label.classList.remove('border-indigo-300', 'bg-indigo-50');
-                            label.classList.add('border-slate-200');
+                            label.classList.remove('border-my-purple/40', 'bg-my-purple/10');
+                            label.classList.add('border-gray-200');
                         });
-                        radio.closest('.sanction-option').classList.remove('border-slate-200');
-                        radio.closest('.sanction-option').classList.add('border-indigo-300',
-                            'bg-indigo-50');
+                        radio.closest('.sanction-option').classList.remove('border-gray-200');
+                        radio.closest('.sanction-option').classList.add('border-my-purple/40',
+                            'bg-my-purple/10');
 
                         var customInput = radio.closest('form').querySelector('#customDaysInput');
                         if (customInput) {
@@ -574,80 +502,6 @@
                         }
                     });
                 });
-
-                // ---------- Report card actions (approve/reject/dismiss) ----------
-                document.querySelectorAll('.report-card [data-action]').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        var card = btn.closest('.report-card');
-                        var action = btn.getAttribute('data-action');
-                        if (action === 'approve' || action === 'reject' || action === 'dismiss') {
-                            if (card) {
-                                card.style.transition = 'opacity 0.25s ease';
-                                card.style.opacity = '0';
-                                setTimeout(function() {
-                                    card.remove();
-                                    checkEmptyState();
-                                }, 250);
-                            }
-                        }
-                    });
-                });
-
-                // ---------- Ban appeal actions ----------
-                document.querySelectorAll('[data-action="accept-appeal"], [data-action="reject-appeal"]').forEach(
-                    function(btn) {
-                        btn.addEventListener('click', function() {
-                            var card = btn.closest('.bg-white');
-                            if (card) {
-                                card.style.transition = 'opacity 0.25s ease';
-                                card.style.opacity = '0';
-                                setTimeout(function() {
-                                    card.remove();
-                                }, 250);
-                            }
-                        });
-                    });
-
-                // ---------- Unban action ----------
-                document.querySelectorAll('[data-action="unban"]').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        var row = btn.closest('.ban-row');
-                        if (row) row.remove();
-                    });
-                });
-
-                // ---------- Filters (client-side, if used) ----------
-                var sourceFilter = document.getElementById('sourceFilter');
-                var typeFilter = document.getElementById('typeFilter');
-
-                if (sourceFilter && typeFilter) {
-                    function applyFilters() {
-                        var sourceVal = sourceFilter.value;
-                        var typeVal = typeFilter.value;
-                        var visibleCount = 0;
-
-                        document.querySelectorAll('.report-card').forEach(function(card) {
-                            var matchesSource = sourceVal === 'all' || card.getAttribute('data-source') ===
-                                sourceVal;
-                            var matchesType = typeVal === 'all' || card.getAttribute('data-type') === typeVal;
-                            var visible = matchesSource && matchesType;
-                            card.classList.toggle('hidden', !visible);
-                            if (visible) visibleCount++;
-                        });
-
-                        var emptyState = document.getElementById('emptyState');
-                        if (emptyState) emptyState.classList.toggle('hidden', visibleCount !== 0);
-                    }
-
-                    sourceFilter.addEventListener('change', applyFilters);
-                    typeFilter.addEventListener('change', applyFilters);
-                }
-
-                function checkEmptyState() {
-                    var remaining = document.querySelectorAll('.report-card:not(.hidden)').length;
-                    var emptyState = document.getElementById('emptyState');
-                    if (emptyState) emptyState.classList.toggle('hidden', remaining !== 0);
-                }
             });
         </script>
     @endpush

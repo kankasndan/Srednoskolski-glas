@@ -3,22 +3,13 @@
 @section('title', 'Корисници')
 
 @section('content')
-    {{-- Page header --}}
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Корисници</h1>
-            <p class="text-sm text-gray-500">Пребарај и управувај со сите регистрирани корисници на платформата</p>
-        </div>
+    <x-admin.page-header title="Корисници" subtitle="Пребарај и управувај со сите регистрирани корисници на платформата.">
         <div class="text-sm text-gray-500">
             Вкупно: <span class="font-semibold text-gray-800">{{ $users->total() }}</span> корисници
         </div>
-    </div>
+    </x-admin.page-header>
 
-    @if (session('success'))
-        <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
+    <x-admin.flash />
 
     {{-- Search + Filters --}}
     <form action="{{ route('user.index') }}" method="GET" class="flex flex-wrap items-center gap-3 mb-6">
@@ -43,8 +34,8 @@
 
         <select name="provider" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
             <option value="">Сите начини на најава</option>
-            <option value="google" {{ request('sign_in_method') == 'google' ? 'selected' : '' }}>Google</option>
-            <option value="facebook" {{ request('sign_in_method') == 'facebook' ? 'selected' : '' }}>Facebook</option>
+            <option value="google" @selected(request('provider') == 'google')>Google</option>
+            <option value="facebook" @selected(request('provider') == 'facebook')>Facebook</option>
         </select>
 
         <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
@@ -58,7 +49,7 @@
             Филтрирај
         </button>
 
-        @if (request()->anyFilled(['search', 'school', 'sign_in_method', 'status']))
+        @if (request()->anyFilled(['search', 'school', 'provider', 'status']))
             <a href="{{ route('user.index') }}" class="text-sm text-gray-500 hover:underline">Исчисти филтри</a>
         @endif
     </form>
@@ -79,12 +70,12 @@
             </thead>
             <tbody class="divide-y divide-gray-100">
                 @forelse ($users as $user)
-                    <tr class="cursor-pointer hover:bg-gray-50"
-                        onclick="window.location='{{ route('user.show', $user->id) }}'">
-                        <td class="px-4 py-3 flex items-center gap-3">
-                            <img src="{{ $user->imageUrl ?? 'https://via.placeholder.com/32' }}"
-                                class="w-8 h-8 rounded-full object-cover">
-                            <span class="font-medium text-gray-800">{{ $user->username }}</span>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">
+                            <a href="{{ route('user.show', $user->id) }}" class="flex items-center gap-3">
+                            <x-admin.avatar :user="$user" size="sm" />
+                            <span class="font-medium text-gray-800 hover:text-my-purple">{{ $user->username }}</span>
+                            </a>
                         </td>
                         <td class="px-4 py-3 text-gray-500">{{ $user->email }}</td>
                         <td class="px-4 py-3 text-gray-500">{{ $user->studentData->school->name ?? '—' }}</td>
@@ -126,32 +117,7 @@
             </table>
         </div>
 
-        {{-- Pagination --}}
-        <div class="flex justify-center my-10">
-            <nav class="flex gap-1 text-sm">
-                @if ($users->onFirstPage())
-                    <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                        Претходна
-                    </button>
-                @else
-                    <a href="{{ $users->previousPageUrl() }}"
-                        class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                        Претходна
-                    </a>
-                @endif
-
-                @if ($users->hasMorePages())
-                    <a href="{{ $users->nextPageUrl() }}"
-                        class="px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">
-                        Следна
-                    </a>
-                @else
-                    <button disabled class="px-3 py-1.5 rounded-md border border-gray-200 text-gray-400 cursor-not-allowed">
-                        Следна
-                    </button>
-                @endif
-            </nav>
-        </div>
+        <x-admin.pagination :paginator="$users" />
 
         @push('scripts')
             <script>

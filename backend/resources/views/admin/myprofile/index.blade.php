@@ -3,29 +3,9 @@
 @section('title', 'Мој профил')
 
 @section('content')
-    {{-- Page header --}}
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Мој профил</h1>
-            <p class="text-sm text-gray-500">Управувај со податоците и поставките на сметката</p>
-        </div>
-    </div>
+    <x-admin.page-header title="Мој профил" subtitle="Управувај со податоците и поставките на сметката." />
 
-    @if (session('success'))
-        <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
-            <ul class="list-disc pl-5 space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    <x-admin.flash />
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -34,15 +14,19 @@
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
                 <div class="p-6 text-center">
-                    <img src="{{ $user->imageUrl ?? 'https://via.placeholder.com/96' }}"
-                        class="w-24 h-24 rounded-full mx-auto border-4 border-white shadow-sm object-cover">
+                    <x-admin.avatar :user="$user" size="2xl" class="mx-auto border-4 border-white shadow-sm" />
                     <h2 class="text-lg font-bold text-gray-800 mt-3">{{ $user->username }}</h2>
                     <p class="text-sm text-gray-500">{{ $user->email }}</p>
 
                     <span
                         class="inline-flex items-center mt-3 px-3 py-1 rounded-full text-xs font-medium
                         {{ $user->role == 'super_admin' ? 'bg-my-purple/10 text-my-purple' : ($user->role == 'admin' ? 'bg-my-blue text-my-purple' : 'bg-green-100 text-green-700') }}">
-                        {{ ucfirst(str_replace('_', ' ', $user->role)) }}
+                        {{ match ($user->role) {
+                            'super_admin' => 'Супер админ',
+                            'admin' => 'Админ',
+                            'moderator' => 'Модератор',
+                            default => $user->role,
+                        } }}
                     </span>
 
                     <div class="mt-6 border-t border-gray-100 pt-4 text-left space-y-2">
