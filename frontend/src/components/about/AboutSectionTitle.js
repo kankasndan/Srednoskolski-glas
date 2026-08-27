@@ -1,6 +1,6 @@
 export default function AboutSectionTitle({ children }) {
   return (
-    <h2 className="text-[24px] font-bold leading-8 text-[var(--color-primary-200)] lg:text-[32px]">
+    <h2 className="text-[clamp(24px,3.125vw,32px)] font-bold leading-[1.33] text-[var(--color-primary-200)]">
       {children}
     </h2>
   );

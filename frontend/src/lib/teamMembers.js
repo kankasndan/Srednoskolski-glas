@@ -2,7 +2,7 @@
 export const TEAM_MEMBERS = [
   { 
     name: "Горазд Јованоски", 
-    role: "X",
+    role: "Full-stack дeвелопер\nTeam Lead",
     photo: "/about/gorazd.png"
   },
   {

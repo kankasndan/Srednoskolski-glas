@@ -9,7 +9,7 @@ import { useCreateThreadAction } from "@/hooks/useCreateThreadAction";
 import { useProfile } from "@/hooks/useProfile";
 
 const filledButton =
-  "flex h-10 flex-1 cursor-pointer items-center justify-center rounded-xl border border-[var(--color-primary-200)] bg-[var(--color-primary-200)] px-4 py-2 text-[14px] font-bold leading-none text-white transition-colors hover:border-[#3300F5] hover:bg-[#3300F5]";
+  "order-1 flex h-10 w-full cursor-pointer items-center justify-center gap-4 rounded-xl border border-[var(--color-primary-200)] bg-[var(--color-primary-200)] px-4 py-2 text-[16px] font-bold leading-none text-white transition-colors hover:border-[#3300F5] hover:bg-[#3300F5] lg:order-2 lg:flex-1 lg:text-[14px]";
 
 export default function AboutCta({ className = "" }) {
   const { user } = useProfile();
@@ -25,18 +25,18 @@ export default function AboutCta({ className = "" }) {
 
   return (
     <section className={`flex flex-col items-center gap-12 ${className}`}>
-      <div className="flex flex-col items-center gap-8">
+      <div className="flex flex-col items-center gap-6 lg:gap-8">
         <AboutSectionTitle>Сега е твој ред!</AboutSectionTitle>
-        <p className="max-w-[361px] text-center text-[16px] text-[var(--color-grays-700)]">
+        <p className="max-w-[361px] text-center text-[16px] leading-[1.5] text-[var(--color-grays-700)]">
           Постави прашање, сподели искуство, поврзи се со некој кој те разбира.
         </p>
       </div>
 
-      <div className="flex w-full max-w-[552px] flex-col gap-4 sm:flex-row">
+      <div className="flex w-full max-w-[552px] flex-col gap-3 lg:flex-row lg:gap-4">
         <button
           type="button"
           onClick={() => setFeedbackOpen(true)}
-          className="flex h-10 flex-1 cursor-pointer items-center justify-center rounded-xl border border-[var(--color-primary-200)] px-4 py-2 text-[14px] font-bold leading-none text-[var(--color-grays-900)] transition-colors hover:bg-[#E5E5E5]"
+          className="order-2 flex h-10 w-full cursor-pointer items-center justify-center gap-4 rounded-xl border border-[var(--color-primary-200)] px-4 py-2 text-[16px] font-bold leading-none text-[var(--color-grays-900)] transition-colors hover:bg-[#E5E5E5] lg:order-1 lg:flex-1 lg:text-[14px]"
         >
           Кажи ни што мислиш
         </button>
