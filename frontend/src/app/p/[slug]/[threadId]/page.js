@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useSearchParams } from "next/navigation";
 import AppShell from "@/components/shell/AppShell";
 import BackButton from "@/components/shell/BackButton";
 import CommentComposer from "@/components/thread/CommentComposer";
@@ -11,6 +11,7 @@ import MobileFooter from "@/components/shell/MobileFooter";
 import ThreadPost from "@/components/thread/ThreadPost";
 import { useCommentHashId } from "@/hooks/useHashTarget";
 import { useThread } from "@/hooks/useThread";
+import { parseExpandPath } from "@/lib/commentLink";
 import { findCommentPath } from "@/lib/commentPath";
 
 function StatusMessage({ children }) {
@@ -23,6 +24,8 @@ function StatusMessage({ children }) {
 
 export default function ThreadPage() {
   const { slug, threadId } = useParams();
+  const searchParams = useSearchParams();
+  const expandParam = searchParams.get("expand");
   const [sort, setSort] = useState("best");
   const {
     forum,
@@ -38,10 +41,24 @@ export default function ThreadPage() {
   const linkedCommentId = useCommentHashId();
   const [linkedBranch, setLinkedBranch] = useState(null);
 
-  // Spodelen link kon odgovor: grankata do nego se otvora sama.
+  // Spodelen link / notifikacija kon odgovor: grankata do nego se otvora sama.
   useEffect(() => {
-    if (!linkedCommentId || comments.length === 0) return undefined;
-    if (comments.some((comment) => comment.id === linkedCommentId)) return undefined;
+    const fromQuery = parseExpandPath(expandParam);
+
+    if (fromQuery) {
+      setLinkedBranch({ path: fromQuery, replies: {} });
+      return undefined;
+    }
+
+    if (!linkedCommentId || comments.length === 0) {
+      setLinkedBranch(null);
+      return undefined;
+    }
+
+    if (comments.some((comment) => Number(comment.id) === Number(linkedCommentId))) {
+      setLinkedBranch(null);
+      return undefined;
+    }
 
     let active = true;
 
@@ -52,7 +69,7 @@ export default function ThreadPage() {
     return () => {
       active = false;
     };
-  }, [linkedCommentId, comments]);
+  }, [linkedCommentId, comments, expandParam]);
 
   if (loading && !thread) {
     return (
@@ -107,6 +124,7 @@ export default function ThreadPage() {
           onCommentDeleted={markCommentDeleted}
           expandPath={linkedBranch?.path ?? null}
           preloadedReplies={linkedBranch?.replies ?? null}
+          highlightCommentId={linkedCommentId}
         />
 
         {/* Kontejnerot ovde ima gap-8, pa treba pomala margina od feed-ot. */}

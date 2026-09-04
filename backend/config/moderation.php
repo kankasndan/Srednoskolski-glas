@@ -7,11 +7,13 @@ return [
     | Content Moderation
     |--------------------------------------------------------------------------
     |
-    | Screens every uploaded image, video and document before it is handed to
-    | the media driver, so refused files never reach a public URL. The check is
-    | wired in as a decorator around the "MediaStorage" contract, which means it
-    | covers every upload path (thread attachments, admin forum art, avatars)
-    | without callers knowing about it.
+    | Screens uploaded images, video and documents before they are handed to
+    | the media driver, and screens thread title / description / poll text
+    | and comment bodies before they are created or edited. Refused files
+    | never reach a public URL; refused text never reaches the database. File
+    | checks are wired in as a decorator around the "MediaStorage" contract.
+    | Text checks run from ThreadController and CommentController via
+    | TextModerator.
     |
     */
 

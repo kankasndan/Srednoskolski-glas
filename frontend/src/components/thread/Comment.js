@@ -13,7 +13,6 @@ import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import InfoDialog from "@/components/ui/InfoDialog";
 import ReportDialog from "@/components/ui/ReportDialog";
 import { useCommentShift } from "@/hooks/useCommentShift";
-import { useHashTarget } from "@/hooks/useHashTarget";
 import { useProfile } from "@/hooks/useProfile";
 import { userFacingError } from "@/lib/api";
 import { isActivelyBanned } from "@/lib/ban";
@@ -55,15 +54,18 @@ export default function Comment({
   onCommentUpdated,
   expandPath = null,
   preloadedReplies = null,
+  highlightCommentId = null,
+  ancestorIds = [],
   depth = 0,
 }) {
   const { user } = useProfile();
   const elementId = `comment-${comment.id}`;
   const containerRef = useRef(null);
   const autoExpandedRef = useRef(false);
-  const linked = useHashTarget(elementId);
+  const linked =
+    highlightCommentId != null && Number(comment.id) === Number(highlightCommentId);
   // Patekata do spodeleniot odgovor: ako pochnuva so mene, ostatokot odi podolu.
-  const onPath = expandPath?.[0] === comment.id;
+  const onPath = expandPath?.[0] != null && Number(expandPath[0]) === Number(comment.id);
   const childExpandPath = onPath ? expandPath.slice(1) : null;
   const [content, setContent] = useState(comment.content ?? "");
   const [mentions, setMentions] = useState(comment.mentions ?? []);
@@ -276,6 +278,7 @@ export default function Comment({
           )}
           <CommentActions
             commentId={comment.id}
+            ancestorIds={ancestorIds}
             votes={comment.upvotes}
             hasVoted={comment.has_voted}
             repliesCount={repliesCount}
@@ -391,6 +394,8 @@ export default function Comment({
                 onCommentUpdated={patchReply}
                 expandPath={childExpandPath}
                 preloadedReplies={preloadedReplies}
+                highlightCommentId={highlightCommentId}
+                ancestorIds={[...ancestorIds, Number(comment.id)]}
                 depth={depth + 1}
               />
             ))

@@ -8,6 +8,8 @@ use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Thread;
 use App\Models\Vote;
+use App\Services\Moderation\TextModerator;
+use App\Support\NotifyCommentActivity;
 use App\Support\SyncCommentMentions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,7 +21,11 @@ class CommentController extends Controller
         StoreCommentRequest $request,
         Thread $thread,
         SyncCommentMentions $syncMentions,
+        NotifyCommentActivity $notifyActivity,
+        TextModerator $textModerator,
     ): JsonResponse {
+        $textModerator->enforceComment($request->validated('content'));
+
         $comment = DB::transaction(function () use ($request, $thread): Comment {
             $comment = Comment::forceCreate([
                 'thread_id' => $thread->id,
@@ -34,7 +40,8 @@ class CommentController extends Controller
             return $comment;
         });
 
-        $syncMentions->handle($comment);
+        $newlyMentionedIds = $syncMentions->handle($comment);
+        $notifyActivity->forCreatedComment($comment, $newlyMentionedIds);
         $comment->load(Comment::authorWith());
         $comment->setAttribute('has_voted', true);
         $comment->setAttribute('replies_count', 0);
@@ -80,12 +87,18 @@ class CommentController extends Controller
         UpdateCommentRequest $request,
         Comment $comment,
         SyncCommentMentions $syncMentions,
+        NotifyCommentActivity $notifyActivity,
+        TextModerator $textModerator,
     ): JsonResponse {
-        $comment->content = $request->string('content')->toString();
+        $content = $request->string('content')->toString();
+        $textModerator->enforceComment($content);
+
+        $comment->content = $content;
         $comment->edited_at = now();
         $comment->save();
 
-        $syncMentions->handle($comment);
+        $newlyMentionedIds = $syncMentions->handle($comment);
+        $notifyActivity->forUpdatedComment($comment, $newlyMentionedIds);
         $comment->load(Comment::authorWith());
         $comment->loadCount([
             'replies as replies_count' => fn ($replies) => $replies->visibleInThread(),

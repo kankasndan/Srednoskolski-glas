@@ -10,6 +10,7 @@ use App\Http\Resources\ThreadResource;
 use App\Models\Comment;
 use App\Models\Forum;
 use App\Models\User;
+use App\Notifications\NewFollowNotification;
 use App\Services\Feed\FeedCache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -122,7 +123,11 @@ class UserProfileController extends Controller
 
         abort_if((int) $viewer->id === (int) $profileUser->id, 422, 'Не можеш да се следиш себеси.');
 
-        $viewer->following()->syncWithoutDetaching([$profileUser->id]);
+        $changes = $viewer->following()->syncWithoutDetaching([$profileUser->id]);
+
+        if (($changes['attached'] ?? []) !== []) {
+            $profileUser->notify(new NewFollowNotification($viewer));
+        }
 
         // Author-affinity signal changed for the personalized feed.
         FeedCache::forgetForUser($viewer);

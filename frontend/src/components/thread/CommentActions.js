@@ -6,6 +6,7 @@ import { toggleCommentVote } from "@/api/comments";
 import ThreadShareButton from "@/components/thread/ThreadShareButton";
 import ThreeDotsMenu from "@/components/ui/ThreeDotsMenu";
 import { ONBOARDING_REQUIRED_MESSAGE } from "@/lib/capabilities";
+import { commentShareUrl } from "@/lib/commentLink";
 import { nextVoteState } from "@/lib/votes";
 
 function IconButton({ icon, iconClassName, label, onClick }) {
@@ -46,6 +47,7 @@ function RepliesToggle({ repliesCount, expanded, loadingReplies, onToggle }) {
 
 export default function CommentActions({
   commentId,
+  ancestorIds = [],
   votes: initialVotes = 0,
   hasVoted: initialHasVoted = false,
   repliesCount = 0,
@@ -98,9 +100,7 @@ export default function CommentActions({
   }
 
   function commentUrl() {
-    const url = new URL(window.location.href);
-    url.hash = `comment-${commentId}`;
-    return url.toString();
+    return commentShareUrl(commentId, ancestorIds);
   }
 
   // Izbrishaniot ostanuva samo kako nosach na odgovorite.

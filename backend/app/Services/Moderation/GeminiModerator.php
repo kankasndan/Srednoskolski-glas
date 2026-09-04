@@ -100,6 +100,43 @@ class GeminiModerator implements ContentModerator
     ];
 
     /**
+     * Schema for the student-text prompt (safe / flag / unsure).
+     *
+     * @var array<string, mixed>
+     */
+    private const TEXT_RESPONSE_SCHEMA = [
+        'type' => 'OBJECT',
+        'properties' => [
+            'verdict' => [
+                'type' => 'STRING',
+                'enum' => ['safe', 'flag', 'unsure'],
+            ],
+            'confidence' => ['type' => 'NUMBER'],
+            'categories' => [
+                'type' => 'ARRAY',
+                'items' => [
+                    'type' => 'STRING',
+                    'enum' => [
+                        'profanity',
+                        'sexual',
+                        'nudity',
+                        'hate',
+                        'bullying',
+                        'threats',
+                        'self_harm',
+                        'drugs',
+                        'dangerous',
+                        'privacy',
+                        'spam',
+                    ],
+                ],
+            ],
+            'reason' => ['type' => 'STRING'],
+        ],
+        'required' => ['verdict', 'confidence', 'categories'],
+    ];
+
+    /**
      * @param  array<string, mixed>  $config
      */
     public function __construct(
@@ -154,6 +191,22 @@ class GeminiModerator implements ContentModerator
                 $this->deleteRemoteFile($remoteFile, $timeout);
             }
         }
+    }
+
+    public function reviewText(string $text): ModerationVerdict
+    {
+        $text = trim($text);
+
+        if ($text === '') {
+            return ModerationVerdict::allow('empty text');
+        }
+
+        return $this->interpret($this->generate(
+            [['text' => $text]],
+            $this->timeoutFor(),
+            self::textPolicy(),
+            self::TEXT_RESPONSE_SCHEMA,
+        ));
     }
 
     /**
@@ -211,13 +264,14 @@ class GeminiModerator implements ContentModerator
 
     /**
      * @param  list<array<string, mixed>>  $parts
+     * @param  array<string, mixed>|null  $schema
      * @return array<string, mixed>
      */
-    private function generate(array $parts, int $timeout): array
+    private function generate(array $parts, int $timeout, ?string $policy = null, ?array $schema = null): array
     {
         $payload = [
             'systemInstruction' => [
-                'parts' => [['text' => self::POLICY]],
+                'parts' => [['text' => $policy ?? self::POLICY]],
             ],
             'contents' => [[
                 'role' => 'user',
@@ -228,7 +282,7 @@ class GeminiModerator implements ContentModerator
                 // a support problem, so leave no room for sampling.
                 'temperature' => 0,
                 'responseMimeType' => 'application/json',
-                'responseSchema' => self::RESPONSE_SCHEMA,
+                'responseSchema' => $schema ?? self::RESPONSE_SCHEMA,
             ],
             // Without this the configurable filters refuse to classify borderline
             // files at all, which would reach us as a failure instead of a verdict
@@ -305,6 +359,10 @@ class GeminiModerator implements ContentModerator
             throw new RuntimeException('Gemini returned a malformed moderation verdict: '.$text);
         }
 
+        if (array_key_exists('verdict', $verdict)) {
+            return $this->fromTextVerdict($verdict, $text);
+        }
+
         $decision = ModerationDecision::tryFrom((string) ($verdict['decision'] ?? ''));
 
         if ($decision === null) {
@@ -319,6 +377,55 @@ class GeminiModerator implements ContentModerator
                 static fn ($category): bool => is_string($category) && $category !== '',
             )),
         );
+    }
+
+    /**
+     * Map the student-text prompt (safe / flag / unsure) onto the shared
+     * allow / reject / escalate decisions the rest of the app already uses.
+     *
+     * @param  array<string, mixed>  $verdict
+     */
+    private function fromTextVerdict(array $verdict, string $raw): ModerationVerdict
+    {
+        $label = (string) ($verdict['verdict'] ?? '');
+        $categories = array_values(array_filter(
+            (array) ($verdict['categories'] ?? []),
+            static fn ($category): bool => is_string($category) && $category !== '',
+        ));
+        $reason = is_string($verdict['reason'] ?? null) && trim($verdict['reason']) !== ''
+            ? trim($verdict['reason'])
+            : null;
+
+        $decision = match ($label) {
+            'safe' => ModerationDecision::Allow,
+            'flag' => in_array('self_harm', $categories, true)
+                ? ModerationDecision::Escalate
+                : ModerationDecision::Reject,
+            'unsure' => ModerationDecision::Escalate,
+            default => null,
+        };
+
+        if ($decision === null) {
+            throw new RuntimeException('Gemini returned an unknown text moderation verdict: '.$raw);
+        }
+
+        return new ModerationVerdict(
+            decision: $decision,
+            reason: $reason,
+            categories: $categories,
+        );
+    }
+
+    private static function textPolicy(): string
+    {
+        $path = __DIR__.DIRECTORY_SEPARATOR.'text-moderation-prompt.txt';
+        $policy = file_get_contents($path);
+
+        if (! is_string($policy) || trim($policy) === '') {
+            throw new RuntimeException('Missing text moderation prompt at '.$path);
+        }
+
+        return $policy;
     }
 
     /**

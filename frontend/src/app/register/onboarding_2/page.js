@@ -1,6 +1,6 @@
 import OnboardingGuard from "@/components/auth/OnboardingGuard";
 import BackButton from "@/components/shell/BackButton";
-import AvatarUploadCard from "@/components/auth/AvatarUploadCard";
+import AvatarPickerCard from "@/components/auth/AvatarPickerCard";
 
 export default function OnboardingAvatar() {
   return (
@@ -16,7 +16,7 @@ export default function OnboardingAvatar() {
         </div>
 
         <div className="relative z-10 flex w-full justify-center">
-          <AvatarUploadCard />
+          <AvatarPickerCard />
         </div>
       </main>
     </OnboardingGuard>

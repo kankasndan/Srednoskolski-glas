@@ -8,8 +8,8 @@ use App\Models\User;
 final class AvatarUrl
 {
     /**
-     * Default local assets, the user's current photo, an ImageKit-generated
-     * image, or a file this user uploaded themselves.
+     * Preset local avatars, the user's current photo, a previously generated
+     * ImageKit image, or a file this user uploaded themselves.
      */
     public static function isAllowed(string $url, ?User $user): bool
     {

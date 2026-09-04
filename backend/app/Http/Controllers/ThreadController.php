@@ -14,6 +14,7 @@ use App\Models\Poll;
 use App\Models\Thread;
 use App\Models\ThreadView;
 use App\Models\Vote;
+use App\Services\Moderation\TextModerator;
 use App\Support\HtmlSanitizer;
 use App\Support\ViewThrottle;
 use Illuminate\Http\JsonResponse;
@@ -57,9 +58,10 @@ class ThreadController extends Controller
      *
      * POST /api/threads  (multipart/form-data)
      */
-    public function store(StoreThreadRequest $request): JsonResponse
+    public function store(StoreThreadRequest $request, TextModerator $textModerator): JsonResponse
     {
         $validated = $request->validated();
+        $textModerator->enforceThread($validated);
         $user = $request->user();
         $files = $this->normalizeUploadedFiles($request->file('files', []));
 
@@ -110,9 +112,10 @@ class ThreadController extends Controller
      * PUT|POST /api/threads/{thread}
      * Prefer POST multipart/form-data when uploading or removing files.
      */
-    public function update(UpdateThreadRequest $request, Thread $thread): JsonResponse
+    public function update(UpdateThreadRequest $request, Thread $thread, TextModerator $textModerator): JsonResponse
     {
         $validated = $request->validated();
+        $textModerator->enforceThread($validated);
         $files = $this->normalizeUploadedFiles($request->file('files', []));
 
         /** @var list<int> $removeIds */

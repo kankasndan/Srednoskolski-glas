@@ -310,3 +310,121 @@ it('sends videos through the gemini files api when stills cannot be sampled', fu
             && data_get($data, 'contents.0.parts.0.inlineData') === null;
     });
 });
+
+it('screens thread text with the text policy rather than the file policy', function () {
+    Http::fake([
+        'generativelanguage.googleapis.com/*' => Http::response([
+            'candidates' => [[
+                'finishReason' => 'STOP',
+                'content' => [
+                    'parts' => [[
+                        'text' => json_encode([
+                            'verdict' => 'safe',
+                            'confidence' => 0.95,
+                            'categories' => [],
+                            'reason' => null,
+                        ]),
+                    ]],
+                ],
+            ]],
+        ]),
+    ]);
+
+    $verdict = app(ContentModerator::class)->reviewText(
+        "Title: Homework help\nPoll question: When is the exam?",
+    );
+
+    expect($verdict->isAllowed())->toBeTrue();
+
+    Http::assertSent(function (Request $request) {
+        if (! str_contains($request->url(), 'generateContent')) {
+            return false;
+        }
+
+        $data = $request->data();
+        $instruction = data_get($data, 'systemInstruction.parts.0.text');
+        $userText = data_get($data, 'contents.0.parts.0.text');
+
+        return is_string($instruction)
+            && str_contains($instruction, 'STRICT content moderator')
+            && str_contains($instruction, 'pichka')
+            && ! str_contains($instruction, 'attached file')
+            && is_string($userText)
+            && str_contains($userText, 'Title: Homework help');
+    });
+});
+
+it('maps a text flag verdict to reject', function () {
+    Http::fake([
+        'generativelanguage.googleapis.com/*' => Http::response([
+            'candidates' => [[
+                'finishReason' => 'STOP',
+                'content' => [
+                    'parts' => [[
+                        'text' => json_encode([
+                            'verdict' => 'flag',
+                            'confidence' => 0.92,
+                            'categories' => ['hate', 'profanity'],
+                            'reason' => 'Текстот содржи говор на омраза.',
+                        ]),
+                    ]],
+                ],
+            ]],
+        ]),
+    ]);
+
+    $verdict = app(ContentModerator::class)->reviewText('Title: slur');
+
+    expect($verdict->decision)->toBe(ModerationDecision::Reject)
+        ->and($verdict->categories)->toBe(['hate', 'profanity'])
+        ->and($verdict->reason)->toBe('Текстот содржи говор на омраза.');
+});
+
+it('maps an unsure text verdict to escalate', function () {
+    Http::fake([
+        'generativelanguage.googleapis.com/*' => Http::response([
+            'candidates' => [[
+                'finishReason' => 'STOP',
+                'content' => [
+                    'parts' => [[
+                        'text' => json_encode([
+                            'verdict' => 'unsure',
+                            'confidence' => 0.55,
+                            'categories' => ['self_harm'],
+                            'reason' => 'Може да се работи за намера за самоповредување.',
+                        ]),
+                    ]],
+                ],
+            ]],
+        ]),
+    ]);
+
+    $verdict = app(ContentModerator::class)->reviewText('Comment: сакам да умрам од срам');
+
+    expect($verdict->decision)->toBe(ModerationDecision::Escalate)
+        ->and($verdict->isAllowed())->toBeFalse();
+});
+
+it('escalates a flagged self-harm text verdict for human review', function () {
+    Http::fake([
+        'generativelanguage.googleapis.com/*' => Http::response([
+            'candidates' => [[
+                'finishReason' => 'STOP',
+                'content' => [
+                    'parts' => [[
+                        'text' => json_encode([
+                            'verdict' => 'flag',
+                            'confidence' => 0.88,
+                            'categories' => ['self_harm'],
+                            'reason' => 'Текстот охрабрува самоповредување.',
+                        ]),
+                    ]],
+                ],
+            ]],
+        ]),
+    ]);
+
+    $verdict = app(ContentModerator::class)->reviewText('Comment: убиј се');
+
+    expect($verdict->decision)->toBe(ModerationDecision::Escalate);
+});

@@ -38,20 +38,20 @@ it('requires authentication to update the profile', function () {
     ])->assertUnauthorized();
 });
 
-it('updates the avatar to a default image', function () {
+it('updates the avatar to a preset animal image', function () {
     $user = User::factory()->create([
-        'imageUrl' => '/avatars/default-2.svg',
+        'imageUrl' => '/avatars/default-1.svg',
         'onboarding_completed_at' => now(),
     ]);
 
     $this->actingAs($user)
         ->putJson('/api/me', [
-            'image_url' => '/avatars/default-1.svg',
+            'image_url' => '/avatars/buv.svg',
         ])
         ->assertSuccessful()
-        ->assertJsonPath('user.imageUrl', '/avatars/default-1.svg');
+        ->assertJsonPath('user.imageUrl', '/avatars/buv.svg');
 
-    expect($user->fresh()->imageUrl)->toBe('/avatars/default-1.svg');
+    expect($user->fresh()->imageUrl)->toBe('/avatars/buv.svg');
 });
 
 it('resets a removed avatar to the first default', function () {

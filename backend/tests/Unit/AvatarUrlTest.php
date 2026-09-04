@@ -14,7 +14,7 @@ beforeEach(function () {
     ]);
 });
 
-it('allows default avatar paths', function () {
+it('allows preset avatar paths', function () {
     expect(AvatarUrl::isAllowed('/avatars/default-1.svg', null))->toBeTrue();
 });
 

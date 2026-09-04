@@ -42,7 +42,7 @@ class User extends Authenticatable
 
     protected static function booted(): void
     {
-        // Give users without a picture one of the default avatars at random, so
+        // Give users without a picture one of the preset avatars at random, so
         // every account always has an image to display.
         static::creating(function (User $user): void {
             if (empty($user->imageUrl)) {

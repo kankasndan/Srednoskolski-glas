@@ -1,17 +1,21 @@
 import { getCommentReplies } from "@/api/comments";
 
+function commentId(value) {
+  return Number(value);
+}
+
 // Ja bara patekata do komentar shto seushte ne e vchitan (spodelen link kon
 // odgovor). Vrakja { path, replies }: roditelite od najgorniot nadolu i
 // odgovorite vchitani po pat, za da ne se baraat po vtor pat.
 export async function findCommentPath(comments, targetId) {
-  const target = Number(targetId);
+  const target = commentId(targetId);
 
   if (!Number.isFinite(target)) {
     return null;
   }
 
   for (const comment of comments ?? []) {
-    if (comment.id === target) {
+    if (commentId(comment.id) === target) {
       return { path: [], replies: {} };
     }
 
@@ -26,16 +30,14 @@ export async function findCommentPath(comments, targetId) {
 }
 
 async function searchBranch(comment, target) {
-  // Odgovorot ima pogolemo id od roditelot, pa granka so pogolem koren otpagja.
-  if (comment.id > target || (comment.replies_count ?? 0) === 0) {
+  if ((comment.replies_count ?? 0) === 0) {
     return null;
   }
 
   const replies = await getCommentReplies(comment.id).catch(() => []);
 
-  // Prvo celoto nivo, pa duri potoa podlaboko — pobrzo koga celta e plitka.
-  if (replies.some((reply) => reply.id === target)) {
-    return { path: [comment.id], replies: { [comment.id]: replies } };
+  if (replies.some((reply) => commentId(reply.id) === target)) {
+    return { path: [commentId(comment.id)], replies: { [comment.id]: replies } };
   }
 
   for (const reply of replies) {
@@ -43,7 +45,7 @@ async function searchBranch(comment, target) {
 
     if (deeper) {
       return {
-        path: [comment.id, ...deeper.path],
+        path: [commentId(comment.id), ...deeper.path],
         replies: { ...deeper.replies, [comment.id]: replies },
       };
     }

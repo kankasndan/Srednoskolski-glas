@@ -1,5 +1,6 @@
 <?php
 
+use App\Contracts\ContentModerator;
 use App\Models\City;
 use App\Models\Forum;
 use App\Models\Poll;
@@ -8,6 +9,8 @@ use App\Models\StudentData;
 use App\Models\Thread;
 use App\Models\User;
 use App\Models\Vote;
+use App\Support\Moderation\ModerationDecision;
+use App\Support\Moderation\ModerationVerdict;
 use App\Support\SyncUserContentPermissions;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -230,4 +233,123 @@ it('rejects combining a link with uploaded media', function () {
             UploadedFile::fake()->create('photo.jpg', 100, 'image/jpeg'),
         ],
     ])->assertUnprocessable();
+});
+
+it('does not create a thread when gemini rejects the title', function () {
+    config()->set('moderation.enabled', true);
+
+    $this->mock(ContentModerator::class, function ($mock) {
+        $mock->shouldReceive('reviewText')
+            ->once()
+            ->andReturn(new ModerationVerdict(
+                ModerationDecision::Reject,
+                'hate speech',
+                ['hate_speech'],
+                ['title'],
+            ));
+        $mock->shouldReceive('review')->never();
+    });
+
+    $user = storeThreadAuthor();
+    $forum = makeStoreThreadForum();
+
+    $this->actingAs($user)->post('/api/threads', [
+        'forum_id' => $forum->id,
+        'title' => 'Hate filled title here',
+        'description' => 'Otherwise ordinary body',
+    ])->assertUnprocessable()
+        ->assertJsonPath('errors.title.0', 'Овој текст не е дозволен. Отстрани навредливи зборови или говор на омраза.');
+
+    expect(Thread::query()->count())->toBe(0);
+});
+
+it('does not create a thread when gemini rejects poll text', function () {
+    config()->set('moderation.enabled', true);
+
+    $this->mock(ContentModerator::class, function ($mock) {
+        $mock->shouldReceive('reviewText')
+            ->once()
+            ->withArgs(function (string $text): bool {
+                return str_contains($text, 'Title:')
+                    && str_contains($text, 'Poll question:')
+                    && str_contains($text, 'Poll option 1:');
+            })
+            ->andReturn(new ModerationVerdict(
+                ModerationDecision::Reject,
+                'profanity in poll option',
+                ['profanity'],
+                ['poll'],
+            ));
+        $mock->shouldReceive('review')->never();
+    });
+
+    $user = storeThreadAuthor();
+    $forum = makeStoreThreadForum();
+
+    $this->actingAs($user)->post('/api/threads', [
+        'forum_id' => $forum->id,
+        'title' => 'Анкета за матура',
+        'poll' => [
+            'question' => 'Кој е најдобар?',
+            'options' => ['Слава', 'Навреда'],
+            'duration_days' => 7,
+        ],
+    ])->assertUnprocessable()
+        ->assertJsonPath('errors.poll.0', 'Овој текст не е дозволен. Отстрани навредливи зборови или говор на омраза.');
+
+    expect(Thread::query()->count())->toBe(0)
+        ->and(Poll::query()->count())->toBe(0);
+});
+
+it('refuses thread create when text moderation is unreachable', function () {
+    config()->set('moderation.enabled', true);
+    config()->set('moderation.on_failure', 'reject');
+
+    $this->mock(ContentModerator::class, function ($mock) {
+        $mock->shouldReceive('reviewText')->once()->andThrow(new RuntimeException('timeout'));
+        $mock->shouldReceive('review')->never();
+    });
+
+    $user = storeThreadAuthor();
+    $forum = makeStoreThreadForum();
+
+    $this->actingAs($user)->post('/api/threads', [
+        'forum_id' => $forum->id,
+        'title' => 'Нова дискусија за матура',
+    ])->assertUnprocessable()
+        ->assertJsonPath('errors.title.0', 'Проверката на текстот не успеа. Обиди се повторно.');
+
+    expect(Thread::query()->count())->toBe(0);
+});
+
+it('creates a thread when gemini allows the title description and poll', function () {
+    config()->set('moderation.enabled', true);
+
+    $this->mock(ContentModerator::class, function ($mock) {
+        $mock->shouldReceive('reviewText')
+            ->once()
+            ->withArgs(function (string $text): bool {
+                return str_contains($text, 'Title: Нова дискусија за матура')
+                    && str_contains($text, 'Description: Како да се подготвам')
+                    && str_contains($text, 'Poll question: Кога ќе полагаш?')
+                    && str_contains($text, 'Poll option 2: Август');
+            })
+            ->andReturn(ModerationVerdict::allow('ordinary school thread'));
+        $mock->shouldReceive('review')->never();
+    });
+
+    $user = storeThreadAuthor();
+    $forum = makeStoreThreadForum();
+
+    $this->actingAs($user)->post('/api/threads', [
+        'forum_id' => $forum->id,
+        'title' => 'Нова дискусија за матура',
+        'description' => '<p>Како да се подготвам</p>',
+        'poll' => [
+            'question' => 'Кога ќе полагаш?',
+            'options' => ['Јуни', 'Август'],
+            'duration_days' => 7,
+        ],
+    ])->assertCreated()
+        ->assertJsonPath('data.title', 'Нова дискусија за матура');
 });

@@ -698,6 +698,65 @@ GET /api/me/following-users
 
 ---
 
+### In-app notifications
+
+Student bell only (admin moderation notifications are never returned here).
+
+A user is notified when:
+
+- they are `@mentioned` in a comment
+- someone replies to a comment they wrote
+- someone comments on a thread they authored
+- someone comments on a thread they follow
+- someone starts following them
+
+The commenter/follower is never notified of their own action. One item per recipient for a comment: mention wins over reply, then “your post”, then “followed thread”. Editing a comment only notifies newly mentioned users. Following the same user again does not send another notification.
+
+```
+GET /api/me/notifications
+```
+
+**Auth required.** Latest 30 items, newest first.
+
+```json
+{
+  "data": [
+    {
+      "id": "9d3e…",
+      "reason": "mention",
+      "title": "Спомнување",
+      "message": "marko_p те спомна во коментар „Тест дискусија“.",
+      "url": "/p/opshti-diskusii/12?comment=45#comment-45",
+      "actor_username": "marko_p",
+      "actor_image_url": "/avatars/default-1.svg",
+      "read_at": null,
+      "created_at": "2026-09-01T12:00:00.000000Z"
+    }
+  ],
+  "unread_count": 1
+}
+```
+
+`reason` is `mention`, `comment_reply`, `thread_comment`, `followed_thread_comment`, or `new_follow`. `url` is a frontend path (`/p/{slug}/{threadId}?comment={id}&expand={ancestorIds}#comment-{id}` or `/u/{username}`). Nested replies include `expand` (dot-separated parent ids) so the thread page can open the full branch.
+
+```
+POST /api/me/notifications/{id}/read
+```
+
+**Auth required.** Marks one of the current user’s student notifications as read. `404` if it does not exist or belongs to someone else.
+
+```
+POST /api/me/notifications/read-all
+```
+
+**Auth required.** Marks all of the current user’s student notifications as read.
+
+```json
+{ "data": { "ok": true } }
+```
+
+---
+
 ### Public user profile
 
 ```
@@ -1304,6 +1363,8 @@ POST /api/threads
 
 **Exclusivity (same as UI):** link cannot combine with image/video; images + one video are allowed together; document / poll cannot combine.
 
+When content moderation is enabled, Gemini also screens `title`, `description`, and poll question/options with the school-safe text policy before the row is created. A refusal is `422` with a Macedonian explanation on `title`, `description`, and/or `poll`. Attachments are still screened separately on upload.
+
 Files are uploaded with `Media::upload($file, "threads/{id}")` → ImageKit, then saved on `thread_attachments`.
 
 Polls expire after `duration_days` (`ends_at`). One poll per thread.
@@ -1333,7 +1394,7 @@ PUT|POST /api/threads/{id}
 | `poll[duration_days]` | int | required with poll; **1–30**. Sets `ends_at` from now |
 | `remove_poll` | bool | optional; deletes the thread poll (cannot combine with `poll`) |
 
-Same exclusivity as create for the **resulting** attachment set after removals + additions (link vs image/video; max 10 images / 1 video / 1 file / 1 link; file cannot combine with a poll). Omitting `poll` leaves an existing poll unchanged. Anonymity is not editable here.
+Same exclusivity as create for the **resulting** attachment set after removals + additions (link vs image/video; max 10 images / 1 video / 1 file / 1 link; file cannot combine with a poll). Omitting `poll` leaves an existing poll unchanged. Anonymity is not editable here. Title, description, and any submitted poll text are screened the same way as on create.
 
 Sets `edited_at` to now. Attachment objects in responses include `id`, `url`, and `type`.
 
@@ -1446,6 +1507,8 @@ Omit `parent_id` (or send `null`) for a top-level comment. Pass a comment id to 
 
 `@username` tokens in `content` are parsed on save: existing onboarded users (except the author) are stored in `mentions` and returned for display.
 
+When content moderation is enabled, Gemini screens `content` with the same school-safe text policy as thread title / description / poll. A GIF-only comment with empty `content` skips the text check. A refusal is `422` on `content` with a Macedonian explanation.
+
 **Success (`201`)** — single `Comment` resource (same shape as in the thread tree; `replies` is `[]` for a freshly created node). The author is auto-upvoted (`upvotes` starts at 1, `has_voted` is `true`):
 
 ```json
@@ -1489,7 +1552,7 @@ PUT /api/comments/{id}
 |-------|------|--------|
 | `content` | string | required; 1–1000 characters |
 
-Sets `edited_at` to now. Soft-deleted comments cannot be updated (`404`). Re-parses `@username` mentions from the new content.
+Sets `edited_at` to now. Soft-deleted comments cannot be updated (`404`). Re-parses `@username` mentions from the new content. `content` is screened the same way as on create.
 
 **Success (`200`)** — `Comment` resource (same shape as create).
 
@@ -1603,6 +1666,9 @@ DELETE /api/media
 | `GET` | `/api/me/comments` | yes | Current user’s comments (+ thread context) |
 | `GET` | `/api/me/followed-forums` | yes | Forums the user follows |
 | `GET` | `/api/me/following-users` | yes | Users the current user follows |
+| `GET` | `/api/me/notifications` | yes | Student bell (mentions, replies, comments on your posts / followed threads, new followers) |
+| `POST` | `/api/me/notifications/read-all` | yes | Mark all student notifications read |
+| `POST` | `/api/me/notifications/{id}/read` | yes | Mark one student notification read |
 | `GET` | `/api/u/{username}` | no | Public user profile + counts |
 | `GET` | `/api/u/{username}/threads` | no | User’s threads |
 | `GET` | `/api/u/{username}/comments` | no | User’s comments |

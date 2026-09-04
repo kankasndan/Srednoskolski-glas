@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
@@ -9,31 +9,14 @@ import { faCheck, faLock } from "@fortawesome/free-solid-svg-icons";
 
 config.autoAddCss = false;
 import { getCities, updateProfile } from "@/api/profile";
-import { uploadMedia } from "@/api/media";
 import { CITIES } from "@/lib/schools";
 import InfoDialog from "@/components/ui/InfoDialog";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SelectField from "@/components/ui/SelectField";
+import { DEFAULT_AVATAR, SELECTABLE_AVATARS } from "@/lib/avatars";
 import { userFacingError } from "@/lib/api";
 
 const SAVED_TITLE = "Промените на профилот се зачувани.";
-
-// Mora da odgovara na `avatars.defaults` vo backendot.
-const DEFAULT_AVATARS = [
-  "/avatars/default-1.svg",
-  "/avatars/default-2.svg",
-  "/avatars/default-3.svg",
-  "/avatars/default-4.svg",
-];
-
-// Vo izborot na korisnikot gi ima i novite; avtomatskiot izbor ne gi koristi.
-const SELECTABLE_AVATARS = [
-  ...DEFAULT_AVATARS,
-  "/avatars/buv.svg",
-  "/avatars/lisica.svg",
-  "/avatars/slon.svg",
-  "/avatars/zirafa.svg",
-];
 
 const AREAS = [
   "Геолошко-рударска и металуршка струка",
@@ -110,10 +93,7 @@ function citiesToGroups(cities) {
 
 export default function EditProfileForm({ user: initialUser }) {
   const router = useRouter();
-  const fileInputRef = useRef(null);
-  const [imageUrl, setImageUrl] = useState(initialUser.imageUrl || DEFAULT_AVATARS[0]);
-  const [pendingFile, setPendingFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(initialUser.imageUrl || DEFAULT_AVATARS[0]);
+  const [imageUrl, setImageUrl] = useState(initialUser.imageUrl || DEFAULT_AVATAR);
   const [school, setSchool] = useState(schoolValueFromUser(initialUser));
   const [area, setArea] = useState(vocationFromUser(initialUser));
   const [year, setYear] = useState(gradeFromUser(initialUser));
@@ -141,39 +121,8 @@ export default function EditProfileForm({ user: initialUser }) {
     };
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (previewUrl?.startsWith("blob:")) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
-
-  function selectDefaultAvatar(src) {
-    if (previewUrl?.startsWith("blob:")) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setPendingFile(null);
+  function selectAvatar(src) {
     setImageUrl(src);
-    setPreviewUrl(src);
-  }
-
-  function handleRemoveAvatar() {
-    selectDefaultAvatar(DEFAULT_AVATARS[0]);
-  }
-
-  function handleFileChange(event) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file || !file.type.startsWith("image/")) return;
-
-    if (previewUrl?.startsWith("blob:")) {
-      URL.revokeObjectURL(previewUrl);
-    }
-
-    setPendingFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
-    setImageUrl("");
   }
 
   async function handleSubmit(event) {
@@ -182,15 +131,8 @@ export default function EditProfileForm({ user: initialUser }) {
     setError("");
 
     try {
-      let nextImageUrl = imageUrl;
-
-      if (pendingFile) {
-        const uploaded = await uploadMedia(pendingFile, "avatars");
-        nextImageUrl = uploaded.url;
-      }
-
       const payload = {
-        image_url: nextImageUrl,
+        image_url: imageUrl,
       };
 
       if (school && area && year) {
@@ -230,54 +172,28 @@ export default function EditProfileForm({ user: initialUser }) {
 
             <div className="flex flex-wrap items-center gap-5 md:gap-4">
               <img
-                src={previewUrl}
+                src={imageUrl || DEFAULT_AVATAR}
                 alt=""
                 width={96}
                 height={96}
                 className="size-18 shrink-0 rounded-full object-cover md:size-24"
               />
-
-              <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                <PrimaryButton
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex h-10 w-24 items-center justify-center font-[family-name:var(--font-manrope)] text-[14px] md:w-auto md:px-4"
-                >
-                  <span className="md:hidden">Прикачи</span>
-                  <span className="hidden md:inline">Прикачи слика</span>
-                </PrimaryButton>
-                <button
-                  type="button"
-                  onClick={handleRemoveAvatar}
-                  className="flex h-10 w-24 cursor-pointer items-center justify-center rounded-xl border border-[#582FF5] bg-white font-[family-name:var(--font-manrope)] text-[14px] font-bold text-[#582FF5] transition-colors active:bg-[#F1EEFE] hover:bg-[#F1EEFE] md:w-auto md:px-4"
-                >
-                  Отстрани
-                </button>
-              </div>
             </div>
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-
             <p className="font-[family-name:var(--font-manrope)] text-[13px] leading-[19.5px] text-[#595959] md:text-[14px]">
-              Или избери стандарден аватар:
+              Избери аватар:
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
               {SELECTABLE_AVATARS.map((src) => {
-                const selected = !pendingFile && imageUrl === src;
+                const selected = imageUrl === src;
 
                 return (
                   <button
                     key={src}
                     type="button"
-                    onClick={() => selectDefaultAvatar(src)}
-                    aria-label="Избери стандарден аватар"
+                    onClick={() => selectAvatar(src)}
+                    aria-label="Избери аватар"
                     aria-pressed={selected}
                     className="relative size-10 cursor-pointer rounded-full md:size-14"
                   >

@@ -74,7 +74,10 @@ export default function CommentComposer({
       onCreated?.(created);
       onClose?.();
     } catch (err) {
-      if (err.status === 403) {
+      const validation = err.body?.errors;
+      if (validation) {
+        setError(Object.values(validation).flat().join(" "));
+      } else if (err.status === 403) {
         setError(userFacingError(err, "Немаш дозвола да коментираш."));
       } else if (err.status === 401) {
         setError("Мора да си најавен за да коментираш.");

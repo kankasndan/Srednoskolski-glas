@@ -1,9 +1,12 @@
 <?php
 
+use App\Contracts\ContentModerator;
 use App\Models\Forum;
 use App\Models\Thread;
 use App\Models\ThreadAttachment;
 use App\Models\User;
+use App\Support\Moderation\ModerationDecision;
+use App\Support\Moderation\ModerationVerdict;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
@@ -148,4 +151,31 @@ it('rejects removing an attachment that does not belong to the thread', function
         'remove_attachment_ids' => [$foreign->id],
     ])->assertUnprocessable()
         ->assertJsonValidationErrors(['remove_attachment_ids']);
+});
+
+it('does not update a thread when gemini rejects the new description', function () {
+    config()->set('moderation.enabled', true);
+
+    $this->mock(ContentModerator::class, function ($mock) {
+        $mock->shouldReceive('reviewText')
+            ->once()
+            ->andReturn(new ModerationVerdict(
+                ModerationDecision::Reject,
+                'profanity',
+                ['profanity'],
+                ['description'],
+            ));
+        $mock->shouldReceive('review')->never();
+    });
+
+    $author = User::factory()->create();
+    $thread = updateThread(updateThreadForum(), $author);
+
+    $this->actingAs($author)->putJson("/api/threads/{$thread->id}", [
+        'title' => 'Updated title here',
+        'description' => 'Offensive body text',
+    ])->assertUnprocessable()
+        ->assertJsonPath('errors.description.0', 'Овој текст не е дозволен. Отстрани навредливи зборови или говор на омраза.');
+
+    expect($thread->fresh()->title)->toBe('Original title here');
 });

@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class FollowThreadController extends Controller
 {
     /**
-     * Follow a thread (visual follow in MVP — no notifications).
+     * Follow a thread. Followers are notified when someone else comments.
      *
      * POST /api/threads/{thread}/follow
      */

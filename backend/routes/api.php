@@ -3,9 +3,9 @@
 use App\Http\Controllers\Auth\AcknowledgeSanctionController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\MeController;
-use App\Http\Controllers\Auth\OnboardingAvatarController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\Auth\StoreAppealController;
+use App\Http\Controllers\Auth\UserNotificationController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ExploreController;
@@ -33,7 +33,6 @@ use Illuminate\Support\Facades\Route;
 
 // Save onboarding profile (and auto-follow the student's school forum).
 Route::middleware(['auth:sanctum', 'not_banned', 'throttle:api-writes'])->put('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
-Route::middleware(['auth:sanctum', 'not_banned', 'onboarding', 'throttle:media-upload'])->post('/onboarding/avatar', [OnboardingAvatarController::class, 'store'])->name('onboarding.avatar');
 // Return the current authenticated user.
 Route::middleware('auth:sanctum')->get('/me', MeController::class)->name('me.show');
 // Dismiss the current-user sanction popup (banned users must still be able to call this).
@@ -50,6 +49,12 @@ Route::middleware('auth:sanctum')->get('/me/comments', [ProfileController::class
 Route::middleware('auth:sanctum')->get('/me/followed-forums', [ProfileController::class, 'followedForums'])->name('me.followed-forums');
 Route::middleware('auth:sanctum')->get('/me/followed-threads', [ProfileController::class, 'followedThreads'])->name('me.followed-threads');
 Route::middleware('auth:sanctum')->get('/me/following-users', [ProfileController::class, 'followingUsers'])->name('me.following-users');
+Route::middleware(['auth:sanctum', 'throttle:api-reads'])->get('/me/notifications', [UserNotificationController::class, 'index'])
+    ->name('me.notifications.index');
+Route::middleware(['auth:sanctum', 'throttle:api-writes'])->post('/me/notifications/read-all', [UserNotificationController::class, 'readAll'])
+    ->name('me.notifications.read-all');
+Route::middleware(['auth:sanctum', 'throttle:api-writes'])->post('/me/notifications/{id}/read', [UserNotificationController::class, 'read'])
+    ->name('me.notifications.read');
 // Log the user out and end the session.
 Route::middleware(['auth:sanctum', 'throttle:api-writes'])->post('/logout', LogoutController::class)->name('auth.logout');
 

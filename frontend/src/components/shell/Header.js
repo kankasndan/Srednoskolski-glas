@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import SearchBar, { SearchBarFallback } from "@/components/shell/SearchBar";
 import AuthButtons from "@/components/shell/AuthButtons";
 import Avatar from "@/components/ui/Avatar";
+import NotificationBell from "@/components/shell/NotificationBell";
 import { useProfile } from "@/hooks/useProfile";
 
 function MobileAuthControl() {
@@ -16,23 +17,26 @@ function MobileAuthControl() {
 
   // Profilnata go sledi logoto po golemina, ne ikonata za meni.
   if (loading) {
-    return <div className="size-11 shrink-0 md:size-13" aria-hidden />;
+    return <div className="h-11 w-[92px] shrink-0 md:h-13 md:w-[108px]" aria-hidden />;
   }
 
   if (user) {
     return (
-      <Link
-        href="/profile"
-        aria-label="Профил"
-        className="flex size-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full md:size-13"
-      >
-        <Avatar
-          src={user.imageUrl}
-          size="xl"
-          sizeClassName="size-11 md:size-13"
-          alt={user.username || "Профил"}
-        />
-      </Link>
+      <div className="flex shrink-0 items-center gap-1">
+        <NotificationBell compact />
+        <Link
+          href="/profile"
+          aria-label="Профил"
+          className="flex size-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full md:size-13"
+        >
+          <Avatar
+            src={user.imageUrl}
+            size="xl"
+            sizeClassName="size-11 md:size-13"
+            alt={user.username || "Профил"}
+          />
+        </Link>
+      </div>
     );
   }
 

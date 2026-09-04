@@ -10,6 +10,7 @@ export default function CommentList({
   onCommentDeleted,
   expandPath = null,
   preloadedReplies = null,
+  highlightCommentId = null,
 }) {
   return (
     <CommentShiftProvider>
@@ -28,6 +29,8 @@ export default function CommentList({
               onCommentDeleted={onCommentDeleted}
               expandPath={expandPath}
               preloadedReplies={preloadedReplies}
+              highlightCommentId={highlightCommentId}
+              ancestorIds={[]}
             />
           </article>
         ))}

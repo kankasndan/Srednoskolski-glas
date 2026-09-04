@@ -1,10 +1,13 @@
 <?php
 
+use App\Contracts\ContentModerator;
 use App\Models\Comment;
 use App\Models\Forum;
 use App\Models\Thread;
 use App\Models\User;
 use App\Models\Vote;
+use App\Support\Moderation\ModerationDecision;
+use App\Support\Moderation\ModerationVerdict;
 use App\Support\SyncUserContentPermissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -261,4 +264,103 @@ it('hides the author when the anonymous thread owner comments', function () {
         ])
         ->assertCreated()
         ->assertJsonPath('data.author.id', $other->id);
+});
+
+it('does not create a comment when gemini rejects the text', function () {
+    config()->set('moderation.enabled', true);
+
+    $this->mock(ContentModerator::class, function ($mock) {
+        $mock->shouldReceive('reviewText')
+            ->once()
+            ->withArgs(fn (string $text): bool => str_contains($text, 'Comment:'))
+            ->andReturn(new ModerationVerdict(
+                ModerationDecision::Reject,
+                'hate speech',
+                ['hate_speech'],
+                ['content'],
+            ));
+        $mock->shouldReceive('review')->never();
+    });
+
+    $user = onboardedCommenter();
+    $thread = commentThread(commentForum(), $user);
+
+    $this->actingAs($user)->postJson("/api/threads/{$thread->id}/comments", [
+        'content' => 'Offensive comment text',
+    ])->assertUnprocessable()
+        ->assertJsonPath('errors.content.0', 'Овој текст не е дозволен. Отстрани навредливи зборови или говор на омраза.');
+
+    expect(Comment::query()->count())->toBe(0);
+});
+
+it('shows the macedonian moderation reason on a rejected comment', function () {
+    config()->set('moderation.enabled', true);
+
+    $this->mock(ContentModerator::class, function ($mock) {
+        $mock->shouldReceive('reviewText')
+            ->once()
+            ->andReturn(new ModerationVerdict(
+                ModerationDecision::Reject,
+                'Текстот содржи навредливи зборови.',
+                ['profanity'],
+            ));
+        $mock->shouldReceive('review')->never();
+    });
+
+    $user = onboardedCommenter();
+    $thread = commentThread(commentForum(), $user);
+
+    $this->actingAs($user)->postJson("/api/threads/{$thread->id}/comments", [
+        'content' => 'pichka',
+    ])->assertUnprocessable()
+        ->assertJsonPath('errors.content.0', 'Текстот содржи навредливи зборови.');
+});
+
+it('skips text moderation for a gif-only comment', function () {
+    config()->set('moderation.enabled', true);
+
+    $this->mock(ContentModerator::class, function ($mock) {
+        $mock->shouldReceive('reviewText')->never();
+        $mock->shouldReceive('review')->never();
+    });
+
+    $user = onboardedCommenter();
+    $thread = commentThread(commentForum(), $user);
+
+    $this->actingAs($user)->postJson("/api/threads/{$thread->id}/comments", [
+        'content' => '',
+        'gif_url' => 'https://media.giphy.com/media/abc123/200w.gif',
+    ])->assertCreated();
+});
+
+it('does not update a comment when gemini rejects the new text', function () {
+    config()->set('moderation.enabled', true);
+
+    $this->mock(ContentModerator::class, function ($mock) {
+        $mock->shouldReceive('reviewText')
+            ->once()
+            ->andReturn(new ModerationVerdict(
+                ModerationDecision::Reject,
+                'profanity',
+                ['profanity'],
+                ['content'],
+            ));
+        $mock->shouldReceive('review')->never();
+    });
+
+    $user = onboardedCommenter();
+    $thread = commentThread(commentForum(), $user);
+    $comment = Comment::forceCreate([
+        'thread_id' => $thread->id,
+        'parent_id' => null,
+        'user_id' => $user->id,
+        'content' => 'Original comment',
+    ]);
+
+    $this->actingAs($user)->putJson("/api/comments/{$comment->id}", [
+        'content' => 'Offensive edit',
+    ])->assertUnprocessable()
+        ->assertJsonPath('errors.content.0', 'Овој текст не е дозволен. Отстрани навредливи зборови или говор на омраза.');
+
+    expect($comment->fresh()->content)->toBe('Original comment');
 });

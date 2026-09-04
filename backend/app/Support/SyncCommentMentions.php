@@ -9,9 +9,11 @@ final class SyncCommentMentions
 {
     /**
      * Replace stored mentions for a comment from `@username` tokens in its body.
-     * Unknown names and self-mentions are ignored. No notifications in MVP.
+     * Unknown names and self-mentions are ignored.
+     *
+     * @return list<int> User ids that were newly mentioned (for notifications).
      */
-    public function handle(Comment $comment): void
+    public function handle(Comment $comment): array
     {
         $usernames = MentionParser::usernames($comment->content);
         $mentionedIds = $this->resolveMentionedUserIds($comment, $usernames);
@@ -19,19 +21,27 @@ final class SyncCommentMentions
         if ($mentionedIds === []) {
             $comment->mentions()->delete();
 
-            return;
+            return [];
         }
 
         $comment->mentions()
             ->whereNotIn('mentioned_user_id', $mentionedIds)
             ->delete();
 
+        $newlyMentionedIds = [];
+
         foreach ($mentionedIds as $mentionedId) {
-            $comment->mentions()->firstOrCreate([
+            $mention = $comment->mentions()->firstOrCreate([
                 'mentioning_user_id' => $comment->user_id,
                 'mentioned_user_id' => $mentionedId,
             ]);
+
+            if ($mention->wasRecentlyCreated) {
+                $newlyMentionedIds[] = $mentionedId;
+            }
         }
+
+        return $newlyMentionedIds;
     }
 
     /**
