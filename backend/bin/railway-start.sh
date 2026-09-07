@@ -6,6 +6,11 @@ if [ -z "${APP_KEY:-}" ]; then
   exit 1
 fi
 
+if [ -z "${DB_URL:-}${MYSQL_URL:-}${DATABASE_URL:-}${MYSQLHOST:-}${MYSQL_HOST:-}" ]; then
+  echo "No MySQL settings found. On the backend service add DB_URL as a variable reference to your MySQL plugin's MYSQL_URL (Variables → Add variable reference). Do not leave DB_URL empty."
+  exit 1
+fi
+
 php artisan package:discover --ansi
 
 php artisan migrate --force

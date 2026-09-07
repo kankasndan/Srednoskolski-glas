@@ -92,4 +92,15 @@ Do not set `SESSION_DOMAIN=.railway.app` — that suffix is public and browsers 
 
 `caching_sha2_password` / `SQLSTATE[HY000] [2054]`: the old Nixpacks PHP client cannot auth to MySQL 8. Redeploy after this repo’s Dockerfile is on GitHub. In backend Settings → Build, builder should be **Dockerfile**.
 
-`Unknown database 'srednoskolski_glas'`: remove `DB_DATABASE` from the backend service. Keep `DB_URL=${{MySQL.MYSQL_URL}}` only.
+`Unknown database 'srednoskolski_glas'`: remove `DB_DATABASE` from the backend service. Keep `DB_URL`.
+
+`Connection refused` / host `127.0.0.1` / database `laravel`: `DB_URL` is missing or empty. Laravel then uses local defaults. Add it back:
+
+1. Backend → Variables → **New variable** → **Add a variable reference**.
+2. Pick the MySQL service → `MYSQL_URL`.
+3. Name the variable `DB_URL`.
+4. Redeploy backend.
+
+The reference `${{MySQL.MYSQL_URL}}` only works if the database service on the canvas is named exactly `MySQL`. If it is named something else, use that name, or use the “variable reference” picker so Railway fills it in.
+
+Do not delete `DB_URL`. Only delete `DB_HOST` / `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` if those were copied from local `.env`.
