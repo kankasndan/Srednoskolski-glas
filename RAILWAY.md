@@ -67,6 +67,12 @@ Generate a public URL for `frontend` too.
 
 `NEXT_PUBLIC_API_URL` is compiled into the JS bundle. If the backend domain was not ready at first build, **Redeploy** the frontend after it exists.
 
+Start command must be `npm run start` (Next.js). **Do not** set Custom Start Command to `npx serve -s dist -l $PORT` — there is no `dist` folder. If you already set that in frontend → Settings → Deploy, delete it or replace it with `npm run start`, then redeploy.
+
+Next.js 16 needs Node **22** (not 18). That is pinned in `frontend/package.json` (`engines`) and `frontend/.nvmrc`. If a build still says `Node.js 18`, set a frontend variable `NIXPACKS_NODE_VERSION=22` and redeploy.
+
+The `npm warn config production` line is harmless. `serve@14.2.6` only appears when the wrong start command is used.
+
 Then redeploy **backend** once so `FRONTEND_URL` / Sanctum see the frontend host.
 
 ## 5. Order of first deploy

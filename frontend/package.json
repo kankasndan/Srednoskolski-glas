@@ -2,6 +2,9 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "tailwind": "npx @tailwindcss/cli -i ./src/app/globals.css -o ./public/tailwind.css --watch",

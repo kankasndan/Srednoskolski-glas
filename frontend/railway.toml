@@ -4,6 +4,8 @@ NIXPACKS_NODE_VERSION = "22"
 [build]
 builder = "NIXPACKS"
 
+# Do not override this in the Railway UI with `npx serve -s dist`.
+# This app is Next.js (output is .next), not a static Vite/CRA dist folder.
 [deploy]
 startCommand = "npm run start"
 healthcheckPath = "/"
