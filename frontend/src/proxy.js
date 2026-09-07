@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { API_BASE_URL } from "@/lib/apiBaseUrl";
 
-const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_ORIGIN = API_BASE_URL;
 
 // GIF search goes through our API; only the CDN still needs to be in img-src.
 const GIPHY_MEDIA = "https://*.giphy.com";
