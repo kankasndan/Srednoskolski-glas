@@ -1,6 +1,7 @@
 [variables]
-NIXPACKS_PHP_VERSION = "8.3"
+NIXPACKS_PHP_VERSION = "8.4"
 NIXPACKS_NODE_VERSION = "22"
+COMPOSER_ALLOW_SUPERUSER = "1"
 
 [phases.setup]
 nixPkgs = ["...", "ffmpeg", "nodejs_22"]
