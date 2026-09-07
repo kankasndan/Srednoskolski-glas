@@ -1,0 +1,9 @@
+[variables]
+NIXPACKS_PHP_VERSION = "8.3"
+NIXPACKS_NODE_VERSION = "22"
+
+[phases.setup]
+nixPkgs = ["...", "ffmpeg", "nodejs_22"]
+
+[phases.build]
+cmds = ["...", "npm install --ignore-scripts", "npm run build"]

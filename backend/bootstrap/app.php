@@ -26,6 +26,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
 
+        // Railway (and any TLS terminator) sends X-Forwarded-*. Without this,
+        // Laravel thinks the request is HTTP and session cookies are not Secure.
+        $middleware->trustProxies(at: '*');
+
         $middleware->append(SecurityHeaders::class);
 
         $middleware->api(append: [
