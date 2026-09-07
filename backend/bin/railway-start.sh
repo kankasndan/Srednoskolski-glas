@@ -6,6 +6,8 @@ if [ -z "${APP_KEY:-}" ]; then
   exit 1
 fi
 
+php artisan package:discover --ansi
+
 php artisan migrate --force
 
 php artisan db:seed --class=RailwaySeeder --force

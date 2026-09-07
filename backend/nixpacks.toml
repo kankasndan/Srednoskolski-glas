@@ -1,3 +1,4 @@
+# Unused on Railway (backend/railway.toml uses Dockerfile). Kept for local nixpacks builds.
 [variables]
 NIXPACKS_PHP_VERSION = "8.4"
 NIXPACKS_NODE_VERSION = "22"

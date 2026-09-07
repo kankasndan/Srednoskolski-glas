@@ -2,6 +2,8 @@
 
 One Git repo, **two services**. Cookie login only works if you follow the env names below.
 
+The API image is `backend/Dockerfile` (PHP 8.4 with mysqlnd). Nixpacks cannot talk to Railway MySQL 8 (`caching_sha2_password`).
+
 ## 1. Push this repo to GitHub
 
 Railway deploys from GitHub. The root directory of each service is a subfolder.
@@ -45,6 +47,8 @@ Required:
 | `DB_URL` | `${{MySQL.MYSQL_URL}}` |
 | `CONTENT_MODERATION_ON_FAILURE` | `reject` |
 
+Do **not** set `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, or `DB_PASSWORD` on the backend service. If you pasted a local `.env`, delete those four — they target `srednoskolski_glas`, which does not exist on Railway (the plugin database is `railway`).
+
 Also set ImageKit, `GEMINI_API_KEY`, and `GIPHY_API_KEY` the same as local.
 
 Optional staff login: set `ADMIN_SEED_PASSWORD` to a strong password. That creates `admin@srednoskolskiglas.mk` / `moderator@srednoskolskiglas.mk` on boot (see `RailwaySeeder`).
@@ -83,3 +87,9 @@ When you have `app.example.com` and `api.example.com`:
 - Redeploy both.
 
 Do not set `SESSION_DOMAIN=.railway.app` — that suffix is public and browsers will drop the cookie.
+
+## 7. Database connection errors
+
+`caching_sha2_password` / `SQLSTATE[HY000] [2054]`: the old Nixpacks PHP client cannot auth to MySQL 8. Redeploy after this repo’s Dockerfile is on GitHub. In backend Settings → Build, builder should be **Dockerfile**.
+
+`Unknown database 'srednoskolski_glas'`: remove `DB_DATABASE` from the backend service. Keep `DB_URL=${{MySQL.MYSQL_URL}}` only.
