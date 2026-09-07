@@ -31,6 +31,9 @@ COPY . .
 COPY --from=assets /app/public/build ./public/build
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-railway.ini
 
+# Never ship a local .env (DB_HOST=127.0.0.1) inside the image.
+RUN rm -f .env .env.example .env.production .env.production.example .env.railway.example
+
 RUN composer install --no-dev --optimize-autoloader --no-scripts \
     && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
     && chmod -R ug+rwx storage bootstrap/cache
