@@ -34,16 +34,19 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    // OAuth callbacks must hit the SPA origin (`FRONTEND_URL`) because the
+    // browser only talks to /api through the Next rewrite. Using APP_URL here
+    // drops the session cookie and social login fails with auth_failed.
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('GOOGLE_REDIRECT_URI'),
+        'redirect' => env('GOOGLE_REDIRECT_URI') ?: (rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'), '/').'/api/auth/google/callback'),
     ],
 
     'facebook' => [
         'client_id' => env('FACEBOOK_CLIENT_ID'),
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
-        'redirect' => env('FACEBOOK_REDIRECT_URI'),
+        'redirect' => env('FACEBOOK_REDIRECT_URI') ?: (rtrim((string) env('FRONTEND_URL', 'http://localhost:3000'), '/').'/api/auth/facebook/callback'),
     ],
 
     'giphy' => [

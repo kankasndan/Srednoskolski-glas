@@ -39,7 +39,7 @@ Required:
 | `APP_URL` | `https://${{RAILWAY_PUBLIC_DOMAIN}}` |
 | `FRONTEND_URL` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
 | `SANCTUM_STATEFUL_DOMAINS` | `${{frontend.RAILWAY_PUBLIC_DOMAIN}}` (no `https://`) |
-| `SESSION_SAME_SITE` | `none` |
+| `SESSION_SAME_SITE` | `lax` (first-party via Next `/api` proxy) |
 | `SESSION_SECURE_COOKIE` | `true` |
 | `SESSION_DOMAIN` | leave empty |
 | `SESSION_ENCRYPT` | `true` |
@@ -49,7 +49,16 @@ Required:
 
 Do **not** set `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, or `DB_PASSWORD` on the backend service. If you pasted a local `.env`, delete those four — they target `srednoskolski_glas`, which does not exist on Railway (the plugin database is `railway`).
 
-Also set ImageKit, `GEMINI_API_KEY`, and `GIPHY_API_KEY` the same as local.
+Also delete any local leftovers: `GOOGLE_REDIRECT_URI=http://localhost:8000/...` and `FACEBOOK_REDIRECT_URI=...`. Leave those unset; `railway-start.sh` sets them from `FRONTEND_URL`. If they stay as localhost, Google/Facebook login redirects to `localhost:3000?error=auth_failed`.
+
+Also set ImageKit, `GEMINI_API_KEY`, `GIPHY_API_KEY`, `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`, and Facebook client credentials the same as local.
+
+### Google / Facebook console URIs
+
+Authorized redirect URIs must be the **frontend** host (not the backend):
+
+- `https://<frontend>.up.railway.app/api/auth/google/callback`
+- `https://<frontend>.up.railway.app/api/auth/facebook/callback`
 
 Optional staff login: set `ADMIN_SEED_PASSWORD` to a strong password. That creates `admin@srednoskolskiglas.mk` / `moderator@srednoskolskiglas.mk` on boot (see `RailwaySeeder`).
 

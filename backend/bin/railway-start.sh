@@ -47,6 +47,64 @@ esac
 
 echo "MySQL host: $db_host"
 
+is_loopback_url() {
+  php -r '
+    $url = getenv("CHECK_URL") ?: "";
+    $host = strtolower((string) (parse_url($url, PHP_URL_HOST) ?: ""));
+    exit(in_array($host, ["localhost", "127.0.0.1", "::1"], true) ? 0 : 1);
+  '
+}
+
+# FRONTEND_URL must be the public SPA host. OAuth and CORS break on localhost leftovers.
+if [ -z "${FRONTEND_URL:-}" ]; then
+  echo "FRONTEND_URL is not set."
+  echo "Set it to https://<your-frontend>.up.railway.app (variable reference to frontend.RAILWAY_PUBLIC_DOMAIN)."
+  exit 1
+fi
+
+FRONTEND_URL=$(printf '%s' "$FRONTEND_URL" | sed 's:/*$::')
+export FRONTEND_URL
+export CHECK_URL="$FRONTEND_URL"
+if is_loopback_url; then
+  echo "FRONTEND_URL is still localhost ($FRONTEND_URL)."
+  echo "Delete the local value and set https://\${{frontend.RAILWAY_PUBLIC_DOMAIN}} on the backend service."
+  exit 1
+fi
+
+if [ -z "${APP_URL:-}" ]; then
+  echo "APP_URL is not set. Set https://\${{RAILWAY_PUBLIC_DOMAIN}} on the backend service."
+  exit 1
+fi
+
+APP_URL=$(printf '%s' "$APP_URL" | sed 's:/*$::')
+export APP_URL
+export CHECK_URL="$APP_URL"
+if is_loopback_url; then
+  echo "APP_URL is still localhost ($APP_URL)."
+  echo "Set https://\${{RAILWAY_PUBLIC_DOMAIN}} on the backend service."
+  exit 1
+fi
+
+# Browser talks to /api on the SPA host (Next rewrite). Socialite must use the same
+# host for OAuth callbacks or Google/Facebook return to localhost / the API host,
+# the session cookie is missing, and login fails with auth_failed.
+fix_oauth_redirect() {
+  provider="$1"
+  var_name="$2"
+  eval "current=\${$var_name:-}"
+  export CHECK_URL="$current"
+  if [ -z "$current" ] || is_loopback_url; then
+    value="${FRONTEND_URL}/api/auth/${provider}/callback"
+    export "$var_name=$value"
+    echo "Using $var_name=$value"
+  else
+    echo "Using $var_name=$current"
+  fi
+}
+
+fix_oauth_redirect google GOOGLE_REDIRECT_URI
+fix_oauth_redirect facebook FACEBOOK_REDIRECT_URI
+
 php artisan package:discover --ansi
 
 php artisan migrate --force
