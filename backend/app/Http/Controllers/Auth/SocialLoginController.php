@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -26,11 +27,11 @@ class SocialLoginController extends Controller
         return Socialite::driver($provider)->redirect();
     }
 
-    public function callback(string $provider): RedirectResponse
+    public function callback(Request $request, string $provider): RedirectResponse
     {
         $this->assertAllowedProvider($provider);
 
-        $frontendUrl = rtrim((string) config('app.frontend_url'), '/');
+        $frontendUrl = $this->resolveFrontendUrl($request);
 
         try {
             $socialUser = Socialite::driver($provider)->user();
@@ -63,6 +64,76 @@ class SocialLoginController extends Controller
 
             return redirect()->to("{$frontendUrl}/login?error=auth_failed");
         }
+    }
+
+    private function resolveFrontendUrl(Request $request): string
+    {
+        $configured = rtrim((string) config('app.frontend_url'), '/');
+
+        // In production, default localhost config breaks OAuth/profile redirects.
+        // If FRONTEND_URL is still localhost (or empty), infer the real SPA host
+        // from Origin/Referer sent by the browser.
+        if ($this->canUseInferredFrontendUrl($configured)) {
+            $inferred = $this->frontendUrlFromHeaders($request);
+            if ($inferred !== null) {
+                return $inferred;
+            }
+        }
+
+        if ($configured !== '') {
+            return $configured;
+        }
+
+        return 'http://localhost:3000';
+    }
+
+    private function canUseInferredFrontendUrl(string $configured): bool
+    {
+        if (! app()->environment('production')) {
+            return false;
+        }
+
+        if ($configured === '') {
+            return true;
+        }
+
+        return $this->isLoopbackOrigin($configured);
+    }
+
+    private function frontendUrlFromHeaders(Request $request): ?string
+    {
+        foreach (['origin', 'referer'] as $header) {
+            $value = trim((string) $request->headers->get($header, ''));
+            if ($value === '') {
+                continue;
+            }
+
+            $parts = parse_url($value);
+            $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+            $host = (string) ($parts['host'] ?? '');
+            $port = $parts['port'] ?? null;
+
+            if (! in_array($scheme, ['http', 'https'], true) || $host === '') {
+                continue;
+            }
+
+            $origin = "{$scheme}://{$host}";
+            if (is_int($port)) {
+                $origin .= ":{$port}";
+            }
+
+            return $origin;
+        }
+
+        return null;
+    }
+
+    private function isLoopbackOrigin(string $url): bool
+    {
+        $parts = parse_url($url);
+        $host = strtolower((string) ($parts['host'] ?? ''));
+
+        return in_array($host, ['localhost', '127.0.0.1', '::1'], true);
     }
 
     /**
