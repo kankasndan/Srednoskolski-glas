@@ -1,4 +1,6 @@
-export { API_BASE_URL } from "@/lib/apiBaseUrl";
+import { apiRequestBase } from "@/lib/apiBaseUrl";
+
+export { API_BASE_URL, apiRequestBase } from "@/lib/apiBaseUrl";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
@@ -36,7 +38,7 @@ function attachCsrfHeader(headers) {
 // Always refresh: OAuth login regenerates the session, and a leftover cookie
 // from before that would 419 as "CSRF token mismatch".
 export async function ensureCsrfCookie() {
-  await fetch(`${API_BASE_URL}/sanctum/csrf-cookie`, {
+  await fetch(`${apiRequestBase()}/sanctum/csrf-cookie`, {
     credentials: "include",
   });
 }
@@ -64,12 +66,12 @@ export async function apiFetch(path, options = {}) {
     headers,
   };
 
-  const response = await fetch(`${API_BASE_URL}${path}`, request);
+  const response = await fetch(`${apiRequestBase()}${path}`, request);
 
   if (!SAFE_METHODS.has(method) && response.status === 419) {
     await ensureCsrfCookie();
     attachCsrfHeader(headers);
-    return fetch(`${API_BASE_URL}${path}`, request);
+    return fetch(`${apiRequestBase()}${path}`, request);
   }
 
   return response;

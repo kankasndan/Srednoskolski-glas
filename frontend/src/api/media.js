@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { API_BASE_URL, ensureCsrfCookie } from "@/lib/api";
+import { apiRequestBase, ensureCsrfCookie } from "@/lib/api";
 
 /**
  * @param {File} file
@@ -12,7 +12,7 @@ export async function uploadMedia(file, directory = "avatars") {
   formData.append("file", file);
   formData.append("directory", directory);
 
-  const response = await fetch(`${API_BASE_URL}/api/media`, {
+  const response = await fetch(`${apiRequestBase()}/api/media`, {
     method: "POST",
     credentials: "include",
     headers: {

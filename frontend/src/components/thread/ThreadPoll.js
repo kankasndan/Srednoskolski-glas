@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Cookies from "js-cookie";
-import { API_BASE_URL, ensureCsrfCookie, userFacingError } from "@/lib/api";
+import { apiRequestBase, ensureCsrfCookie, userFacingError } from "@/lib/api";
 
 function formatEndsAt(endsAt) {
   if (!endsAt) return null;
@@ -21,7 +21,7 @@ function formatEndsAt(endsAt) {
 async function voteOnPoll(pollId, pollOptionId) {
   await ensureCsrfCookie();
 
-  const response = await fetch(`${API_BASE_URL}/api/polls/${pollId}/vote`, {
+  const response = await fetch(`${apiRequestBase()}/api/polls/${pollId}/vote`, {
     method: "POST",
     credentials: "include",
     headers: {

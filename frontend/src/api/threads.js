@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { API_BASE_URL, apiFetch, ensureCsrfCookie } from "@/lib/api";
+import { apiRequestBase, apiFetch, ensureCsrfCookie } from "@/lib/api";
 import { normalizeEmbedLink } from "@/lib/embeds";
 
 export async function getThread(
@@ -60,7 +60,7 @@ export async function createThread(payload) {
     });
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/threads`, {
+  const response = await fetch(`${apiRequestBase()}/api/threads`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -134,7 +134,7 @@ export async function updateThread(threadId, payload) {
   }
 
   // POST multipart — PHP does not populate files reliably on PUT.
-  const response = await fetch(`${API_BASE_URL}/api/threads/${threadId}`, {
+  const response = await fetch(`${apiRequestBase()}/api/threads/${threadId}`, {
     method: "POST",
     credentials: "include",
     headers: {

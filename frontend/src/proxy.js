@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server";
-import { API_BASE_URL } from "@/lib/apiBaseUrl";
-
-const API_ORIGIN = API_BASE_URL;
 
 // GIF search goes through our API; only the CDN still needs to be in img-src.
 const GIPHY_MEDIA = "https://*.giphy.com";
@@ -20,7 +17,7 @@ function contentSecurityPolicy(nonce, isDev) {
     ? "'self' 'unsafe-inline' 'unsafe-eval'"
     : `'self' 'nonce-${nonce}' 'strict-dynamic'`;
 
-  const connectSrc = ["'self'", API_ORIGIN, isDev ? "ws: http://localhost:*" : ""]
+  const connectSrc = ["'self'", isDev ? "ws: http://localhost:*" : ""]
     .filter(Boolean)
     .join(" ");
 
@@ -45,6 +42,11 @@ function contentSecurityPolicy(nonce, isDev) {
 }
 
 export function proxy(request) {
+  const { pathname } = request.nextUrl;
+  if (pathname.startsWith("/api/") || pathname.startsWith("/sanctum/")) {
+    return NextResponse.next();
+  }
+
   const isDev = process.env.NODE_ENV !== "production";
   const nonce = crypto.randomUUID();
   const csp = contentSecurityPolicy(nonce, isDev);

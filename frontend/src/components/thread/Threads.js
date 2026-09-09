@@ -7,7 +7,7 @@ import ForumEmptyState from "@/components/forum/ForumEmptyState";
 import FeedFilterSheet from "@/components/thread/FeedFilterSheet";
 import NoMoreThreads from "@/components/thread/NoMoreThreads";
 import ThreadCard from "@/components/thread/ThreadCard";
-import { API_BASE_URL } from "@/lib/api";
+import { apiRequestBase } from "@/lib/api";
 import {
   isReloadNavigation,
   listSnapshotKey,
@@ -173,15 +173,15 @@ export default function Threads({
     if (isSearch) {
       if (searchQuery) params.set("q", searchQuery);
       if (forum) params.set("forum", forum);
-      return `${API_BASE_URL}/api/search?${params}`;
+      return `${apiRequestBase()}/api/search?${params}`;
     }
 
     if (listPath) {
-      return `${API_BASE_URL}${listPath}?${params}`;
+      return `${apiRequestBase()}${listPath}?${params}`;
     }
 
     const path = forum === null ? "/api/feed" : `/api/p/${forum}/threads`;
-    return `${API_BASE_URL}${path}?${params}`;
+    return `${apiRequestBase()}${path}?${params}`;
   }
 
   async function fetchThreads({

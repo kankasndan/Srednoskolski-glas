@@ -1,5 +1,7 @@
-// Public Laravel origin. NEXT_PUBLIC_API_URL is inlined at `next build` time.
-export function apiBaseUrl() {
+// Laravel origin. NEXT_PUBLIC_API_URL is inlined at `next build` time and used
+// for Next rewrites / server-side fetches. The browser always calls same-origin
+// `/api` and `/sanctum`; next.config.mjs proxies those to this host.
+export function laravelOrigin() {
   const configured = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/\/$/, "");
 
   if (configured) {
@@ -15,4 +17,13 @@ export function apiBaseUrl() {
   return "http://localhost:8000";
 }
 
-export const API_BASE_URL = apiBaseUrl();
+export const API_BASE_URL = laravelOrigin();
+
+/** Empty in the browser so cookies stay first-party on the SPA host. */
+export function apiRequestBase() {
+  if (typeof window !== "undefined") {
+    return "";
+  }
+
+  return API_BASE_URL;
+}

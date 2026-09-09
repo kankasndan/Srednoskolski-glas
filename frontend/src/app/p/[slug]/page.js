@@ -6,7 +6,7 @@ import Threads from "@/components/thread/Threads";
 import ForumBanner from "@/components/forum/ForumBanner";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { API_BASE_URL } from "@/lib/api";
+import { apiRequestBase } from "@/lib/api";
 
 export default function ForumPage() {
   const { slug } = useParams();
@@ -21,7 +21,7 @@ export default function ForumPage() {
       setForumError(null);
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/p/${slug}?track_view=1`, {
+        const response = await fetch(`${apiRequestBase()}/api/p/${slug}?track_view=1`, {
           credentials: "include",
         });
 

@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookF, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { API_BASE_URL } from "@/lib/api";
 import { safeInternalPath } from "@/lib/paths";
 
 const socialProviders = [
@@ -62,7 +61,7 @@ export default function SocialAuthButtons({
             {providers.map((provider) => (
               <a
                 key={provider.id}
-                href={`${API_BASE_URL}/api/auth/${provider.id}/redirect`}
+                href={`/api/auth/${provider.id}/redirect`}
                 onClick={handleClick}
                 className="h-stack h-14 w-full items-center justify-center gap-4 rounded-[16px] bg-[#582FF5] px-4 py-2 font-(family-name:--font-manrope) text-base leading-none font-bold text-white transition-colors hover:bg-[#3300F5]"
               >
@@ -154,7 +153,7 @@ function DefaultSocialAuthButtons({
         {socialProviders.map((provider) => (
           <a
             key={provider.id}
-            href={`${API_BASE_URL}/api/auth/${provider.id}/redirect`}
+            href={`/api/auth/${provider.id}/redirect`}
             onClick={onProviderClick}
             className="flex h-12 cursor-pointer items-center justify-center gap-3 rounded-2xl bg-[#582FF5] px-6 font-(family-name:--font-manrope) text-[15px] font-bold leading-none text-white transition-colors hover:bg-[#3300F5] 2xl:h-14 2xl:text-[17px]"
           >
