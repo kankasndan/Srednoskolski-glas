@@ -32,6 +32,14 @@ class AppServiceProvider extends ServiceProvider
     {
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
+
+            // Railway terminates TLS on 443 but the container listens on $PORT
+            // (often 8080). Without this, pagination links become
+            // https://host:8080/... which the public proxy does not serve.
+            $root = config('app.url');
+            if (is_string($root) && $root !== '') {
+                URL::forceRootUrl(rtrim($root, '/'));
+            }
         }
 
         Gate::policy(Thread::class, ThreadPolicy::class);

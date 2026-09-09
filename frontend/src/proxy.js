@@ -6,16 +6,15 @@ const GIPHY_MEDIA = "https://*.giphy.com";
 /**
  * Content-Security-Policy.
  *
- * In production every script must carry the per-request nonce (Next.js stamps
- * its own bundles automatically) and `strict-dynamic` covers the chunks they
- * load, so injected markup cannot execute even if it slips past sanitizing.
- * The dev server needs `unsafe-eval`/`unsafe-inline` for React Refresh, so the
- * strict policy only applies to real builds.
+ * The dev server needs `unsafe-eval`/`unsafe-inline` for React Refresh.
+ * Production keeps scripts same-origin and allows inline Next bootstrap script.
+ * (Nonce-based strict CSP can be reintroduced once the runtime reliably stamps
+ * nonce attributes on every script block in this deployment target.)
  */
 function contentSecurityPolicy(nonce, isDev) {
   const scriptSrc = isDev
     ? "'self' 'unsafe-inline' 'unsafe-eval'"
-    : `'self' 'nonce-${nonce}' 'strict-dynamic'`;
+    : "'self' 'unsafe-inline'";
 
   const connectSrc = ["'self'", isDev ? "ws: http://localhost:*" : ""]
     .filter(Boolean)
