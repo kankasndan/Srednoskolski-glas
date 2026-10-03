@@ -61,9 +61,14 @@ class ThreadController extends Controller
     public function store(StoreThreadRequest $request, TextModerator $textModerator): JsonResponse
     {
         $validated = $request->validated();
-        $textModerator->enforceThread($validated);
         $user = $request->user();
         $files = $this->normalizeUploadedFiles($request->file('files', []));
+
+        if ($this->containsVideo($files)) {
+            set_time_limit(300);
+        }
+
+        $textModerator->enforceThread($validated);
 
         $thread = DB::transaction(function () use ($validated, $user, $files): Thread {
             $thread = Thread::forceCreate([
@@ -115,8 +120,13 @@ class ThreadController extends Controller
     public function update(UpdateThreadRequest $request, Thread $thread, TextModerator $textModerator): JsonResponse
     {
         $validated = $request->validated();
-        $textModerator->enforceThread($validated);
         $files = $this->normalizeUploadedFiles($request->file('files', []));
+
+        if ($this->containsVideo($files)) {
+            set_time_limit(300);
+        }
+
+        $textModerator->enforceThread($validated);
 
         /** @var list<int> $removeIds */
         $removeIds = array_values(array_map(
@@ -356,6 +366,20 @@ class ThreadController extends Controller
             $files,
             static fn ($file) => $file instanceof UploadedFile,
         ));
+    }
+
+    /**
+     * @param  list<UploadedFile>  $files
+     */
+    private function containsVideo(array $files): bool
+    {
+        foreach ($files as $file) {
+            if (str_starts_with((string) $file->getMimeType(), 'video/')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

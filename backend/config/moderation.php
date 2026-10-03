@@ -77,7 +77,7 @@ return [
 
             // Optional absolute path to ffmpeg. Empty means: look on PATH, then
             // the ffmpeg-static npm package under the backend directory.
-            'ffmpeg_path' => env('FFMPEG_PATH'),
+            'ffmpeg_path' => env('FFMPEG_PATH', '/usr/bin/ffmpeg'),
 
             // Used only when stills cannot be sampled and the whole file has to
             // go through the Files API (PDFs, or videos with no ffmpeg).
