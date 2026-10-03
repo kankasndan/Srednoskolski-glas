@@ -3,6 +3,16 @@ import { NextResponse } from "next/server";
 // GIF search goes through our API; only the CDN still needs to be in img-src.
 const GIPHY_MEDIA = "https://*.giphy.com";
 
+function safeOrigin(value, fallback) {
+  try {
+    return new URL(value || fallback).origin;
+  } catch {
+    return new URL(fallback).origin;
+  }
+}
+
+const API_ORIGIN = safeOrigin(process.env.NEXT_PUBLIC_API_URL, "http://localhost:8000");
+
 /**
  * Content-Security-Policy.
  *
@@ -25,8 +35,8 @@ function contentSecurityPolicy(nonce, isDev) {
     `script-src ${scriptSrc}`,
     // Tailwind and next/font emit inline <style> blocks that carry no nonce.
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob: https://ik.imagekit.io ${GIPHY_MEDIA}`,
-    "media-src 'self' blob: https://ik.imagekit.io",
+    `img-src 'self' data: blob: https://ik.imagekit.io ${GIPHY_MEDIA} ${API_ORIGIN}`,
+    `media-src 'self' blob: https://ik.imagekit.io ${API_ORIGIN}`,
     "font-src 'self' data:",
     `connect-src ${connectSrc}`,
     "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://www.tiktok.com",

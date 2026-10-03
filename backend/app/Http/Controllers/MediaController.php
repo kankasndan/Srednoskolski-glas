@@ -8,6 +8,8 @@ use App\Models\ThreadAttachment;
 use App\Support\MediaLimits;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -60,11 +62,42 @@ class MediaController extends Controller
             'provider' => $media->provider,
             'file_id' => $media->id,
             'path' => $media->path,
-            'url' => $media->url,
+            'url' => $media->path,
             'directory' => $directory,
         ]);
 
         return response()->json($media, 201);
+    }
+
+    public function show(string $path): mixed
+    {
+        $path = rawurldecode(trim($path));
+        abort_if($path === '', 404);
+
+        $disk = (string) config('media.drivers.s3.disk', 's3');
+        /** @var FilesystemAdapter $storage */
+        $storage = Storage::disk($disk);
+
+        abort_unless($storage->exists($path), 404);
+
+        $stream = $storage->readStream($path);
+        abort_if($stream === false, 404);
+
+        $mimeType = $storage->mimeType($path) ?: 'application/octet-stream';
+        $size = $storage->size($path) ?: null;
+
+        return response()->stream(function () use ($stream): void {
+            fpassthru($stream);
+
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }, 200, array_filter([
+            'Content-Type' => $mimeType,
+            'Content-Length' => $size,
+            'Content-Disposition' => 'inline',
+            'Cache-Control' => 'public, max-age=86400',
+        ]));
     }
 
     public function destroy(Request $request): JsonResponse

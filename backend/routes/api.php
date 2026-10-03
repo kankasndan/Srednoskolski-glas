@@ -94,6 +94,11 @@ Route::post('/feedback', StoreFeedbackController::class)
     ->middleware('throttle:feedback')
     ->name('feedback.store');
 
+// Public media proxy for Railway bucket files and other stored uploads.
+Route::get('/media/{path}', [MediaController::class, 'show'])
+    ->where('path', '.*')
+    ->name('media.show');
+
 Route::middleware(['auth:sanctum', 'not_banned', 'onboarding'])->group(function () {
     // Username autocomplete for @mentions in comments.
     Route::get('/users/search', [UserSearchController::class, 'index'])

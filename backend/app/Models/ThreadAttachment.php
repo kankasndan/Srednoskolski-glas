@@ -3,12 +3,21 @@
 namespace App\Models;
 
 use App\Facades\Media;
+use App\Support\MediaUrl;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ThreadAttachment extends Model
 {
     protected $fillable = ['url', 'slug', 'thread_id', 'provider', 'file_id'];
+
+    protected function url(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value): ?string => MediaUrl::resolve($value),
+        );
+    }
 
     public function thread(): BelongsTo
     {

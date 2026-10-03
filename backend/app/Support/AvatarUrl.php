@@ -33,8 +33,8 @@ final class AvatarUrl
 
         return MediaUpload::query()
             ->where('user_id', $userId)
-            ->where('url', $url)
-            ->exists();
+            ->get(['url', 'path'])
+            ->contains(fn (MediaUpload $media) => MediaUrl::matches((string) $media->url, $url) || MediaUrl::matches((string) $media->path, $url));
     }
 
     /**

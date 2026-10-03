@@ -18,6 +18,7 @@ Railway deploys from GitHub. The root directory of each service is a subfolder.
    - Settings → **Root Directory:** `/frontend`
    - Rename the service to `frontend`
 4. On **backend**: New → **Database → MySQL**. Wait until it is running.
+5. On **backend**: New → **Storage → Bucket**. This is the media store for images, videos, and documents.
 
 Generate an app key on your machine (from `backend/`):
 
@@ -46,12 +47,21 @@ Required:
 | `DB_CONNECTION` | `mysql` |
 | `DB_URL` | `${{MySQL.MYSQL_URL}}` |
 | `CONTENT_MODERATION_ON_FAILURE` | `reject` |
+| `MEDIA_DRIVER` | `s3` |
+| `MEDIA_S3_DISK` | `s3` |
+| `MEDIA_S3_VISIBILITY` | `private` |
+| `AWS_ACCESS_KEY_ID` | bucket `ACCESS_KEY_ID` |
+| `AWS_SECRET_ACCESS_KEY` | bucket `SECRET_ACCESS_KEY` |
+| `AWS_DEFAULT_REGION` | bucket `REGION` |
+| `AWS_BUCKET` | bucket `BUCKET` |
+| `AWS_ENDPOINT` | bucket `ENDPOINT` |
+| `AWS_URL` | leave empty |
 
 Do **not** set `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, or `DB_PASSWORD` on the backend service. If you pasted a local `.env`, delete those four — they target `srednoskolski_glas`, which does not exist on Railway (the plugin database is `railway`).
 
 Also delete any local leftovers: `GOOGLE_REDIRECT_URI=http://localhost:8000/...` and `FACEBOOK_REDIRECT_URI=...`. Leave those unset; `railway-start.sh` sets them from `FRONTEND_URL`. If they stay as localhost, Google/Facebook login redirects to `localhost:3000?error=auth_failed`.
 
-Also set ImageKit, `GEMINI_API_KEY`, `GIPHY_API_KEY`, `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`, and Facebook client credentials the same as local.
+Also set `GEMINI_API_KEY`, `GIPHY_API_KEY`, `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`, and Facebook client credentials the same as local.
 
 ### Google / Facebook console URIs
 

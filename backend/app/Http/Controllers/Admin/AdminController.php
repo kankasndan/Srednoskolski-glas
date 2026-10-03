@@ -78,7 +78,7 @@ class AdminController extends Controller
             return back()->withErrors(['image' => 'Прикачи валидна слика.']);
         }
 
-        $imageUrl = Media::upload($uploaded, 'users/images')->url;
+        $imageUrl = Media::upload($uploaded, 'users/images')->path;
 
         $user->update([
             'imageUrl' => $imageUrl,

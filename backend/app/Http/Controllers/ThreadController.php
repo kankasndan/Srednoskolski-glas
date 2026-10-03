@@ -367,7 +367,7 @@ class ThreadController extends Controller
             $stored = Media::upload($file, "threads/{$thread->id}");
 
             $thread->threadAttachment()->create([
-                'url' => $stored->url,
+                'url' => $stored->path,
                 'slug' => $stored->type,
                 'provider' => $stored->provider,
                 'file_id' => $stored->id,

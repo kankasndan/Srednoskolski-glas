@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Support\MediaUrl;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -53,6 +55,13 @@ class User extends Authenticatable
                 }
             }
         });
+    }
+
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value): ?string => MediaUrl::resolve($value),
+        );
     }
 
     public function studentData(): HasOne

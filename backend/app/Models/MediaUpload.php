@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\MediaUrl;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -15,6 +17,13 @@ class MediaUpload extends Model
         'url',
         'directory',
     ];
+
+    protected function url(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value): ?string => MediaUrl::resolve($value),
+        );
+    }
 
     public function user(): BelongsTo
     {

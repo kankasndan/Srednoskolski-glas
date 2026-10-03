@@ -70,11 +70,11 @@ class ForumController extends Controller
         $bannerUrl = $this->defaultBannerUrl($slug, 'general');
 
         if ($request->file('icon') instanceof UploadedFile) {
-            $imageUrl = Media::upload($request->file('icon'), 'forums/icons')->url;
+            $imageUrl = Media::upload($request->file('icon'), 'forums/icons')->path;
         }
 
         if ($request->file('banner') instanceof UploadedFile) {
-            $bannerUrl = Media::upload($request->file('banner'), 'forums/banners')->url;
+            $bannerUrl = Media::upload($request->file('banner'), 'forums/banners')->path;
         }
 
         Forum::query()->create([
@@ -129,11 +129,11 @@ class ForumController extends Controller
         $bannerUrl = $forum->bannerUrl;
 
         if ($request->file('icon') instanceof UploadedFile) {
-            $imageUrl = Media::upload($request->file('icon'), 'forums/icons')->url;
+            $imageUrl = Media::upload($request->file('icon'), 'forums/icons')->path;
         }
 
         if ($request->file('banner') instanceof UploadedFile) {
-            $bannerUrl = Media::upload($request->file('banner'), 'forums/banners')->url;
+            $bannerUrl = Media::upload($request->file('banner'), 'forums/banners')->path;
         }
 
         $forum->update([

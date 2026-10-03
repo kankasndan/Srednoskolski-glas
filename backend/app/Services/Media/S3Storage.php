@@ -3,6 +3,7 @@
 namespace App\Services\Media;
 
 use App\Contracts\MediaStorage;
+use App\Support\MediaUrl;
 use App\Support\Media\ResolvesMediaType;
 use App\Support\Media\StoredMedia;
 use Illuminate\Contracts\Filesystem\Factory as FilesystemFactory;
@@ -50,7 +51,7 @@ class S3Storage implements MediaStorage
             provider: 's3',
             id: $path,
             path: $path,
-            url: $this->disk()->url($path),
+            url: $this->url($path),
             name: $fileName,
             type: $this->resolveMediaType($mimeType),
             size: $file->getSize(),
@@ -67,7 +68,7 @@ class S3Storage implements MediaStorage
 
     public function url(string $path, array $options = []): string
     {
-        return $this->disk()->url($path);
+        return MediaUrl::resolve($path) ?? url('/api/media/'.ltrim($path, '/'));
     }
 
     private function disk(): Filesystem

@@ -161,7 +161,7 @@ it('uploads files to imagekit and stores attachments', function () {
 
     $response->assertCreated()
         ->assertJsonPath('data.attachments.0.type', 'image')
-        ->assertJsonPath('data.attachments.0.url', 'https://ik.imagekit.io/demo/threads/1/photo.jpg');
+        ->assertJsonPath('data.attachments.0.url', url('/api/media/threads/1/photo.jpg'));
 
     $attachment = Thread::query()->first()->threadAttachment()->first();
 

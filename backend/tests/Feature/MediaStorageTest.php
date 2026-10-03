@@ -97,7 +97,8 @@ it('uploads a file to s3 through the filesystem disk', function () {
     );
 
     expect($media->provider)->toBe('s3')
-        ->and($media->type)->toBe('file');
+        ->and($media->type)->toBe('file')
+        ->and($media->url)->toContain('/api/media/documents/');
 
     Storage::disk('s3')->assertExists($media->path);
 

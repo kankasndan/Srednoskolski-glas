@@ -2,12 +2,28 @@
 
 namespace App\Models;
 
+use App\Support\MediaUrl;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Forum extends Model
 {
     protected $fillable = ['name', 'user_id', 'slug', 'description', 'type', 'school_id', 'imageUrl', 'bannerUrl', 'threads_count', 'members_count', 'views'];
+
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value): ?string => MediaUrl::resolve($value),
+        );
+    }
+
+    protected function bannerUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value): ?string => MediaUrl::resolve($value),
+        );
+    }
 
     public function threads()
     {
