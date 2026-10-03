@@ -35,6 +35,10 @@ class S3Storage implements MediaStorage
         $directory = trim($directory ?? '', '/');
         $mimeType = $file->getMimeType();
 
+        if (str_starts_with((string) $mimeType, 'video/')) {
+            set_time_limit(180);
+        }
+
         // Derive the stored extension from the sniffed MIME type, never from the
         // client file name: S3 picks Content-Type from the key, so "photo.html"
         // would be served as HTML and execute whatever the bytes contain.
