@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Vocation;
 use App\Support\SyncUserContentPermissions;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -38,7 +39,7 @@ class LargeThreadSeeder extends Seeder
         'Англиски вежби',
         'Проекти и идеи',
         'Кариера после средно',
-        'Ментално здравје',
+        'Душевно здравје',
         'Технологија и алатки',
         'Училишни настани',
         'Слободно време',
@@ -82,7 +83,7 @@ class LargeThreadSeeder extends Seeder
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, User>
+     * @return Collection<int, User>
      */
     private function ensureAuthors($schools, $vocations)
     {
@@ -134,8 +135,8 @@ class LargeThreadSeeder extends Seeder
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, Forum>  $forums
-     * @param  \Illuminate\Support\Collection<int, User>  $authors
+     * @param  Collection<int, Forum>  $forums
+     * @param  Collection<int, User>  $authors
      */
     private function seedThreads($forums, $authors): void
     {
