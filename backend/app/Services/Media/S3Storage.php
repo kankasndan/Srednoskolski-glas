@@ -3,13 +3,14 @@
 namespace App\Services\Media;
 
 use App\Contracts\MediaStorage;
-use App\Support\MediaUrl;
 use App\Support\Media\ResolvesMediaType;
 use App\Support\Media\StoredMedia;
+use App\Support\MediaUrl;
 use Illuminate\Contracts\Filesystem\Factory as FilesystemFactory;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 /**
  * S3 storage driver.
@@ -46,10 +47,14 @@ class S3Storage implements MediaStorage
         $fileName = $options['file_name'] ?? Str::uuid()->toString().($extension !== '' ? ".{$extension}" : '');
 
         $path = $this->disk()->putFileAs($directory, $file, $fileName, [
-            'visibility' => $options['visibility'] ?? $this->config['visibility'] ?? 'public',
+            'visibility' => $options['visibility'] ?? $this->config['visibility'] ?? 'private',
             'mimetype' => $mimeType,
             'ContentType' => $mimeType,
         ]);
+
+        if ($path === false) {
+            throw new RuntimeException("S3 upload to disk [{$this->diskName()}] failed. Check the AWS_* bucket credentials, region and endpoint.");
+        }
 
         return new StoredMedia(
             provider: 's3',
@@ -77,6 +82,11 @@ class S3Storage implements MediaStorage
 
     private function disk(): Filesystem
     {
-        return $this->filesystem->disk($this->config['disk'] ?? 's3');
+        return $this->filesystem->disk($this->diskName());
+    }
+
+    private function diskName(): string
+    {
+        return $this->config['disk'] ?? 's3';
     }
 }

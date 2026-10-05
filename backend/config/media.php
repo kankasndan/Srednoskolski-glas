@@ -55,7 +55,7 @@ return [
 
         's3' => [
             'disk' => env('MEDIA_S3_DISK', 's3'),
-            'visibility' => env('MEDIA_S3_VISIBILITY', 'public'),
+            'visibility' => env('MEDIA_S3_VISIBILITY', 'private'),
         ],
 
     ],

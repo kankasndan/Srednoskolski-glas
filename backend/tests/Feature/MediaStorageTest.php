@@ -6,9 +6,12 @@ use App\Services\Media\MediaManager;
 use App\Services\Media\ModeratedMediaStorage;
 use App\Services\Media\S3Storage;
 use App\Support\Media\StoredMedia;
+use Illuminate\Contracts\Filesystem\Factory;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 
 beforeEach(function () {
     config()->set('media.default', 'imagekit');
@@ -104,4 +107,31 @@ it('uploads a file to s3 through the filesystem disk', function () {
 
     expect(app(MediaManager::class)->driver('s3')->delete($media))->toBeTrue();
     Storage::disk('s3')->assertMissing($media->path);
+});
+
+it('builds the real s3 disk for an s3-compatible bucket', function () {
+    config()->set('filesystems.disks.s3', array_merge(config('filesystems.disks.s3'), [
+        'key' => 'key',
+        'secret' => 'secret',
+        'region' => 'auto',
+        'bucket' => 'bucket',
+        'endpoint' => 'https://t3.storageapi.dev',
+    ]));
+
+    expect(Storage::disk('s3')->getAdapter())->toBeInstanceOf(AwsS3V3Adapter::class);
+});
+
+it('throws when the s3 disk fails to store the file', function () {
+    $disk = Mockery::mock(Filesystem::class);
+    $disk->shouldReceive('putFileAs')->once()->andReturn(false);
+
+    $filesystem = Mockery::mock(Factory::class);
+    $filesystem->shouldReceive('disk')->with('s3')->andReturn($disk);
+
+    $storage = new S3Storage($filesystem, ['disk' => 's3']);
+
+    expect(fn () => $storage->upload(
+        UploadedFile::fake()->image('photo.jpg'),
+        'threads/1',
+    ))->toThrow(RuntimeException::class, 'S3 upload to disk [s3] failed');
 });
